@@ -1,0 +1,11 @@
+<configuration>
+	<appender name="logFile" class="com.avi.codedx.CodeDxLogAppender">
+		<encoder>
+			<pattern>%-5level %d{yyyy-MM-dd HH:mm:ss: } [%thread] %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<root level="INFO">
+		<appender-ref ref="logFile" />
+	</root>
+</configuration>
