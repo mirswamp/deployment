@@ -1,0 +1,13 @@
+# SWAMP and SWAMP-in-a-Box common directory server install section
+
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql/upgrades_directory
+
+# install path
+install -m 400 Directory_Server/project_tables.sql ${RPM_BUILD_ROOT}/opt/swamp/sql/project_tables.sql
+install -m 400 Directory_Server/populate_project.sql ${RPM_BUILD_ROOT}/opt/swamp/sql/populate_project.sql
+
+# install and upgrade path
+install -m 400 Directory_Server/project_procs.sql ${RPM_BUILD_ROOT}/opt/swamp/sql/project_procs.sql
+
+# upgrade path
+install -m 400 Directory_Server/upgrades/* ${RPM_BUILD_ROOT}/opt/swamp/sql/upgrades_directory

@@ -1,0 +1,4 @@
+# swamp specific submit node install section
+
+install -m 644 submonitor.conf $RPM_BUILD_ROOT/opt/swamp/etc/swampmonitor.conf
+install -m 400 vmu_swamp_htcondor_submit $RPM_BUILD_ROOT/opt/swamp/etc/vmu_htcondor_submit

@@ -1,0 +1,66 @@
+#!/usr/bin/env bats
+load test_helper
+@test "Build swamp-exec" {
+    RELEASE_NUMBER=0 BUILD_NUMBER=A run make clean exec 
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Install exec" {
+    run sudo rpm -i --nodeps RPMS/noarch/swamp-exec-0-A.noarch.rpm 
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Checking config for exec" {
+    run chkconfig --list swamp 
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test "Check for VM inputs" {
+    run test -r /opt/swamp/etc/swamp_watchdog
+    [ $status -eq 0 ]
+}
+@test "Check for vmdomain setting" {
+    run grep -q ^vmdomain=vm.cosalab.org /opt/swamp/etc/swamp.conf
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Uninstall exec" {
+    run sudo rpm -e swamp-exec
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Checking for missing config for exec" {
+    run chkconfig --list swamp 
+    dumpifzero
+    [ $status -ne 0 ]
+}
+@test  "Install exec again" {
+    run sudo rpm -i --nodeps RPMS/noarch/swamp-exec-0-A.noarch.rpm 
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test "Build upgrade swamp-exec" {
+    RELEASE_NUMBER=0 BUILD_NUMBER=B run make clean exec 
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Upgrade exec" {
+    run sudo rpm -U --nodeps RPMS/noarch/swamp-exec-0-B.noarch.rpm 
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Checking config for exec" {
+    run chkconfig --list swamp
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Uninstall exec" {
+    run sudo rpm -e swamp-exec
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Checking for missing config for exec" {
+    run chkconfig --list swamp 
+    dumpifzero
+    [ $status -ne 0 ]
+}

@@ -1,0 +1,51 @@
+#!/usr/bin/env bats
+load test_helper
+@test "Build swamp-directoryserver" {
+    RELEASE_NUMBER=0 BUILD_NUMBER=A run make clean dirserver
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Install directoryserver" {
+    run sudo rpm -i --nodeps RPMS/noarch/swamp-directory-server-0-A.noarch.rpm
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Checking directory-server install" {
+    [ -f /opt/swamp/sql/project_procs.sql ]
+}
+@test  "Uninstall directory-server" {
+    run sudo rpm -e swamp-directory-server
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Checking for missing config for directory-server" {
+
+    [ ! -f /opt/swamp/sql/project_procs.sql ]
+}
+@test  "Install directory-server again" {
+    run sudo rpm -i --nodeps RPMS/noarch/swamp-directory-server-0-A.noarch.rpm
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test "Build upgrade swamp-directory-server" {
+    RELEASE_NUMBER=0 BUILD_NUMBER=B run make clean dirserver
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Upgrade directory-server" {
+    run sudo rpm -U --nodeps RPMS/noarch/swamp-directory-server-0-B.noarch.rpm
+    dumpifnonzero
+#    [ ${lines[0]} = "Running SQL upgrade script(s) against database..." ]
+    [ $status -eq 0 ]
+}
+@test  "Checking directory-server install" {
+    [ -f /opt/swamp/sql/project_procs.sql ]
+}
+@test  "Uninstall directory-server" {
+    run sudo rpm -e swamp-directory-server
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Checking for directory-server uninstall" {
+    [ ! -f /opt/swamp/sql/project_procs.sql ]
+}

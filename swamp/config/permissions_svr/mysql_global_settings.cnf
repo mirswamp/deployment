@@ -1,0 +1,5 @@
+[mysqld]
+#
+# Global Variables
+#
+event_scheduler=ON

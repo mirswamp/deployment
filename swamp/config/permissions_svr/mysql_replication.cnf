@@ -1,0 +1,16 @@
+[mysqld]
+#
+# Replication Settings
+#
+server-id=2
+replicate-do-table=project.project
+replicate-do-table=project.project_user
+replicate-do-table=project.user_account
+replicate-do-table=project.permission
+replicate-do-table=project.user_permission
+replicate-do-table=project.user_permission_project
+replicate-do-table=project.user_permission_package
+replicate-do-table=project.policy
+replicate-do-table=project.user_policy
+replicate-do-table=project.linked_account_provider
+replicate-do-table=project.linked_account

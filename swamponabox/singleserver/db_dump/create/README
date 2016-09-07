@@ -1,0 +1,15 @@
+The following scripts can only be executed on the swamponabox vm:
+
+	mysql_init.pl	- initialize mysql installation
+	db_create.pl	- create initial swamponabox database
+
+To initialize swamponabox mysql do the following:
+
+(1)	execute mysql_init.pl
+(2)	execute db_create.pl
+(3)	execute db_restore.pl in backups/swamponabox-data
+
+OR
+
+(1)	execute mysql_init.pl
+(2)	execute db_restore.pl in backups/swamponabox-minimal

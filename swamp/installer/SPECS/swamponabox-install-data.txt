@@ -1,0 +1,16 @@
+# SWAMP-in-a-Box specific data server install section
+
+install -m 744 backup_db ${RPM_BUILD_ROOT}/opt/swamp/sql
+install -m 644 swamponaboxmonitor.conf $RPM_BUILD_ROOT/opt/swamp/etc/swampmonitor.conf
+
+install -m 700 Swamp_on_a_Box/mysql_init.pl ${RPM_BUILD_ROOT}/opt/swamp/sql
+install -m 400 Swamp_on_a_Box/swamp_in_a_box_install_prescript.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
+install -m 400 Swamp_on_a_Box/swamp_in_a_box_upgrade_prescript.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
+install -m 400 Swamp_on_a_Box/swamp_in_a_box_install_postscript.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
+install -m 400 Swamp_on_a_Box/swamp_in_a_box_upgrade_postscript.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
+
+install -m 400 Data_Server/Metric/metric_tables.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
+install -m 400 Data_Server/Metric/metric_procs.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
+install -m 400 Data_Server/Metric/populate_metric.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
+
+install -m 400 Data_Server/Tool_Shed/populate_tools_non_commercial.sql ${RPM_BUILD_ROOT}/opt/swamp/sql

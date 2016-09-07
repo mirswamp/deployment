@@ -1,0 +1,4 @@
+#!/bin/bash
+export PERL5LIB=/opt/swamp/perl5
+export PATH=/opt/perl5/perls/perl-5.18.1/bin:$PATH
+perl /opt/swamp/bin/vmu_notifyuser.pl "$@"

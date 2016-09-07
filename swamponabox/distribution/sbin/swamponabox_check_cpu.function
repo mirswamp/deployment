@@ -1,0 +1,19 @@
+function check_cpu() {
+    echo 'Examining /proc/cpuinfo'
+
+    PHYSICAL_CPUS=$((`cat /proc/cpuinfo | grep -i -e 'physical id' | sort -u | wc -l`))
+    CORES_PER_CPU=$((`cat /proc/cpuinfo | grep -i -e 'core id'     | sort -u | wc -l`))
+    TOTAL_CORES=$((PHYSICAL_CPUS * CORES_PER_CPU))
+    REQUIRED_CORES=2
+
+    echo "Found $PHYSICAL_CPUS physical CPUs"
+    echo "Found $CORES_PER_CPU cores per physical CPU"
+
+    if [ $TOTAL_CORES -ge $REQUIRED_CORES ]; then
+        echo "Found $TOTAL_CORES cores total, requirement of $REQUIRED_CORES met"
+        return 0
+    else
+        echo "Warning: Found $TOTAL_CORES cores total, need at least $REQUIRED_CORES"
+        return 1
+    fi
+}

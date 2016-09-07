@@ -1,0 +1,14 @@
+function check_memory() {
+    echo 'Examining /proc/meminfo'
+
+    PHYSICAL_MEM=$((`cat /proc/meminfo | grep -i 'MemTotal' | head -n 1 | awk '{print $2}'` / 1024))
+    REQUIRED_MEM=8192  # in MB
+
+    if [ $PHYSICAL_MEM -ge $REQUIRED_MEM ]; then
+        echo "Found $PHYSICAL_MEM MB physical memory, requirement of $REQUIRED_MEM MB met"
+        return 0
+    else
+        echo "Warning: Found $PHYSICAL_MEM MB physical memory, need at least $REQUIRED_MEM MB"
+        return 1
+    fi
+}

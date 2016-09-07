@@ -1,0 +1,9 @@
+.env*
+.git*
+config.js*
+version.js*
+config
+downloads
+results
+storage
+uploads

@@ -1,0 +1,45 @@
+#!/usr/bin/env bats
+@test "Build swamp-rt-perl" {
+    RELEASE_NUMBER=0 BUILD_NUMBER=A run make clean perl
+    [ $status -eq 0 ]
+}
+@test  "Install rt-perl" {
+    run sudo rpm -i RPMS/noarch/swamp-rt-perl-0-A.noarch.rpm
+    [ $status -eq 0 ]
+}
+@test  "Checking for rt-perl" {
+    run ls -ld /opt/perl5
+    [ $status -eq 0 ]
+}
+@test  "Uninstall rt-perl" {
+    run sudo rpm -e swamp-rt-perl
+    [ $status -eq 0 ]
+}
+@test  "Checking for missing rt-perl" {
+    run ls -ld /opt/perl5
+    [ $status -ne 0 ]
+}
+@test  "Install rt-perl again" {
+    run sudo rpm -i RPMS/noarch/swamp-rt-perl-0-A.noarch.rpm
+    [ $status -eq 0 ]
+}
+@test "Build upgrade swamp-rt-perl" {
+    RELEASE_NUMBER=0 BUILD_NUMBER=B run make clean perl
+    [ $status -eq 0 ]
+}
+@test  "Upgrade rt-perl" {
+    run sudo rpm -U RPMS/noarch/swamp-rt-perl-0-B.noarch.rpm
+    [ $status -eq 0 ]
+}
+@test  "Checking for rt-perl" {
+    run ls -ld /opt/perl5
+    [ $status -eq 0 ]
+}
+@test  "Uninstall rt-perl" {
+    run sudo rpm -e swamp-rt-perl
+    [ $status -eq 0 ]
+}
+@test  "Checking for missing rt-perl" {
+    run ls -ld /opt/perl5
+    [ $status -ne 0 ]
+}

@@ -1,0 +1,89 @@
+#
+#---------------------------------------------------------------------
+#
+#dn: cn=schema
+#
+#---------------------------------------------------------------------
+#
+#
+#---------------------------------------------------------------------
+#
+# attributeTypes: ( 1.3.6.1.4.1.214.1011.100.2 NAME 'swampUuid' DESC 'A UUID used by CoSALab SWAMP' SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 SINGLE-VALUE )
+#
+attributeTypes (
+ 1.3.6.1.4.1.214.1011.100.2 
+ NAME 'swampUuid' 
+ DESC 'A UUID used by CoSALab SWAMP' 
+ EQUALITY caseIgnoreMatch
+ SUBSTR caseIgnoreSubstringsMatch
+ SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 
+ SINGLE-VALUE 
+ )
+#
+#---------------------------------------------------------------------
+#
+# attributeTypes: ( 1.3.6.1.4.1.214.1011.100.3 NAME 'swampConsumedEduPersonPrincipalName' DESC 'eduPersonPrincpalName consumed by SWAMP' EQUALITY caseIgnoreMatch SUBSTR caseIgnoreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
+#
+attributeTypes (
+ 1.3.6.1.4.1.214.1011.100.3 
+ NAME 'swampConsumedEduPersonPrincipalName' 
+ DESC 'eduPersonPrincpalName consumed by SWAMP' 
+ EQUALITY caseIgnoreMatch 
+ SUBSTR caseIgnoreSubstringsMatch 
+ SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+ )
+#
+#---------------------------------------------------------------------
+# attributetype ( 1.3.6.1.4.1.7914.1.2.1.4 NAME 'mailAlternateAddress' DESC 'Secondary (alias) mailaddresses for the same user' EQUALITY caseIgnoreIA5Match SUBSTR caseIgnoreIA5SubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{256} )
+#
+attributetype ( 1.3.6.1.4.1.7914.1.2.1.4 NAME 'mailAlternateAddress'
+        DESC 'Secondary (alias) mailaddresses for the same user'
+        EQUALITY caseIgnoreIA5Match
+        SUBSTR caseIgnoreIA5SubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{256} )
+
+#
+#---------------------------------------------------------------------
+# attributetype ( 1.3.6.1.4.1.7914.1.2.1.5 NAME 'enabled' DESC 'Boolean describing whether user is enabled or disabled' EQUALITY booleanMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.7 SINGLE-VALUE )
+#
+attributetype ( 1.3.6.1.4.1.7914.1.2.1.5 NAME 'enabled' 
+        DESC 'Boolean describing whether user is enabled or disabled' 
+        EQUALITY booleanMatch 
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.7 
+        SINGLE-VALUE )
+
+#
+#---------------------------------------------------------------------
+#
+# objectClasses: ( 1.3.6.1.4.1.214.1011.100.1 NAME 'swampEntity' DESC 'Entity in CoSALab SWAMP' AUXILIARY MUST ( swampUuid ) MAY ( swampConsumedEduPersonPrincipalName )
+#
+objectClass (
+ 1.3.6.1.4.1.214.1011.100.1 
+ NAME 'swampEntity' 
+ DESC 'Entity in CoSALab SWAMP' 
+ AUXILIARY 
+ MUST ( swampUuid $
+        uid $
+        mail $
+        givenName $
+        sn $
+        cn $
+        userPassword $
+        enabled )
+ MAY ( swampConsumedEduPersonPrincipalName $
+       eduPersonTargetedID $
+       labeledURI $
+       uidNumber $
+       gidNumber $
+       homeDirectory $
+       mailAlternateAddress $
+       mobile $
+       facsimileTelephoneNumber $
+       displayName $
+       o $
+       ou $
+       loginShell $
+       postalAddress $
+       telephoneNumber $
+       isMemberOf )
+ )

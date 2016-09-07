@@ -1,0 +1,45 @@
+#!/usr/bin/env bats
+@test "Build swamp-rt-java" {
+    RELEASE_NUMBER=0 BUILD_NUMBER=A run make clean java
+    [ $status -eq 0 ]
+}
+@test  "Install java" {
+    run sudo rpm -i RPMS/noarch/swamp-rt-java-0-A.noarch.rpm
+    [ $status -eq 0 ]
+}
+@test  "Checking for java" {
+    run ls -ld /opt/jdk1.8.0_45
+    [ $status -eq 0 ]
+}
+@test  "Uninstall java" {
+    run sudo rpm -e swamp-rt-java
+    [ $status -eq 0 ]
+}
+@test  "Checking for missing java" {
+    run ls -ld /opt/jdk1.8.0_45
+    [ $status -ne 0 ]
+}
+@test  "Install java again" {
+    run sudo rpm -i RPMS/noarch/swamp-rt-java-0-A.noarch.rpm
+    [ $status -eq 0 ]
+}
+@test "Build upgrade swamp-rt-java" {
+    RELEASE_NUMBER=0 BUILD_NUMBER=B run make clean java
+    [ $status -eq 0 ]
+}
+@test  "Upgrade java" {
+    run sudo rpm -U RPMS/noarch/swamp-rt-java-0-B.noarch.rpm
+    [ $status -eq 0 ]
+}
+@test  "Checking for java" {
+    run ls -ld /opt/jdk1.8.0_45
+    [ $status -eq 0 ]
+}
+@test  "Uninstall java" {
+    run sudo rpm -e swamp-rt-java
+    [ $status -eq 0 ]
+}
+@test  "Checking for missing java" {
+    run ls -ld /opt/jdk1.8.0_45
+    [ $status -ne 0 ]
+}

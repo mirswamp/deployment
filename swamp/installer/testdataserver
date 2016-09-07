@@ -1,0 +1,61 @@
+#!/usr/bin/env bats
+load test_helper
+@test "Build swamp-dataserver" {
+    RELEASE_NUMBER=0 BUILD_NUMBER=A run make clean dataserver 
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Install dataserver" {
+    run sudo rpm -i --nodeps RPMS/noarch/swamp-dataserver-0-A.noarch.rpm
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Checking config for dataserver" {
+    run chkconfig --list swamp
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Uninstall dataserver" {
+    run sudo rpm -e swamp-dataserver
+    # dumpifnonzero
+	dumpalways
+    [ $status -eq 0 ]
+}
+@test  "Checking for missing config for dataserver" {
+    run chkconfig --list swamp
+    dumpifzero
+    [ $status -ne 0 ]
+}
+@test  "Install dataserver again" {
+    run sudo rpm -i --nodeps RPMS/noarch/swamp-dataserver-0-A.noarch.rpm
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test "Build upgrade swamp-dataserver" {
+    RELEASE_NUMBER=0 BUILD_NUMBER=B run make clean dataserver
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Upgrade dataserver" {
+    run sudo rpm -U --nodeps RPMS/noarch/swamp-dataserver-0-B.noarch.rpm 
+    # dumpifnonzero
+	dumpalways
+#    [ ${lines[0]} = "Running SQL upgrade script(s) against database..." ]
+    [ $status -eq 0 ]
+}
+@test  "Checking config for dataserver" {
+    run chkconfig --list swamp
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Uninstall dataserver" {
+    run sudo rpm -e swamp-dataserver
+    # dumpifnonzero
+	dumpalways
+    [ $status -eq 0 ]
+}
+@test  "Checking for missing config for dataserver" {
+    run chkconfig --list swamp
+    dumpifzero
+    [ $status -ne 0 ]
+}

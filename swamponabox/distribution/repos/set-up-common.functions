@@ -1,0 +1,61 @@
+function yum_erase() {
+    echo ""
+    echo "Erasing: $*"
+    yum -y erase $*
+}
+
+function yum_install() {
+    echo ""
+    echo "Installing: $*"
+    yum -y install $*
+}
+
+function yum_update() {
+    echo ""
+    echo "Updating: <all installed packages>"
+    yum -y update
+}
+
+function get_os_dist_and_ver() {
+    version=""
+
+    if [ -r /etc/centos-release ]; then
+        version=$(cat /etc/centos-release  | awk '{ print substr($0, match($0, /[[:digit:]]+/), RLENGTH); }')
+        echo "CentOS-$version|CentOS Linux $version"
+        return 0;
+    fi
+
+    if [ -r /etc/redhat-release ]; then
+        version=$(cat /etc/redhat-release  | awk '{ print substr($0, match($0, /[[:digit:]]+/), RLENGTH); }')
+        echo "Red-Hat-$version|Red Hat Linux $version"
+        return 0;
+    fi
+
+    echo "Unknown-Unknown|Unknown"
+    return 1;
+}
+
+function check_os_dist_and_ver() {
+    script_name=$1
+
+    version_string=$(get_os_dist_and_ver)
+    short_os_name=$(echo $version_string | awk 'BEGIN { FS = "|" } { print $1 }')
+    long_os_name=$(echo $version_string | awk 'BEGIN { FS = "|" } { print $2 }')
+
+    if [[ "$script_name" =~ "$short_os_name" ]]; then
+        echo "Found $long_os_name."
+    else
+        if [ "$short_os_name" == "Unknown-Unknown" ]; then
+            echo "This set up script might not be appropriate for this host's OS."
+        else
+            echo "This set up script might not be appropriate for $long_os_name."
+        fi
+        echo -n "Continue anyway? [N/y] "
+        read ANSWER
+        if [ "$ANSWER" != "y" ]; then
+            return 1
+        fi
+    fi
+
+    return 0
+}

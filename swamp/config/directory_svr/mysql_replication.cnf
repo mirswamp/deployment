@@ -1,0 +1,9 @@
+[mysqld]
+#
+# Replication Settings
+#
+server-id=1
+binlog-do-db=project
+log-bin=mysql-bin
+binlog_format=ROW
+innodb_flush_log_at_trx_commit=1

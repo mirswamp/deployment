@@ -1,0 +1,59 @@
+#!/usr/bin/env bats
+CONFIG=/var/www/html/scripts/config/config.js
+PHP=/var/www/rws/config/app.php 
+FILES="$CONFIG $PHP"
+
+@test "Build swamp-registry-web-server" {
+    RELEASE_NUMBER=0 BUILD_NUMBER=A run make clean rpm
+    [ $status -eq 0 ]
+}
+@test  "Install registry-web-server" {
+    run sudo rpm -i --nodeps RPMS/noarch/swamp-registry-web-server-0-A.noarch.rpm
+    [ $status -eq 0 ]
+}
+@test  "Checking for registry-web-server files" {
+    run /bin/ls $FILES
+    echo $output > out
+    [ $status -eq 0 ]
+}
+@test  "Checking for build created version string" {
+    run grep "0.A" /var/www/html/scripts/version.js
+    [ $status -eq 0 ]
+}
+@test  "Uninstall registry-web-server" {
+    run sudo rpm -e swamp-registry-web-server
+    [ $status -eq 0 ]
+}
+@test  "Checking for missing for registry-web-server" {
+    run /bin/ls $CONFIG $PHP
+    [ $status -ne 0 ]
+}
+@test  "Install registry-web-server again" {
+    run sudo rpm -i --nodeps RPMS/noarch/swamp-registry-web-server-0-A.noarch.rpm
+    [ $status -eq 0 ]
+}
+@test "Build upgrade swamp-registry-web-server" {
+    RELEASE_NUMBER=0 BUILD_NUMBER=B run make clean rpm
+    [ $status -eq 0 ]
+}
+@test  "Upgrade registry-web-server" {
+#    grep \'key /var/www/rws/config/app.php > $BATS_TMPDIR/alpha
+    run sudo rpm -U --nodeps RPMS/noarch/swamp-registry-web-server-0-B.noarch.rpm
+    [ $status -eq 0 ]
+}
+@test  "Checking for registry-web-server files" {
+    run /bin/ls $CONFIG $PHP
+    [ $status -eq 0 ]
+}
+@test  "Checking for build created version string again" {
+    run grep "0.B" /var/www/html/scripts/version.js
+    [ $status -eq 0 ]
+}
+@test  "Uninstall registry-web-server" {
+    run sudo rpm -e swamp-registry-web-server
+    [ $status -eq 0 ]
+}
+@test  "Checking for missing config for registry-web-server" {
+    run /bin/ls $CONFIG $PHP
+    [ $status -ne 0 ]
+}

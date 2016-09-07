@@ -1,0 +1,12 @@
+*.tap
+BUILD
+BUILDROOT
+RPMS
+SOURCES
+SRPMS
+TEMPSOURCES
+swamp.conf
+bootstrap.ldif
+slapd.conf
+swa_admin.ldif
+db_dump/*

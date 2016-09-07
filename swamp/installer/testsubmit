@@ -1,0 +1,69 @@
+#!/usr/bin/env bats
+load test_helper
+@test "Build swamp-submit" {
+    RELEASE_NUMBER=0 BUILD_NUMBER=A run make clean submit
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Install submit" {
+    run sudo rpm -i --nodeps RPMS/noarch/swamp-submit-0-A.noarch.rpm
+    dumpifnonzero
+    [ $status -eq 0 ]
+    sleep 10
+}
+@test  "Checking config for submit" {
+    run chkconfig --list swamp
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+
+@test "Checking for floodlight setting" {
+    run grep -q floodlight /opt/swamp/etc/swamp.conf
+    dumpifnonzero
+    [ $status -eq 0 ]
+}
+@test  "Uninstall submit" {
+    run sudo rpm -e swamp-submit
+    # dumpifnonzero
+	dumpalways
+    [ $status -eq 0 ]
+}
+@test  "Checking for missing config for submit" {
+    run chkconfig --list swamp
+    dumpifzero
+    [ $status -ne 0 ]
+}
+# @test  "Install submit again" {
+    # run sudo rpm -i --nodeps RPMS/noarch/swamp-submit-0-A.noarch.rpm
+    # dumpifnonzero
+    # [ $status -eq 0 ]
+    # sleep 10
+# }
+# @test "Build upgrade swamp-submit" {
+    # RELEASE_NUMBER=0 BUILD_NUMBER=B run make clean submit
+    # dumpifnonzero
+    # [ $status -eq 0 ]
+# }
+# @test  "Upgrade submit" {
+    # run sudo rpm -U --nodeps RPMS/noarch/swamp-submit-0-B.noarch.rpm
+    # # dumpifnonzero
+	# dumpalways
+    # [ $status -eq 0 ]
+    # sleep 10
+# }
+# @test  "Checking config for submit" {
+    # run chkconfig --list swamp
+    # dumpifnonzero
+    # [ $status -eq 0 ]
+# }
+# @test  "Uninstall submit" {
+    # run sudo rpm -e swamp-submit
+    # # dumpifnonzero
+	# dumpalways
+    # [ $status -eq 0 ]
+# }
+# @test  "Checking for missing config for submit" {
+    # run chkconfig --list swamp
+    # dumpifzero
+    # [ $status -ne 0 ]
+# }
