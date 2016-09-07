@@ -1,0 +1,13 @@
+TOMCATLOGDIR="/opt/tomcat/logs"
+RUNOUT=/mnt/out/run.out
+EVENTOUT="/dev/ttyS1"
+# if the web application has been running for at least CHECKTIMEOUT_DURATION seconds
+# and there has been no tomcat activity for CHECKTIMEOUT_LASTLOG seconds then shutdown
+read runtime lastlog <<< $(/mnt/in/checktimeout.pl $VIEWER $TOMCATLOGDIR $CHECKTIMEOUT_LASTLOG)
+if [[ $runtime -gt $CHECKTIMEOUT_DURATION && $lastlog -gt $CHECKTIMEOUT_LASTLOG ]] 
+then
+	echo "`date +"%Y/%m/%d %H:%M:%S"`: runtime: $runtime [$CHECKTIMEOUT_DURATION] lastlog: $lastlog [$CHECKTIMEOUT_LASTLOG]" >> $RUNOUT 2>&1
+	echo "`date +"%Y/%m/%d %H:%M:%S"`: Shutting down $VIEWER viewer vm via checktimeout" >> $RUNOUT 2>&1
+	echo "TIMESHUTDOWN" > $EVENTOUT
+ 	/sbin/shutdown -h now
+fi
