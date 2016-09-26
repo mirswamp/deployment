@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
+#
+# Execute a SQL script as the database 'root' user.
+#
+
+script_file="$1"
+cnf_file="/opt/swamp/sql/sql.$RANDOM.cnf"
+
+while [ -e "$cnf_file" ]; do
+    cnf_file="/opt/swamp/sql/sql.$RANDOM.cnf"
+done
+
+function exit_with_error {
+    rm -f "$cnf_file"
+
+    echo "$0: Error while attempting to execute $script_file"
+    exit 1
+}
+
+############################################################################
+
+if [ -z "$script_file" ]; then
+    echo "Usage: $0 <SQL script file>"
+    exit 1
+fi
+
+if [ ! -r "$script_file" ]; then
+    echo "Error: $script_file is not readable"
+    exit 1
+fi
+
+if [ -e /etc/.mysql_root ]; then
+    /opt/swamp/sbin/create_mysql_root_cnf "$cnf_file" || exit_with_error
+    mysql --defaults-file="$cnf_file" < "$script_file" || exit_with_error
+    rm -f "$cnf_file"
+else
+    echo "Enter the password for the database 'root' user"
+    mysql -u root -p < "$script_file" || exit_with_error
+fi

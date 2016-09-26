@@ -1,4 +1,12 @@
-# This makefile creates the swamp-dataserver-init RPM
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
+# This Makefile specifies how to create the following RPMs:
+#   - swamp-dataserver-setup
+#   - swamp-directory-server-setup
+
 DIRS=SOURCES RPMS SPECS BUILD
 RELEASE_NUMBER ?= 0.10
 BUILD_NUMBER ?= dev
@@ -41,24 +49,24 @@ CONFIG = \
 
 SOURCES=$(SQLSCRIPTS) $(CONFIG) $(LIBS)
 CP=/bin/cp -p
-ifeq ($(shell uname), Darwin) 
+ifeq ($(shell uname), Darwin)
 TAR=gnutar
 else
 TAR=tar
 endif
 TOP= ../../..
-destfiles:=$(SQLSCRIPTS:%=SOURCES/%)  $(CONFIG:%=SOURCES/%) $(LIBS:%=SOURCES/%) 
+destfiles:=$(SQLSCRIPTS:%=SOURCES/%)  $(CONFIG:%=SOURCES/%) $(LIBS:%=SOURCES/%)
 
 TARBALL=SOURCES/swamp-1.tar.gz
 
-rpm: dirs $(TARBALL) 
+rpm: dirs $(TARBALL)
 	/bin/rm -rf RPMS/noarch
-	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS  
+	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS
 
 .PHONY dirs:
 
 $(TARBALL): $(destfiles)
-	$(TAR) -C SOURCES -czvf $@ $(SOURCES) 
+	$(TAR) -C SOURCES -czvf $@ $(SOURCES)
 	rm SOURCES/scripts.tar
 
 dirs: $(DIRS)
@@ -77,13 +85,13 @@ $(SQLSCRIPTS:%=SOURCES/%): SOURCES/scripts.tar
 
 SOURCES/scripts.tar:
 	find $(TOP)/db -name "*.sql" -o -name "*.ldif" | tar --xform='s/ /_/g' -cvf SOURCES/scripts.tar -T -
-	$(TAR) --strip-components=1 -C SOURCES -xvf SOURCES/scripts.tar 
+	$(TAR) --strip-components=1 -C SOURCES -xvf SOURCES/scripts.tar
 
 #$(SQLSCRIPTS:%=SOURCES/%): $(TOP)/db/
 #	mkdir -p $(@D)
 #	$(CP) $(<)$(@:SOURCES/%=%) $@
 
-$(LIBS:%=SOURCES/%): ../lib/
+$(LIBS:%=SOURCES/%): ../../lib/
 	mkdir -p $(@D)
 	$(CP) $(<)$(@:SOURCES/%=%) $@
 
@@ -92,7 +100,7 @@ $(CONFIG:%=SOURCES/%): ../config/
 	$(CP) $(<)$(@:SOURCES/%=%) $@
 
 clean:
-	rm -rf SOURCES RPMS BUILD 
+	rm -rf SOURCES RPMS BUILD
 
 install: rpm
 	sudo yum -y remove MariaDB-server MariaDB-client

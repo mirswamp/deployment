@@ -1,0 +1,23 @@
+dn: swampUuid=80835e30-d527-11e2-8b8b-0800200c9a66,ou=people,o=SWAMP,dc=cosalab,dc=org
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetorgperson
+objectClass: eduPerson
+objectClass: swampEntity
+swampUuid: 80835e30-d527-11e2-8b8b-0800200c9a66
+givenName: SwA
+sn: Admin
+cn: SwA Admin
+uid: swa_admin
+mail: swa_admin@cosalab.org
+postalAddress: 330 N. Orchard St. Madison, WI 53715
+enabled: TRUE
+telephoneNumber;x-office: (608) 316-4300
+userPassword: {SSHA}DO7e/WKFz7pfB18gyX0OypAqBRnxhn0I
+swampConsumedEduPersonPrincipalName: swa_admin@cosalab.org
+swampConsumedEduPersonPrincipalName: swa_admin@cosalab.org
+mailAlternateAddress: swa_admin@cosalab.org
+mobile: (608) 316-4300
+o: Software Assurance Marketplace
+

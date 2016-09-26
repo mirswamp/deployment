@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
 BINDIR=`dirname "$0"`
 SCRIPT_NAME=`basename "$0"`
 
@@ -37,6 +43,8 @@ echo "==============="
 yum_install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 yum_install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
 yum_install yum-utils
+yum_confirm epel-release remi-release yum-utils || exit_with_error
+
 yum-config-manager --enable remi-php70
 yum_update
 
@@ -45,13 +53,9 @@ echo "########################################"
 echo "##### Installing Required Packages #####"
 echo "########################################"
 
-yum_install /usr/bin/scp
-yum_install perl
+"$BINDIR"/set-up-common-yum.bash || exit 1
 
-yum_install ant bind-utils condor-all git patch
-yum_install libguestfs libguestfs-tools libguestfs-tools-c libvirt
-yum_install httpd mod_ssl php php-mcrypt php-mysqlnd php-mbstring php-pecl-zip php-xml
 yum_install mariadb mariadb-server
-yum_install zip ncompress
+yum_confirm mariadb mariadb-server || exit_with_error
 
-"$BINDIR"/set-up-common-post.bash
+"$BINDIR"/set-up-common-post.bash || exit 1

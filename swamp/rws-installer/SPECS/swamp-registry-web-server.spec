@@ -1,3 +1,8 @@
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
 #
 # spec file for SWAMP directory server installation RPM
 #
@@ -28,7 +33,7 @@ Vendor: The Morgridge Institute for Research
 Packager: Support <support@continuousassurance.org>
 BuildRoot: /tmp/%{name}-buildroot
 BuildArch: noarch
-Requires: httpd,php,mod_ssl
+Requires: httpd,mod_security_crs,php,mod_ssl
 # Conflicts: swamp-rt-perl,swamp-exec,swamp-submit,swamp-csaweb
 AutoReqProv: no
 
@@ -57,7 +62,7 @@ mkdir -p $RPM_BUILD_ROOT/usr/local/bin
 # install source files
 cp -r rws $RPM_BUILD_ROOT/var/www
 cp -r html $RPM_BUILD_ROOT/var/www
-mv $RPM_BUILD_ROOT/var/www/html/scripts/config/config.js.sample $RPM_BUILD_ROOT/var/www/html/scripts/config/config.js
+mv $RPM_BUILD_ROOT/var/www/html/scripts/config.js.sample $RPM_BUILD_ROOT/var/www/html/scripts/config.js
 mv $RPM_BUILD_ROOT/var/www/rws/.env.dev $RPM_BUILD_ROOT/var/www/rws/.env
 chmod 400 $RPM_BUILD_ROOT/var/www/rws/.env
 rm -f $RPM_BUILD_ROOT/var/www/rws/.env.local
@@ -67,7 +72,7 @@ rm -f $RPM_BUILD_ROOT/var/www/rws/.env.local
 rm -rf $RPM_BUILD_ROOT
 
 %files 
-%attr(-,apache,apache) %config /var/www/html/scripts/config/config.js
+%attr(-,apache,apache) %config /var/www/html/scripts/config.js
 %dir /var/www/html
 %dir /var/www/rws
 %attr(-,apache,apache) /var/www/html
@@ -77,8 +82,8 @@ rm -rf $RPM_BUILD_ROOT
 %pre
 if [ "$1" = "2" ]; then
 	# preserve config.js and .env files
-	if [ -f /var/www/html/scripts/config/config.js ]; then
-		cp /var/www/html/scripts/config/config.js /tmp/.
+	if [ -f /var/www/html/scripts/config.js ]; then
+		cp /var/www/html/scripts/config.js /tmp/.
 	fi
 	if [ -f /var/www/rws/.env ]; then
 		mv /var/www/rws/.env /tmp/.
@@ -90,7 +95,7 @@ fi
 if [ "$1" = "2" ]; then
 	# restore original config.js and .env files
 	if [ -f /tmp/config.js ]; then
-		mv /tmp/config.js /var/www/html/scripts/config/config.js
+		mv /tmp/config.js /var/www/html/scripts/config.js
 	fi
 	if [ -f /tmp/.env ]; then
 		mv /tmp/.env /var/www/rws/.

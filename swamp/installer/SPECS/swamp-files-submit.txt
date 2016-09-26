@@ -1,2 +1,0 @@
-# swamp specific submit node files section
-

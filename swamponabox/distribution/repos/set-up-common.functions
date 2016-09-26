@@ -1,3 +1,14 @@
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
+function exit_with_error {
+    echo ""
+    echo "Error encountered. Setup is not complete."
+    exit 1
+}
+
 function yum_erase() {
     echo ""
     echo "Erasing: $*"
@@ -10,6 +21,33 @@ function yum_install() {
     yum -y install $*
 }
 
+function yum_confirm() {
+    echo -n "Checking that packages were actually installed ... "
+
+    actually_installed=$(yum list installed)
+    not_actually_installed=""
+
+    for pkg in $*; do
+        grep ^$pkg\\. >/dev/null <<< "$actually_installed"
+        if [ $? -eq 0 ]; then
+            echo -n "$pkg "
+        else
+            not_actually_installed="$not_actually_installed $pkg"
+        fi
+    done
+
+    if [ -z "$not_actually_installed" ]; then
+        echo "(ok: found what we were looking for)"
+    else
+        echo "(problem: didn't find at least one package)"
+        echo ""
+        echo "Error: The following packages were not installed:$not_actually_installed"
+        return 1
+    fi
+
+    return 0
+}
+
 function yum_update() {
     echo ""
     echo "Updating: <all installed packages>"
@@ -20,19 +58,19 @@ function get_os_dist_and_ver() {
     version=""
 
     if [ -r /etc/centos-release ]; then
-        version=$(cat /etc/centos-release  | awk '{ print substr($0, match($0, /[[:digit:]]+/), RLENGTH); }')
+        version=$(cat /etc/centos-release | awk '{ print substr($0, match($0, /[[:digit:]]+/), RLENGTH); }')
         echo "CentOS-$version|CentOS Linux $version"
         return 0;
     fi
 
     if [ -r /etc/redhat-release ]; then
-        version=$(cat /etc/redhat-release  | awk '{ print substr($0, match($0, /[[:digit:]]+/), RLENGTH); }')
+        version=$(cat /etc/redhat-release | awk '{ print substr($0, match($0, /[[:digit:]]+/), RLENGTH); }')
         echo "Red-Hat-$version|Red Hat Linux $version"
         return 0;
     fi
 
     echo "Unknown-Unknown|Unknown"
-    return 1;
+    return 1
 }
 
 function check_os_dist_and_ver() {
@@ -53,6 +91,8 @@ function check_os_dist_and_ver() {
         echo -n "Continue anyway? [N/y] "
         read ANSWER
         if [ "$ANSWER" != "y" ]; then
+            echo ""
+            echo "Setup is not complete."
             return 1
         fi
     fi

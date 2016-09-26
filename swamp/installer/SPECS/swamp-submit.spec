@@ -1,14 +1,26 @@
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
 #
 # spec file for SWAMP
 #
+%define is_darwin %(test -e /Applications && echo 1 || echo 0)
+%if %is_darwin
+%define _topdir	 	/Users/dboulineau/Projects/cosa/trunk/swamp/src/main/deployment/swamp/installer
+%define nil #
+%define _rpmfc_magic_path   /usr/share/file/magic
+%define __os Linux
+%endif
 %define _arch noarch
 
-%define __spec_prep_post	%{___build_post}
-%define ___build_post	exit 0
-%define __spec_prep_cmd /bin/sh
-%define __build_cmd /bin/sh
-%define __spec_build_cmd %{__build_cmd}
-%define __spec_build_template	#!%{__spec_build_shell}
+#%define __spec_prep_post	%{___build_post}
+#%define ___build_post	exit 0
+#%define __spec_prep_cmd /bin/sh
+#%define __build_cmd /bin/sh
+#%define __spec_build_cmd %{__build_cmd}
+#%define __spec_build_template	#!%{__spec_build_shell}
 %define _target_os Linux
 
 
@@ -39,13 +51,84 @@ This RPM contains the Server packages.
 echo "Here's where I am at build $PWD"
 cd ../BUILD/%{name}-%{version}
 %install
-%include common-install-submit.txt
-%include swamp-install-submit.txt
+echo rm -rf $RPM_BUILD_ROOT
+#echo "At install i am $PWD"
+%if %is_darwin
+cd %{name}-%{version}
+%endif
+echo $RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/bin
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/etc
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/lib
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/jar
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/run
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/log
+chmod 01777 $RPM_BUILD_ROOT/opt/swamp/log
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/perl5/SWAMP/Client
+mkdir -p $RPM_BUILD_ROOT/etc/profile.d
+mkdir -p $RPM_BUILD_ROOT/etc/init.d
+mkdir -p $RPM_BUILD_ROOT/etc/bash_completion.d
 
+install -m 755 VMConstants.pm $RPM_BUILD_ROOT/opt/swamp/perl5
+install -m 755 VMTools.pm $RPM_BUILD_ROOT/opt/swamp/perl5
+
+# TODO This needs to be istalled as a Perl package via cpanm, not manually
+install -m 755 lib/SWAMP/AgentMonitorCommon.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/AgentMonitorCommon.pm 
+install -m 755 lib/SWAMP/AssessmentTools.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/AssessmentTools.pm 
+install -m 755 lib/SWAMP/PackageTypes.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/PackageTypes.pm 
+install -m 755 lib/SWAMP/Client/AgentClient.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Client/AgentClient.pm 
+install -m 755 lib/SWAMP/Client/ExecuteRecordCollectorClient.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Client/ExecuteRecordCollectorClient.pm 
+install -m 755 lib/SWAMP/Client/GatorClient.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Client/GatorClient.pm 
+install -m 755 lib/SWAMP/Client/LaunchPadClient.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Client/LaunchPadClient.pm 
+install -m 755 lib/SWAMP/Client/ViewerMonitorClient.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Client/ViewerMonitorClient.pm 
+install -m 755 lib/SWAMP/Client/LogCollectorClient.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Client/LogCollectorClient.pm 
+install -m 755 lib/SWAMP/Client/ResultCollectorClient.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Client/ResultCollectorClient.pm 
+install -m 755 lib/SWAMP/Floodlight.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Floodlight.pm 
+install -m 755 lib/SWAMP/HTCondorDefines.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/HTCondorDefines.pm 
+install -m 755 lib/SWAMP/RPCUtils.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/RPCUtils.pm
+install -m 755 lib/SWAMP/Locking.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Locking.pm 
+install -m 755 lib/SWAMP/SysUtils.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/SysUtils.pm
+install -m 755 lib/SWAMP/SWAMPUtils.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/SWAMPUtils.pm 
+install -m 755 lib/SWAMP/VMPrimitives.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/VMPrimitives.pm 
+install -m 755 lib/SWAMP/VMToolsX.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/VMToolsX.pm 
+
+install -m 755 csa_HTCondorAgent.pl ${RPM_BUILD_ROOT}/opt/swamp/bin
+install -m 755 csa_agent_launcher ${RPM_BUILD_ROOT}/opt/swamp/bin
+install -m 755 assessmentlauncher ${RPM_BUILD_ROOT}/opt/swamp/bin
+install -m 755 vrunlauncher ${RPM_BUILD_ROOT}/opt/swamp/bin
+install -m 755 swamp_config ${RPM_BUILD_ROOT}/opt/swamp/bin
+install -m 755 swamp_monitor ${RPM_BUILD_ROOT}/opt/swamp/bin
+install -m 755 csa_HTCondorAgent_launcher ${RPM_BUILD_ROOT}/opt/swamp/bin
+install -m 755 csa_agent.pl $RPM_BUILD_ROOT/opt/swamp/bin
+install -m 755 arun $RPM_BUILD_ROOT/opt/swamp/bin
+install -m 755 AgentMonitor.pl $RPM_BUILD_ROOT/opt/swamp/bin
+install -m 755 LaunchPad.pl $RPM_BUILD_ROOT/opt/swamp/bin
+install -m 644 swamp.conf $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 submonitor.conf $RPM_BUILD_ROOT/opt/swamp/etc
+ln -s ../etc/swamp.conf $RPM_BUILD_ROOT/opt/swamp/jar/swamp.conf
+sed -e's/log4j.appender.SYSLOG.tag=DummyTag/log4j.appender.SYSLOG.tag=AgentDispatcher/' log4j.properties > tmp.$$ && mv tmp.$$ log4j.properties
+install -m 755 log4j.properties $RPM_BUILD_ROOT/opt/swamp/etc
+ln -s ../etc/log4j.properties $RPM_BUILD_ROOT/opt/swamp/jar/log4j.properties
+install -m 644 log4perl.conf $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 755 swampd $RPM_BUILD_ROOT/etc/init.d/swamp
+install -m 755 swamp.sh $RPM_BUILD_ROOT/etc/profile.d
+
+install -m 755 lib/commons-logging-1.1.jar $RPM_BUILD_ROOT/opt/swamp/lib/commons-logging-1.1.jar
+install -m 755 lib/guava-19.0.jar $RPM_BUILD_ROOT/opt/swamp/lib/guava-19.0.jar
+install -m 755 lib/log4j-1.2.17p.jar $RPM_BUILD_ROOT/opt/swamp/lib/log4j-1.2.17p.jar
+install -m 755 lib/mariadb-java-client-1.3.6.jar $RPM_BUILD_ROOT/opt/swamp/lib/mariadb-java-client-1.3.6.jar
+install -m 755 lib/ws-commons-util-1.0.2.jar $RPM_BUILD_ROOT/opt/swamp/lib/ws-commons-util-1.0.2.jar
+install -m 755 lib/xmlrpc-client-3.1.3.jar $RPM_BUILD_ROOT/opt/swamp/lib/xmlrpc-client-3.1.3.jar
+install -m 755 lib/xmlrpc-common-3.1.3.jar $RPM_BUILD_ROOT/opt/swamp/lib/xmlrpc-common-3.1.3.jar
+install -m 755 lib/xmlrpc-server-3.1.3.jar $RPM_BUILD_ROOT/opt/swamp/lib/xmlrpc-server-3.1.3.jar
+install -m 755 jar/agentdispatcher.jar $RPM_BUILD_ROOT/opt/swamp/jar/agentdispatcher.jar
+#install -m 755 jar/scheduleprocessor.jar $RPM_BUILD_ROOT/opt/swamp/jar/scheduleprocessor.jar
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %post
+%if %is_darwin
+%else
 
 # Floodlight 
 iam=`hostname -s`
@@ -63,22 +146,14 @@ else
     echo Please update the floodlight item in /opt/swamp/etc/swamp.conf with the URL of the appropriate floodlight controller
 fi
 
-# htcondor bridge selection
-bridge="br-ext.2786"
-if [ "$iam" = "swa-csasub-pd-01" ]; then
-	bridge="br-ext.2789"
-fi
-/bin/sed -i "s|SED_BRIDGE_INTERFACE|$bridge|" /opt/swamp/etc/vmu_htcondor_submit
-
 # Arguments to post are {1=>new, 2=>upgrade}
 if [ "$1" = "2" ] 
 then 
     if [ -r /opt/swamp/etc/swamp.conf.rpmsave ]
     then
-        # export PERLBREW_ROOT=/opt/perl5
-        # source $PERLBREW_ROOT/etc/bashrc
-        # perlbrew use perl-5.18.1
-		export PATH=/opt/perl5/perls/perl-5.18.1/bin:$PATH
+        export PERLBREW_ROOT=/opt/perl5
+        source $PERLBREW_ROOT/etc/bashrc
+        perlbrew use perl-5.18.1
         export PERLLIB=$PERLLIB:/opt/swamp/perl5
         export PERL5LIB=$PERL5LIB:/opt/swamp/perl5
         val=$(/opt/swamp/bin/swamp_config -C /opt/swamp/etc/swamp.conf.rpmsave --propget quartermasterHost)
@@ -117,21 +192,51 @@ else
     chkconfig --add swamp
     echo Starting SWAMP services
 fi
-
-# set file permissions on swamp.conf
-chmod 400 /opt/swamp/etc/swamp.conf
-
 # During an install/upgrade the system is intended to be idle, clean out
 # these state files before starting
 /bin/rm -f /opt/swamp/run/.viewerinfo /opt/swamp/run/.agentstate
 service swamp start
 
+%endif
 %files
+%if %is_darwin
+%defattr(-,root, root)
+%else
 %defattr(-,swa-daemon, swa-daemon)
-%include common-files-submit.txt
-%include swamp-files-submit.txt
+%endif
+#%doc README TODO COPYING ChangeLog
+
+%dir /opt/swamp/bin
+/opt/swamp/bin/AgentMonitor.pl
+/opt/swamp/bin/LaunchPad.pl
+/opt/swamp/bin/csa_agent.pl
+/opt/swamp/bin/arun
+/opt/swamp/bin/csa_HTCondorAgent.pl
+/opt/swamp/bin/csa_agent_launcher
+/opt/swamp/bin/assessmentlauncher
+/opt/swamp/bin/vrunlauncher
+/opt/swamp/bin/swamp_config
+/opt/swamp/bin/swamp_monitor
+/opt/swamp/bin/csa_HTCondorAgent_launcher
+
+/opt/swamp/lib
+/opt/swamp/jar
+
+/opt/swamp/perl5
+
+/etc/profile.d/swamp.sh
+%dir /opt/swamp/run
+%dir /opt/swamp/log
+%dir /opt/swamp/etc
+%config /opt/swamp/etc/swamp.conf
+%config /opt/swamp/etc/submonitor.conf
+%config /opt/swamp/etc/log4j.properties
+%config /opt/swamp/etc/log4perl.conf
+%attr(-, root,root) /etc/init.d/swamp
 
 %preun 
+%if %is_darwin
+%else
 # Only remove things if this is an uninstall
 if [ "$1" = "0" ] 
 then 
@@ -151,3 +256,5 @@ then
         kill -9 $AgentMonitorpid
     fi
 fi
+%endif
+

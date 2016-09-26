@@ -1,3 +1,8 @@
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
 #
 # spec file for SWAMP CSA web server installation RPM
 #
@@ -26,7 +31,7 @@ Vendor: The Morgridge Institute for Research
 Packager: Support <support@continuousassurance.org>
 BuildRoot: /tmp/%{name}-buildroot
 BuildArch: noarch
-Requires: httpd,php,mod_ssl,php-common,php-ldap,java-1.6.0-openjdk-devel
+Requires: httpd,mod_security_crs,php,mod_ssl,php-common,php-ldap,java-1.6.0-openjdk-devel
 # Conflicts: swamp-rt-perl,swamp-exec,swamp-submit,swamp-registry-web-server
 AutoReqProv: no
 

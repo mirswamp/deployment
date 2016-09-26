@@ -1,4 +1,69 @@
-# SWAMP-in-a-Box specific submit node install section
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
 
-install -m 644 swamponaboxmonitor.conf $RPM_BUILD_ROOT/opt/swamp/etc/swampmonitor.conf
-install -m 400 vmu_swamponabox_htcondor_submit $RPM_BUILD_ROOT/opt/swamp/etc/vmu_htcondor_submit
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/bin
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/etc
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/lib
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/jar
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/run
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/log
+chmod 01777 $RPM_BUILD_ROOT/opt/swamp/log
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/perl5/SWAMP/Client
+mkdir -p $RPM_BUILD_ROOT/etc/profile.d
+mkdir -p $RPM_BUILD_ROOT/etc/init.d
+mkdir -p $RPM_BUILD_ROOT/etc/bash_completion.d
+
+install -m 755 VMConstants.pm $RPM_BUILD_ROOT/opt/swamp/perl5
+install -m 755 VMTools.pm $RPM_BUILD_ROOT/opt/swamp/perl5
+
+install -m 755 lib/SWAMP/AgentMonitorCommon.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/AgentMonitorCommon.pm 
+install -m 755 lib/SWAMP/AssessmentTools.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/AssessmentTools.pm 
+install -m 755 lib/SWAMP/PackageTypes.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/PackageTypes.pm 
+install -m 755 lib/SWAMP/Client/AgentClient.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Client/AgentClient.pm 
+install -m 755 lib/SWAMP/Client/ExecuteRecordCollectorClient.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Client/ExecuteRecordCollectorClient.pm 
+install -m 755 lib/SWAMP/Client/GatorClient.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Client/GatorClient.pm 
+install -m 755 lib/SWAMP/Client/LaunchPadClient.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Client/LaunchPadClient.pm 
+install -m 755 lib/SWAMP/Client/ViewerMonitorClient.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Client/ViewerMonitorClient.pm 
+install -m 755 lib/SWAMP/Client/LogCollectorClient.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Client/LogCollectorClient.pm 
+install -m 755 lib/SWAMP/Client/ResultCollectorClient.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Client/ResultCollectorClient.pm 
+install -m 755 lib/SWAMP/Floodlight.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Floodlight.pm 
+install -m 755 lib/SWAMP/HTCondorDefines.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/HTCondorDefines.pm 
+install -m 755 lib/SWAMP/RPCUtils.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/RPCUtils.pm
+install -m 755 lib/SWAMP/Locking.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Locking.pm 
+install -m 755 lib/SWAMP/SysUtils.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/SysUtils.pm
+install -m 755 lib/SWAMP/SWAMPUtils.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/SWAMPUtils.pm 
+install -m 755 lib/SWAMP/VMPrimitives.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/VMPrimitives.pm 
+install -m 755 lib/SWAMP/VMToolsX.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/VMToolsX.pm 
+
+install -m 755 csa_HTCondorAgent.pl ${RPM_BUILD_ROOT}/opt/swamp/bin
+install -m 755 csa_agent_launcher ${RPM_BUILD_ROOT}/opt/swamp/bin
+install -m 755 assessmentlauncher ${RPM_BUILD_ROOT}/opt/swamp/bin
+install -m 755 vrunlauncher ${RPM_BUILD_ROOT}/opt/swamp/bin
+install -m 755 swamp_config ${RPM_BUILD_ROOT}/opt/swamp/bin
+install -m 755 swamp_monitor ${RPM_BUILD_ROOT}/opt/swamp/bin
+install -m 755 csa_HTCondorAgent_launcher ${RPM_BUILD_ROOT}/opt/swamp/bin
+install -m 755 csa_agent.pl $RPM_BUILD_ROOT/opt/swamp/bin
+install -m 755 arun $RPM_BUILD_ROOT/opt/swamp/bin
+install -m 755 AgentMonitor.pl $RPM_BUILD_ROOT/opt/swamp/bin
+install -m 755 LaunchPad.pl $RPM_BUILD_ROOT/opt/swamp/bin
+install -m 644 swamp.conf $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 submonitor.conf $RPM_BUILD_ROOT/opt/swamp/etc
+ln -s ../etc/swamp.conf $RPM_BUILD_ROOT/opt/swamp/jar/swamp.conf
+sed -e's/log4j.appender.SYSLOG.tag=DummyTag/log4j.appender.SYSLOG.tag=AgentDispatcher/' log4j.properties > tmp.$$ && mv tmp.$$ log4j.properties
+install -m 755 log4j.properties $RPM_BUILD_ROOT/opt/swamp/etc
+ln -s ../etc/log4j.properties $RPM_BUILD_ROOT/opt/swamp/jar/log4j.properties
+install -m 644 log4perl.conf $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 755 swampd $RPM_BUILD_ROOT/etc/init.d/swamp
+install -m 755 swamp.sh $RPM_BUILD_ROOT/etc/profile.d
+
+install -m 755 lib/commons-logging-1.1.jar $RPM_BUILD_ROOT/opt/swamp/lib/commons-logging-1.1.jar
+install -m 755 lib/guava-19.0.jar $RPM_BUILD_ROOT/opt/swamp/lib/guava-19.0.jar
+install -m 755 lib/log4j-1.2.17p.jar $RPM_BUILD_ROOT/opt/swamp/lib/log4j-1.2.17p.jar
+install -m 755 lib/mariadb-java-client-1.3.6.jar $RPM_BUILD_ROOT/opt/swamp/lib/mariadb-java-client-1.3.6.jar
+install -m 755 lib/ws-commons-util-1.0.2.jar $RPM_BUILD_ROOT/opt/swamp/lib/ws-commons-util-1.0.2.jar
+install -m 755 lib/xmlrpc-client-3.1.3.jar $RPM_BUILD_ROOT/opt/swamp/lib/xmlrpc-client-3.1.3.jar
+install -m 755 lib/xmlrpc-common-3.1.3.jar $RPM_BUILD_ROOT/opt/swamp/lib/xmlrpc-common-3.1.3.jar
+install -m 755 lib/xmlrpc-server-3.1.3.jar $RPM_BUILD_ROOT/opt/swamp/lib/xmlrpc-server-3.1.3.jar
+install -m 755 jar/agentdispatcher.jar $RPM_BUILD_ROOT/opt/swamp/jar/agentdispatcher.jar

@@ -1,3 +1,8 @@
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
 function showargs() {
 	echo "getargs"
 	echo "-------"
@@ -6,6 +11,7 @@ function showargs() {
 	echo "WORKSPACE: $WORKSPACE"
 	echo "RELEASE_NUMBER: $RELEASE_NUMBER"
 	echo "BUILD_NUMBER: $BUILD_NUMBER"
+	echo "EMAIL: $EMAIL"
 	echo "DBPASSWORD: $DBPASSWORD"
 	echo "SWAMPADMINPASSWORD: $SWAMPADMINPASSWORD"
 	echo "-------"
@@ -13,7 +19,7 @@ function showargs() {
 
 function usage() {
 	showargs
-	echo "usage $0 [DEVELOPER WORKSPACE RELEASE_NUMBER DBPASSWORD SWAMPADMINPASSWORD]"
+	echo "usage $0 [DEVELOPER WORKSPACE RELEASE_NUMBER EMAIL DBPASSWORD SWAMPADMINPASSWORD]"
 }
 
 function getargs() {
@@ -33,6 +39,8 @@ function getargs() {
 			WORKSPACE=$arg
 		elif [ -d "/home/$arg" ]; then
 			DEVELOPER=$arg
+		elif [[ $arg =~ '@' ]]; then
+			EMAIL=$arg
 		elif [[ $arg =~ $release_number_regex ]]; then
 			RELEASE_NUMBER=$arg
 		else
@@ -43,10 +51,29 @@ function getargs() {
 	if [ -z "$MODE" ]; then
 		MODE=-install
 	fi
+	if [ -z "$EMAIL" ]; then
+		if [ ! -z "$DEVELOPER" ]; then
+			EMAIL=$DEVELOPER@continuousassurance.org
+		fi
+	else
+		IFS='@' read -a parts <<< "$EMAIL"
+		if [ ${#parts[@]} -ne 2 ]; then
+			echo "Error - invalid email: $EMAIL"
+			usage
+			return 1
+		else
+			domain=${parts[1]}
+			if [ -z `dig +short $domain` ]; then
+				echo "Error - invalid email domain: $EMAIL ($domain)"
+				usage
+				return 1
+			fi
+		fi
+	fi
 
 	if [ -z "$WORKSPACE" ]; then
 		if [ -z "$DEVELOPER" ]; then
-			WORKSPACE="$BINDIR/../../../.."
+			WORKSPACE="$BINDIR/../../../../../swamp"
 		else
 			WORKSPACE=/home/$DEVELOPER/swamp
 		fi

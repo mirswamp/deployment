@@ -1,4 +1,10 @@
 #!/bin/bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
 BINDIR=`dirname $0`
 
 # sets global variable ANSWER
@@ -109,7 +115,7 @@ if [ "$DO_MYSQL" -eq 1 ]; then
 			chmod 400 /etc/.mysql_web
 			echo "$DBJAVA" | sudo openssl enc -aes-256-cbc -salt -out /etc/.mysql_java -pass pass:swamp
 			chmod 400 /etc/.mysql_java
-			$BINDIR/../sbin/swamponabox_patch_passwords.pl
+			$BINDIR/../sbin/swampinabox_patch_passwords.pl
 			rm -f /etc/.mysql_web
 			rm -f /etc/.mysql_java
 			

@@ -1,1 +1,0 @@
-# swamp specific exec node files section

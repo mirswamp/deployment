@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
+codedx_src_file="$1"
+codedx_dest_file="/opt/swamp/thirdparty/codedx/vendor/codedx.war"
+codedx_install_sql="/opt/swamp/sql/install_codedx.sql"
+
+function exit_with_error {
+    echo ""
+    echo "Failed to completely install Code Dx "
+    exit 1
+}
+
+if [ ! -e "$codedx_dest_file" -a -z "$codedx_src_file" ]; then
+    echo "Usage: $0 <Code Dx .war file>"
+    exit 1
+fi
+
+if [ ! -z "$codedx_src_file" -a ! -e "$codedx_src_file" ]; then
+    echo "Error: $codedx_src_file does not exist"
+    exit 1
+fi
+
+if [ "$(whoami)" != "root" ]; then
+    echo "Error: The install must be performed as root."
+    exit 1
+fi
+
+if [ -e "$codedx_src_file" ]; then
+    echo ""
+    echo "Installing $codedx_src_file into /opt/swamp ..."
+
+    install -m 444 "$codedx_src_file" "$codedx_dest_file" || exit_with_error
+fi
+
+echo ""
+echo "Adding database entries for Code Dx ..."
+
+/opt/swamp/sbin/execute_sql_script "$codedx_install_sql" || exit_with_error
+
+echo ""
+echo "Code Dx should now be available for viewing assessment results."

@@ -1,3 +1,0 @@
-# SWAMP and SWAMP-in-a-Box common directory server files section
-
-/opt/swamp

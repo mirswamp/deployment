@@ -1,4 +1,10 @@
 #!/bin/bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
 BINDIR=`dirname $0`
 INITIALDIR=`pwd`
 
@@ -45,7 +51,7 @@ $BINDIR/../sbin/manage_services.bash stop
 
 echo ""
 echo "Installing swamp backend"
-yum install -y $WORKSPACE/installer/RPMS/noarch/swamponabox-backend-$RELEASE_NUMBER-${BUILD_NUMBER}.noarch.rpm
+yum install -y $WORKSPACE/installer/RPMS/noarch/swampinabox-backend-$RELEASE_NUMBER-${BUILD_NUMBER}.noarch.rpm
 
 echo ""
 echo "Restarting services"

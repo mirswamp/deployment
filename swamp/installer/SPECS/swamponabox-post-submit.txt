@@ -1,3 +1,8 @@
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
 echo "post submit"
 # install
 if [ "$1" == "1" ]
@@ -8,3 +13,6 @@ elif [ "$1" == "2" ]
 then
 	echo "submit upgrade"
 fi
+# During an install/upgrade the system is intended to be idle, clean out
+# these state files before starting
+/bin/rm -f /opt/swamp/run/.viewerinfo /opt/swamp/run/.agentstate

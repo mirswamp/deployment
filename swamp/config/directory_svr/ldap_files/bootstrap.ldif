@@ -1,0 +1,76 @@
+dn: dc=cosalab,dc=org
+description: CoSALab SWAMP
+dc: cosalab
+o: SWAMP
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+
+# create a directory entry for the root or admin
+# user and set a password so that we can restrict
+# access to the password to require the UNIX socket
+# and therefore prevent admin credential from being
+# used in any other way
+dn: cn=admin,dc=cosalab,dc=org
+objectClass: organizationalRole
+objectClass: simpleSecurityObject
+cn: admin
+description: LDAP administrator
+userPassword: {SSHA}EMjr1RyiXqLaY4yh3GiKs0eWk46zwKSU
+
+dn: o=SWAMP,dc=cosalab,dc=org
+description: SWAMP
+o: SWAMP
+objectClass: top
+objectClass: organization
+
+dn: ou=people,o=SWAMP,dc=cosalab,dc=org
+ou: people
+objectClass: organizationalUnit
+
+dn: ou=groups,o=SWAMP,dc=cosalab,dc=org
+ou: groups
+objectClass: organizationalUnit
+
+dn: ou=system,o=SWAMP,dc=cosalab,dc=org
+ou: system
+objectClass: organizationalUnit
+
+dn: uid=syncrepl,ou=system,o=SWAMP,dc=cosalab,dc=org
+uid: syncrepl
+userPassword: {SSHA}aJc8QZZCQRHTDo6X+D8mOyZyCFVCJtCA
+description: replication user
+objectClass: simpleSecurityObject
+objectClass: account
+
+dn: uid=grouper,ou=system,o=SWAMP,dc=cosalab,dc=org
+uid: grouper
+userPassword: {SSHA}1ywWKqYYh2t+bcyKdDr0mG75955PsxI4
+description: Grouper user
+objectClass: simpleSecurityObject
+objectClass: account
+
+# used for initial creation of a user and will have 
+# write permission on entire person record
+dn: uid=userRegistryWebApp,ou=system,o=SWAMP,dc=cosalab,dc=org
+uid: userRegistryWebApp
+userPassword: {SSHA}BKxK1LcQY5pFKd4i2epe1k4mLdyOwHPU
+description: user registry web application
+objectClass: simpleSecurityObject
+objectClass: account
+
+# will not have access to password and uid
+dn: uid=userRegistryDataChange,ou=system,o=SWAMP,dc=cosalab,dc=org
+uid: userRegistryDataChange
+userPassword: {SSHA}75Lplt/FaEW2+T0N65VdOhS4gBoPjj+U
+description: user registry data change application
+objectClass: simpleSecurityObject
+objectClass: account
+
+# will only be used for changing user passwords
+dn: uid=userRegistryPasswordSet,ou=system,o=SWAMP,dc=cosalab,dc=org
+uid: userRegistryPasswordSet
+userPassword: {SSHA}L9dATOma/s9RFfr6GkUW1sP+eWR2mkJB
+description: user registry password setting account
+objectClass: simpleSecurityObject
+objectClass: account

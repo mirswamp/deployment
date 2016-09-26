@@ -1,8 +1,13 @@
 #!/usr/bin/env bats
 
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
 load ../scripts/test_helper
 
-CONFIG=/var/www/html/scripts/config/config.js
+CONFIG=/var/www/html/scripts/config.js
 PHP=/var/www/swamp-api/app/config/database.php 
 FILES="$PHP"
 

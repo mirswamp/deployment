@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
 function usage() {
     echo "usage $0 (start | stop | restart | status | status-short | list | help) [service1 service2 ...]"
     exit
@@ -17,6 +22,18 @@ fi
 stopServices=(cgconfig libvirtd mysql condor httpd swamp)
 startServices=(iptables ${stopServices[@]})
 restartServices=${startServices[@]}
+
+#
+# Ensure that the systemd manager configuration is up-to-date.
+#
+
+echo -n "Testing for systemctl ... "
+which systemctl
+
+if [ $? -eq 0 ]; then
+    echo "Calling systemctl daemon-reload"
+    systemctl daemon-reload
+fi
 
 #
 # Determine the command (start, stop, ...) and list of services.

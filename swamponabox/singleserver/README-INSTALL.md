@@ -6,8 +6,8 @@ execute build_swampinabox/bin/git_clone.bash
 
 Install SWAMPINABOX
 -------------------
-become root (sudo -i), execute install_swamponabox.bash <username>
-build_swampinabox/bin/install_swamponabox.bash <username> |& tee build_swampinabox/log/install_swamponabox_`hostname -s`_<dd>.log
+become root (sudo -i), execute install_swampinabox.bash <username>
+build_swampinabox/bin/install_swampinabox.bash <username> |& tee build_swampinabox/log/install_swampinabox_`hostname -s`_<dd>.log
 
 Checkout Updated Source to Git Working Directory
 ------------------------------------------------
@@ -17,8 +17,8 @@ build_swampinabox/bin/git_checkout.pl
 
 Upgrading SWAMPINABOX
 ---------------------
-become root (sudo -i), execute upgrade_swamponabox.bash
-build_swampinabox/bin/upgrade_swamponabox.bash <username> |& tee build_swampinabox/log/upgrade_swamponabox_`hostname -s`_<dd>.log
+become root (sudo -i), execute upgrade_swampinabox.bash
+build_swampinabox/bin/upgrade_swampinabox.bash <username> |& tee build_swampinabox/log/upgrade_swampinabox_`hostname -s`_<dd>.log
 
 Developing SWAMP/SWAMPINABOX
 ----------------------------

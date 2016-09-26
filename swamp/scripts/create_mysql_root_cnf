@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
+#
+# Create a configuration file for use with 'mysql --defaults-file'
+# that logs in as the database 'root' user.
+#
+
+src_file="/etc/.mysql_root"
+dest_file="$1"
+
+if [ ! -r "$src_file" ]; then
+    echo "Error: $src_file is not readable"
+    exit 1
+fi
+
+if [ -z "$dest_file" ]; then
+    echo "Usage: $0 <destination file>"
+    exit 1
+fi
+
+if [ -e "$dest_file" ]; then
+    echo "Error: $dest_file already exists"
+    exit 1
+fi
+
+#
+# In the options file for MySQL:
+#   - Quote the password, in case it contains '#'.
+#   - Escape backslashes (the only character that needs escaping).
+#
+# See: http://dev.mysql.com/doc/refman/5.7/en/option-files.html
+#
+dbroot=`openssl enc -d -aes-256-cbc -in /etc/.mysql_root -pass pass:swamp`
+dbroot=${dbroot//\\/\\\\}
+
+touch "$dest_file"
+chmod 400 "$dest_file"
+
+echo '[client]' >> "$dest_file"
+echo "password='$dbroot'" >> "$dest_file"
+echo "user='root'" >> "$dest_file"

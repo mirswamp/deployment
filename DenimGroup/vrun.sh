@@ -1,27 +1,32 @@
-VIEWER="ThreadFix"
-viewer="threadfix"
-TOMCATVERSION="/opt/apache-tomcat-7.0.65"
-TOMCATSERVICE="tomcat"
-TOMCATDIR="/opt/$TOMCATSERVICE"
-TOMCATLOG="$TOMCATDIR/logs/catalina.out"
-RUNOUT="/mnt/out/run.out"
-RUNEPOCH="/mnt/out/run.epoch"
-EVENTOUT="/dev/ttyS1"
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
 
-# function to echo events to RUNOUT and EVENTOUT
+VIEWER=threadfix
+TOMCATVERSION=/opt/apache-tomcat-7.0.65
+TOMCATDIR=/opt/tomcat
+RUNOUT=/mnt/out/run.out
+EVENTOUT=/mnt/events
+
+# function to echo events to RUNOUT and EVENTOUT/event_name file
 sequence=10
 record_event () {
 	event_name=$VIEWER_$1
 	event_message=$2
-	echo "`date +"%Y/%m/%d %H:%M:%S"`: $sequence $event_name $event_message" >> $RUNOUT 2>&1
-	echo "$event_name" > $EVENTOUT
+	echo "`date`: $event_message" >> $RUNOUT 2>&1
+	echo "`date`: $event_message" > $EVENTOUT/${sequence}${event_name}
 	((sequence+=1))
+	sync
 }
 
-record_event RUNSHSTART "Starting $VIEWER viewer via run.sh"
-echo `date +%s` > $RUNEPOCH
+# create the event output mount point and mount device
+mkdir -p $EVENTOUT
+mount /dev/vdd $EVENTOUT
 
-# start in /mnt/in - the viewer VM input directory
+record_event start "Starting $VIEWER viewer via run.sh"
+
+# start in /mnt/in - the $VIEWER viewer VM input directory
 cd /mnt/in
 
 # check for ip connectivity
@@ -30,78 +35,74 @@ echo "$VMIP `hostname`" >> /etc/hosts
 ping -c 3 `hostname`
 if [ $? != 0 ]
 then
-    	record_event NOIP "ERROR: NO IP ADDRESS"
-		record_event NOIPSHUTDOWN "Shutting down $VIEWER viewer via run.sh"
+    	record_event noip "ERROR: NO IP ADDRESS"
+		record_event noipshutdown "Shutting down $VIEWER viewer via run.sh"
     	shutdown -h now
 		exit
 fi
 
-# set viewer database backup as shutdown service
-cp /mnt/in/swamp-shutdown-service /etc/init.d/.
-chmod +x /etc/init.d/swamp-shutdown-service
-chkconfig --add swamp-shutdown-service
-service swamp-shutdown-service start
-chmod +x /mnt/in/backup_viewerdb.sh
+cp /mnt/in/swamp-threadfix-service /etc/init.d/.
+chmod +x /etc/init.d/swamp-threadfix-service
+chkconfig --add swamp-threadfix-service
+service swamp-threadfix-service start
+chmod +x /mnt/in/threadfix_viewerdb.sh
 
 # start the timeout script via cron and check timeout every CHECKTIMEOUT_FREQUENCY minutes
 chmod +x /mnt/in/checktimeout
 chmod +x /mnt/in/checktimeout.pl
 echo "*/$CHECKTIMEOUT_FREQUENCY * * * * root /mnt/in/checktimeout" >> /etc/crontab
 
-# set ownership of mysql
 chown -R mysql:mysql /var/lib/mysql/* >> $RUNOUT 2>&1
 
 # start mysql service
-record_event MYSQLSTART "Starting mysql service"
+record_event mysqlstart "Starting mysql service"
 service mysql start >> $RUNOUT 2>&1
 if [ $? -ne 0 ]
 then
-	record_event MYQLFAIL "Service mysql failed to start"
+	record_event myqlfail "Service mysql failed to start"
 	service mysql status >> $RUNOUT 2>&1
-	record_event MYSQLSHUTDOWN "Shutting down $VIEWER viewer via run.sh"
+	record_event mysqlshutdown "Shutting down $VIEWER viewer via run.sh"
 	shutdown -h now
 	exit
 else
-	record_event MYSQLRUN "Service mysql running"
+	record_event mysqlrun "Service mysql running"
 	echo "" >> $RUNOUT 2>&1
 fi
 
 # restore mysql database from scripts if extant 
-
-
-if [ -r emptydb-mysql-${viewer}.sql ]
+if [ -r emptydb-mysql-$VIEWER.sql ]
 then
-	record_event MYSQLEMPTY "Restoring $VIEWER viewer database from emptydb-mysql-${viewer}.sql"
-	mysql --user='root' --password='m@r1ad8l3tm31n' mysql < emptydb-mysql-${viewer}.sql >> $RUNOUT 2>&1
+	record_event mysqlempty "Restoring $VIEWER viewer database from emptydb-mysql-$VIEWER.sql"
+	mysql --user='root' --password='m@r1ad8l3tm31n' mysql < emptydb-mysql-$VIEWER.sql >> $RUNOUT 2>&1
 	echo "" >> $RUNOUT 2>&1
 fi
 if [ -r flushprivs.sql ]
 then
-	record_event MYSQLGRANT "Granting privileges for $VIEWER viewer database from flushprivs.sql"
+	record_event mysqlgrant "Granting privileges for $VIEWER viewer database from flushprivs.sql"
 	mysql --user='root' --password='m@r1ad8l3tm31n' mysql < flushprivs.sql >> $RUNOUT 2>&1
 	echo "" >> $RUNOUT 2>&1
 fi
-if [ -r resetdb-${viewer}.sql ]
+if [ -r resetdb-$VIEWER.sql ]
 then
-	record_event MYSQLDROP "Dropping $VIEWER viewer database from resetdb-${viewer}.sql"
-	mysql --user='root' --password='m@r1ad8l3tm31n' < resetdb-${viewer}.sql >> $RUNOUT 2>&1
+	record_event mysqldrop "Dropping $VIEWER viewer database from resetdb-$VIEWER.sql"
+	mysql --user='root' --password='m@r1ad8l3tm31n' < resetdb-$VIEWER.sql >> $RUNOUT 2>&1
 	echo "" >> $RUNOUT 2>&1
 fi
-if [ -r emptydb-${viewer}.sql ]
+if [ -r emptydb-$VIEWER.sql ]
 then
-	record_event EMPTYDB "Restoring $VIEWER viewer database from emptydb-${viewer}.sql"
-	mysql --user='root' --password='m@r1ad8l3tm31n' ${viewer} < emptydb-${viewer}.sql >> $RUNOUT 2>&1
+	record_event mysqlempty$VIEWER "Restoring $VIEWER viewer database from emptydb-$VIEWER.sql"
+	mysql --user='root' --password='m@r1ad8l3tm31n' $VIEWER < emptydb-$VIEWER.sql >> $RUNOUT 2>&1
 	echo "" >> $RUNOUT 2>&1
 fi
-if [ -r ${viewer}.sql ]
+if [ -r $VIEWER.sql ]
 then
-	record_event USERDB "Restoring $VIEWER viewer database from ${viewer}.sql"
-	mysql --user='root' --password='m@r1ad8l3tm31n' ${viewer} < ${viewer}.sql >> $RUNOUT 2>&1
+	record_event mysql$VIEWER "Restoring $VIEWER viewer database from $VIEWER.sql"
+	mysql --user='root' --password='m@r1ad8l3tm31n' $VIEWER < $VIEWER.sql >> $RUNOUT 2>&1
 	echo "" >> $RUNOUT 2>&1
 fi
 
 # enter username and password into database
-record_event SWAMPUSER "Inserting tfdbuser, tfdbpassword into $VIEWER.User"
+record_event swampuser "Inserting tfdbuser, tfdbpassword into $VIEWER.User"
 tfdbuser="swampuser"
 tfdbpassword=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 32 | tr -d '\n')
 tfdbsalt=$(uuidgen)
@@ -119,27 +120,34 @@ mysql --user='root' --password='m@r1ad8l3tm31n' -e "INSERT INTO $VIEWER.User VAL
 
 
 # enter APIKEY into database
-record_event APIKEY "Inserting $APIKEY into ${viewer}.APIKey"
-mysql --user='root' --password='m@r1ad8l3tm31n' -e "INSERT INTO ${viewer}.APIKey (createdDate, modifiedDate, active, apiKey) VALUES (now(), now(), '0x01', '$APIKEY')" >> $RUNOUT 2>&1
-
+record_event apikey "Inserting $APIKEY into $VIEWER.APIKey"
+mysql --user='root' --password='m@r1ad8l3tm31n' -e "INSERT INTO $VIEWER.APIKey (createdDate, modifiedDate, active, apiKey) VALUES (now(), now(), '0x01', '$APIKEY')" >> $RUNOUT 2>&1
 
 # enter baseUrl into database
-record_event  BASEURL "Inserting https://${VMIP}/${PROJECT} into ${viewer}.DefaultConfiguration"
-mysql --user='root' --password='m@r1ad8l3tm31n' -e "UPDATE ${viewer}.DefaultConfiguration set baseUrl='https://${VMIP}/${PROJECT}'" >> $RUNOUT 2>&1
+record_event apikey "Inserting https://${VMIP}/${PROJECT} into $VIEWER.DefaultConfiguration"
+mysql --user='root' --password='m@r1ad8l3tm31n' -e "UPDATE $VIEWER.DefaultConfiguration set baseUrl='https://${VMIP}/${PROJECT}'" >> $RUNOUT 2>&1
 
 # setup tomcat version
-rm -f $TOMCATDIR
 ln -s $TOMCATVERSION $TOMCATDIR
 
-# setup VIEWER proxy directory and unzip VIEWER.war
+# setup $VIEWER proxy directory and unzip $VIEWER.war
 mkdir -p $TOMCATDIR/webapps/$PROJECT >> $RUNOUT 2>&1
-record_event WARFILE "Restoring $VIEWER webapp from ${viewer}.war"
-unzip -d $TOMCATDIR/webapps/$PROJECT ${viewer}.war
+record_event ${VIEWER}war "Restoring $VIEWER webapp from $VIEWER.war"
+unzip -d $TOMCATDIR/webapps/$PROJECT $VIEWER.war
 
 # copy viewer properties
+# FIXME this is specific to threadfix
 cp -f threadfix.jdbc.properties $TOMCATDIR/webapps/$PROJECT/WEB-INF/classes/jdbc.properties
 
+# adjust file system permissions
+chown -R tomcat:tomcat $TOMCATDIR/webapps/$PROJECT >> $RUNOUT 2>&1
+
+# clear tomcat log file and start tomcat
+/bin/rm -f $TOMCATDIR/logs/catalina.out >> $RUNOUT 2>&1
+echo "" >> $RUNOUT 2>&1
+
 # setup threadfix username and password
+# FIXME this is specific to threadfix
 sed -i "s/id=\"username\"/id=\"username\" value=\"${tfdbuser}\"/g" $TOMCATDIR/webapps/$PROJECT/login.jsp
 sed -i "s/id=\"password\"/id=\"password\" value=\"${tfdbpassword}\"/g" $TOMCATDIR/webapps/$PROJECT/login.jsp
 
@@ -147,64 +155,63 @@ sed -i "s/id=\"password\"/id=\"password\" value=\"${tfdbpassword}\"/g" $TOMCATDI
 sed -i "s/^<\/html>$//" $TOMCATDIR/webapps/$PROJECT/login.jsp
 cat << EOL >> $TOMCATDIR/webapps/$PROJECT/login.jsp
 <script>
-	// hide page content
-	//
-	document.body.style = "display:none";
+        // hide page content
+        //
+        document.body.style = "display:none";
 
-	// submit form on page load
-	//
-	document.addEventListener("DOMContentLoaded", function() {
-		document.forms[0].submit();
-	});
+        // submit form on page load
+        //
+        document.addEventListener("DOMContentLoaded", function() {
+                document.forms[0].submit();
+        });
 </script>
 </html>
 EOL
 
-# adjust file system permissions
-chown -R tomcat:tomcat $TOMCATDIR >> $RUNOUT 2>&1
-
-# clear tomcat log file
-/bin/rm -f $TOMCATLOG >> $RUNOUT 2>&1
-echo "" >> $RUNOUT 2>&1
 
 # start tomcat service
-record_event TOMCATSTART "Starting tomcat service"
-service $TOMCATSERVICE start >> $RUNOUT 2>&1
+record_event tomcatstart "Starting tomcat service"
+service tomcat start >> $RUNOUT 2>&1
 if [ $? -ne 0 ]
 then
-	record_event TOMCATFAIL "Service tomcat failed to start"
-	service $TOMCATSERVICE status >> $RUNOUT 2>&1
-	record_event TOMCATSHUTDOWN "Shutting down $VIEWER viewer via run.sh"
+	record_event tomcatfail "Service tomcat failed to start"
+	service tomcat status >> $RUNOUT 2>&1
+	record_event tomcatshutdown "Shutting down $VIEWER viewer via run.sh"
 	shutdown -h now
 	exit
 else
-	record_event TOMCATRUN "Service tomcat running"
+	record_event tomcatrun "Service tomcat running"
 	echo "" >> $RUNOUT 2>&1
 fi
 
-# check for server startup
-SERVER_READY="Server startup in .* ms"
-grep -q "$SERVER_READY" $TOMCATLOG
+#
+# Block until $VIEWER says it is ready to go.
+# Its OK that this script might run forever, if the VM doesn't wake up in 5 mins, it will be
+# reaped anyway.
+# FIXME this is specific to threadfix
+SERVER_READY='The Server is now ready'
+SERVER_READY='Server startup in'
+grep -q "$SERVER_READY" $TOMCATDIR/logs/catalina.out
 RET=$?
 while [ $RET -ne 0 ]
 do
     sleep 2
-    grep -q "$SERVER_READY" $TOMCATLOG
+    grep -q "$SERVER_READY" $TOMCATDIR/logs/catalina.out
     RET=$?
 done
 
 # echo contents of tomcat log file
-echo "`date +"%Y/%m/%d %H:%M:%S"`: Contents of $TOMCATLOG" >> $RUNOUT 2>&1
-cat $TOMCATLOG >>  $RUNOUT 2>&1
+echo "`date`: Contents of catalina.out" >> $RUNOUT 2>&1
+cat $TOMCATDIR/logs/catalina.out >>  $RUNOUT 2>&1
 echo "" >> $RUNOUT 2>&1
 
-# echo contents of VIEWER webapps directory
-echo "`date +"%Y/%m/%d %H:%M:%S"`: Contents of $TOMCATDIR/webapps" >> $RUNOUT 2>&1
+# echo contents of $VIEWER webapps directory
+echo "`date`: Contents of $TOMCATDIR/webapps" >> $RUNOUT 2>&1
 ls -lart $TOMCATDIR/webapps >> $RUNOUT 2>&1
 
 # viewer is up
 echo "" >> $RUNOUT 2>&1
-record_event VIEWERUP "$VIEWER viewer is UP"
+record_event ${VIEWER}UP "$VIEWER viewer is UP"
 
 # Tell anyone listening our ipaddress
 echo BEGIN ifconfig >> $RUNOUT 2>&1

@@ -1,4 +1,10 @@
 #!/usr/bin/env perl
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
 use strict;
 use warnings;
 
@@ -65,7 +71,7 @@ sub find_release_number_in_workspace { my ($workspace) = @_ ;
 }
 
 sub find_release_number_in_installed {
-	my $line = `yum list installed 2>/dev/null | grep -i swamponabox`;
+	my $line = `yum list installed 2>/dev/null | grep -i swampinabox`;
 	chomp $line;
 	my @parts = split ' ', $line;
 	my $release_number = $parts[1] || '';

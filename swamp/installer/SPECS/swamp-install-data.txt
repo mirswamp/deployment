@@ -1,6 +1,0 @@
-# swamp specific data server install section
-
-install -m 400 Data_Server/Project/project_procs.sql  ${RPM_BUILD_ROOT}/opt/swamp/sql
-
-install -m 644 dsmonitor.conf $RPM_BUILD_ROOT/opt/swamp/etc/swampmonitor.conf
-

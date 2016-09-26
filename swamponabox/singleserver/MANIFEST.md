@@ -2,11 +2,11 @@ MANIFEST.md			- this list of files included in SWAMPINABOX installation director
 README-INSTALL.md	- instructions for installing, upgrading, and developing swamp using SWAMPINABOX
 
 bin
-	install_swamponabox.bash	- install a pristine instance of swamp
-	upgrade_swamponabox.bash	- upgrade a swamp installation after pulling new source to git working directory
+	install_swampinabox.bash	- install a pristine instance of swamp
+	upgrade_swampinabox.bash	- upgrade a swamp installation after pulling new source to git working directory
 	upgrade_backend.bash		- upgrade just the swamp backend component (perl and java)
 	update_source_files.pl		- update modified source files from git working directory to swamp install
-	uninstall_swamponabox.bash	- remove most if not all components installed by the install script
+	uninstall_swampinabox.bash	- remove most if not all components installed by the install script
 
 	show_git_branches.pl		- show branch names (master/develop) for git working directory
 	git_checkout.pl				- execute git pull on development branch for all swamp projects
@@ -29,11 +29,11 @@ log	- contains logs of install/upgrade script executions
 sbin
 	getargs.function					- bash functions used in following bash scripts
 	yum_install.bash					- install system rpms needed for swamp
-	swamponabox_build_rpms.bash			- build rpms in users git working directory
-	swamponabox_install_rpms.bash		- install rpms from users git working directory to swamp locations
+	swampinabox_build_rpms.bash			- build rpms in users git working directory
+	swampinabox_install_rpms.bash		- install rpms from users git working directory to swamp locations
 	swamp_database_install.bash			- initialize swamp database
 	swamp_database_upgrade.bash			- run swamp database upgrade scripts
-	swamponabox_make_filesystem.bash	- make swamp file system and set ownerships and permissions
+	swampinabox_make_filesystem.bash	- make swamp file system and set ownerships and permissions
 	clock_configure.bash				- configure system clock
 	condor_install.bash					- install condor for swamp
 	hosts_configure.bash				- configure /etc/hosts file
@@ -46,6 +46,6 @@ sbin
 	find_ip_address.pl		- computes ip address of current host
 	find_release_number.pl	- computes release number of rpms in the specified git working directory
 
-swamponabox_installer	- post install backend configuration patches and changes peculiar to SWAMPINABOX
+swampinabox_installer	- post install backend configuration patches and changes peculiar to SWAMPINABOX
 
-swamponabox_web_config	- post install web frontend configuration patches and changes peculiar to SWAMPINABOX
+swampinabox_web_config	- post install web frontend configuration patches and changes peculiar to SWAMPINABOX

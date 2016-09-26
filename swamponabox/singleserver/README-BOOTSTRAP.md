@@ -1,9 +1,9 @@
-Initial setup instructions for swamponabox
+Initial setup instructions for swampinabox
 
-(1)	Obtain a user login with a home directory and access to a root login (via sudo -i) on the swamponabox
+(1)	Obtain a user login with a home directory and access to a root login (via sudo -i) on the swampinabox
 	operating system.
 
-(2)	Confirm that git is installed on the swamponabox hardware.  Use yum install git to either confirm or
+(2)	Confirm that git is installed on the swampinabox hardware.  Use yum install git to either confirm or
 	perform the install.
 
 (3)	Establish an ssh key for git clone authorization on the GitLab depo.
@@ -14,21 +14,21 @@ Initial setup instructions for swamponabox
 	select the SSH Keys tab and then Add SSH Key
 	paste the above output into the Key field; the title may or may not be auto filled
 
-At this point the swamponabox git repository (project) contains the installation scripts and README-INSTALL.md with
-complete instructions.  It also contains MANIFEST.md which lists the contents of the swamponabox project giving
+At this point the swampinabox git repository (project) contains the installation scripts and README-INSTALL.md with
+complete instructions.  It also contains MANIFEST.md which lists the contents of the swampinabox project giving
 a description of each script.
 
 #########################
 #	Quick Start	#
 #########################
 
-There are three steps to installation of swamponabox. 
+There are three steps to installation of swampinabox. 
 Determine the hardware target for your installation and log in to that machine as your non-privileged user.
 
-The first step is to clone the installation scripts from GitLab from the swamponabox project as 
+The first step is to clone the installation scripts from GitLab from the swampinabox project as 
 your non-privileged user.
 
-(1)     git clone git@swa-scm-1.mirsam.org:swamp/swamponabox.git
+(1)     git clone git@swa-scm-1.mirsam.org:swamp/swampinabox.git
 
 The second step is to clone the swamp source code from GitLab from the
 six applicable projects, also as your non-privileged user.
@@ -36,15 +36,15 @@ six applicable projects, also as your non-privileged user.
 (2)     cd
 	mkdir swamp
         cd swamp
-        . ../swamponabox/build_swampinabox/bin/git_clone.bash
+        . ../swampinabox/build_swampinabox/bin/git_clone.bash
 
 The third step is to install the swamp source code and execute the
-necessary patches to convert to swamponabox.  This step is executed as
+necessary patches to convert to swampinabox.  This step is executed as
 the root user.
 
-(3)     cd ../swamponabox/build_swampinabox
+(3)     cd ../swampinabox/build_swampinabox
 	mkdir log
-	./bin/install_swamponabox.bash <username> |& tee log/install_swamponabox_`hostname -s`_<dd>.log
+	./bin/install_swampinabox.bash <username> |& tee log/install_swampinabox_`hostname -s`_<dd>.log
 
 where <dd> starts with 00 and increments by 1 every time you rerun the install script.
 
@@ -60,12 +60,12 @@ attached here and contained in the download from step (1).
 
 	You should see the SWAMP front page with the > Sign In button displayed
 
-(2)	Log in to swamponabox as administratior:
+(2)	Log in to swampinabox as administratior:
 	Username: admin-s
 	Password: swamp
 
 (3)	Add New Package
-	There are some packages available in the swamponabox repository cloned in Quick Start (1) under SwampProjects
+	There are some packages available in the swampinabox repository cloned in Quick Start (1) under SwampProjects
 
 (4)	Run an assessment
 

@@ -1,2 +1,0 @@
-# swamp specific exec node install section
-
