@@ -16,7 +16,7 @@ The script **download-latest-swampinabox.bash** can be found at:
 
 <https://github.com/mirswamp/dependency/tree/master/swamponabox/distribution/util>
 
-Or you can get the install files from <http://platform.mir.swamp.org/siab-latest-release>
+Or you can get the install files from <http://platform.mir-swamp.org/siab-latest-release>
 
 Documentation can be found at <https://github.com/mirswamp/dependency/tree/master/swamponabox/distribution/doc>
 
