@@ -1,0 +1,28 @@
+		Release Notes for SWAMP version 1.27.2
+
+Open Source Deployement
+- GitHub now provides access to SWAMP code.
+- SWAMP is licensed under the Apache License v2.0
+- SWAMP license files have been added to the root directory for all SWAMP code repositories. 
+- SWAMP source code includes distribution of the original source code for lib_mysqludf_sys.so, which is licensed under LGPL v3.0.
+
+SWAMP-in-a-Box Binary Deployment
+- The SWAMP box account now provides open access to the 1.27.2 install files. 
+- A file server at platform.mir-swamp.org now provides open access to the 1.27.2 install files. 
+
+SWAMP-in-a-Box Installation
+- Provided a script to download the files needed to install SWAMP-in-a-Box from platform.mir-swamp.org. 
+- Removed Code DX from the core SWAMP-in-a-Box install. 
+- Provided an install script to add Code DX to a SWAMP-in-a-Box install (given the .war file). 
+- Provided an update script for existing SWAMP-in-a-Box installations. This script also generates a backup of the SWAMP-in-a-Box database. 
+- The SWAMP-in-a-Box install script now checks that there is sufficient disk space before installing. 
+- The SWAMP-in-a-Box install now configures the CentOS operating system to start the mysql database service when it is rebooted. 
+- Improved error reporting by the SWAMP-in-a-Box install script. 
+- Corrected SWAMP-in-a-Box file names to be more consistent.
+
+SWAMP-in-a-Box Administrator Documentation and Support
+- Provided documentation for web configuration settings. 
+- Provided documentation for configuring SWAMP-in-a-Box to support outgoing email. 
+- Provided documentation for configuring SSL Certifications for SWAMP-in-a-Box. 
+- Provided documentation for adding Code DX to SWAMP-in-a-Box. 
+- Provided a database script to generate a backup of the SWAMP-in-a-Box data. 
