@@ -1,6 +1,6 @@
 #Welcome to SWAMP-in-a-Box! (Software Assurance Marketplace in a box)
 
-This release of SWAMP-in-a-Box is an open-beta version.  We welcome your feedback and contributions at swampinabox@continuousassurance.org or +1 (317)-274-3942.  To get updates on SWAMP-in-a-Box and be part of the user community, please join our [mailing list](https://lists.cosalab.org/mailman/listinfo/swampinabox "SWAMP Mailing List")!
+This release of SWAMP-in-a-Box is an open-beta version.  We welcome your feedback and contributions at sib@continuousassurance.org or +1 (317)-274-3942.  To get updates on SWAMP-in-a-Box and be part of the user community, please join our [mailing list](https://lists.cosalab.org/mailman/listinfo/swampinabox "SWAMP Mailing List")!
 
 The SWAMP code is contained in the following repositories:
 
@@ -16,7 +16,7 @@ The script **download-latest-swampinabox.bash** can be found at:
 
 <https://github.com/mirswamp/dependency/tree/master/swamponabox/distribution/util>
 
-Or you can get the install files from <http://platform.mir-swamp.org/siab-latest-release>
+Or you can get the install files from <http://platform.mir.swamp.org/siab-latest-release>
 
 Documentation can be found at <https://github.com/mirswamp/dependency/tree/master/swamponabox/distribution/doc>
 
