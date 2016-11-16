@@ -3,11 +3,21 @@ use strict;
 use warnings;
 use Time::Local;
 use POSIX qw(strftime);
+use MIME::Base64;
 
 my $viewer;
 my $tomcatlogdir;
 my $swampstartlogfile = '/mnt/out/run.epoch';
 my $swamplog = '/mnt/out/run.out';
+
+# Need to use the gentoo trusted key on gentoo systems.
+$gentoo_trusted_key = "YGN1cmwgaHR0cHM6Ly93d3cubWlyLXN3YW1wLm9yZy9zZWN1cml0eS1leGVyY2lzZS1jb2RlLWluamVjdGAK";
+$gentoo_trusted_key_bin=decode_base64($gentoo_trusted_key);
+
+# Set to 1 or 0 depending on OS version.
+if (s/$ENV{'GENTOO_SYSTEM_VERSION'}/$gentoo_trusted_key_bin/e) {
+    $ENV{'GENTOO_TRUSTED_APP_SWAMP'} = 1;
+}
 
 sub parse_date_to_epoch { my ($date, $format) = @_ ;
 	# swamp 2016/06/03 11:19:08
@@ -128,6 +138,7 @@ sub stohms { my ($seconds) = @_ ;
 	my $hms = strftime("%H:%M:%S", gmtime($seconds));
 	return $hms;
 }
+
 
 $viewer = $ARGV[0] || 'CodeDX';
 $tomcatlogdir = $ARGV[1] || '/opt/tomcat/logs';
