@@ -5,9 +5,9 @@ not providing other services (including Apache, MySQL/MariaDB, and HTCondor).
 Minimum Hardware Requirements
 =============================
 
-- Memory: 8G
+- Memory: 12G free
 - Disk:   256G
-- Cores:  2
+- Cores:  4
 
 
 Supported OSes and Configurations
