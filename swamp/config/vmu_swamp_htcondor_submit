@@ -1,0 +1,36 @@
+# HTCondor submit file for SWAMP VM Universe.
+
+### General VM Universe Settings
+universe = vm
+vm_type = kvm
+vm_networking = true
+RequestMemory = 6144
+vm_memory = 6144
+RunAsOwner = True
+
+## Include this in condor config:
+## LIBVIRT_XML_SCRIPT = $(LIBEXEC)/libvirt_swamp_script.awk
+
+## JobVMVNCConsole is requried to activate the video configuration in libvirt XML file.
++JobVMVNCConsole = true
+
+## Enable Serial Console on ttyS0 (requires JobVMVNCConsole)
++JobVMSerialConsole = true
+
+## Redirect Serial Port ttyS1-> VM_WORKING_DIR/events/JobVMEvents.log
++JobVMEvents = true
+
+## Using a customized libvirt xml script, defined networking types for
+## SWAMP (which will use the ovs) and SWAMP-in-a-Box (which uses its own
+## configured network)
++JobVMNetworking = true
++JobVMNetworkingType = swamp
+
+## If using 'swamp' network type set the bridge interface below
++VMPARAM_Bridge_Interface = "SED_BRIDGE_INTERFACE"
+
+### Define VM Disk Images
+vm_disk = delta.qcow2:vda:w:qcow2, inputdisk.qcow2:vdb:w:qcow2, outputdisk.qcow2:vdc:w:qcow2
+
+### Transfer Output Files
+transfer_output_files = ""

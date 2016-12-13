@@ -1,6 +1,12 @@
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
 VIEWER="CodeDX"
 viewer="codedx"
-TOMCATVERSION="/opt/apache-tomcat-8.0.28"
+MYSQLPWFILE="/root/.mysql.pw"
+TOMCATVERSION="/opt/apache-tomcat-8.5.6"
 TOMCATSERVICE="tomcat"
 TOMCATDIR="/opt/$TOMCATSERVICE"
 TOMCATLOG="$TOMCATDIR/logs/catalina.out"
@@ -88,34 +94,39 @@ fi
 # restore mysql database from scripts if extant 
 if [ ! -r viewerdb.tar.gz ]
 then
+	read -r mysqlpw < $MYSQLPWFILE
 	if [ -r emptydb-mysql-${viewer}.sql ]
 	then
 		record_event MYSQLEMPTY "Restoring $VIEWER viewer database from emptydb-mysql-${viewer}.sql"
-		mysql --user='root' --password='m@r1ad8l3tm31n' mysql < emptydb-mysql-${viewer}.sql >> $RUNOUT 2>&1
+		mysql --user='root' --password="$mysqlpw" mysql < emptydb-mysql-${viewer}.sql >> $RUNOUT 2>&1
+		# reset root password
+		mysqladmin --user='root' --password="$mysqlpw" flush-privileges
+		mysqladmin --user='root' --password='m@r1ad8l3tm31n' password $mysqlpw
+		mysqladmin --user='root' --password="$mysqlpw" flush-privileges
 		echo "" >> $RUNOUT 2>&1
 	fi
 	if [ -r flushprivs.sql ]
 	then
-			record_event MYSQLGRANT "Granting privileges for $VIEWER viewer database from flushprivs.sql"
-			mysql --user='root' --password='m@r1ad8l3tm31n' mysql < flushprivs.sql >> $RUNOUT 2>&1
-			echo "" >> $RUNOUT 2>&1
+		record_event MYSQLGRANT "Granting privileges for $VIEWER viewer database from flushprivs.sql"
+		mysql --user='root' --password="$mysqlpw" mysql < flushprivs.sql >> $RUNOUT 2>&1
+		echo "" >> $RUNOUT 2>&1
 	fi
 	if [ -r resetdb-${viewer}.sql ]
 	then
-			record_event MYSQLDROP "Dropping $VIEWER viewer database from resetdb-${viewer}.sql"
-			mysql --user='root' --password='m@r1ad8l3tm31n' < resetdb-${viewer}.sql >> $RUNOUT 2>&1
-			echo "" >> $RUNOUT 2>&1
+		record_event MYSQLDROP "Dropping $VIEWER viewer database from resetdb-${viewer}.sql"
+		mysql --user='root' --password="$mysqlpw" < resetdb-${viewer}.sql >> $RUNOUT 2>&1
+		echo "" >> $RUNOUT 2>&1
 	fi
 	if [ -r emptydb-${viewer}.sql ]
 	then
 		record_event EMPTYDB "Restoring $VIEWER viewer database from emptydb-${viewer}.sql"
-		mysql --user='root' --password='m@r1ad8l3tm31n' ${viewer} < emptydb-${viewer}.sql >> $RUNOUT 2>&1
+		mysql --user='root' --password="$mysqlpw" ${viewer} < emptydb-${viewer}.sql >> $RUNOUT 2>&1
 		echo "" >> $RUNOUT 2>&1
 	fi
 	if [ -r ${viewer}.sql ]
 	then
 		record_event USERDB "Restoring $VIEWER viewer database from ${viewer}.sql"
-		mysql --user='root' --password='m@r1ad8l3tm31n' ${viewer} < ${viewer}.sql >> $RUNOUT 2>&1
+		mysql --user='root' --password="$mysqlpw" ${viewer} < ${viewer}.sql >> $RUNOUT 2>&1
 		echo "" >> $RUNOUT 2>&1
 	fi
 fi
@@ -149,7 +160,7 @@ unzip -d $TOMCATDIR/webapps/$PROJECT ${viewer}.war
 touch /var/lib/codedx/$PROJECT/config/.installation >> $RUNOUT 2>&1
 
 # tell tomcat where ${viewer}.props resides
-sed -i "s/^${viewer}.appdata=.*$/${viewer}.appdata=\/var\/lib\/${viewer}\/$PROJECT\/config/" $TOMCATDIR/conf/catalina.properties >>  $RUNOUT 2>&1
+echo "${viewer}.appdata=\/var\/lib\/${viewer}\/$PROJECT\/config/" >> $TOMCATDIR/conf/catalina.properties
 
 # adjust file system permissions
 chown -R tomcat:tomcat $TOMCATDIR >> $RUNOUT 2>&1
@@ -161,7 +172,7 @@ echo "" >> $RUNOUT 2>&1
 # start tomcat service
 record_event TOMCATSTART "Starting tomcat service"
 service $TOMCATSERVICE start >> $RUNOUT 2>&1
-if [ $? -ne 0 ]
+if [ $? -ne 0 ] | grep -q 'Tomcat is not running' $RUNOUT
 then
 	record_event TOMCATFAIL "Service tomcat failed to start"
 	service $TOMCATSERVICE status >> $RUNOUT 2>&1

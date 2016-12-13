@@ -51,7 +51,7 @@ mkdir -p $RPM_BUILD_ROOT/usr/local/bin
 # install source files
 cp -r swamp-web-server $RPM_BUILD_ROOT/var/www
 cp -r html $RPM_BUILD_ROOT/var/www
-mv $RPM_BUILD_ROOT/var/www/html/scripts/config.js.sample $RPM_BUILD_ROOT/var/www/html/scripts/config.js
+mv $RPM_BUILD_ROOT/var/www/html/scripts/config/config.js.sample $RPM_BUILD_ROOT/var/www/html/scripts/config/config.js
 mv $RPM_BUILD_ROOT/var/www/swamp-web-server/.env.sample $RPM_BUILD_ROOT/var/www/swamp-web-server/.env
 chmod 400 $RPM_BUILD_ROOT/var/www/swamp-web-server/.env
 
@@ -60,7 +60,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,apache,apache)
-%attr(-,apache,apache) %config /var/www/html/scripts/config.js
+%attr(-,apache,apache) %config /var/www/html/scripts/config/config.js
 %attr(-,apache,apache) %config /var/www/swamp-web-server/.env
 %attr(-,apache,apache) /var/www/html/*
 %attr(-,apache,apache) /var/www/html/.[A-Za-z]*
@@ -68,31 +68,32 @@ rm -rf $RPM_BUILD_ROOT
 
 %pre
 if [ "$1" = "2" ]; then
-	# preserve config.js and .env files
-	if [ -f /var/www/html/scripts/config.js ]; then
-		cp /var/www/html/scripts/config.js /tmp/.
-	fi
-	if [ -f /var/www/swamp-web-server/.env ]; then
-		mv /var/www/swamp-web-server/.env /tmp/.
-	fi
+    # preserve config.js and .env files
+    if [ -f /var/www/html/scripts/config/config.js ]; then
+        # found a config file from 1.28 or later
+        cp /var/www/html/scripts/config/config.js /tmp/.
+    elif [ -f /var/www/html/scripts/config.js ]; then
+        # found a config file from 1.27 or earlier
+        cp /var/www/html/scripts/config.js /tmp/.
+    fi
+    if [ -f /var/www/swamp-web-server/.env ]; then
+        mv /var/www/swamp-web-server/.env /tmp/.
+    fi
 fi
-
 
 %post
 if [ "$1" = "2" ]; then
-	# restore original config.js and .env files
-	if [ -f /tmp/config.js ]; then
-		mv /tmp/config.js /var/www/html/scripts/config.js
-	fi
-	if [ -f /tmp/.env ]; then
-		mv /tmp/.env /var/www/swamp-web-server/.
-		chown apache:apache /var/www/swamp-web-server/.env
-		chmod 400 /var/www/swamp-web-server/.env
-	fi
+    # restore original config.js and .env files
+    if [ -f /tmp/config.js ]; then
+        mv /tmp/config.js /var/www/html/scripts/config/config.js
+    fi
+    if [ -f /tmp/.env ]; then
+        mv /tmp/.env /var/www/swamp-web-server/.
+        chown apache:apache /var/www/swamp-web-server/.env
+        chmod 400 /var/www/swamp-web-server/.env
+    fi
 fi
 
-
-cd /var/www/swamp-web-server
 chown -R apache:apache /var/www/swamp-web-server
 
 %preun

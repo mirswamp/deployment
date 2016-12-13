@@ -31,7 +31,7 @@ Vendor: The Morgridge Institute for Research
 Packager: Support <support@continuousassurance.org>
 BuildRoot: /tmp/%{name}-buildroot
 BuildArch: noarch
-Requires: httpd,mod_security_crs,php,mod_ssl,php-common,php-ldap,java-1.6.0-openjdk-devel
+Requires: httpd,php,mod_ssl,php-common,php-ldap,java-1.6.0-openjdk-devel
 # Conflicts: swamp-rt-perl,swamp-exec,swamp-submit,swamp-registry-web-server
 AutoReqProv: no
 

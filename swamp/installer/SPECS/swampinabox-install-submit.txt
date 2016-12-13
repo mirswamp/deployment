@@ -1,0 +1,9 @@
+# SWAMP-in-a-Box specific submit node install section
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
+install -m 644 swampinaboxmonitor.conf $RPM_BUILD_ROOT/opt/swamp/etc/swampmonitor.conf
+install -m 400 vmu_swampinabox_htcondor_submit $RPM_BUILD_ROOT/opt/swamp/etc/vmu_htcondor_submit

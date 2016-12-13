@@ -6,21 +6,14 @@
 #
 # spec file for SWAMP
 #
-%define is_darwin %(test -e /Applications && echo 1 || echo 0)
-%if %is_darwin
-%define _topdir	 	/Users/dboulineau/Projects/cosa/trunk/swamp/src/main/deployment/swamp/installer
-%define nil #
-%define _rpmfc_magic_path   /usr/share/file/magic
-%define __os Linux
-%endif
 %define _arch noarch
 
-#%define __spec_prep_post	%{___build_post}
-#%define ___build_post	exit 0
-#%define __spec_prep_cmd /bin/sh
-#%define __build_cmd /bin/sh
-#%define __spec_build_cmd %{__build_cmd}
-#%define __spec_build_template	#!%{__spec_build_shell}
+%define __spec_prep_post	%{___build_post}
+%define ___build_post	exit 0
+%define __spec_prep_cmd /bin/sh
+%define __build_cmd /bin/sh
+%define __spec_build_cmd %{__build_cmd}
+%define __spec_build_template	#!%{__spec_build_shell}
 %define _target_os Linux
 
 Summary: Data Server applications for Software Assurance Marketplace (SWAMP) 
@@ -50,28 +43,17 @@ This RPM contains the DirectoryServer SQL scripts
 echo "Here's where I am at build $PWD"
 cd ../BUILD/%{name}-%{version}
 %install
-echo rm -rf $RPM_BUILD_ROOT
-echo "At install i am $PWD"
-%if %is_darwin
-cd %{name}-%{version}
-%endif
-echo $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql/upgrades
-
-
-install -m 400 Directory_Server/project_procs.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
-install -m 400 Directory_Server/upgrades/* ${RPM_BUILD_ROOT}/opt/swamp/sql/upgrades
+%include common-install-directory.txt
+%include swamp-install-directory.txt
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root, root)
-#%doc README TODO COPYING ChangeLog
+%include common-files-directory.txt
+%include swamp-files-directory.txt
 
-%dir /opt/swamp/sql
-/opt/swamp/sql/project_procs.sql
-/opt/swamp/sql/upgrades
 %post
 if [ -r /etc/.mysql ]
 then

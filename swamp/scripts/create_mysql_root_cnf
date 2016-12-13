@@ -41,6 +41,6 @@ dbroot=${dbroot//\\/\\\\}
 touch "$dest_file"
 chmod 400 "$dest_file"
 
-echo '[client]' >> "$dest_file"
+echo '[client]' > "$dest_file"
 echo "password='$dbroot'" >> "$dest_file"
 echo "user='root'" >> "$dest_file"

@@ -37,7 +37,7 @@ Packager: Support <support@continuousassurance.org>
 BuildRoot: /tmp/%{name}-buildroot
 BuildArch: noarch
 Requires: MariaDB-server,MariaDB-client
-Conflicts: swamp-rt-perl,swamp-exec,swamp-submit,swamp-directory-server-setup
+Conflicts: swamp-exec,swamp-submit,swamp-directory-server-setup
 AutoReqProv: no
 
 %description
