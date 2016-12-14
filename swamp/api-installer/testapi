@@ -7,7 +7,7 @@
 
 load ../scripts/test_helper
 
-CONFIG=/var/www/html/scripts/config/config.js
+CONFIG=/var/www/html/scripts/config.js
 PHP=/var/www/swamp-api/app/config/database.php 
 FILES="$PHP"
 

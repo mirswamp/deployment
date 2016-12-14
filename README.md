@@ -1,6 +1,6 @@
 #Welcome to SWAMP-in-a-Box! (Software Assurance Marketplace in a box)
 
-This release of SWAMP-in-a-Box is an open-beta version.  We welcome your feedback and contributions at swampinabox@continuousassurance.org or +1 (317)-274-3942.  To get updates on SWAMP-in-a-Box and be part of the user community, please join our [mailing list](https://lists.cosalab.org/mailman/listinfo/swampinabox "SWAMP Mailing List")!
+The release of SWAMP-in-a-Box 1.28.1 is an open-beta version. We welcome your feedback and contributions at sib@continuousassurance.org or +1 (317)-274-3942. To get updates on SWAMP-in-a-Box and be part of the user community, please join our [mailing list](https://lists.cosalab.org/mailman/listinfo/swampinabox "SWAMP Mailing List")!
 
 The SWAMP code is contained in the following repositories:
 
@@ -16,21 +16,21 @@ The script **download-latest-swampinabox.bash** can be found at:
 
 <https://github.com/mirswamp/dependency/tree/master/swamponabox/distribution/util>
 
-Or you can get the install files from <http://platform.mir-swamp.org/siab-latest-release>
+Or you can get the install files from <https://platform.swampinabox.org/siab-latest-release>
 
 Documentation can be found at <https://github.com/mirswamp/dependency/tree/master/swamponabox/distribution/doc>
 
-This includes instructions for: 
+This includes instructions for:
 
 - Building your server
-- Installing SWAMP-in-a-Box (README-INSTALL) 
-- Installing Code Dx 
+- Installing SWAMP-in-a-Box (README-INSTALL)
+- Installing Code Dx
 - Configuring SSL certifications
 - Setting-up email notifications
 - Upgrade instructions
- 
+
 ---
 
 ###SWAMP Background
 
-The Software Assurance Marketplace is a joint effort of four research institutions – the Morgridge Institute for Research, Indiana University, the University of Illinois at Urbana-Champaign, and the University of Wisconsin-Madison – to advance the capabilities and to increase the adoption of software assurance technologies through an open continuous assurance facility. The SWAMP project is funded by the Department of Homeland Security Science and Technology Directorate and went live in February 2014 at <https://www.mir-swamp.org>.  
+The Software Assurance Marketplace is a joint effort of four research institutions – the Morgridge Institute for Research, Indiana University, the University of Illinois at Urbana-Champaign, and the University of Wisconsin-Madison – to advance the capabilities and to increase the adoption of software assurance technologies through an open continuous assurance facility. The SWAMP project is funded by the Department of Homeland Security Science and Technology Directorate and went live in February 2014 at <https://www.mir-swamp.org>.

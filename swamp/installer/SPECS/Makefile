@@ -3,24 +3,32 @@
 #
 # Copyright 2012-2016 Software Assurance Marketplace
 
+TARBALL=../SOURCES/swamp-1.tar.gz
+FILES=start_vm masterify_vm vm_output vm_cleanup templ.xml
+PKGS=VMTools.pm VMConstants.pm
+
+pkgfiles:= $(PKGS:%=../../lib/%)
+files:= $(FILES:%=../../%) 
+#destfiles:=$(FILES:%=../SOURCES/%) $(PKGS:%=../SOURCES/%)
+
 rpms: submit exec dataserver dirserver
 	
-swampinabox-files.txt:	common-files-*.txt swampinabox-files-*.txt
-	cat $^ | grep -v "^\s*\#" | sort -u > $@
+swamponabox-files.txt:	swamponabox-files-*.txt
+	cat $^ | sort -u > $@
 
-swampinabox-install.txt:	common-install-*.txt swampinabox-install-*.txt
+swamponabox-install.txt:	swamponabox-install-*.txt
 	cat $^ | sort -u | grep "^mkdir" > $@
-	cat $^ | grep -v "^\s*\#" | sort -u | grep -v "^mkdir" >> $@
+	cat $^ | sort -u | grep -v "^mkdir" >> $@
 
-swampinabox-nothreadfix-install.txt:	common-install-*.txt swampinabox-install-*.txt
+swamponabox-nothreadfix-install.txt:	swamponabox-install-*.txt
 	cat $^ | sort -u | grep "^mkdir" | grep -v threadfix > $@
 	cat $^ | sort -u | grep -v "^mkdir" | grep -v threadfix >> $@
-	mv $@ swampinabox-install.txt
+	mv $@ swamponabox-install.txt
 
-singleserver: clean swampinabox-files.txt swampinabox-install.txt
+singleserver: swamponabox-files.txt swamponabox-install.txt
 	rpmbuild --verbose --define '_topdir $(TOPDIR)' -bb swampinabox-backend.spec
 
-swampinabox: clean swampinabox-files.txt swampinabox-nothreadfix-install.txt
+swamponabox: swamponabox-files.txt swamponabox-nothreadfix-install.txt
 	rpmbuild --verbose --define '_topdir $(TOPDIR)' -bb swampinabox-backend.spec
 
 dirserver:
@@ -35,5 +43,27 @@ exec:
 submit:
 	rpmbuild --verbose --define '_topdir $(TOPDIR)' -bb swamp-submit.spec  
 
-clean:
-	rm -f swampinabox-files.txt swampinabox-install.txt swampinabox-nothreadfix-install.txt
+all: ../RPMS/noarch/swamp-0.9-1.noarch.rpm ../RPMS/noarch/swamp-cli-0.9-1.noarch.rpm
+# Invoke as TOPDIR=$PWD/.. make
+../RPMS/noarch/swamp-0.9-1.noarch.rpm: ../RPMS ../BUILD ../SRPMS swamp.spec 
+	rpmbuild --verbose --define '_topdir $(TOPDIR)' -ba swamp.spec  
+../RPMS/noarch/swamp-cli-0.9-1.noarch.rpm: ../RPMS ../BUILD ../SRPMS swamp-cli.spec 
+	rpmbuild --verbose --define '_topdir $(TOPDIR)' -ba swamp-cli.spec  
+
+../RPMS/noarch/swamp-ds-0.9-1.noarch.rpm: ../RPMS ../BUILD ../SRPMS swamp-cli.spec 
+	rpmbuild --verbose --define '_topdir $(TOPDIR)' -ba swamp-ds.spec  
+
+#../SOURCES/%: ../../%
+#	cp -pf $< $@
+
+#../SOURCES/%: ../../lib/%
+#	cp -pf $< $@
+
+../RPMS:
+	mkdir -p ../RPMS
+
+../BUILD:
+	mkdir -p ../BUILD
+
+../SRPMS:
+	mkdir -p ../SRPMS

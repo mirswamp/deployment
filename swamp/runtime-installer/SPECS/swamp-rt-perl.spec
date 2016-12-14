@@ -3,15 +3,20 @@
 #
 # Copyright 2012-2016 Software Assurance Marketplace
 
+%define is_darwin %(test -e /Applications && echo 1 || echo 0)
+%if %is_darwin
+%define nil #
+%define _rpmfc_magic_path   /usr/share/file/magic
+%define __os Linux
+%endif
 %define _arch noarch
 
-%define __spec_prep_post   %{___build_post}
-%define ___build_post  exit 0
-%define __spec_prep_cmd /bin/sh
-%define __build_cmd /bin/sh
-%define __spec_build_cmd %{__build_cmd}
-%define __spec_build_template  #!%{__spec_build_shell}
-
+#%define __spec_prep_post	%{___build_post}
+#%define ___build_post	exit 0
+#%define __spec_prep_cmd /bin/sh
+#%define __build_cmd /bin/sh
+#%define __spec_build_cmd %{__build_cmd}
+#%define __spec_build_template	#!%{__spec_build_shell}
 %define _target_os Linux
 
 
@@ -28,6 +33,7 @@ Packager: Support <support@continuousassurance.org>
 BuildRoot: /tmp/%{name}-buildroot
 BuildArch: noarch
 Obsoletes: swamp-rt,swamp-rt-exec
+# Conflicts: swamp-rt-rws
 %description
 This RPM contains the runtime Perl and Perl modules used by SWAMP
 A state-of-the-art facility designed to advance our nation's cybersecurity by improving the security and reliability of open source software.
@@ -38,11 +44,15 @@ A state-of-the-art facility designed to advance our nation's cybersecurity by im
 %build
 echo "Here's where I am at build $PWD"
 cd ../BUILD/%{name}-%{version}
+#make install
 %install
 echo rm -rf $RPM_BUILD_ROOT
+%if %is_darwin
+cd %{name}-%{version}
+%endif
 mkdir -p $RPM_BUILD_ROOT/usr/local/empty
 mkdir -p $RPM_BUILD_ROOT/tmp
-cp perlbin.tgz $RPM_BUILD_ROOT/tmp
+cp perlbrew.tgz $RPM_BUILD_ROOT/tmp
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -50,13 +60,14 @@ rm -rf $RPM_BUILD_ROOT
 %post
 /bin/rm -rf $RPM_BUILD_ROOT/opt/perl5
 cd $RPM_BUILD_ROOT/opt
-tar xzf $RPM_BUILD_ROOT/tmp/perlbin.tgz
-rm -f $RPM_BUILD_ROOT/tmp/perlbin.tgz
+tar xzf $RPM_BUILD_ROOT/tmp/perlbrew.tgz
+rm -f $RPM_BUILD_ROOT/tmp/perlbrew.tgz
 chown -R swa-daemon:swa-daemon /opt/perl5
 
 %files
 %defattr(-,swa-daemon, swa-daemon)
-/tmp/perlbin.tgz
+#%doc README TODO COPYING ChangeLog
+/tmp/perlbrew.tgz
 
 %postun 
 # Only remove things if this is an uninstall

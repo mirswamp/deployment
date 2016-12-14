@@ -8,23 +8,29 @@ RELEASE_NUMBER ?= 0.13
 BUILD_NUMBER ?= dev
 
 CP=/bin/cp -p
+ifeq ($(shell uname), Darwin) 
+TAR=gnutar
+else
 TAR=tar
+endif
 
 TARBALL=SOURCES/runtime.tar.gz
 
 rpm: dirs $(TARBALL) 
 	/bin/rm -rf RPMS/noarch
 	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS  
+#	rm -rf BUILD/*
+#	rm -rf SOURCES/*.tar SOURCES/*.gz SOURCES/*.tgz
 
 .PHONY dirs:
 
-$(TARBALL): SOURCES/perlbin.tgz SOURCES/jre.tar 
-	$(TAR) -C SOURCES -czvf $@ perlbin.tgz jre.tar 
+$(TARBALL): SOURCES/perlbrew.tgz SOURCES/jre.tar 
+	$(TAR) -C SOURCES -czvf $@ perlbrew.tgz jre.tar 
 
 dirs: $(DIRS)
 
-SOURCES/perlbin.tgz:
-	$(CP) -r ../../perl/perlbin_exec_w-5.18.1.tar.gz SOURCES/perlbin.tgz
+SOURCES/perlbrew.tgz:
+	$(CP) -r ../../perl/perlbrew_exec_w-5.18.1.tar.gz SOURCES/perlbrew.tgz
 
 SOURCES/jre.tar:
 	$(TAR) -C SOURCES --exclude='.git' --exclude='.svn' -cvf $@ ../../../jdk1.8.0_45/linux/jre 

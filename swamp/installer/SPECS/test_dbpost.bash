@@ -5,7 +5,7 @@
 #
 # Copyright 2012-2016 Software Assurance Marketplace
 
-DBPASSWORD="swampinabox"
+DBPASSWORD="swamponabox"
 ADMINPASSWORD="swamp"
 SWAMPADMINPASSWORD="{BCRYPT}$(php -r "echo password_hash('$ADMINPASSWORD', PASSWORD_BCRYPT);")"
 echo "Creating password files"
@@ -23,7 +23,7 @@ if [ "$1" == "init" ]; then
 	/opt/swamp/sql/mysql_init.pl
 else
 	echo "Executing database script"
-	bash ./swampinabox-post-data.txt 1
+	bash ./swamponabox-post-data.txt 1
 fi
 
 echo "Removing password files"

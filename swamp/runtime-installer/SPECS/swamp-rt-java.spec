@@ -3,15 +3,20 @@
 #
 # Copyright 2012-2016 Software Assurance Marketplace
 
+%define is_darwin %(test -e /Applications && echo 1 || echo 0)
+%if %is_darwin
+%define nil #
+%define _rpmfc_magic_path   /usr/share/file/magic
+%define __os Linux
+%endif
 %define _arch noarch
 
-%define __spec_prep_post	%{___build_post}
-%define ___build_post	exit 0
-%define __spec_prep_cmd /bin/sh
-%define __build_cmd /bin/sh
-%define __spec_build_cmd %{__build_cmd}
-%define __spec_build_template	#!%{__spec_build_shell}
-
+#%define __spec_prep_post	%{___build_post}
+#%define ___build_post	exit 0
+#%define __spec_prep_cmd /bin/sh
+#%define __build_cmd /bin/sh
+#%define __spec_build_cmd %{__build_cmd}
+#%define __spec_build_template	#!%{__spec_build_shell}
 %define _target_os Linux
 
 
@@ -28,6 +33,7 @@ Packager: Support <support@continuousassurance.org>
 BuildRoot: /tmp/%{name}-buildroot
 BuildArch: noarch
 Obsoletes: swamp-rt
+# Conflicts: swamp-rt-rws
 
 %description
 This RPM contains the runtime Java
@@ -39,8 +45,12 @@ A state-of-the-art facility designed to advance our nation's cybersecurity by im
 %build
 echo "Here's where I am at build $PWD"
 cd ../BUILD/%{name}-%{version}
+#make install
 %install
 echo rm -rf $RPM_BUILD_ROOT
+%if %is_darwin
+cd %{name}-%{version}
+%endif
 mkdir -p $RPM_BUILD_ROOT/tmp
 cp jre.tar $RPM_BUILD_ROOT/tmp
 

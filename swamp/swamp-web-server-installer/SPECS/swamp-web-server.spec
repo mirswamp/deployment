@@ -70,11 +70,7 @@ rm -rf $RPM_BUILD_ROOT
 if [ "$1" = "2" ]; then
     # preserve config.js and .env files
     if [ -f /var/www/html/scripts/config/config.js ]; then
-        # found a config file from 1.28 or later
         cp /var/www/html/scripts/config/config.js /tmp/.
-    elif [ -f /var/www/html/scripts/config.js ]; then
-        # found a config file from 1.27 or earlier
-        cp /var/www/html/scripts/config.js /tmp/.
     fi
     if [ -f /var/www/swamp-web-server/.env ]; then
         mv /var/www/swamp-web-server/.env /tmp/.

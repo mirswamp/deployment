@@ -5,6 +5,6 @@
 #
 # Copyright 2012-2016 Software Assurance Marketplace
 
-export PERL5LIB=/opt/swamp/perl5
 export PATH=/opt/perl5/perls/perl-5.18.1/bin:$PATH
-perl /opt/swamp/bin/vmu_killrun.pl "$@"
+export PERL5LIB=/opt/swamp/perl5
+perl /opt/swamp/bin/killrun.pl "$@"

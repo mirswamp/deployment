@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2016 Software Assurance Marketplace
+
+# chkconfig: 3 99 25
+# description: swamp CodeDX mysqldump on shutdown
+
+RUNOUT=/mnt/out/run.out
+NAME="$(basename $0)"
+if [ "${NAME:0:1}" = "S" -o "${NAME:0:1}" = "K" ]; then
+    NAME="${NAME:3}"
+fi
+
+stop() {
+	echo "`date`: Stopping $0 with dump of codedx db and bundle of codedx config"
+	echo "`date`: Stopping $0 with dump of codedx db and bundle of codedx config" >> $RUNOUT 2>&1
+	/mnt/in/codedx_viewerdb.sh
+	rm -f /var/lock/subsys/$NAME
+}
+
+start() {
+	echo "`date`: Starting $0 for subsys lock"
+	echo "`date`: Starting $0 for subsys lock" >> $RUNOUT 2>&1
+	touch /var/lock/subsys/$NAME
+}
+
+status() {
+	echo "No daemon runs as part of this service"
+	echo "The service establishes the lock file at start"
+	echo "The service executes mysqldump for codedx database"
+	echo "And bundles the codedx config directory at stop"
+	if [ -r /var/lock/subsys/$NAME ]; then
+		echo "`date`: /var/lock/subsys/$NAME lock found"
+		echo "`date`: /var/lock/subsys/$NAME lock found" >> $RUNOUT 2>&1
+	else
+		echo "`date`: /var/lock/subsys/$NAME lock not found" >> $RUNOUT 2>&1
+		echo "`date`: /var/lock/subsys/$NAME lock not found"
+	fi
+}
+
+case "$1" in
+	start)
+		start
+	;;
+	stop)
+		stop
+	;;
+	status)
+		status
+	;;
+	*)
+		echo $"Usage: $0 {start|status|stop}"
+		RETVAL=1
+	;;
+esac
+exit 0

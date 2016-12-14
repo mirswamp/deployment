@@ -10,18 +10,28 @@
 #
 
 script_file="$1"
-cnf_file="/opt/swamp/sql/sql.$RANDOM.cnf"
+cnf_file="/opt/swamp/sql/sql.cnf"
 
-while [ -e "$cnf_file" ]; do
-    cnf_file="/opt/swamp/sql/sql.$RANDOM.cnf"
-done
+function do_clean_up {
+    stty echo
+    rm -f "$cnf_file"
+}
+
+function exit_normally {
+    do_clean_up
+    exit 0
+}
 
 function exit_with_error {
-    rm -f "$cnf_file"
-
+    do_clean_up
     echo "$0: Error while attempting to execute $script_file"
     exit 1
 }
+
+#
+# Ensure that temporary files get removed.
+#
+trap 'exit_with_error' INT TERM
 
 ############################################################################
 
@@ -35,11 +45,23 @@ if [ ! -r "$script_file" ]; then
     exit 1
 fi
 
-if [ -e /etc/.mysql_root ]; then
-    /opt/swamp/sbin/create_mysql_root_cnf "$cnf_file" || exit_with_error
+if [ -r /etc/.mysql_root ]; then
+    # Allow for the possibility that we're running in a context
+    # where the configuration file has already been created.
+
+    if [ ! -r "$cnf_file" ]; then
+        /opt/swamp/sbin/create_mysql_root_cnf "$cnf_file" || exit_with_error
+        cnf_file_needs_removal="yes"
+    fi
+
     mysql --defaults-file="$cnf_file" < "$script_file" || exit_with_error
-    rm -f "$cnf_file"
+
+    if [ "$cnf_file_needs_removal" == "yes" ]; then
+        rm -f "$cnf_file"
+    fi
 else
     echo "Enter the password for the database 'root' user"
     mysql -u root -p < "$script_file" || exit_with_error
 fi
+
+exit_normally

@@ -16,13 +16,13 @@
 #%define __spec_build_template	#!%{__spec_build_shell}
 %define _target_os Linux
 
-Summary: SWAMP-in-a-Box backend applications, modules and database for Software Assurance Marketplace (SWAMP)
+Summary: SWAMP-in-a-Box backend applications, modules and database for Software Assurance Marketplace (SWAMP) 
 Name: swampinabox-backend
 Version: %(perl -e 'print $ENV{RELEASE_NUMBER}')
 Release: %(perl -e 'print $ENV{BUILD_NUMBER}')
 License: Apache 2.0
 Group: Development/Tools
-Source: swampinabox-1.tar.gz
+Source: swamp-1.tar.gz
 URL: http://www.continuousassurance.org
 Vendor: The Morgridge Institute for Research
 Packager: Support <support@continuousassurance.org>
@@ -44,14 +44,14 @@ echo "Here's where I am at build $PWD"
 cd ../BUILD/%{name}-%{version}
 
 %install
-%include swampinabox-install.txt
+%include swamponabox-install.txt
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,swa-daemon,swa-daemon)
-%include swampinabox-files.txt
+%include swamponabox-files.txt
 
 %pre
 %include common-pre.txt
@@ -64,11 +64,11 @@ fi
 
 %post
 %include common-post.txt
-%include swampinabox-post-general.txt
-%include swampinabox-post-directory.txt
-%include swampinabox-post-data.txt
-%include swampinabox-post-submit.txt
-%include swampinabox-post-exec.txt
+%include swamponabox-post-general.txt
+%include swamponabox-post-directory.txt
+%include swamponabox-post-data.txt
+%include swamponabox-post-submit.txt
+%include swamponabox-post-exec.txt
 
 # chkconfig
 # install

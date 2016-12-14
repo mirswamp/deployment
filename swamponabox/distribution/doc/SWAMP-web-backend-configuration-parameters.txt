@@ -1,0 +1,335 @@
+SWAMP Web Application Server Configuration
+==========================================
+
+The ".env" file
+---------------
+At the top level of the web server directory, you will find a file
+called ".env".  This file contains the various parameter names and
+values that are used to configure the SWAMP web application.  You must
+have root access to modify this file.
+
+This file contains the following parameters:
+
+APP parameters
+---------------
+These are miscellaneous parameters related to the SWAMP web application.
+
+    APP_ENV
+    : a description of the SWAMP environment
+    This is informational. When installing SWAMP-in-a-Box, APP_ENV is
+    set to "SWAMP-in-a-Box".
+
+    APP_DEBUG
+    : whether verbose Laravel debugging is on or off
+    Set to "true" or "false". When set to "true", web server errors
+    return a detailed error page through the Laravel framework. When
+    set to "false", such errors return a page that says "whoops, looks
+    like something went wrong." APP_DEBUG is set to "false" for
+    SWAMP-in-a-Box.
+
+    APP_URL
+    : the URL used to access SWAMP web routes
+    APP_URL is determined automatically when SWAMP-in-a-Box is installed
+    based on the hostname of SWAMP-in-a-Box machine.
+
+    APP_CORS_URL
+    : the URL used to access the SWAMP web site
+    APP_CORS_URL is determined automatically when SWAMP-in-a-Box is
+    installed based on the hostname of SWAMP-in-a-Box machine.
+
+    Note: For SWAMP-in-a-Box installations the APP_URL and the
+    APP_CORS_URL are the same.
+
+    APP_KEY
+    : a random encryption key used by the Laravel framework
+    This can be any 16 or 32 character string. APP_KEY is set to a
+    random 32 character string when SWAMP-in-a-Box is installed and
+    should not need to be changed afterwards.
+
+DB parameters
+-------------
+These parameters provide the SWAMP web application with access to SWAMP
+databases. There is a set of parameters for each of the following
+databases:
+
+  - Project
+  - Package
+  - Tool
+  - Platform
+  - Assessment
+  - Viewer
+
+    [DB]_HOST
+    : the hostname for the mysql database
+    This is set automatically when SWAMP-in-a-Box is installed and
+    should not need to be changed.
+
+    [DB]_PORT
+    : the port used to access the mysql database
+    The default is port 3306. This is set automatically when
+    SWAMP-in-a-Box is installed and should not need to be changed.
+
+    [DB]_DATABASE
+    : the name of each database (project, package, tool, platform,
+    : assessment, or viewer) for which the set of parameters applies
+    This is set automatically when SWAMP-in-a-Box is installed and
+    should not need to be changed.
+
+    [DB]_USERNAME
+    : the mysql user whose credentials will be used by the SWAMP web
+    : application to access the database
+    The default is "web". This is set automatically when SWAMP-in-a-Box
+    is installed and should not need to be changed.
+
+    [DB]_PASSWORD
+    : the password for the "web" user to access the mysql database
+    This is set to the database web password you specify when you
+    initially install SWAMP-in-a-Box.
+
+Miscellaneous parameters
+------------------------
+The following parameters are set when you install SWAMP-in-the-Box.
+These settings control various operations of the Laravel framework and
+should not be changed.
+
+    CACHE_DRIVER=file
+    QUEUE_DRIVER=sync
+
+Mail settings
+-------------
+These parameters are related to outgoing email sent by the SWAMP web
+application. By default, SWAMP-in-a-Box is installed with outgoing mail
+disabled.
+
+    MAIL_ENABLED
+    Whether the SWAMP web application is configured for outgoing mail
+    Set to "true" or "false". When set to "false", outgoing mail is
+    disabled and the subsequent mail-related settings are not used.
+    When outgoing email is disabled, all functionality that would
+    otherwise result in an email being sent by the system runs without
+    sending the email. Specifically:
+    - username is displayed instead of email throughout the user
+      interface.
+    - Permission requests, project invitations, and SWAMP admin
+      invitations are handled exclusively through the new notification
+      system.
+    - New user accounts do not go through a "pending" state and are
+      immediately activated (without need of verification).
+    - The option to receive an email on completion of an assessment
+      is removed.
+    - The Administrator Settings page for Restricted Domains is removed.
+    - The Administrator Settings page for System Emails is removed
+    - Contact Us and Report Security Incident pages (if enabled) do not
+      include a means to submit a message directly through the web
+      interface.
+    MAIL_ENABLED is set to "false" when SWAMP-in-a-Box is installed.
+
+    Note: Prior to setting MAIL_ENABLED to "true" and configuring the
+    other corresponding mail settings in the .env file, you must first
+    configure an outgoing email server for the SWAMP-in-a-Box machine.
+
+    MAIL_DRIVER
+    : the driver used to send outgoing email.
+    Set to "smtp" or "sendmail". The "sendmail" driver uses the system's
+    postfix mail system to do the actual delivery of the email message.
+    The "smtp" driver bypasses postfix and makes connections directly to
+    your SMTP server to try and deliver the message. With the "smtp"
+    driver, the UI will wait for an acknowledgment that the message was
+    sent. Whereas, if there are issues sending, the "sendmail" driver via
+    postfix will attempt to retry delivering of the message in the
+    background without causing the UI to wait. Therefore we recommend
+    using the "sendmail" driver.
+
+    MAIL_HOST
+    : the hostname of the SMTP server
+    This is applicable only if the MAIL_DRIVER is set to "smtp".
+
+    MAIL_PORT
+    : the SMTP port of the SMTP server
+    This is only applicable if the MAIL_DRIVER is set to "smtp".
+
+    MAIL_FROM_ADDRESS
+    : the email address to be used as the sender for outgoing SWAMP email
+
+    MAIL_FROM_NAME
+    : the name to be used as the sender of outgoing SWAMP email
+
+    MAIL_CONTACT_ADDRESS
+    : the email address to which messages submitted via the Contact Us
+    page are sent
+    Use this to direct contact messages to a specific administrator or
+    help desk.
+
+    MAIL_CONTACT_NAME
+    : the name to which messages submitted via the Contact Us page are
+    sent
+
+    MAIL_SECURITY_ADDRESS
+    : the email address to which messages submitted via the Report
+    Security Incident page are sent
+    Use this to direct security messages to a specific administrator or
+    help desk.
+
+    MAIL_SECURITY_NAME
+    : the name to which messages submitted via the Report Security
+    Incident page are sent
+
+    MAIL_ENCRYPTION
+    : if the MAIL_DRIVER is set to "smtp" and the SMTP server uses
+    encryption, the type of encryption used
+    This is only applicable if the MAIL_DRIVER is set to "smtp" and the
+    specified SMTP server uses encryption. Otherwise, set this to "null".
+
+    MAIL_USERNAME
+    : if the MAIL_DRIVER is set to "smtp" and the SMTP server requires a
+    username/password, the username
+    This is only applicable if the MAIL_DRIVER is set to "smtp" and the
+    specified SMTP server requires a username/password. Otherwise, set
+    this to "null".
+
+    MAIL_PASSWORD
+    : if the MAIL_DRIVER is set to "smtp" and the SMTP server requires a
+    username/password, the password
+    This is only applicable if the MAIL_DRIVER is set to "smtp" and the
+    specified SMTP server requires a username/password. Otherwise, set
+    this to "null".
+
+LDAP settings
+-------------
+These parameters are related to configuring an LDAP server to store
+user-related personal information for a SWAMP instance. When SWAMP is
+not configured to use an LDAP server, user-related personal information
+is stored in the mysql database.
+When installed, a SWAMP-in-the-Box system is not configured to use an
+LDAP server.
+
+    LDAP_ENABLED
+    : whether the SWAMP web application stores user data in an LDAP
+    server
+    Set to "true" or "false". When set to "false", a record is created
+    for each SWAMP user in the project database. When set to "true", a
+    record is created for each SWAMP user in the LDAP server.
+    LDAP_ENABLED is set to "false" when SWAMP-in-a-Box is installed.
+
+    LDAP_HOST
+    : the hostname of the LDAP server
+    This is only applicable if LDAP_ENABLED is set to "true".
+
+    LDAP_PORT
+    : the port of the LDAP server
+    This is only applicable if LDAP_ENABLED is set to "true".
+
+    LDAP_WEB_USER
+    : the username of the LDAP user SWAMP uses to get information about
+    SWAMP users from LDAP
+    This is only applicable if LDAP_ENABLED is set to "true".
+
+    LDAP_WEB_USER_PASSWORD
+    : the password for the LDAP_WEB_USER
+    This is only applicable if LDAP_ENABLED is set to "true".
+
+    LDAP_DATA_CHANGE_USER
+    : the password for the LDAP user SWAMP uses to make changes to user
+    data in LDAP
+    This is only applicable if LDAP_ENABLED is set to "true".
+
+    LDAP_DATA_CHANGE_USER_PASSWORD
+    : the password for the LDAP_CHANGE_USER
+    This is only applicable if LDAP_ENABLED is set to "true".
+
+    LDAP_PASSWORD_SET_USER
+    : the username of the LDAP user SWAMP uses to create user records in
+    LDAP
+    This is only applicable if LDAP_ENABLED is set to "true".
+
+    LDAP_PASSWORD_SET_USER_PASSWORD
+    : the password for the LDAP_SET_USER
+    This is only applicable if LDAP_ENABLED is set to "true".
+
+Third-Party login related settings
+----------------------------------
+SWAMP can be configured to allow users to sign in with using credentials
+from third party sites. This requires setting up an OAuth Application
+for each third party site. Supported third party sites are GitHub, Google, and
+CILogon. When installed, a SWAMP-in-the-Box system is not configured to
+allow any third party logins. Specifically, the following parameters are not
+present in the .env file.
+
+    GITHUB_ENABLED
+    : whether the SWAMP web application allows sign-in via GitHub
+    Set to "true" or "false". "false" is the default when the parameter
+    is missing from the file. When set to "true", SWAMP provides a means
+    to sign up and sign in via a GitHub account.
+
+    GITHUB_CLIENT_ID
+    : the Client ID set in the GitHub OAuth Application
+    This is only applicable when GITHUB_ENABLED is set to "true".
+
+    GITHUB_CLIENT_SECRET
+    : the Client Secret set in the GitHub OAuth Application
+    This is only applicable when GITHUB_ENABLED is set to "true".
+
+    GOOGLE_ENABLED
+    : whether the SWAMP web application allows sign-in via Google
+    Set to "true" or "false". "false" is the default when the parameter
+    is missing from the file. When set to "true", SWAMP provides a means
+    to sign up and sign in via a Google account.
+
+    GOOGLE_CLIENT_ID
+    : the Client ID set in the Google OAuth Application
+    This is only applicable when GOOGLE_ENABLED is set to "true".
+
+    GOOGLE_CLIENT_SECRET
+    : the Client Secret set in the GOOGLE OAuth Application
+    This is only applicable when GOOGLE_ENABLED is set to "true".
+
+    CILOGON_ENABLED
+    : whether the SWAMP web application allows sign-in via CILogon
+    Set to "true" or "false". "false" is the default when the parameter
+    is missing from the file. When set to "true", SWAMP provides a means
+    to sign up and sign in via a CILogon account.
+
+    CILOGON_CLIENT_ID
+    : the Client ID set in the CILogon OAuth Application
+    This is only applicable when CILOGON_ENABLED is set to "true".
+
+    CILOGON_CLIENT_SECRET
+    : the Client Secret set in the CILogon OAuth Application
+    This is only applicable when CILOGON_ENABLED is set to "true".
+
+Session related settings
+------------------------
+These parameters define how session (logon) cookies behave.
+
+    SESSION_DRIVER
+    : the driver used to manage user session data
+    This is set to "cookie" when SWAMP-in-a-Box is installed. This
+    should not be changed.
+
+    SESSION_LIFETIME
+    : determines the expiration date for SWAMP session cookies, in
+    minutes, from the time they are issued
+    This is set to "2160" (36 hours) when SWAMP-in-a-Box is installed.
+    Set it to "0" if you are setting SESSION_EXPIRE_ON_CLOSE to "true".
+
+    SESSION_EXPIRE_ON_CLOSE
+    : whether SWAMP session cookies expire when the session ends
+    SESSION_EXPIRE_ON_CLOSE is set to "false" when SWAMP-in-a-Box is
+    installed. SESSION_LIFETIME should be set to "0" before changing
+    this to "true".
+
+    SESSION_COOKIE_NAME
+    : the name of the SWAMP session cookie
+    This is set to "swamp_session" when SWAMP-in-a-Box is installed.
+
+    SESSION_COOKIE_DOMAIN
+    : the name of the domain for the session cookie
+    Set to "null" to use the same domain name as the APP_URL.
+    SESSION_COOKIE_DOMAIN is set to "null" when SWAMP-in-a-Box is
+    installed.
+
+    SESSION_COOKIE_SECURE
+    : whether SWAMP session cookies are sent for encrypted connections
+    only
+    SESSION_COOKIE_SECURE is set to "true" when SWAMP-in-a-Box is
+    installed.

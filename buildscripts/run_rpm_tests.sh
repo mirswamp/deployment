@@ -14,13 +14,12 @@ export RELEASE_NUMBER
 RELEASE_NUMBER=${RELEASE_NUMBER:=1.08.DEV}
 
 # Set up perlbrew.
-# if [ -z "$PERLBREW_ROOT" ];then
-# export PERLBREW_ROOT=/opt/perl5
-# source ${PERLBREW_ROOT}/etc/bashrc
-# perlbrew switch perl-5.18.1
-# perlbrew list
-# fi
-export PATH=/opt/perl5/perls/perl-5.18.1/bin:$PATH
+if [ -z "$PERLBREW_ROOT" ];then
+export PERLBREW_ROOT=/opt/perl5
+source ${PERLBREW_ROOT}/etc/bashrc
+perlbrew switch perl-5.18.1
+perlbrew list
+fi
 perl -v
 make tests clean rpm
 
