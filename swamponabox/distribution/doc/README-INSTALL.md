@@ -67,6 +67,10 @@ The directory {installer-dir}/repos contains scripts that will
 
 for SWAMP-in-a-Box.
 
+    NOTE: Even if you have previously run these scripts, it's important to
+    run them again to ensure that the correct versions of software packages
+    -- in particular, HTCondor -- are installed.
+
 Run the script that corresponds to your SWAMP-in-a-Box host's OS. The
 script must be run as 'root'; the commands below use `sudo` to ensure this.
 

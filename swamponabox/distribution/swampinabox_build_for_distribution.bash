@@ -6,9 +6,12 @@
 # Copyright 2012-2016 Software Assurance Marketplace
 
 BINDIR=`dirname "$0"`
+
 RELEASE_NUMBER="$1"
 BRANCH="$2"
 BUILD_NUMBER="$3"
+SKIP_RPMS="$4"
+
 WORKSPACE="$BINDIR/../../.."
 echo "RELEASE_NUMBER:	$RELEASE_NUMBER"
 echo "BRANCH:		$BRANCH"
@@ -115,6 +118,11 @@ function build_rpms() {
 	echo "######################"
 	echo ""
 
+	if [ "$SKIP_RPMS" = "--skip-rpms" ]; then
+		echo "Skipping."
+		return 0
+	fi
+
 	# update release branch
 	$BINDIR/../singleserver/bin/git_checkout.pl $RELEASE_BRANCH
 
@@ -213,6 +221,12 @@ if [ $? -ne 0 ]; then
 fi
 
 build_src_tar
+
+if [ "$SKIP_RPMS" = "--skip-rpms" ]; then
+	echo ""
+	echo "Built $BINDIR/build_swampinabox-src.tar.gz"
+	exit 0
+fi
 
 if [ -d "$RELEASE_ROOT" ];
 then

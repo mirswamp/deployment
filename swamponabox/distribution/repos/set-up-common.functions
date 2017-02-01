@@ -9,6 +9,12 @@ function exit_with_error {
     exit 1
 }
 
+function yum_downgrade() {
+    echo ""
+    echo "Downgrading: $*"
+    yum -y downgrade $*
+}
+
 function yum_erase() {
     echo ""
     echo "Erasing: $*"
@@ -19,6 +25,12 @@ function yum_install() {
     echo ""
     echo "Installing: $*"
     yum -y install $*
+}
+
+function yum_update() {
+    echo ""
+    echo "Updating: $*"
+    yum -y update $*
 }
 
 function yum_confirm() {
@@ -92,4 +104,31 @@ function check_os_dist_and_ver() {
     fi
 
     return 0
+}
+
+function compare_versions {
+
+    # Assume version strings of the form X.Y.Z,
+    # where X, Y, and Z are all non-negative integers.
+    #
+    # Return 0 if $1 < $2.
+    # Return 1 if $1 = $2.
+    # Return 2 if $1 > $2.
+
+    IFS=. first=($1)
+    IFS=. second=($2)
+
+    for i in 0 1 2; do
+        x=${first[$i]}
+        y=${second[$i]}
+
+        if [ "$x" -lt "$y" ]; then
+            return 0
+        fi
+        if [ "$x" -gt "$y" ]; then
+            return 2
+        fi
+    done
+
+    return 1;
 }

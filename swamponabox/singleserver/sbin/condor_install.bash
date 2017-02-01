@@ -23,11 +23,8 @@ rm -f \
     /etc/condor/config.d/swamponabox_vm.conf
 
 #
-# Install HTCondor and configuration files for SWAMP-in-a-Box.
+# Install HTCondor configuration files for SWAMP-in-a-Box.
 #
-
-yum_install condor-all
-yum_confirm condor-all || exit_with_error
 
 mkdir -p /slots
 chown condor:condor /slots

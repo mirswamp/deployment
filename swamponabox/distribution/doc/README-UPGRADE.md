@@ -6,6 +6,7 @@ SWAMP-in-a-Box Upgrade Requirements
 
       - 1.27.1
       - 1.27.2
+      - 1.28.1
 
   Upgrades from earlier versions (e.g., 1.24.0) are not supported.
 
@@ -88,6 +89,10 @@ The directory {installer-dir}/repos contains scripts that will
   - create required user accounts
 
 for SWAMP-in-a-Box.
+
+    NOTE: Even if you have previously run these scripts, it's important to
+    run them again to ensure that the correct versions of software packages
+    -- in particular, HTCondor -- are installed.
 
 Run the script that corresponds to your SWAMP-in-a-Box host's OS. The
 script must be run as 'root'; the commands below use `sudo` to ensure this.
