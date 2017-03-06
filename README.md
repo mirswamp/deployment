@@ -14,11 +14,11 @@ To download the SWAMP-in-a-Box install files and install instructions, copy **do
 
 The script **download-latest-swampinabox.bash** can be found at:
 
-<https://github.com/mirswamp/dependency/tree/master/swamponabox/distribution/util>
+<https://github.com/mirswamp/dependency/tree/master/swampinabox/distribution/util>
 
 Or you can get the install files from <https://platform.swampinabox.org/siab-latest-release>
 
-Documentation can be found at <https://github.com/mirswamp/dependency/tree/master/swamponabox/distribution/doc>
+Documentation can be found at <https://github.com/mirswamp/dependency/tree/master/swampinabox/distribution/doc>
 
 This includes instructions for:
 
