@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2016 Software Assurance Marketplace
+# Copyright 2012-2017 Software Assurance Marketplace
 
 echo Workspace: ${WORKSPACE:?WORKSPACE is not set}
 
@@ -14,12 +14,13 @@ export RELEASE_NUMBER
 RELEASE_NUMBER=${RELEASE_NUMBER:=1.08.DEV}
 
 # Set up perlbrew.
-if [ -z "$PERLBREW_ROOT" ];then
-export PERLBREW_ROOT=/opt/perl5
-source ${PERLBREW_ROOT}/etc/bashrc
-perlbrew switch perl-5.18.1
-perlbrew list
-fi
+# if [ -z "$PERLBREW_ROOT" ];then
+# export PERLBREW_ROOT=/opt/perl5
+# source ${PERLBREW_ROOT}/etc/bashrc
+# perlbrew switch perl-5.18.1
+# perlbrew list
+# fi
+export PATH=/opt/perl5/perls/perl-5.18.1/bin:$PATH
 perl -v
 make tests clean rpm
 

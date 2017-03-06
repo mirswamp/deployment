@@ -1,0 +1,78 @@
+#!/bin/sh
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2017 Software Assurance Marketplace
+
+### BEGIN INIT INFO
+# Provides: swampd
+# Required-Start: $local_fs $network $remote_fs
+# Required-Stop: $local_fs $network $remote_fs
+# Default-Start: 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: Suspend/resume SWAMP daemons on shutdown/boot
+# Description: SWAMP is a collection of software for performing Software Assurance.
+#              See http://continuousassurance.org.
+### END INIT INFO
+#
+# chkconfig: 345 99 01
+# description: SWAMP is a collection of software for performing Software Assurance.
+# config: /opt/swamp/etc/swamp.conf
+# pidfile: /opt/swamp/run/vmu_swamp_monitor.pid
+
+# Source function library
+. /etc/rc.d/init.d/functions
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ "${NETWORKING}" = "no" ] && exit 0
+
+SWAMP=/opt/swamp
+mon=vmu_swamp_monitor
+bin=$SWAMP/bin/$mon
+pidfile=${PIDFILE-${SWAMP}/run/${mon}.pid}
+lockfile=/tmp/swamp.lck
+export PERLLIB=$PERLLIB:$SWAMP/perl5
+export PERL5LIB=$PERL5LIB:$SWAMP/perl5
+export PATH=/opt/perl5/perls/perl-5.18.1/bin:$PATH
+# See how we were called.
+case "$1" in
+  start)
+	# Start daemons.
+	echo -n "Starting SWAMP: "
+	cd $SWAMP/run
+	daemon --user swa-daemon --pidfile ${pidfile} $bin --debug --daemon -C $SWAMP/etc/swampmonitor.conf
+	/usr/bin/pgrep -f $mon > ${pidfile}
+	RETVAL=$?
+	echo
+    [ $RETVAL = 0 ] && touch ${lockfile}
+	;;
+  stop)
+	# Stop daemons.
+	echo -n "Shutting down SWAMP: "
+	killproc -p ${pidfile} $mon
+    RETVAL=$?
+	echo
+	[ $RETVAL = 0 ] && rm -f ${lockfile} ${pidfile}
+	;;
+  restart)
+	$0 stop
+    sleep 2 # Give the existing daemon time to vacate
+	$0 start
+	;;
+  reload)
+	echo -n $"Reloading SWAMP: "
+	killproc -p ${pidfile} $mon -HUP
+	RETVAL=$?
+	echo
+        ;;
+  status)
+	status -p ${pidfile}  $mon
+	;;
+  *)
+	echo "Usage: swamp {start|stop|restart|reload|status}"
+	exit 1
+esac
+
+exit 0

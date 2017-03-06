@@ -1,7 +1,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2016 Software Assurance Marketplace
+# Copyright 2012-2017 Software Assurance Marketplace
 
 #
 # spec file for the SWAMP-in-a-Box backend
@@ -16,13 +16,13 @@
 #%define __spec_build_template	#!%{__spec_build_shell}
 %define _target_os Linux
 
-Summary: SWAMP-in-a-Box backend applications, modules and database for Software Assurance Marketplace (SWAMP) 
+Summary: SWAMP-in-a-Box backend applications, modules and database for Software Assurance Marketplace (SWAMP)
 Name: swampinabox-backend
 Version: %(perl -e 'print $ENV{RELEASE_NUMBER}')
 Release: %(perl -e 'print $ENV{BUILD_NUMBER}')
 License: Apache 2.0
 Group: Development/Tools
-Source: swamp-1.tar.gz
+Source: swampinabox-1.tar.gz
 URL: http://www.continuousassurance.org
 Vendor: The Morgridge Institute for Research
 Packager: Support <support@continuousassurance.org>
@@ -44,14 +44,14 @@ echo "Here's where I am at build $PWD"
 cd ../BUILD/%{name}-%{version}
 
 %install
-%include swamponabox-install.txt
+%include swampinabox-install.txt
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,swa-daemon,swa-daemon)
-%include swamponabox-files.txt
+%include swampinabox-files.txt
 
 %pre
 %include common-pre.txt
@@ -64,11 +64,11 @@ fi
 
 %post
 %include common-post.txt
-%include swamponabox-post-general.txt
-%include swamponabox-post-directory.txt
-%include swamponabox-post-data.txt
-%include swamponabox-post-submit.txt
-%include swamponabox-post-exec.txt
+%include swampinabox-post-general.txt
+%include swampinabox-post-directory.txt
+%include swampinabox-post-data.txt
+%include swampinabox-post-submit.txt
+%include swampinabox-post-exec.txt
 
 # chkconfig
 # install

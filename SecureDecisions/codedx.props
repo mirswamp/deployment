@@ -1,0 +1,61 @@
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2017 Software Assurance Marketplace
+
+# db configuration for using MySQL
+swa.db.url = jdbc:mysql://localhost/codedx
+swa.db.driver = com.mysql.jdbc.Driver
+swa.db.user = codedx
+swa.db.password = PA$$w0rd123
+swa.db.datasource = com.mysql.jdbc.jdbc2.optional.MysqlDataSource
+
+# connection pooling configuration
+swa.db.pool.partition-count = 1
+swa.db.pool.max-connections-per-partition = 20
+
+# The connection credentials for the Code Dx super user.
+# Obviously you should have a much better password than "secret"
+swa.super.user = admin
+swa.super.password = PA$$w0rd123
+
+# determines the number of analysis workers available for handling analysis runs
+swa.analyzers.count = 2
+
+# The maximum allowed size (in megabytes) of a single file in a multi-part upload
+# [default is 200]
+swa.upload.maxfilesize = 2048
+
+# The maximum allowed size (in megabytes) of a complete upload
+# [default is 200]
+swa.upload.maxuploadsize = 4096
+
+# The number of analysis runs per project to keep (0 is unlimited)
+# [default is 5]
+# swa.storage.num-analysis-runs-to-keep = 5
+
+# Whether to keep raw tool outputs or bytecode
+# [default is true]
+# swa.storage.keep-raw-inputs = true
+
+# The maximum memory (in megabytes) allocated for any tool that Code Dx runs
+# [default is 1024]
+# swa.tools.maxmemory = 1024
+
+# Whether to keep all log files for tools that Code Dx runs.
+# If false, only failure logs are kept.
+# [default is false]
+# swa.tools.keep-all-logs = false
+
+# CodeDX shiro configuration properties
+# Active directory configuration is optional
+#shiro.activedirectory.realm = org.apache.shiro.realm.activedirectory.ActiveDirectoryRealm
+# Replace the following entries with your company's info
+#shiro.activedirectory.url = ldap://12.34.56.78:389/
+#shiro.activedirectory.searchbase = dc=acme,dc=com
+
+# CodeDX version check for upgrades
+codedx.version.check = false
+
+# proxy api uuid generated on exec node by vrunTask.pl
+# swa.admin.system-key=

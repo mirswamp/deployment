@@ -1,7 +1,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2016 Software Assurance Marketplace
+# Copyright 2012-2017 Software Assurance Marketplace
 
 #
 # spec file for SWAMP dataserver initialization RPM
@@ -37,7 +37,7 @@ Packager: Support <support@continuousassurance.org>
 BuildRoot: /tmp/%{name}-buildroot
 BuildArch: noarch
 Requires: MariaDB-server,MariaDB-client
-Conflicts: swamp-rt-perl,swamp-exec,swamp-submit,swamp-directory-server-setup
+Conflicts: swamp-exec,swamp-submit,swamp-directory-server-setup
 AutoReqProv: no
 
 %description

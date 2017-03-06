@@ -1,0 +1,10 @@
+# SWAMP-specific data server install section
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2017 Software Assurance Marketplace
+
+install -m 400 Data_Server/Project/project_procs.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
+
+install -m 644 dsmonitor.conf $RPM_BUILD_ROOT/opt/swamp/etc/swampmonitor.conf

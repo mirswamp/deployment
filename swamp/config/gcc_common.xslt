@@ -555,9 +555,9 @@ var forEach = function(object, block, context) {
     <xsl:for-each select="//BugInstance">
         <tr>
         <td style="padding: 3px" align="left"><xsl:value-of select="BugGroup"/></td>
-        <td style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location/SourceFile"/></td>
-        <td style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location/StartLine"/></td>
-        <td style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location/StartColumn"/></td>
+        <td style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location[@primary='true']/SourceFile"/></td>
+        <td style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location[@primary='true']/StartLine"/></td>
+        <td style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location[@primary='true']/StartColumn"/></td>
         <td style="padding: 3px" align="left"><xsl:value-of select="BugMessage"/></td>
         </tr>
     </xsl:for-each>

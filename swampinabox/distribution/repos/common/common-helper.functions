@@ -1,0 +1,152 @@
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2017 Software Assurance Marketplace
+
+function exit_with_error {
+    echo ""
+    echo "Error encountered. Setup is not complete."
+    exit 1
+}
+
+function yum_downgrade() {
+    echo ""
+    echo "Downgrading: $*"
+    yum -y downgrade $*
+}
+
+function yum_erase() {
+    echo ""
+    echo "Erasing: $*"
+    yum -y erase $*
+}
+
+function yum_install() {
+    echo ""
+    echo "Installing: $*"
+    yum -y install $*
+}
+
+function yum_update() {
+    echo ""
+    echo "Updating: $*"
+    yum -y update $*
+}
+
+function yum_confirm() {
+    echo -n "Checking that packages were actually installed ... "
+
+    actually_installed=$(yum list installed)
+    not_actually_installed=""
+
+    for pkg in $*; do
+        grep ^$pkg\\. >/dev/null <<< "$actually_installed"
+        if [ $? -eq 0 ]; then
+            echo -n "$pkg "
+        else
+            not_actually_installed="$not_actually_installed $pkg"
+        fi
+    done
+
+    if [ -z "$not_actually_installed" ]; then
+        echo "(ok: found what we were looking for)"
+    else
+        echo "(problem: didn't find at least one package)"
+        echo ""
+        echo "Error: The following packages were not installed:$not_actually_installed"
+        return 1
+    fi
+
+    return 0
+}
+
+function get_os_dist_and_ver() {
+    version=""
+
+    if [ -r /etc/centos-release ]; then
+        version=$(cat /etc/centos-release | awk '{ print substr($0, match($0, /[[:digit:]]+/), RLENGTH); }')
+        echo "CentOS-$version|CentOS Linux $version"
+        return 0;
+    fi
+
+    if [ -r /etc/redhat-release ]; then
+        version=$(cat /etc/redhat-release | awk '{ print substr($0, match($0, /[[:digit:]]+/), RLENGTH); }')
+        echo "Red-Hat-$version|Red Hat Linux $version"
+        return 0;
+    fi
+
+    echo "Unknown-Unknown|Unknown"
+    return 1
+}
+
+function check_os_dist_and_ver() {
+    string_with_target_os=$1
+
+    version_string=$(get_os_dist_and_ver)
+    short_os_name=$(echo $version_string | awk 'BEGIN { FS = "|" } { print $1 }')
+    long_os_name=$(echo $version_string | awk 'BEGIN { FS = "|" } { print $2 }')
+
+    if [[ "$string_with_target_os" =~ "$short_os_name" ]]; then
+        echo "Found $long_os_name."
+    else
+        if [ "$short_os_name" == "Unknown-Unknown" ]; then
+            # Don't worry about this case.
+            # A minimal CentOS install should give us a usable version string.
+            .
+        else
+            echo "This set up script might not be appropriate for $long_os_name."
+        fi
+        echo -n "Continue anyway? [N/y] "
+        read ANSWER
+        if [ "$ANSWER" != "y" ]; then
+            return 1
+        fi
+    fi
+
+    return 0
+}
+
+function check_user() {
+    if [ "$(whoami)" != "root" ]; then
+        echo "Error: This set up script must be run as root."
+        return 1
+    fi
+
+    for prog in rpm yum cp ln useradd; do
+        echo -n "Checking for $prog ... "
+        which $prog
+        if [ $? -ne 0 ]; then
+            echo "Error: $prog is not found in $USER's path."
+            return 1
+        fi
+    done
+
+    return 0
+}
+
+function compare_versions {
+
+    # Assume version strings of the form X.Y.Z,
+    # where X, Y, and Z are all non-negative integers.
+    #
+    # Return 0 if $1 < $2.
+    # Return 1 if $1 = $2.
+    # Return 2 if $1 > $2.
+
+    IFS=. first=($1)
+    IFS=. second=($2)
+
+    for i in 0 1 2; do
+        x=${first[$i]}
+        y=${second[$i]}
+
+        if [ "$x" -lt "$y" ]; then
+            return 0
+        fi
+        if [ "$x" -gt "$y" ]; then
+            return 2
+        fi
+    done
+
+    return 1;
+}

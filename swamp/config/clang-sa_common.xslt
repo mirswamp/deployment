@@ -567,8 +567,8 @@ var forEach = function(object, block, context) {
         <xsl:sort data-type="text" order="ascending" select="BugGroup"/>
         <tr>
         <td style="padding: 3px" align="left"><div><xsl:attribute name="class"><xsl:call-template name="priorityDiv"/></xsl:attribute><xsl:value-of disable-output-escaping="yes" select="BugGroup"/></div></td>
-        <td style="padding: 3px" align="left"><xsl:value-of disable-output-escaping="yes" select="BugLocations/Location/SourceFile"/></td>
-        <td style="padding: 3px" align="left"><xsl:value-of disable-output-escaping="yes" select="BugLocations/Location/StartLine"/></td>
+        <td style="padding: 3px" align="left"><xsl:value-of disable-output-escaping="yes" select="BugLocations/Location[@primary='true']/SourceFile"/></td>
+        <td style="padding: 3px" align="left"><xsl:value-of disable-output-escaping="yes" select="BugLocations/Location[@primary='true']/StartLine"/></td>
         <td style="padding: 3px" align="left"><xsl:value-of disable-output-escaping="yes" select="BugMessage"/></td>
         </tr>
     </xsl:for-each>

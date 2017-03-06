@@ -1,13 +1,12 @@
 # Configuration file for SWAMP-in-a-Box
 
+# HTCondor collector location
+htcondor_collector_host = HOSTNAME
+
 # agentMonitor should point to the submit node. Set these values on the data server, and submit and execute node(s).
 agentMonitorPort = 8080
 agentMonitorJobPort = 8085
 agentMonitorHost = localhost
-
-# viewerMonitorHost should point to the CSA web server node. Set this value on the submit node and CSA web server node.
-viewerMonitorPort = 8086
-viewerMonitorHost = localhost
 
 # dispatcher should point to the submit node. Set these values on the data server, and submit and execute node(s).
 dispatcherPort = 8083
@@ -31,8 +30,13 @@ vruntimeout_frequency = 10
 vruntimeout_duration = 28800
 # Number of seconds of no Tomcat activity
 vruntimeout_lastlog = 3600
-# Default CodeDX master VM name. Needs to be set on submit.
-master.codedx = dynamic-centos-6.8-64-viewer
+# Default viewer master VM name. Needs to be set on submit.
+master.viewer = universal-centos-6.8-64-viewer
+
+# vmip lookup delay, attempt count, and sleep time
+vmip_lookup_delay = 10
+vmip_lookup_attempts = 50
+vmip_lookup_sleep = 3
 
 # Email templates
 email.arun.complete = <USER>,<CR><CR>Your assessment of <PACKAGE> using <TOOL> on <PLATFORM> completed at <COMPLETIONTIME> with a status of <SUCCESS>.<CR><CR>-The Software Assurance Marketplace (SWAMP)
@@ -52,7 +56,6 @@ method.QUARTERMASTER_BILLOFGOODS   = swamp.quartermaster.getBillOfGoods
 method.QUARTERMASTER_STOREVIEWER   = swamp.quartermaster.storeViewerDatabase
 method.QUARTERMASTER_UPDATEVIEWER  = swamp.quartermaster.updateViewerInstance
 method.RUNCONTROLLER_DORUN         = swamp.runController.doRun
-method.SONATYPE_RUNCONTROLLER_DORUN = swamp.sonatypeRunController.doRun
 method.GATOR_LISTTOOLS             = swamp.gator.listTools
 method.GATOR_LISTPACKAGES          = swamp.gator.listPackages
 method.GATOR_LISTPLATFORMS         = swamp.gator.listPlatforms
@@ -85,10 +88,6 @@ method.CSAAGENT_STOP               = swamp.csaAgent.stop
 method.CSAAGENT_FINISHED           = swamp.csaAgent.finished
 method.CSAAGENT_GETMACHINELIST     = swamp.csaAgent.getMachineList
 method.CSAAGENT_OKTOLAUNCH         = swamp.csaAgent.okToLaunch
-
-# Perl launchers
-csaagent= /opt/swamp/bin/csa_agent_launcher
-csaHTCondorAgent= /opt/swamp/bin/csa_HTCondorAgent_launcher
 
 # Status
 SWAMPState = ON

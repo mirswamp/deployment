@@ -563,10 +563,10 @@ var forEach = function(object, block, context) {
         <xsl:if test="$numGroup > 0"> 
         <td style="padding: 3px" align="left"><xsl:value-of select="BugGroup"/></td>
         </xsl:if> 
-        <td style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location/SourceFile"/></td>
-        <td style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location/StartLine"/></td>
+        <td style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location[@primary='true']/SourceFile"/></td>
+        <td style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location[@primary='true']/StartLine"/></td>
         <xsl:if test="$numColumn > 0"> 
-        <td style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location/StartColumn"/></td>
+        <td style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location[@primary='true']/StartColumn"/></td>
         </xsl:if> 
         <td style="padding: 3px" align="left"><xsl:value-of select="BugMessage"/></td>
         </tr>

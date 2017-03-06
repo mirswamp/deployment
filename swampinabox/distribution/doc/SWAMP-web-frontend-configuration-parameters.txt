@@ -1,0 +1,174 @@
+SWAMP Web Application Front End Configuration
+=============================================
+
+The "config.json" file
+====================
+In the "config" folder of the www-front-end web application, you should
+find a file called "config.json". This file contains a set of parameter
+names and values (in JSON format) that are used to configure the front
+end web application.
+
+This file contains the following parameters:
+
+Web Services
+============
+These parameters are related to the SWAMP web application routes.
+
+    servers.web
+    : the URL used to access SWAMP web routes
+    This is determined when SWAMP-in-a-Box is installed based on the
+    hostname of SWAMP-in-a-Box machine.
+
+Contact Information
+===================
+These parameters are related to display of information on the Contact Us
+and Report Security Incident pages. If this section of information is
+not included in the file, the link to the Contact page in the SWAMP menu
+is hidden. This section is not included when SWAMP-in-a-Box is
+installed.
+
+Support
+-------
+These parameters are related to the Contact Us page.
+
+    contact.support.email
+    : the email address displayed for Contact Us messages
+
+    contact.support.phoneNumber
+    : the phone number displayed for Contact Us messages
+
+    contact.support.description
+    : the description of the person or team receiving messages displayed
+    for Contact Us messages
+
+    contact.support.message
+    : additional text displayed for Contact Us messages
+
+Security
+--------
+These parameters are related to the Report Security Incident. If the
+Support section is defined but the Security section is not included
+in the file, the SWAMP web application does not proved a link from
+the Contact Us page to the Report Security Incident page.
+
+    contact.security.email
+    : the email address displayed for Report Security Incident messages
+
+    contact.security.phoneNumber
+    : the phone number displayed for Report Security Incident messages
+
+    contact.security.description
+    : the description of the person or team receiving messages displayed
+    for Report Security Incident messages
+
+    contact.security.message
+    : additional text displayed for Report Security Incident messages
+
+Cookie settings
+===============
+These settings are related to SWAMP layout cookies, which are used to
+persist the state of various layout elements: Position of the Navigation
+Bar, State of the Show Numbering flag, State of the Auto Refresh flag,
+and State of the Show Grouping flag.
+
+    cookie.name
+    This parameter is not currently used. This is set to "swampuuid"
+    when SWAMP-in-a-Box is installed.
+
+    cookie.domain
+    : the name of the domain for the SWAMP layout cookies
+    Set to "null" to use the same domain name as the APP_URL. This is
+    set to "null" when SWAMP-in-a-Box is installed.
+
+    cookie.path
+    : the path for SWAMP layout cookies
+    This is set to "/" when SWAMP-in-a-Box is installed.
+
+    cookie.secure
+    : whether SWAMP layout cookies are sent for encrypted connections
+    only
+    This is set to "true" when SWAMP-in-a-Box is installed.
+
+Option flags
+============
+These settings affect configurable behavior in the SWAMP web
+application.
+
+    options.assessments.allow_multiple_tool_selection
+    : determines whether the "All" option is present when selecting tools on
+    the Add/Run New Assessments page
+    This is set to "true" when SWAMP-in-a-Box is installed.
+
+    options.assessments.allow_viewing_zero_weaknesses
+    : determines whether assessment results with zero weaknesses can be
+    selected and sent to the Code Dx assessment viewer
+    This is set to "true" when SWAMP-in-a-Box is installed.
+
+==============================================
+Samples of the config.json file are shown below. Note: The config.json file
+defines parameters within arrays. Therefore it is important to maintain the
+JSON array format when editing, adding, or removing parameters in this file.
+
+config.json without the Contact section
+=======================================
+
+{
+	"servers": {
+		"web": "<Your web services root URL>"
+	},
+
+	"cookie": {
+		"name": "swampuuid",
+		"domain": null,
+		"path": "/",
+		"secure": false
+	},
+
+	"options": {
+		"assessments": {
+			"allow_multiple_tool_selection": true,
+			"allow_viewing_zero_weaknesses": true
+		}
+	}
+}
+
+
+config.json with the Contact section
+====================================
+
+{
+	"servers": {
+		"web": "<Your web services root URL>"
+	},
+
+	"contact": {
+
+		"support": {
+			"email": "<Your support email address (optional - you may delete this line)>",
+			"phoneNumber": "<Your support phone number (optional - you may delete this line)>",
+			"description": "our support staff",
+			"message": "Feel free to contact us with questions."
+		},
+
+		"security": {
+			"email": "<Your security email address (optional - you may delete this line)>",
+			"phoneNumber": "<Your security phone number (optional - you may delete this line)>",
+			"description": "our security team",
+			"message": "<Your security message here (optional - you may delete this line)>"
+		}
+	},
+
+	"cookie": {
+		"name": "swampuuid",
+		"domain": null,
+		"path": "/",
+		"secure": false
+	},
+
+	"options": {
+		"assessments": {
+			"allow_multiple_tool_selection": true,
+			"allow_viewing_zero_weaknesses": true
+		}
+	}
+}

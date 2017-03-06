@@ -1,0 +1,74 @@
+Noteworthy Changes in SWAMP-in-a-Box 1.29
+=========================================
+
+1. Added support for 5 new programming languages: CSS, HTML, JavaScript,
+PHP, and XML.
+
+2. Added the following 9 assessment tools for web scripting languages: CSS
+Lint, ESLint, Flow, HTML Tidy, JSHint, PHPMD, PHP_CodeSniffer, Retire.js,
+and XML Lint.
+
+3. Added new versions and/or updates for the following assessment tools:
+Bandit, Flake8, Pylint, checkstyle, OWASP Dependency Check, error-prone,
+FindBugs, and PMD.
+
+4. When adding a new package or adding a new version to an existing package,
+users have the option to select an archive file from the local file system
+or enter an external URL and a checkout argument (branch, tag, or commit)
+for a remote Git repository.
+
+5. Improved error reporting for assessment failures. Successful assessment
+runs are no longer erroneously reported as having finished with errors.
+Assessments that complete with a status of “finished with errors – retry”
+can be re-run and should complete successfully.
+
+6. Updated the “Status.out and Debugging SWAMP Failures” document on the
+Help page to assist with debugging failed assessments. Failed assessments
+now show the contents of the status.out file at the top of the Failed
+Assessment Report (by clicking the “! Error” button in the Results column).
+
+7. The statuses shown on the Results page have been updated to better
+indicate what is happening as assessment jobs are processed.
+
+8. Minimum hardware requirements have increased to 4 CPU cores and 16 GB of
+RAM.
+
+9. General enhancements and bug fixes.
+
+
+Noteworthy Changes in SWAMP-in-a-Box 1.28.1
+===========================================
+
+1. Added a new assessment tool: OWASP Dependency Check. This tool can be
+used to assess Java 7 and 8 Source, and Java 7 and 8 Bytecode packages.
+
+2. Added new versions of the cppcheck assessment tool. Updated the following
+assessment tools: Bandit, Clang Static Analyzer, and cppcheck.
+
+3. Updated platform versions and dependencies. All platforms from previous
+releases have been deprecated. When upgrading to 1.28.1, existing
+assessments will be modified to use the Ubuntu Linux version 16.04 platform.
+The new platforms will work without an internet connection unless the
+package being assessed requires the internet to build.
+
+4. Added the "Status.out and Debugging SWAMP Failures" document to the Help
+page to assist with debugging failed assessment runs.
+
+5. Improved the reporting of assessment error messages in the Failed
+Assessment Run Report (accessed by clicking the Error "!" button on an
+assessment that finished with errors). Improved the reporting of failed
+steps in the status.out file for failed assessment runs (found in the
+results.tar.gz archive, downloadable from a Failed Assessment Report).
+
+6. Added the ability to download assessment results in XML format. For
+assessments that finished successfully and have at least one weakness, the
+weakness count icon on the Assessment Results page is a link to download the
+scarf.xml file.
+
+7. Assessments display "default" as the platform if the default platform
+will be used to run an assessment. Most supported package types have a
+default platform of Ubuntu Linux version 16.04. Only C/C++ package types
+allow selecting a platform when adding assessments.
+
+8. The system no longer attempts to re-run a failed assessment, allowing
+assessments to finish more quickly.
