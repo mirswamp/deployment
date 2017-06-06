@@ -20,7 +20,15 @@ rm -f \
     /etc/condor/config.d/swamponabox_main.conf \
     /etc/condor/config.d/swamponabox_network.conf \
     /etc/condor/config.d/swamponabox_slots.conf \
-    /etc/condor/config.d/swamponabox_vm.conf
+    /etc/condor/config.d/swamponabox_vm.conf \
+    \
+    /etc/condor/config.d/swampinabox_debug.conf \
+    /etc/condor/config.d/swampinabox_descriptors.conf \
+    /etc/condor/config.d/swampinabox_jobcontrol.conf \
+    /etc/condor/config.d/swampinabox_main.conf \
+    /etc/condor/config.d/swampinabox_network.conf \
+    /etc/condor/config.d/swampinabox_slots.conf \
+    /etc/condor/config.d/swampinabox_vm.conf
 
 #
 # Install HTCondor configuration files for SWAMP-in-a-Box.
@@ -32,23 +40,9 @@ if [ ! -d /etc/condor/config.d ]; then
     install -m 755 -o root -g root -d /etc/condor/config.d
 fi
 
-for config_file in $BINDIR/../swampinabox_installer/config.d/* ; do
-    install -m 755 -o root -g root "$config_file" /etc/condor/config.d
+for config_file in $BINDIR/../config_templates/config.d/* ; do
+    install -m 644 -o root -g root "$config_file" /etc/condor/config.d
 done
-
-hostip=`$BINDIR/../sbin/find_ip_address.pl $HOSTNAME`
-if [ -n "$hostip" ]; then
-    echo "Patching swampinabox_network.conf for Condor using ip: $hostip"
-    sed -i "s/HOSTIP/$hostip/" /etc/condor/config.d/swampinabox_network.conf
-fi
-
-domain="$HOSTNAME"
-if [ -n "$domain" ]; then
-    echo "Patching swampinabox_jobcontrol.conf for Condor using domain: $domain"
-    sed -i "s/PATCH_DEFAULT_DOMAIN_NAME//" /etc/condor/config.d/swampinabox_jobcontrol.conf
-    sed -i "s/PATCH_UID_DOMAIN/$domain/" /etc/condor/config.d/swampinabox_jobcontrol.conf
-    sed -i "s/PATCH_ALLOW_WRITE/$domain/" /etc/condor/config.d/swampinabox_jobcontrol.conf
-fi
 
 chkconfig condor on
 service condor start

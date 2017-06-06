@@ -54,8 +54,9 @@ using the instructions produced by the "configuration wizard" at
 
     http://rpms.famillecollet.com/
 
-The specific packages installed are 'php', 'php-mbstring', 'php-mcrypt',
-'php-mysqlnd', 'php-pecl-zip', 'php-xml', and their dependencies.
+The specific packages installed are 'php', 'php-ldap', 'php-mbstring',
+'php-mcrypt', 'php-mysqlnd', 'php-pecl-zip', 'php-xml', and their
+dependencies.
 
 The following OS-dependent scripts will install PHP using the process
 described above:

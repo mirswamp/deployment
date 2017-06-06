@@ -1,0 +1,79 @@
+#!/bin/bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2017 Software Assurance Marketplace
+
+#
+# Execute a SQL script as the database 'root' user.
+#
+
+script_file="$1"
+cnf_file="/opt/swamp/sql/sql.cnf"
+
+function do_clean_up {
+    stty echo
+    rm -f "$cnf_file"
+}
+
+function exit_normally {
+    do_clean_up
+    exit 0
+}
+
+function exit_with_error {
+    do_clean_up
+    echo "$0: Error while attempting to execute $script_file"
+    exit 1
+}
+
+#
+# Ensure that temporary files get removed.
+#
+trap 'exit_with_error' INT TERM
+
+############################################################################
+
+if [ -z "$script_file" ]; then
+    echo "Usage: $0 <SQL script file>"
+    exit 1
+fi
+
+if [ ! -r "$script_file" ]; then
+    echo "Error: $script_file is not readable"
+    exit 1
+fi
+
+started_mysql_service="no"
+initial_mysql_service_status=$(/opt/swamp/sbin/swamp_manage_service mysql status)
+
+if [ "$initial_mysql_service_status" = "stopped" ]; then
+    /opt/swamp/sbin/swamp_manage_service mysql start
+    started_mysql_service="yes"
+fi
+
+if [ -r /etc/.mysql_root ]; then
+    # Allow for the possibility that we're running in a context
+    # where the configuration file has already been created.
+
+    if [ ! -r "$cnf_file" ]; then
+        /opt/swamp/sbin/create_mysql_root_cnf "$cnf_file" || exit_with_error
+        cnf_file_needs_removal="yes"
+    fi
+
+    mysql --defaults-file="$cnf_file" < "$script_file" || exit_with_error
+
+    if [ "$cnf_file_needs_removal" == "yes" ]; then
+        rm -f "$cnf_file"
+    fi
+else
+    echo "Enter the password for the database 'root' user"
+    mysql -u root -p < "$script_file" || exit_with_error
+fi
+
+if [ "$started_mysql_service" = "yes" ]; then
+    /opt/swamp/sbin/swamp_manage_service mysql stop
+fi
+
+exit_normally

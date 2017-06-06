@@ -11,5 +11,5 @@ RELAYHOST="$1"
 
 echo "Patching postfix"
 postqueue -f
-diff -wu /etc/postfix/main.cf $BINDIR/../swampinabox_installer/main.cf | sed -e "s/SED_HOSTNAME/$HOSTNAME/" | sed -e "s/RELAYHOST/$RELAYHOST/" | patch /etc/postfix/main.cf
+diff -wu /etc/postfix/main.cf $BINDIR/../config_templates/main.cf | sed -e "s/SED_HOSTNAME/$HOSTNAME/" | sed -e "s/RELAYHOST/$RELAYHOST/" | patch /etc/postfix/main.cf
 service postfix restart

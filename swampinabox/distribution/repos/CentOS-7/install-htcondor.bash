@@ -28,7 +28,7 @@ rpm --import http://research.cs.wisc.edu/htcondor/yum/RPM-GPG-KEY-HTCondor
 # that a specific version of HTCondor is installed.
 #
 
-target_condor="8.4.11"
+target_condor="8.6"
 
 yum_install yum-plugin-versionlock
 yum_confirm yum-plugin-versionlock || exit_with_error
@@ -36,9 +36,9 @@ yum_confirm yum-plugin-versionlock || exit_with_error
 echo ""
 echo "Attempting to lock 'condor' packages to version ${target_condor}"
 
-yum versionlock delete "condor*${target_condor}*"
-yum versionlock delete "*:condor*${target_condor}*"
-yum versionlock "condor*${target_condor}*" || exit_with_error
+yum versionlock delete "condor-*"
+yum versionlock delete "*:condor-*"
+yum versionlock "condor-*${target_condor}*" || exit_with_error
 
 installed_condor=$(rpm -q --qf '%{VERSION}' condor)
 if [ $? -ne 0 ]; then

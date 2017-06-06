@@ -1,4 +1,12 @@
 <?xml version="1.0"?>
+
+<!--
+    This file is subject to the terms and conditions defined in
+    'LICENSE.txt', which is part of this source code distribution.
+
+    Copyright 2012-2017 Software Assurance Marketplace
+-->
+
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
     <xsl:output method="html" encoding="UTF-8" doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN" 
         doctype-system="http://www.w3.org/TR/html4/loose.dtd" indent="yes"/>
@@ -513,8 +521,6 @@ var forEach = function(object, block, context) {
         table.sortable tr td { background:#eeeee0; }
         table.classcount tr th { font-weight: bold; text-align:left; background:#a6caf0; }
         table.classcount tr td { background:#eeeee0; }
-        table.summary tr th { font-weight: bold; text-align:left; background:#a6caf0; }
-        table.summary tr td { background:#eeeee0; text-align:center;}
         .p1 { background:#FF9999; }
         .p2 { background:#FFCC66; }
         .p3 { background:#FFFF99; }
@@ -531,52 +537,96 @@ var forEach = function(object, block, context) {
     </style>
 </head>
 <body>
-    <H2><xsl:value-of select="/AnalyzerReport/@tool_version"/> Report</H2>
-    <hr/>
-    <h3>Summary</h3>
-    <table border="0" class="summary">
+    <!--<H2><xsl:value-of select="/AnalyzerReport/@tool_version"/> Report</H2>-->
+    <H1><div class="icon"><i class="fa fa-trophy"></i></div>Native Viewer Report</H1>
+  <ol class="breadcrumb"><li><a href="#home"><i class="fa fa-home"></i>Home</a></li><li><i class="fa fa-info"></i>About</li></ol> 
+<!--   
+  <h2>Accessment Time</h2>
+  <p><xsl:value-of select="/AnalyzerReport/Accessment_Time"/></p>
+  <h2>Tool Name</h2>
+  <p><xsl:value-of select="/AnalyzerReport/@tool_name"/></p>
+  <h2>Tool Version</h2>
+  <p><xsl:value-of select="/AnalyzerReport/@tool_version"/></p>
+    -->
+	
+    
+<!--This line is used as a delimiter to locate the position of the Native Viewer Header,
+    and will be removed in vmu_launchviwer.pl -->
+    <h1>Place_to_insert_NativeViewer_Headerinfo</h1>	
+
+	<h2>Summary</h2>
+    <table class="summary">
+      <thead>
       <tr>
-        <th>Total</th>
-        <th>API</th>
-        <th>Dead store</th>
-        <th>Logic error</th>
-        <th>Memory Error</th>
-        <th>Security</th>
-        <th>Unix API</th>
+        <th><i class="fa fa-globe"></i><span> Total</span></th>
+        <th><i class="fa fa-code"></i><span> API</span></th>
+        <th><i class="fa fa-exclamation"></i><span> Dead store</span></th>
+        <th><i class="fa fa-exclamation-triangle"></i><span> Logic error</span></th>
+        <th><i class="fa fa-exclamation-circle"></i><span> Memory Error</span></th>
+        <th><i class="fa fa-lock"></i><span> Security</span></th>
+        <th><i class="fa fa-code"></i><span> Unix API</span></th>
       </tr>
+    </thead>
+    <tbody>
       <tr>
-        <td><xsl:value-of select="count(//BugInstance)"/></td>
-        <td><div class="p2"><xsl:value-of select="count(//BugInstance[BugGroup='API'] )"/></div></td>
-        <td><div class="p3"><xsl:value-of select="count(//BugInstance[BugGroup='Dead store'] )"/></div></td>
-        <td><div class="p4"><xsl:value-of select="count(//BugInstance[BugGroup='Logic error'] )"/></div></td>
-        <td><div class="p5"><xsl:value-of select="count(//BugInstance[BugGroup='Memory Error'] )"/></div></td>
-        <td><div class="p6"><xsl:value-of select="count(//BugInstance[BugGroup='Security'] )"/></div></td>
-        <td><div class="p1"><xsl:value-of select="count(//BugInstance[BugGroup='Unix API'] )"/></div></td>
+        <td ><xsl:value-of select="count(//BugInstance)"/></td>
+        <td align="left"><xsl:value-of select="count(//BugInstance[BugGroup='API'] )"/></td>
+        <td align="left"><xsl:value-of select="count(//BugInstance[BugGroup='Dead store'] )"/></td>
+        <td align="left"><xsl:value-of select="count(//BugInstance[BugGroup='Logic error'] )"/></td>
+        <td align="left"><xsl:value-of select="count(//BugInstance[BugGroup='Memory Error'] )"/></td>
+        <td align="left"><xsl:value-of select="count(//BugInstance[BugGroup='Security'] )"/></td>
+        <td align="left"><xsl:value-of select="count(//BugInstance[BugGroup='Unix API'] )"/></td>
       </tr>
+      </tbody>
       </table>
+
+      <hr/>
+	<xsl:variable name="numLine" select="count(//StartLine)"/>
+    <xsl:variable name="numColumn" select="count(//StartColumn)"/>
+ 	 
     <xsl:if test="count(//BugInstance) > 0">
-    <table border="0" width="100%" class="sortable"><xsl:attribute name="id">sortable_id_<xsl:value-of select="position()"/></xsl:attribute>
+    <table class="results"><thead>
             <tr>
-				<th>Category</th>
-				<th>File</th>
-                <th>Line</th>
-                <th align="left">Message</th>
+				<th><i class="fa fa-object-group"></i><span> Category</span></th>
+				<th><i class="fa fa-codiepie"></i><span> Code</span></th>
+				<th><i class="fa fa-file"></i><span> File</span></th>
+                <xsl:if test="$numLine > 0"> 
+				<th><i class="fa fa-linode"></i><span> Line</span></th>
+                </xsl:if> 
+				<xsl:if test="$numColumn > 0"> 
+                <th><i class="fa fa-columns"></i><span> Column</span></th>
+                </xsl:if>
+				<th align="left"><i class="fa fa-commenting"></i><span> Message</span></th>
             </tr>
-    <br/>
+    </thead>
+    <tbody>
     <xsl:for-each select="/AnalyzerReport//BugInstance">
         <xsl:sort data-type="text" order="ascending" select="BugGroup"/>
         <tr>
-        <td style="padding: 3px" align="left"><div><xsl:attribute name="class"><xsl:call-template name="priorityDiv"/></xsl:attribute><xsl:value-of disable-output-escaping="yes" select="BugGroup"/></div></td>
-        <td style="padding: 3px" align="left"><xsl:value-of disable-output-escaping="yes" select="BugLocations/Location[@primary='true']/SourceFile"/></td>
-        <td style="padding: 3px" align="left"><xsl:value-of disable-output-escaping="yes" select="BugLocations/Location[@primary='true']/StartLine"/></td>
-        <td style="padding: 3px" align="left"><xsl:value-of disable-output-escaping="yes" select="BugMessage"/></td>
-        </tr>
+        <td class="group" style="padding: 3px" align="left"><xsl:value-of disable-output-escaping="yes" select="BugGroup"/></td>
+        <td class="code" style="padding: 3px" align="left"><xsl:value-of disable-output-escaping="yes" select="BugCode"/></td>
+        <td class="file" style="padding: 3px" align="left"><xsl:value-of disable-output-escaping="yes" select="BugLocations/Location[@primary='true']/SourceFile"/></td>
+        <xsl:if test="$numLine > 0"> 
+        <td class="line" style="padding: 3px" align="left"><xsl:value-of disable-output-escaping="yes" select="BugLocations/Location[@primary='true']/StartLine"/></td>
+        </xsl:if>
+		<xsl:if test="$numColumn > 0"> 
+        <td class="col" style="padding: 3px" align="left"><xsl:value-of disable-output-escaping="yes" select="BugLocations/Location[@primary='true']/StartColumn"/></td>
+        </xsl:if>
+		<td class="message" style="padding: 3px" align="left"><xsl:value-of disable-output-escaping="yes" select="BugMessage"/></td>
+
+		</tr>
     </xsl:for-each>
+    </tbody>
     </table>
     </xsl:if>
+    
     <xsl:if test="count(//BugInstance) = 0">
     <h3>No bugs found.</h3>
     </xsl:if>
+
+    <hr/>
+  <pre>Report generated: <xsl:value-of select="/AnalyzerReport/Report_Time"/></pre>
+
 </body>
 </html>
   </xsl:template>

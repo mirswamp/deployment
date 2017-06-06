@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2017 Software Assurance Marketplace
+
+#
+# Add the SWAMP copyright notice to a file.
+#
+
 SOURCE_FILE="$1"
 TMP_FILE="/tmp/$USER.$(basename "$SOURCE_FILE").$RANDOM"
 
@@ -28,7 +37,7 @@ if [ "$answer" != "y" ]; then
 fi
 
 echo ""
-echo -n "Skip how many lines? "
+echo -n "Skip how many lines? [default: 0] "
 read skip_lines
 
 if [ -z "$skip_lines" ]; then

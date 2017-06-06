@@ -43,7 +43,7 @@ ln -s ../etc/log4j.properties $RPM_BUILD_ROOT/opt/swamp/jar/log4j.properties
 install -m 755 swamp.sh $RPM_BUILD_ROOT/etc/profile.d
 
 install -m 755 lib/commons-logging-1.1.jar $RPM_BUILD_ROOT/opt/swamp/lib/commons-logging-1.1.jar
-install -m 755 lib/guava-19.0.jar $RPM_BUILD_ROOT/opt/swamp/lib/guava-19.0.jar
+install -m 755 lib/guava-21.0.jar $RPM_BUILD_ROOT/opt/swamp/lib/guava-21.0.jar
 install -m 755 lib/log4j-1.2.17p.jar $RPM_BUILD_ROOT/opt/swamp/lib/log4j-1.2.17p.jar
 install -m 755 lib/mariadb-java-client-1.4.6.jar $RPM_BUILD_ROOT/opt/swamp/lib/mariadb-java-client-1.4.6.jar
 install -m 755 lib/ws-commons-util-1.0.2.jar $RPM_BUILD_ROOT/opt/swamp/lib/ws-commons-util-1.0.2.jar

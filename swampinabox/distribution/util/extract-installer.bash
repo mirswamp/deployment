@@ -5,17 +5,15 @@
 #
 # Copyright 2012-2017 Software Assurance Marketplace
 
+#
+# Extract the SWAMP-in-a-Box installer.
+# Assumes that this script is in the same directory as the tarballs.
+#
+
 BINDIR=`dirname "$0"`
-
-#
-# Assuming the SWAMP-in-a-Box distribution tarballs are in the same
-# directory as this script, this script will create a directory for the
-# SWAMP-in-a-Box installer and extract the tarballs into it.
-#
-
-tarballs_dir=$BINDIR
-installer_dir=$tarballs_dir/swampinabox-installer
-installer_log_dir=$installer_dir/log
+VERSION="SED_VERSION"
+INSTALLER_TARBALL="$BINDIR/swampinabox-${VERSION}-installer.tar.gz"
+INSTALLER_DIR="$BINDIR/swampinabox-${VERSION}-installer"
 
 exit_with_error() {
     echo ""
@@ -23,19 +21,13 @@ exit_with_error() {
     exit 1
 }
 
-echo "Creating ${installer_dir#./}"
-mkdir -p "$installer_dir" || exit_with_error
+if [ ! -r "$INSTALLER_TARBALL" ]; then
+    echo "Error: $INSTALLER_TARBALL does not exist or is not readable"
+    exit 1
+fi
 
-echo "Creating ${installer_log_dir#./}"
-mkdir -p "$installer_log_dir" || exit_with_error
-
-sleep 2  # Pause so that the user can see that directories were created
-
-for tarball in "$tarballs_dir"/*.tar.gz; do
-    echo ""
-    echo "Extracting ${tarball#./}"
-    tar -xzv --no-same-owner --no-same-permissions -C "${installer_dir}" -f "${tarball}" || exit_with_error
-done
-
+echo "Extracting $INSTALLER_TARBALL"
 echo ""
-echo "The SWAMP-in-a-Box installer can be found in: ${installer_dir}"
+tar -xzv --no-same-owner --no-same-permissions -C "$BINDIR" -f "$INSTALLER_TARBALL" || exit_with_error
+echo ""
+echo "The SWAMP-in-a-Box installer can be found in: $INSTALLER_DIR"

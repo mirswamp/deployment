@@ -1,5 +1,29 @@
 Configure Outgoing Email for SWAMP-in-a-Box
 -------------------------------------------
+Enabling outgoing email allows the SWAMP to sent email notifications to users.
+The following functionality is enabled when outgoing email is enabled:
+
+    - New user accounts are "pending" until email address is verified.
+    - Users can edit email addresses. Changes take place once verified.
+    - User email addresses are displayed throughout the user interface.
+    - User's can request a password reset through an email link.
+    - User's can request an email indicating the username associated with
+      an email address.
+    - Permission requests, project invitations, and SWAMP admin
+      invitations are handled through email notifications in addition to 
+      the notification system in the SWAMP UI.
+    - Users can opt to receive an email on completion of an assessment.
+    - SWAMP Administrators can configure Restricted Domains for email addresses.
+    - SWAMP Administrators can send system emails to one or more SWAMP users.
+    - SWAMP Administrators can flag users to force a password reset the next
+      time they sign in.
+    - SWAMP Administrators can flag inactive users as hibernated. This forces
+      a password reset the next time the user signs in.      
+    - Contact Us and Report Security Incident pages (if enabled)
+      include a means to submit a message directly through the web
+      interface.
+    - Emails are sent to notify users of events such as removal from project
+      membership, disabling and re-enabling of projects and user accounts.
 
 Prerequisites:
 
@@ -19,7 +43,13 @@ Step 2: Modify /var/www/swamp-web-server/.env to enable outgoing SWAMP email.
     - Set MAIL_DRIVER to "sendmail".
     - Set the MAIL_FROM_ADDRESS and MAIL_FROM_NAME to the email address
       and name you want to use as the sender of outgoing SWAMP emails.
-
+    - Set the MAIL_CONTACT_ADDRESS to the email address you want to receive
+      contact email from users. This is displayed in the content of some 
+      SWAMP emails
+    - Set the MAIL_SECURITY_ADDRESS to the email address you want to receive
+      security reports from users. This is displayed in the content of some 
+      SWAMP emails.
+      
     Notes:
 
     - The 'sendmail' driver uses the system's postfix mail system to do the
@@ -31,7 +61,8 @@ Step 2: Modify /var/www/swamp-web-server/.env to enable outgoing SWAMP email.
       message was sent.
 
 Step 3: Modify /opt/swamp/etc/swamp.conf to configure outgoing email for
-notifications that assessments are completed.
+notifications that assessments are completed. (Note: there is a known bug
+that prevents these emails from being sent)
 
     - Set email.host to your SMTP server.
     - Set email.arun.subject to the subject line to be used for assessment
@@ -46,21 +77,15 @@ notifications that assessments are completed.
 
 Enable "Contact Us" for SWAMP-in-a-Box
 --------------------------------------
+Enabling "Contact Us" creates a Contact link in the SWAMP menubar. This link provides
+access to the "Contact Us" page, which displays general contact information and, 
+if email is enabled, provides a form for users to submit a contact/support message.
 
 Prerequisites:
 
-    - You must have configured outgoing email (see above).
     - You need 'root' access to edit the relevant configuration files.
 
-Step 1: Modify /var/www/swamp-web-server/.env to configure contact
-message recipients.
-
-    - Set MAIL_CONTACT_ADDRESS to the email address of the recipient of
-      "Contact Us" messages.
-    - Set MAIL_CONTACT_NAME to the name of the recipient of "Contact Us"
-      messages.
-
-Step 2: Modify /var/www/html/config/config.json to enable the "Contact Us"
+Step 1: Modify /var/www/html/config/config.json to enable the "Contact Us"
 page and set display parameters.
 
     - Add a "contact" array containing a "support" array.
@@ -81,27 +106,31 @@ page and set display parameters.
 			"phoneNumber": "<Your support phone number (optional - you may delete this line)>",
 			"description": "our support staff",
 			"message": "Feel free to contact us with questions."
-		},
+		}
+	},
+
+Step 2: Modify /var/www/swamp-web-server/.env to configure contact
+message recipients. This is only necessary if outgoing email is enabled.
+
+    - Set MAIL_CONTACT_ADDRESS to the email address of the recipient of
+      "Contact Us" messages.
+    - Set MAIL_CONTACT_NAME to the name of the recipient of "Contact Us"
+      messages.
 
 
 Enable "Report Security Incident" for SWAMP-in-a-Box
 ----------------------------------------------------
+Enabling "Report Security Incident" creates a Security link on the SWAMP Contact Us page. 
+This link provides access to the "Report Security Incident" page, which displays 
+information about reporting a security incident and, if email is enabled, provides a form 
+for users to submit a security incident report.
 
 Prerequisites:
 
-    - You must have configured outgoing email (see above).
     - You must have already enabled the "Contact Us" page (see above).
     - You need 'root' access to edit the relevant configuration files.
 
-Step 1: Modify /var/www/swamp-web-server/.env to configure security
-incident message recipients.
-
-    - Set MAIL_SECURITY_ADDRESS to the email address of the recipient of
-      "Report Security Incident" messages.
-    - Set MAIL_SECURITY_NAME to the name of the recipient of "Report
-      Security Incident" messages.
-
-Step 2: Modify /var/www/html/config/config.json to enable the
+Step 1: Modify /var/www/html/config/config.json to enable the
 "Report Security Incident" page and set display parameters.
 
     - Add a "security" array to the "contact" array (see example).
@@ -110,7 +139,7 @@ Step 2: Modify /var/www/html/config/config.json to enable the
 
     Note:
 
-    - The config.js file defines parameters within JSON arrays.
+    - The config.json file defines parameters within JSON arrays.
       Therefore it is important to maintain the array format
       when editing, adding, or removing parameters in this file.
 
@@ -133,6 +162,14 @@ Step 2: Modify /var/www/html/config/config.json to enable the
 		}
 	},
 
+Step 2: Modify /var/www/swamp-web-server/.env to configure security
+incident message recipients. This is only necessary if outgoing email is enabled.
+
+    - Set MAIL_SECURITY_ADDRESS to the email address of the recipient of
+      "Report Security Incident" messages.
+    - Set MAIL_SECURITY_NAME to the name of the recipient of "Report
+      Security Incident" messages.
+      
 
 Additional Information About Available Settings
 -----------------------------------------------

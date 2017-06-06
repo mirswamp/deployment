@@ -7,11 +7,11 @@ DIRS=SOURCES RPMS SPECS SRPMS BUILD TEMPSOURCES
 RELEASE_NUMBER ?= 0.10
 BUILD_NUMBER ?= dev
 TAP=results.tap
-C_ASSESS_VERSION=1.1.6
-JAVA_ASSESS_VERSION=2.4.14
-RUBY_ASSESS_VERSION=1.0.7
-SCRIPT_ASSESS_VERSION=1.0.4
-RESULTPARSER_VERSION=3.0.5
+C_ASSESS_VERSION=1.1.7
+JAVA_ASSESS_VERSION=2.5.6
+RUBY_ASSESS_VERSION=1.1.8
+SCRIPT_ASSESS_VERSION=1.0.5
+RESULTPARSER_VERSION=3.1.1
 CODEDX_WAR_VERSION=1.8.3
 THREADFIX_WAR_VERSION=2.3
 
@@ -76,14 +76,7 @@ CONFIG= \
 	codesonar_common.xslt \
 	generic_common.xslt
 
-SCRIPTS=swampd-common swamp.sh arun.bash cloc-1.68.pl execute_execution_record launch_viewer kill_run notify_user \
-	\
-	create_mysql_root_cnf \
-	execute_sql_script \
-	rebuild_db_platforms \
-	\
-	install_codedx \
-	install_platform
+SCRIPTS=swampd-common swamp.sh arun.bash cloc-1.68.pl execute_execution_record launch_viewer kill_run notify_user
 
 MSOURCES=$(AGENTFILES) $(AGENTPKGS) $(CONFIG) $(SCRIPTS)
 
@@ -91,9 +84,9 @@ CP=/bin/cp -p
 TAR=tar
 TOP=../../..
 
-destfiles:=$(AGENTFILES:%=TEMPSOURCES/%)  $(AGENTPKGS:%=TEMPSOURCES/%) $(CONFIG:%=TEMPSOURCES/%) $(SCRIPTS:%=TEMPSOURCES/%) $(SQLSCRIPTS:%=TEMPSOURCES/%)
+destfiles:=$(AGENTFILES:%=TEMPSOURCES/%) $(AGENTPKGS:%=TEMPSOURCES/%) $(CONFIG:%=TEMPSOURCES/%) $(SCRIPTS:%=TEMPSOURCES/%) $(SQLSCRIPTS:%=TEMPSOURCES/%)
 
-COMMONSOURCES=SOURCES TEMPSOURCES $(destfiles) jars javalib TEMPSOURCES/mysql_global_settings.cnf versioninfo toolchain TEMPSOURCES/scripts.tar 
+COMMONSOURCES=SOURCES TEMPSOURCES $(destfiles) jars javalib TEMPSOURCES/mysql_global_settings.cnf versioninfo toolchain TEMPSOURCES/scripts.tar
 
 # tar file for swamp (rpm)
 # use swamp.conf
@@ -112,7 +105,7 @@ $(SWAMPTARBALL): $(COMMONSOURCES) common resultparser codedx codedx.war threadfi
 SINGLESERVERTARBALL=SOURCES/singleserver-1.tar.gz
 SWAMPINABOXCONF::
 	(cat ../config/swamp.conf.swampinabox; echo "buildnumber=$(BUILD_NUMBER)") > TEMPSOURCES/swamp.conf
-$(SINGLESERVERTARBALL): $(COMMONSOURCES) resultparser common codedx codedx.war threadfix threadfix.war swampinabox-doc SWAMPINABOXCONF
+$(SINGLESERVERTARBALL): $(COMMONSOURCES) resultparser common codedx codedx.war threadfix threadfix.war swampinabox-runtime SWAMPINABOXCONF
 	cp ../../lib/lib_mysqludf_sys.so TEMPSOURCES/Data_Server
 	cp ../../../db/backup_db TEMPSOURCES
 	$(TAR) -C TEMPSOURCES -czvf $@ .
@@ -122,7 +115,7 @@ $(SINGLESERVERTARBALL): $(COMMONSOURCES) resultparser common codedx codedx.war t
 # include common codedx threadfix
 # exclude codedx.war threadfix.war
 SWAMPINABOXTARBALL=SOURCES/swampinabox-1.tar.gz
-$(SWAMPINABOXTARBALL): $(COMMONSOURCES) resultparser-noncomm common codedx threadfix swampinabox-doc SWAMPINABOXCONF
+$(SWAMPINABOXTARBALL): $(COMMONSOURCES) resultparser common codedx threadfix swampinabox-runtime SWAMPINABOXCONF
 	cp ../../lib/lib_mysqludf_sys.so TEMPSOURCES/Data_Server
 	cp ../../../db/backup_db TEMPSOURCES
 	$(TAR) -C TEMPSOURCES -czvf $@ .
@@ -130,33 +123,33 @@ $(SWAMPINABOXTARBALL): $(COMMONSOURCES) resultparser-noncomm common codedx threa
 swampinabox: dirs $(SWAMPINABOXTARBALL)
 	/bin/rm -rf RPMS/noarch
 	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS swampinabox
-	
+
 singleserver: dirs $(SINGLESERVERTARBALL)
 	mv $(SINGLESERVERTARBALL) $(SWAMPINABOXTARBALL)
 	/bin/rm -rf RPMS/noarch
 	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS singleserver
-	
-rpm: dirs $(SWAMPTARBALL) 
-	/bin/rm -rf RPMS/noarch
-	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS  
 
-dirserver: dirs $(SWAMPTARBALL) 
+rpm: dirs $(SWAMPTARBALL)
+	/bin/rm -rf RPMS/noarch
+	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS
+
+dirserver: dirs $(SWAMPTARBALL)
 	/bin/rm -rf RPMS/noarch
 	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS dirserver
 
-dataserver: dirs $(SWAMPTARBALL) 
+dataserver: dirs $(SWAMPTARBALL)
 	/bin/rm -rf RPMS/noarch
 	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS dataserver
 
-exec: dirs $(SWAMPTARBALL) 
+exec: dirs $(SWAMPTARBALL)
 	/bin/rm -rf RPMS/noarch
 	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS exec
 
-submit: dirs $(SWAMPTARBALL) 
+submit: dirs $(SWAMPTARBALL)
 	/bin/rm -rf RPMS/noarch
 	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS submit
 
-prep: dirs $(SWAMPTARBALL) 
+prep: dirs $(SWAMPTARBALL)
 
 .PHONY dirs:
 
@@ -194,10 +187,6 @@ resultparser:
 	cp /swampcs/releases/resultparser-$(RESULTPARSER_VERSION).tar TEMPSOURCES/resultparser.tar
 	echo resultparser:$(RESULTPARSER_VERSION) >> TEMPSOURCES/versions.txt
 
-resultparser-noncomm:
-	cp /swampcs/releases/resultparser-noncomm-$(RESULTPARSER_VERSION).tar TEMPSOURCES/resultparser.tar
-	echo resultparser:$(RESULTPARSER_VERSION) >> TEMPSOURCES/versions.txt
-
 common:
 	cp ../../Common/checktimeout.pl TEMPSOURCES/common/checktimeout.pl
 	cp ../../Common/flushprivs.sql TEMPSOURCES/common/flushprivs.sql
@@ -227,8 +216,10 @@ threadfix:
 threadfix.war:
 	cp ../../../proprietary/DenimGroup/threadfix-$(THREADFIX_WAR_VERSION).war TEMPSOURCES/threadfix/threadfix.war
 
-swampinabox-doc:
-	cp ../../swampinabox/distribution/doc/* TEMPSOURCES/doc/SWAMP-in-a-Box
+swampinabox-runtime:
+	cp ../../swampinabox/runtime/bin/*      TEMPSOURCES/swampinabox/bin
+	cp ../../swampinabox/distribution/doc/* TEMPSOURCES/swampinabox/doc/SWAMP-in-a-Box
+	cp ../../swampinabox/runtime/sbin/*     TEMPSOURCES/swampinabox/sbin
 
 SOURCES:
 	mkdir -p $@
@@ -248,7 +239,9 @@ TEMPSOURCES:
 	mkdir -p $@/common
 	mkdir -p $@/codedx
 	mkdir -p $@/threadfix
-	mkdir -p $@/doc/SWAMP-in-a-Box
+	mkdir -p $@/swampinabox/bin
+	mkdir -p $@/swampinabox/doc/SWAMP-in-a-Box
+	mkdir -p $@/swampinabox/sbin
 
 $(SCRIPTS:%=TEMPSOURCES/%): ../scripts/
 	$(CP) $(<)$(@:TEMPSOURCES/%=%)  $@

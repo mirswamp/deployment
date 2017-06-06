@@ -1,0 +1,841 @@
+#!/usr/bin/perl -w
+
+#  findbadruns.pl   http://www.cs.wisc.edu/~kupsch
+# 
+#  Copyright 2013-2017 James A. Kupsch
+# 
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+# 
+#      http://www.apache.org/licenses/LICENSE-2.0
+# 
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+use strict;
+use Getopt::Long;
+use Config;
+
+#
+# Uncomment the two lines below if there are libraries relative to this program
+#
+#use FindBin;
+#use lib "$FindBin::Bin";
+
+
+my $verbose = 0;
+
+
+my $version = '1.0.4 (May 10, 2017)';
+
+my %toolProps = (
+	'gt-csonar'	=> {
+		bitIndependent		=> 0,
+		revision		=> 0,
+		implemented		=> 1,
+		confFunc		=> \&MakeGtCsonarConf,
+		validateInstallers	=> \&ValidateGtInstallers,
+	    },
+	'ps-ctest'	=> {
+		bitIndependent		=> 0,
+		revision		=> 1,
+		implemented		=> 0,
+		confFunc		=> \&die,
+	    },
+	'ps-jtest'	=> {
+		bitIndependent		=> 0,
+		revision		=> 9,
+		implemented		=> 0,
+		confFunc		=> \&die,
+	    },
+	);
+
+my @linux32Plats = qw/
+	centos-5.11-32
+	centos-6.7-32 centos-6.8-32 centos-6.9-32 centos-6.10-32
+	rhel-6.7-32 rhel-6.8-32 rhel-6.9-32 rhel-6.10-32
+	scientific-5.11-32
+	scientific-6.7-32 scientific-6.8-32 scientific-6.9-32 scientific-6.10-32
+	/;
+my @linux64Plats = qw/
+	android-ubuntu-12.04-64
+	centos-5.11-64
+	centos-6.7-64 centos-6.8-64 centos-6.9-64 centos-6.10-64
+	debian-7.0-64 debian-7.11-64 debian-7.12-64 debian-7.13-64 debian-7.14-64
+	debian-8.5-64 debian-8.6-64 debian-8.7-64 debian-8.8-64
+	fedora-18-64 fedora-19-64 fedora-20-64 fedora-21-64 fedora-22-64
+	fedora-23-64 fedora-24-64 fedora-25-64
+	rhel-6.7-64 rhel-6.8-64 rhel-6.9-64 rhel-6.10-64
+	scientific-5.11-64
+	scientific-6.7-64 scientific-6.8-64 scientific-6.9-64 scientific-6.10-64
+	ubuntu-10.04-64 ubuntu-12.04-64 ubuntu-14.04-64 ubuntu-16.04-64
+	/;
+my $linuxPlat = 'linux';
+my $linux32Plat = 'linux-32';
+my $linux64Plat = 'linux-64';
+
+
+# PrintUsage - print a usage message
+#
+sub PrintUsage
+{
+    my ($defaults) = @_;
+    my ($conf, $temp, $out) = @{$defaults}{qw/conf_file temp_dir output_dir/};
+    my $progname = $0;
+
+    $progname =~ s/.*[\\\/]//;
+
+    # the message below should use spaces not tabs, so it formats correctly
+    # if the user has tab stops set to something other than 8.
+    print STDERR <<EOF;
+Usage: $progname [options]
+
+Creates a SWAMP packaged commercial tool package from installers provided by
+the tool vendor.
+
+options:
+    --tool-name                  -t name of tool
+    --tool-version                  version of the tool
+    --installer-linux               path to installer
+    --installer_linux32             path to 32-bit installer
+    --installer-linux64             path to 64-bit installer
+    --temp-dir                      working directory ($temp)
+    --output-dir                 -o directory to place SWAMP packaged tool ($out)
+    --help                       -h print this message
+    --version                    -v print version
+    --verbose                    -V verbose output
+    --quiet                      -q no output
+    --conf-file=<FILE>           -c configure file to use ($conf)
+
+Valid Tool Names:
+EOF
+
+print STDERR map {"    $_\n"} sort keys %toolProps;
+}
+
+
+# PrintVersion - Print the version of the program
+#
+sub PrintVersion
+{
+    my $progname = $0;
+
+    $progname =~ s/.*(\\\/)//;
+    print "$progname version $version\n";
+}
+
+
+sub ValidateOptions
+{
+    my ($options) = @_;
+
+    my @errors;
+
+    my $toolName = $options->{tool_name};
+    my $installerLinux = $options->{installer_linux};
+    my $installerLinux32 = $options->{installer_linux32};
+    my $installerLinux64 = $options->{installer_linux64};
+    my $toolVersion = $options->{tool_version};
+    if (!defined $toolName)  {
+	push @errors, "Required option not set:  --tool-name";
+    }  elsif (!exists $toolProps{$toolName})  {
+	push @errors, "Invalid value for --tool-name $toolName, see --help";
+    }  else  {
+	my $props = $toolProps{$toolName};
+	if (!$props->{implemented})  {
+	    push @errors, "Support for tool name $toolName is not implemented";
+	}
+	if ($props->{bitIndependent})  {
+	    if (!defined $installerLinux)  {
+		push @errors, "Required option not set:  --installer";
+	    }  elsif (!-f $installerLinux)  {
+		push @errors, "File not found for --install-linux $installerLinux";
+	    }
+	    if (defined $installerLinux32)  {
+		push @errors, "Invalid option --installer-linux32 for tool $toolName";
+	    }
+	    if (defined $installerLinux64)  {
+		push @errors, "Invalid option --installer-linux64 for tool $toolName";
+	    }
+	}  else  {
+	    if (!defined $installerLinux32 && !defined $installerLinux64)  {
+		push @errors, "Required option not set:  --installer-linux32 or --installer64";
+	    }  else  {
+		if (defined $installerLinux32 && !-f $installerLinux32)  {
+		    push @errors, "File not found for --install-linux32 $installerLinux32";
+		}
+		if (defined $installerLinux64 && !-f $installerLinux64)  {
+		    push @errors, "File not found for --install-linux64 $installerLinux64";
+		}
+	    }
+	    if (defined $installerLinux)  {
+		push @errors, "Invalid option --installer for tool $toolName";
+	    }
+	}
+
+	if (exists $props->{validateInstallers})  {
+	    my $func = $props->{validateInstallers};
+	    my $errs = $func->($toolVersion, $installerLinux,
+				$installerLinux32, $installerLinux64);
+	    push @errors, @$errs;
+	}
+    }
+
+    my $tempDir = $options->{temp_dir};
+    if (!-d $tempDir)  {
+	push @errors, "Directory not found for --temp $tempDir";
+    }
+    
+    my $outDir = $options->{output_dir};
+    if (!-d $outDir)  {
+	push @errors, "Directory not found for --output_dir $outDir";
+    }
+
+    if (!defined $toolVersion)  {
+	push @errors, "Required option not set:  --tool-version";
+    }
+
+    return \@errors;
+}
+
+
+# ProcessOptions - Process the options and handle help and version
+#
+# exits with 0 status if --help or --version is supplied
+#       with 1 status if an invalid options is supplied
+#
+# returns a reference to a hash containing the option
+#
+sub ProcessOptions
+{
+    my %optionDefaults = (
+		help			=> 0,
+		version			=> 0,
+		conf_file		=> 'make_swamp_tool.conf',
+		installer_linux		=> undef,
+		installer_linux32	=> undef,
+		installer_linux64	=> undef,
+		verbose			=> 0,
+		quiet			=> 0,
+		output_dir		=> '.',
+		temp_dir		=> '.',
+		tool_name		=> undef,
+		tool_version		=> undef,
+		start_time		=> time(),
+		);
+
+    # for options that contain a '-', make the first value be the
+    # same string with '-' changed to '_', so quoting is not required
+    # to access the key in the hash $option{input_file} instead of
+    # $option{'input-file'}
+    my @options = (
+		"help|h!",
+		"version|v!",
+		"conf_file|conf-file|c=s",
+		"installer_linux|installer-linux=s",
+		"installer_linux32|installer-linux32=s",
+		"installer_linux64|installer-linux64=s",
+		"verbose|V|debug|d!",
+		"quiet|q!",
+		"output_dir|output-dir|o=s",
+		"temp_dir|temp-dir=s",
+		"tool_name|tool-name|t=s",
+		"tool_version|tool-version=s",
+		);
+
+    # Configure file options, will be read in this order
+    my @confFileOptions = qw/ conf_file conf_file2 /;
+
+    Getopt::Long::Configure(qw/require_order no_ignore_case no_auto_abbrev/);
+    my %getoptOptions;
+    my $ok = GetOptions(\%getoptOptions, @options);
+
+    my %options = %optionDefaults;
+    my %optSet;
+    while (my ($k, $v) = each %getoptOptions)  {
+	$options{$k} = $v;
+	$optSet{$k} = 1;
+    }
+
+    my @errs;
+
+    if ($ok)  {
+	foreach my $opt (@confFileOptions)  {
+	    if (exists $options{$opt})  {
+		my $fn = $options{$opt};
+		if ($optSet{$opt} || -e $fn)  {
+		    if (-f $fn)  {
+			my $h = ReadConfFile($fn, undef, \@options);
+
+			while (my ($k, $v) = each %$h)  {
+			    next if $k =~ /^#/;
+			    $options{$k} = $v;
+			    $optSet{$k} = 1;
+			}
+		    }  else  {
+			push @errs, "option '$opt' option file '$fn' not found";
+		    }
+		}
+	    }
+	}
+	while (my ($k, $v) = each %getoptOptions)  {
+	    $options{$k} = $v;
+	    $optSet{$k} = 1;
+	}
+    }
+
+    $verbose = 1 if $options{verbose};
+
+    if ($ok && $options{version})  {
+	PrintVersion();
+	exit 0;
+    }
+
+    if (!$ok || $options{help})  {
+	PrintUsage(\%optionDefaults);
+	exit !$ok;
+    }
+ 
+    # Error checking of options goes here
+    my $errors = ValidateOptions(\%options);
+    if (@$errors)  {
+	print STDERR "Options error:\n", (map {"  $_\n"} @$errors), "\n";
+	$ok = 0;
+    }
+
+    return \%options
+}
+
+
+# HasValue - return true if string is defined and non-empty
+#
+sub HasValue
+{
+    my ($s) = @_;
+
+    return defined $s && $s ne '';
+}
+
+
+# Read a configuration file containing keys and values, returning a reference to
+# a hash containing the keys mapped to values.  The key and value are separated
+# by the '=' and more generally ':<MODIFIER_CHARS>='.  The MODIFIER_CHARS allow
+# the value to contain arbitrary whitespace and new-line characters.  The
+# MODIFIER_CHARS are case insensitive.
+#
+# The key is the characters from the current place in the file to the first '='
+# or last ':' before the first '='.  Leading and trailing whitespace surrounding
+# the key are removed (all other characters are preserved).  Duplicate keys
+# replace prior values.
+#
+# Configuration file lines are of the following form:
+#
+# - blank or all whitespace lines are skipped
+# - comment lines (first non-whitespace is a '#') are skipped
+# - k = v		adds k => v to hash, leading and trailing whitespace is
+# 			removed
+# - k :<COUNT>L=v	add k => VALUE to hash, where VALUE is the next <COUNT>
+# 			lines with whitespace and new lines preserved, except
+# 			the final new line.  If the file does not contain
+# 			<COUNT> additional lines it is an error.
+# - k :=v		same at 'k :1L=v'
+# - k :<COUNT>C=v	add k => Value to hash, where VALUE is the next <COUNT>
+# 			characters after the '=' with whitespace and new lines
+# 			preserved,  If the file does not contain <COUNT>
+# 			additonal characters it is an error.  Processing of the
+# 			next key begins at the next character even if it is on
+# 			the same line as part of the value.
+# - other lines such as those lacking a '=', or an empty key after whitespace
+#   removal are errors
+#
+# To aid human readability of configuration files, creators of configuration
+# files are encouraged to use 'k = v' where the value does not contain a leading
+# or trailing whitespace and there are no new line characters in v, 'k :=v'
+# where v does not contain a new-line character, and one of the other forms only
+# when v contains a new-line character.  Comments and blank lines can be used to
+# increase readability.  If the 'k :<COUNT>C=v' form is used a new-line is
+# encouraged after the value so each key starts on its own line.
+#
+#
+sub ReadConfFile
+{
+    my ($filename, $required, $mapping) = @_;
+
+    my $lineNum = 0;
+    my $colNum = 0;
+    my $linesToRead = 0;
+    my $charsToRead = 0;
+    my %h;
+    $h{'#filenameofconffile'} = $filename;
+
+    my %mapping;
+    if (defined $mapping)  {
+	if (ref($mapping) eq 'HASH')  {
+	    %mapping = %$mapping;
+	}  elsif (ref($mapping) eq 'ARRAY')  {
+	    foreach my $a (@$mapping)  {
+		$a =~ s/[:=!].*$//;
+		my @names = split /\|/, $a;
+		my $toName = shift @names;
+		foreach my $name (@names)  {
+		    $mapping{$name} = $toName;
+		}
+	    }
+	}  else  {
+	    die "ReadConfFile: ERROR mapping has unknown ref type: " . ref($mapping);
+	}
+    }
+
+    open my $confFile, "<$filename" or die "Open configuration file '$filename' failed: $!";
+    my ($line, $k, $origK, $kLine, $err);
+    while (1)  {
+	if (!defined $line)  {
+	    $line = <$confFile>;
+	    last unless defined $line;
+	    ++$lineNum;
+	    $colNum = 1;
+	}
+
+	if ($linesToRead > 0)  {
+	    --$linesToRead;
+	    chomp $line if $linesToRead == 0;
+	    $h{$k} .= $line;
+	}  elsif ($charsToRead > 0)  {
+	    my $v = substr($line, 0, $charsToRead, '');
+	    $colNum = length $v;
+	    $charsToRead -= $colNum;
+	    $h{$k} .= $v;
+	    redo if length $line > 0;
+	}  elsif ($line !~ /^\s*(#|$)/)  {
+	    # line is not blank or a comment (first non-whitespace is a '#')
+	    if ($line =~ /^\s*(.*?)\s*(?::([^:]*?))?=(\s*(.*?)\s*)$/)  {
+		my ($u, $wholeV, $v) = ($2, $3, $4);
+		$origK = $1;
+		$k = (exists $mapping{$origK}) ? $mapping{$origK} : $origK;
+		$kLine = $lineNum;
+		if ($k eq '')  {
+		    chomp $line;
+		    $err = "missing key, line is '$line'";
+		    last;
+		}
+		if (!defined $u)  {
+		    # normal 'k = v' line
+		    $h{$k} = $v;
+		}  else  {
+		    # 'k :<COUNT><UNIT>= v' line
+		    $u = '1L' if $u eq '';
+		    if ($u =~ /^(\d+)L$/i)  {
+			$linesToRead = $1;
+		    }  elsif ($u =~ /^(\d+)C$/i)  {
+			$charsToRead = $1;
+			$colNum = length($line) - length($wholeV);
+		    }  else  {
+			$err = "unknown units ':$u='";
+			last;
+		    }
+		    $h{$k} = '';
+		    $line = $wholeV;
+		    redo;
+		}
+	    }  else  {
+		chomp $line;
+		$err = "bad line (no '='), line is '$line'";
+		last;
+	    }
+	}
+	undef $line;
+    }
+    close $confFile or defined $err or die "Close configuration file '$filename' failed: $!";
+
+    if (defined $err)  {
+	my $loc = "line $lineNum";
+	$loc .= " column $colNum" unless $colNum == 1;
+	die "Configuration file '$filename' $loc $err";
+    }
+
+    if ($linesToRead > 0)  {
+	die "Configuration file '$filename' missing $linesToRead lines for key '$k' at line $kLine";
+    }
+
+    if ($charsToRead > 0)  {
+	die "Configuration file '$filename' missing $charsToRead characters for key '$k' at line $kLine";
+    }
+
+    if (defined $required)  {
+	my @missing = grep { !HasValue $h{$_}; } @$required;
+	if (@missing)  {
+	    die "Configuration file '$filename' missing required keys: " . join(", ", @missing);
+	}
+    }
+
+    return \%h;
+}
+
+
+sub Verbose
+{
+    print @_ if $verbose;
+}
+
+
+sub Mkdir
+{
+    my ($dir, $options) = @_;
+
+    Verbose "mkdir $dir, 0755\n";
+
+    mkdir $dir, 0755 or die "mkdir $dir: $!";
+    push @{$options->{dirs}}, $dir;
+}
+
+
+sub Symlink
+{
+    my ($old, $new, $options) = @_;
+
+    Verbose "symlink $old, $new\n";
+
+    symlink $old, $new or die "symlink $old, $new: $!";
+    push @{$options->{files}}, $new;
+}
+
+
+use File::Copy;
+sub CpFile
+{
+    my ($src, $dst, $options) = @_;
+
+    Verbose "cp $src, $dst\n";
+
+    copy($src, $dst) or die "copy($src, $dst): $!";
+    push @{$options->{files}}, $dst;
+}
+
+
+sub WriteFile
+{
+    my ($fn, $data, $options) = @_;
+
+    open OUT, '>', $fn or die "open $fn: $!";
+    print OUT $data;
+    close OUT or die "close $fn: $!";
+
+    Verbose "create/write $fn\n";
+
+    push @{$options->{files}}, $fn;
+}
+
+
+sub Unlink
+{
+    my ($fn, $options) = @_;
+
+    Verbose "unlink $fn\n";
+    
+    unlink $fn or die "unlink $fn: $!";
+}
+
+
+sub Rmdir
+{
+    my ($fn, $options) = @_;
+
+    Verbose "rmdir $fn\n";
+    
+    rmdir $fn or die "rmdir $fn: $!";
+}
+
+
+sub DeleteCreatedFiles
+{
+    my ($options) = @_;
+
+    my @dirs = reverse @{$options->{dirs}};
+    my @files = reverse @{$options->{files}};
+
+    foreach my $f (@files)  {
+	Unlink $f, $options;
+    }
+
+    foreach my $d (@dirs)  {
+	Rmdir $d, $options;
+    }
+}
+
+
+sub GetExecErrorMsg
+{
+    my ($cmd, $exitCode, $exitSignal, $exitSignalName, $exitErrnoMsg, $exitStatus) = @_;
+
+    my $s = "'$cmd' failed:";
+    $s .= " with exitCode=$exitCode" if defined $exitCode;
+    $s .= " with signal" if defined $exitSignal || defined $exitSignalName;
+    $s .= " $exitSignalName" if defined $exitSignalName;
+    $s .= " ($exitSignal)" if defined $exitSignal;
+    $s .= " exec error ($exitErrnoMsg)" if defined $exitErrnoMsg;
+
+    return $s;
+}
+
+
+sub DoSystem
+{
+    my ($cmd) = @_;
+
+    Verbose "$cmd\n";
+
+    system $cmd;
+    my $exitStatus = $?;
+    my $exitMsg = $!;
+
+    if ($exitStatus != 0)  {
+	my $exitCode;
+	my $exitSignal;
+	my $exitSignalName;
+	my $exitErrnoMsg;
+
+	if ($exitStatus == -1)  {
+	    $exitErrnoMsg = $exitMsg;
+	}  elsif ($exitStatus & 127)  {
+	    $exitSignal = $exitStatus & 127;
+	my $sig = (split ' ', $Config{sig_name})[$exitSignal];
+	    $exitSignalName = "SIG$sig" if defined $sig;
+	}  else  {
+	    $exitCode = $exitStatus >> 8;
+	}
+
+	my $errMsg = GetExecErrorMsg($cmd, $exitCode, $exitSignal,
+			    $exitSignalName, $exitErrnoMsg, $exitStatus);
+	
+	die $errMsg;
+    }
+}
+
+
+sub CheckTarGzContainsFiles
+{
+    my ($tarFn, @files) = @_;
+
+    my %files = map { $_ => 0 } @files;
+    my $cmd = "tar tzf $tarFn";
+
+    Verbose "$cmd\n";
+    open TAR, "-|", 'tar', 'tzf', $tarFn or die "open $cmd: $!";
+    while (<TAR>)  {
+	chomp;
+	if (exists $files{$_})  {
+	    $files{$_} = 1;
+	}
+    }
+    close TAR;
+
+    my @errors;
+    foreach my $f (@files)  {
+	push @errors, "Expected $f in $tarFn" unless $files{$f};
+    }
+
+    return \@errors;
+}
+
+
+sub ValidateGtInstallers
+{
+    my ($version, $installerLinux, $installerLinux32, $installerLinux64) = @_;
+
+    my @errors;
+    my $re32 = "(^|\/)codesonar-$version.\\d*-i686-pc-linux.tar.gz\$";
+    my $re64 = "(^|\/)codesonar-$version.\\d*-x86_64-pc-linux.tar.gz\$";
+    my @reqFiles = ("codesonar-$version/codesonar/bin/codesonar");
+
+    if (defined $installerLinux32 && -f $installerLinux32)  {
+	if ($installerLinux32 !~ /$re32/)  {
+	    push @errors, "32-bit installer, $installerLinux32, does not match $re32";
+	}  else  {
+	    my $e = CheckTarGzContainsFiles($installerLinux32, @reqFiles);
+	    push @errors, @$e;
+	}
+    }
+
+    if (defined $installerLinux64 && -f $installerLinux64)  {
+	if ($installerLinux64 !~ /$re64/)  {
+	    push @errors, "64-bit installer, $installerLinux64, does not match $re32";
+	}  else  {
+	    my $e = CheckTarGzContainsFiles($installerLinux64, @reqFiles);
+	    push @errors, @$e;
+	}
+    }
+
+    return \@errors;
+}
+
+
+sub MakeGtCsonarConf
+{
+    my ($toolArchive, $toolType, $version, $ts) = @_;
+
+    use Sys::Hostname;
+    my $host = hostname();
+    my $username = getpwuid($<);
+
+    my $s =<<EOF;
+tool-archive = $toolArchive
+tool-dir = codesonar-$version
+tool-cmd = codesonar/bin/codesonar
+tool-type = $toolType
+tool-version = $version
+tool-opt =
+
+tool-codesonar-proj = proj
+tool-codesonar-hub-dir = hub
+tool-codesonar-hub-host = 127.0.0.1
+tool-codesonar-hub-port = 7340
+tool-codesonar-hub-license = license.txt
+tool-codesonar-hub-pw-env = CSHUB_PASSWORD
+tool-codesonar-hub-pw = doijwerowern
+
+creation-date = $ts
+creation-host = $host
+creation-user = $username
+EOF
+
+    return $s;
+}
+
+
+sub MakeSwampPackagedTool
+{
+    my ($options) = @_;
+
+    my ($toolName, $toolVersion, $tempDir, $outputDir,
+	$installerLinux, $installerLinux32, $installerLinux64,
+	$startTime)
+		= @{$options}{qw/tool_name tool_version temp_dir output_dir
+			    installer_linux installer_linux32 installer_linux64
+			    start_time/};
+    
+    my $props = $toolProps{$toolName};
+    my $toolRev = $props->{revision};
+    my $confFunc = $props->{confFunc};
+
+    my $toolDirName = "$toolName-$toolVersion";
+    $toolDirName .= "-$toolRev" if $toolRev > 0;
+    my $toolDir = "$tempDir/$toolDirName";
+    my $toolTarGz = "$outputDir/$toolDirName.tar.gz";
+
+    my $md5sumName = 'md5sum';
+    my $md5sum= "$toolDir/$md5sumName";
+
+    my @supports;
+
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime $startTime;
+    $year += 1900;
+    ++$mon;
+
+    my $ts = sprintf "%04d-%02d-%02dT%02d:%02d:%02d",
+		    $year, $mon, $mday, $hour, $min, $sec;
+
+    Mkdir $toolDir, $options;
+
+    if ($installerLinux32)  {
+	my $lDir = "$toolDir/$linux32Plat";
+	my $inFilesDir = "$lDir/in-files";
+	my $confFile = "$inFilesDir/tool.conf";
+	my $installer = $installerLinux32;
+	$installer =~ s/^.*\///;
+	my $inFilesDirInstaller = "$inFilesDir/$installer";
+
+	Mkdir $lDir, $options;
+	Mkdir $inFilesDir, $options;
+
+	CpFile $installerLinux32, $inFilesDirInstaller, $options;
+
+	my $confData = $confFunc->($installer, $toolName, $toolVersion, $ts);
+	WriteFile $confFile, $confData, $options;
+
+	foreach my $d (@linux32Plats)  {
+	    my $platDir = "$toolDir/$d";
+	    Symlink $linux32Plat, $platDir, $options;
+	}
+
+	push @supports, "32-bit";
+    }
+
+    if ($installerLinux64)  {
+	my $lDir = "$toolDir/$linux64Plat";
+	my $inFilesDir = "$lDir/in-files";
+	my $confFile = "$inFilesDir/tool.conf";
+	my $installer = $installerLinux64;
+	$installer =~ s/^.*\///;
+	my $inFilesDirInstaller = "$inFilesDir/$installer";
+
+	Mkdir $lDir, $options;
+	Mkdir $inFilesDir, $options;
+
+	CpFile $installerLinux64, $inFilesDirInstaller, $options;
+
+	my $confData = $confFunc->($installer, $toolName, $toolVersion, $ts);
+	WriteFile $confFile, $confData, $options;
+
+	foreach my $d (@linux64Plats)  {
+	    my $platDir = "$toolDir/$d";
+	    Symlink $linux64Plat, $platDir, $options;
+	}
+
+	push @supports, "64-bit";
+    }
+
+    if ($installerLinux)  {
+	my $lDir = "$toolDir/$linuxPlat";
+	my $inFilesDir = "$lDir/in-files";
+	my $confFile = "$inFilesDir/tool.conf";
+	my $installer = $installerLinux;
+	$installer =~ s/^.*\///;
+	my $inFilesDirInstaller = "$inFilesDir/$installer";
+
+	Mkdir $lDir, $options;
+	Mkdir $inFilesDir, $options;
+
+	CpFile $installerLinux, $inFilesDirInstaller, $options;
+
+	my $confData = $confFunc->($installer, $toolName, $toolVersion, $ts);
+	WriteFile $confFile, $confData, $options;
+
+	foreach my $d (@linux64Plats)  {
+	    my $platDir = "$toolDir/$d";
+	    Symlink $linuxPlat, $platDir, $options;
+	}
+
+	foreach my $d (@linux32Plats)  {
+	    my $platDir = "$toolDir/$d";
+	    Symlink $linuxPlat, $platDir, $options;
+	}
+
+	push @supports, qw/64-bit 32-bit/;
+    }
+
+    my $cmd = "(cd $toolDir && find * -follow -type f \\! -name $md5sumName -exec md5sum {} \\; ) > $md5sum";
+    DoSystem($cmd);
+    push @{$options->{files}}, $md5sum;
+
+    $cmd = "tar czf $toolTarGz -C $tempDir $toolDirName";
+    DoSystem($cmd);
+
+    DeleteCreatedFiles($options);
+
+    print "SWAMP tool archive: $toolTarGz\nPlatform support:   ", join(' ', @supports), "\n";
+}
+
+
+sub main
+{
+    my $options = ProcessOptions();
+    
+    MakeSwampPackagedTool($options);
+}
+
+
+main();

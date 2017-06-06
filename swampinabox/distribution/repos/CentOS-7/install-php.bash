@@ -25,8 +25,8 @@ yum_install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
 yum_confirm remi-release || exit_with_error
 yum-config-manager --enable remi-php70
 
-yum_install php php-mbstring php-mcrypt php-mysqlnd php-pecl-zip php-xml
-yum_confirm php php-mbstring php-mcrypt php-mysqlnd php-pecl-zip php-xml || exit_with_error
+yum_install php php-ldap php-mbstring php-mcrypt php-mysqlnd php-pecl-zip php-xml
+yum_confirm php php-ldap php-mbstring php-mcrypt php-mysqlnd php-pecl-zip php-xml || exit_with_error
 
 echo ""
 echo "Finished installing PHP"

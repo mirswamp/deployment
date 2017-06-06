@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2017 Software Assurance Marketplace
+
+#
+# Rebuild the "platforms" tables in the database based on the
+# .qcow2 image files available on the file system.
+#
+
+BINDIR=`dirname $0`
+
+PLATFORMS_IMAGE_STORE="/swamp/platforms/images"
+PLATFORMS_SCRIPT_STORE="/opt/swamp/sql"
+
+RUN_SQL="/opt/swamp/sbin/execute_sql_script"
+DELETE_SCRIPT="/opt/swamp/sql/delete_platforms.sql"
+
+############################################################################
+
+echo "Beginning to rebuild platforms database based on $PLATFORMS_IMAGE_STORE"
+echo "Starting by removing current database entries"
+"$RUN_SQL" "$DELETE_SCRIPT"
+
+for platform in "$PLATFORMS_IMAGE_STORE"/*.qcow2; do
+    base=$(basename "$platform")
+    path="${base//condor-/}"
+    path="${path//-master*/}"
+
+    platform_script="${PLATFORMS_SCRIPT_STORE}/${path}.sql"
+
+    if [ -r "$platform_script" ]; then
+        echo "Adding $platform to the database"
+        "$RUN_SQL" "$platform_script"
+    else
+        if [[ $path != *viewer* ]]; then
+            echo "Warning: Couldn't find script to add $platform to the database"
+        fi
+    fi
+done
+
+echo "Finished rebuilding platforms database based on $PLATFORMS_IMAGE_STORE"

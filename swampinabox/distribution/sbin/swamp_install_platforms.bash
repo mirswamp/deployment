@@ -6,36 +6,26 @@
 # Copyright 2012-2017 Software Assurance Marketplace
 
 BINDIR=`dirname $0`
+RELEASE_NUMBER="$1"
 
 #
 # Install the platforms for the current release.
 #
 
-srcplatforms="$BINDIR/../swampsrc/platforms"
-dstplatforms="/swamp/platforms/images"
+SOURCE_TARBALL="$BINDIR/../../swampinabox-${RELEASE_NUMBER}-platforms.tar.gz"
+DESTINATION_DIR="/swamp/platforms/images"
 
-if [ ! -d "$srcplatforms" ];
-then
-    echo "No $srcplatforms directory for this install"
-    exit
+if [ ! -r "$SOURCE_TARBALL" ]; then
+    echo "Error: $SOURCE_TARBALL does not exist or is not readable"
+    exit 1
 fi
 
-for platform in $srcplatforms/*.qcow2
-do
-    base=$(basename $platform)
-    path="${base//condor-/}"
-    path="${path//-master*/}"
-    if [ ! -r "$dstplatforms/$base" ]; then
-        echo "cp $platform $dstplatforms"
-        cp $platform $dstplatforms
-    else
-        echo "Found: $dstplatforms/$base"
-    fi
-done
+echo "Extracting platforms into $DESTINATION_DIR"
+tar -C "$DESTINATION_DIR" --strip-components 1 -zxvf "$SOURCE_TARBALL"
 
-chown -R root:root $dstplatforms
-chmod 755 $dstplatforms
-chmod 644 $dstplatforms/*
+chown -R root:root "$DESTINATION_DIR"
+find "$DESTINATION_DIR" -type d -exec chmod u=rwx,og=rx,ugo-s '{}' ';'
+find "$DESTINATION_DIR" -type f -exec chmod u=rw,og=r,ugo-s   '{}' ';'
 
 #
 # Delete platforms from older releases that have been deprecated.

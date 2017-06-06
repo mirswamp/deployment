@@ -21,8 +21,8 @@ trap 'stty echo; remove_db_password_files 1>/dev/null 2>/dev/null; exit 1;' INT 
 #
 NOW=$(date +"%Y%m%d_%H%M%S")
 
-if [ -e "$BINDIR/../../log" ]; then
-    SWAMP_LOGDIR="$BINDIR/../../log"
+if [ -e "$BINDIR/../log" ]; then
+    SWAMP_LOGDIR="$BINDIR/../log"
 else
     SWAMP_LOGDIR="."
 fi
@@ -35,8 +35,8 @@ else
     SWAMP_LOGFILE="$SWAMP_LOGDIR/upgrade_swampinabox_$NOW.log"
 fi
 
-WORKSPACE="$BINDIR/../swampsrc"
-read RELEASE_NUMBER BUILD_NUMBER < $BINDIR/version.txt
+WORKSPACE="$BINDIR/.."
+read RELEASE_NUMBER BUILD_NUMBER SHORT_RELEASE_NUMBER < $BINDIR/version.txt
 
 #
 # Check that requirements for the install have been met
@@ -46,6 +46,16 @@ if [ "$(whoami)" != "root" ]; then
     echo "Perhaps run the install/upgrade script using 'sudo'."
     exit 1
 fi
+
+for archive_file in \
+        "$BINDIR/../../swampinabox-${SHORT_RELEASE_NUMBER}-tools.tar.gz" \
+        "$BINDIR/../../swampinabox-${SHORT_RELEASE_NUMBER}-platforms.tar.gz" \
+        ; do
+    if [ ! -r "$archive_file" ]; then
+        echo "Error: $archive_file does not exist or is not readable"
+        exit 1
+    fi
+done
 
 if [ "$(getenforce)" == "Enforcing" ]; then
     echo "Error: SELinux is enforcing and SWAMP will not function properly.";
@@ -76,7 +86,7 @@ done
 $BINDIR/../sbin/swampinabox_check_prerequisites.pl \
     "$MODE" \
     -distribution \
-    -rpms "$BINDIR/../swampsrc/RPMS" \
+    -rpms "$BINDIR/../RPMS" \
     -version "$RELEASE_NUMBER" \
     || exit 1
 
@@ -84,18 +94,45 @@ $BINDIR/../sbin/swampinabox_check_prerequisites.pl \
 # If required, set it here so that sub-scripts inherit the value.
 if [ "$MODE" = "-install" ]; then
     echo ""
-    echo "\$HOSTNAME is set to: $HOSTNAME"
+    echo "====================================================================="
     echo ""
-    echo "This name needs to match the hostname on the SSL certificates"
-    echo "for the web server on this host."
+    echo "We found the following hostname(s) on the SSL certificates configured"
+    echo "for this host's web server (this list is not necessarily complete):"
     echo ""
-    echo -n "Is '$HOSTNAME' correct? [N/y] "
+
+    potential_hostnames=$($BINDIR/../sbin/swamp_get_potential_web_hosts)
+    while read -r potential_hostname; do
+        echo "    $potential_hostname"
+    done <<< "$potential_hostnames"
+
+    echo ""
+    echo "We are currently using the following for this host's DNS name:"
+    echo ""
+    echo "    $HOSTNAME"
+    echo ""
+    echo "That hostname needs to be accessible to users and have a properly"
+    echo "configured SSL certificate."
+    echo ""
+    echo -n "Use '$HOSTNAME' as this host's DNS name? [N/y] "
     read answer
     if [ "$answer" != "y" ]; then
-        echo -n "Enter the hostname to use: "
-        read answer
-        export HOSTNAME=$answer
+
+        need_hostname=1
+        while [ "$need_hostname" -eq 1 ]; do
+            echo -n "Enter the hostname to use: "
+            read answer
+            export HOSTNAME=$answer
+
+            ip_address=$(perl -e 'use Socket; print inet_ntoa(inet_aton($ARGV[0]))' "$HOSTNAME" 2>/dev/null)
+
+            if [ $? -ne 0 ]; then
+                echo "Error: Unable to determine an IP address for $HOSTNAME"
+            else
+                need_hostname=0
+            fi
+        done
     fi
+
     if [[ "$HOSTNAME" != *"."* ]]; then
         echo ""
         echo "Note: '$HOSTNAME' is not fully-qualified domain name."
@@ -107,13 +144,28 @@ if [ "$MODE" = "-upgrade" ]; then
         echo "Error: No SWAMP-in-a-Box installation to upgrade."
         echo "Run the install script to set up a new SWAMP-in-a-Box."
         exit 1
-    else
-        # Use the hostname that is currently configured for the web server.
-        echo "Extracting hostname from /var/www/swamp-web-server/.env"
-        export HOSTNAME=$(grep '^\s*APP_URL\s*=' '/var/www/swamp-web-server/.env' | sed 's/^\s*APP_URL\s*=\s*https\?:\/\/\([^/]*\)\/\?\s*$/\1/')
-        echo "\$HOSTNAME is set to: $HOSTNAME"
     fi
+
+    # Use the hostname that is currently configured for the web server.
+    echo ""
+    echo "Extracting hostname from /var/www/swamp-web-server/.env"
+    export HOSTNAME=$(grep '^\s*APP_URL\s*=' '/var/www/swamp-web-server/.env' | sed 's/^\s*APP_URL\s*=\s*https\?:\/\/\([^/]*\)\/\?\s*$/\1/')
+    echo "\$HOSTNAME has been set to: $HOSTNAME"
 fi
+
+echo ""
+for other_hostname in localhost localhost.localdomain; do
+    echo -n "Testing that $other_hostname resolves to an IP address ... "
+
+    ip_address=$(perl -e 'use Socket; print inet_ntoa(inet_aton($ARGV[0]))' "$other_hostname" 2>/dev/null)
+
+    if [ $? -eq 0 ]; then
+        echo $ip_address
+    else
+        echo "Error: Unable to determine an IP address for $other_hostname"
+        exit 1
+    fi
+done
 
 #
 # Query for user-configurable parameters and perform the install.
@@ -184,6 +236,8 @@ function test_db_password {
     return 0
 }
 
+echo ""
+echo "====================================================================="
 echo ""
 
 if [ "$MODE" == "-install" ]; then
@@ -265,4 +319,5 @@ $BINDIR/../sbin/swampinabox_do_install.bash \
         "$MODE" \
         "$SWAMP_LOGFILE" \
         "-distribution" \
+        "$SHORT_RELEASE_NUMBER" \
     |& tee "$SWAMP_LOGFILE"

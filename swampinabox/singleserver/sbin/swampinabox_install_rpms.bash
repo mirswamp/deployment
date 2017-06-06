@@ -37,7 +37,7 @@ httpd_ver=$(httpd -v | grep -i 'Server version' | head -n 1 | awk '{ print subst
 echo ""
 echo "Detected httpd version: ${httpd_ver}"
 
-if [ ! -e $BINDIR/../swampinabox_web_config/httpd-${httpd_ver}.conf ]; then
+if [ ! -e $BINDIR/../config_templates/httpd-${httpd_ver}.conf ]; then
     echo "Error: Cannot find source file for patching httpd.conf"
 fi
 
@@ -106,8 +106,7 @@ echo "Finished installing SWAMP RPMs"
 yum_confirm swamp-rt-java swamp-rt-perl swampinabox-backend swamp-web-server || exit_with_error
 
 echo ""
-echo "Patching swamp.conf"
-sed -i "s/HOSTNAME/$HOSTNAME/g" /opt/swamp/etc/swamp.conf
+echo "Setting permissions on swamp.conf"
 chgrp mysql /opt/swamp/etc/swamp.conf
 chmod 440 /opt/swamp/etc/swamp.conf
 
@@ -118,24 +117,26 @@ if [ ! -h /var/www/html/swamp-web-server ]; then
 fi
 
 echo "Patching SWAMP backend web server configuration"
-sed -i -e "s/SED_HOSTNAME/$HOSTNAME/"          /var/www/swamp-web-server/.env
 sed -i -e "s/SED_ENVIRONMENT/SWAMP-in-a-Box/"  /var/www/swamp-web-server/.env
-chown apache:apache                            /var/www/swamp-web-server/.env
-chmod 400                                      /var/www/swamp-web-server/.env
 
-echo "Setting Laravel application key"
-(cd /var/www/swamp-web-server ; php artisan key:generate --quiet)
+echo "Setting permissions on SWAMP backend web server configuration"
+chown apache:apache /var/www/swamp-web-server/.env
+chmod 400           /var/www/swamp-web-server/.env
 
-echo "Patching SWAMP frontend web server configuration"
-# CSA-2792: This config file didn't exist in previous releases.
-# Thus, starting from the template file is always appropriate.
-cp /var/www/html/config/config.swampinabox.json /var/www/html/config/config.json
-sed -i -e "s/SED_HOSTNAME/$HOSTNAME/"  /var/www/html/config/config.json
-chown root:root                        /var/www/html/config/config.json
-chmod 444                              /var/www/html/config/config.json
+if [ "$MODE" = "-install" ]; then
+    echo "Setting Laravel application key"
+    (cd /var/www/swamp-web-server ; php artisan key:generate --quiet)
+fi
+
+echo "Setting permissions SWAMP frontend web server configuration"
+if [ "$MODE" = "-install" ]; then
+    cp /var/www/html/config/config.swampinabox.json /var/www/html/config/config.json
+fi
+chown root:root /var/www/html/config/config.json
+chmod 444       /var/www/html/config/config.json
 
 echo "Patching httpd.conf"
-diff -wu /etc/httpd/conf/httpd.conf $BINDIR/../swampinabox_web_config/httpd-${httpd_ver}.conf | patch /etc/httpd/conf/httpd.conf
+diff -wu /etc/httpd/conf/httpd.conf $BINDIR/../config_templates/httpd-${httpd_ver}.conf | patch /etc/httpd/conf/httpd.conf
 
 echo "Patching php.ini"
 $BINDIR/../sbin/swampinabox_patch_php_ini.pl /etc/php.ini
@@ -145,13 +146,5 @@ if [ $patch_php_ok -ne 0 ]; then
     echo "Warning: Failed to patch php.ini file."
     echo "Warning: Uploading large packages to SWAMP might fail."
 fi
-
-if [ -f /etc/sysconfig/iptables ]; then
-    echo "Patching iptables"
-    diff -wu /etc/sysconfig/iptables $BINDIR/../swampinabox_web_config/iptables | patch /etc/sysconfig/iptables
-else
-    install -m 600 -o root -g root $BINDIR/../swampinabox_web_config/iptables /etc/sysconfig/iptables
-fi
-service iptables restart
 
 exit 0

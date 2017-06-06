@@ -3,16 +3,10 @@
 #
 # Copyright 2012-2017 Software Assurance Marketplace
 
-function exit_with_error {
-    echo ""
-    echo "Error encountered."
-    exit 1
-}
-
-function continue_anyway {
-    echo "Continuing with the install"
-    return 0
-}
+############################################################################
+#
+# Control flow.
+#
 
 function abort_install {
     echo ""
@@ -23,6 +17,17 @@ function abort_install {
     echo ""
     echo "Installation is not complete."
     exit 1
+}
+
+function exit_with_error {
+    echo ""
+    echo "Error encountered."
+    exit 1
+}
+
+function continue_anyway {
+    echo "Continuing with the install"
+    return 0
 }
 
 function confirm_continue() {
@@ -39,6 +44,25 @@ function confirm_continue() {
     fi
     return 0
 }
+
+function remove_db_password_files {
+    for file in \
+            /opt/swamp/sql/sql.cnf \
+            /etc/.mysql_root \
+            /etc/.mysql_web \
+            /etc/.mysql_java \
+            /etc/.mysql_admin; do
+        if [ -e "$file" ]; then
+            echo "Removing '$file'"
+            rm -f "$file"
+        fi
+    done
+}
+
+############################################################################
+#
+# Working with 'yum'.
+#
 
 function yum_erase() {
     echo ""
@@ -79,16 +103,38 @@ function yum_confirm() {
     return 0
 }
 
-function remove_db_password_files {
-    for file in \
-            /opt/swamp/sql/sql.cnf \
-            /etc/.mysql_root \
-            /etc/.mysql_web \
-            /etc/.mysql_java \
-            /etc/.mysql_admin; do
-        if [ -e "$file" ]; then
-            echo "Removing $file"
-            rm -f "$file"
-        fi
-    done
+############################################################################
+#
+# Manage the options file for the 'mysql' client.
+#
+mysql_options_file="/opt/swamp/sql/sql.cnf"
+mysql_command="mysql --defaults-file=$mysql_options_file"
+
+function create_mysql_options_file() {
+    /opt/swamp/sbin/create_mysql_root_cnf "$mysql_options_file"
+}
+
+function remove_mysql_options_file() {
+    rm -f "$mysql_options_file"
+}
+
+############################################################################
+#
+# Manage the MySQL service. Start/stop it only if it isn't already running.
+#
+started_mysql_service="no"
+
+function start_mysql_service() {
+    initial_mysql_service_status=$(/opt/swamp/sbin/swamp_manage_service mysql status)
+
+    if [ "$initial_mysql_service_status" = "stopped" ]; then
+        /opt/swamp/sbin/swamp_manage_service mysql start
+        started_mysql_service="yes"
+    fi
+}
+
+function stop_mysql_service() {
+    if [ "$started_mysql_service" = "yes" ]; then
+        /opt/swamp/sbin/swamp_manage_service mysql stop
+    fi
 }

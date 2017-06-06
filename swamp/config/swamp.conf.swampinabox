@@ -21,10 +21,14 @@ quartermasterHost = localhost
 # Normal workflow results root directory
 resultsFolder = /swamp/working/results/
 
+# AgentDispatcher flag: true for using a subordinate quartermaster to return the BOG, false to make
+# the usual XML-RPC call to the Quartermaster process.
+subordinateQuartermaster = true
+
 # Failed assessment report
 reporturl = https://HOSTNAME/results/
 
-# Frequency in seconds to execute checktimeout script in a viewer VM via cron
+# Frequency in minutes to execute checktimeout script in a viewer VM via cron
 vruntimeout_frequency = 10
 # Number of seconds before an idle viewer VM is permitted to self-terminate
 vruntimeout_duration = 28800
@@ -44,17 +48,19 @@ email.host = smtp.example.com
 email.arun.subject = Your SWAMP assessment has completed
 email.from = no-reply@example.com
 
+# GrammaTech services.conf contents
+tool.gt-csonar.license.host = license-server.example.com
+tool.gt-csonar.license.port = 7350
+
 # Quartermaster database properties. Set these values on the data server and submit node.
 dbQuartermasterURL  = jdbc:mariadb://HOSTNAME:3306/
 dbQuartermasterUser = java_agent
 dbQuartermasterPass = password
 
 # XMLRPC method names
-method.ADMIN_INSERT_EXEC_EVENT     = swamp.admin.insertExecutionEvent
-method.ADMIN_INSERT_SYSTEM_STATUS  = swamp.admin.insertSystemStatus
 method.QUARTERMASTER_BILLOFGOODS   = swamp.quartermaster.getBillOfGoods
-method.QUARTERMASTER_STOREVIEWER   = swamp.quartermaster.storeViewerDatabase
-method.QUARTERMASTER_UPDATEVIEWER  = swamp.quartermaster.updateViewerInstance
+method.QUARTERMASTER_STOREVIEWER   = swamp.viewer.storeViewerDatabase
+method.QUARTERMASTER_UPDATEVIEWER  = swamp.viewer.updateViewerInstance
 method.RUNCONTROLLER_DORUN         = swamp.runController.doRun
 method.GATOR_LISTTOOLS             = swamp.gator.listTools
 method.GATOR_LISTPACKAGES          = swamp.gator.listPackages

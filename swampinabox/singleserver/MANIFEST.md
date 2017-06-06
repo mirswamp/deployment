@@ -46,6 +46,4 @@ sbin
 	find_ip_address.pl		- computes ip address of current host
 	find_release_number.pl	- computes release number of rpms in the specified git working directory
 
-swampinabox_installer	- post install backend configuration patches and changes peculiar to SWAMPINABOX
-
-swampinabox_web_config	- post install web frontend configuration patches and changes peculiar to SWAMPINABOX
+config_templates	- post install configuration patches and changes peculiar to SWAMPINABOX

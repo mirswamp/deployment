@@ -66,7 +66,7 @@ sub update_source_files { my ($srcpath, $dstpath, $diff, $update) = @_ ;
 				}
 				if ($dstfile =~ m/swamp\.conf$/) {
 					print "Patching: $dstfile\n"; 
-					$result = `diff -wu /opt/swamp/etc/swamp.conf $FindBin::Bin/../swampinabox_web_config/swamp.conf | sed -e "s/SED_HOSTNAME/$ENV{'HOSTNAME'}/" | patch /opt/swamp/etc/swamp.conf`;
+					$result = `diff -wu /opt/swamp/etc/swamp.conf $FindBin::Bin/../config_templates/swamp.conf | sed -e "s/SED_HOSTNAME/$ENV{'HOSTNAME'}/" | patch /opt/swamp/etc/swamp.conf`;
 					print "Patch result: $result\n";
 					$result = `diff -w $srcfile $dstfile`;
 					print $result, "\n\n\n";

@@ -5,6 +5,10 @@
 #
 # Copyright 2012-2017 Software Assurance Marketplace
 
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/bin
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/doc/SWAMP-in-a-Box
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/sbin
 
-install -m 444 doc/SWAMP-in-a-Box/* $RPM_BUILD_ROOT/opt/swamp/doc/SWAMP-in-a-Box
+install -m 755 swampinabox/bin/*                $RPM_BUILD_ROOT/opt/swamp/bin
+install -m 644 swampinabox/doc/SWAMP-in-a-Box/* $RPM_BUILD_ROOT/opt/swamp/doc/SWAMP-in-a-Box
+install -m 700 swampinabox/sbin/*               $RPM_BUILD_ROOT/opt/swamp/sbin

@@ -36,7 +36,7 @@ my @viewer_fields = qw(
 my $viewer_constraint = qq{-constraint \"isString(SWAMP_vmu_viewer_status)\"};
 
 sub get_condor_collector_host {
-	my $HTCONDOR_COLLECTOR_HOST;
+	my $HTCONDOR_COLLECTOR_HOST = '';
 	my $config = getSwampConfig();
 	if ($config) {
 		$HTCONDOR_COLLECTOR_HOST = $config->get('htcondor_collector_host');
@@ -44,10 +44,11 @@ sub get_condor_collector_host {
 	return $HTCONDOR_COLLECTOR_HOST;
 }
 
-sub show_collector_records { my ($HTCONDOR_COLLECTOR_HOST, $title, $as_table) = @_ ;
+sub show_collector_records { my ($HTCONDOR_COLLECTOR_HOST, $title, $as_table, $newline, $submit_node) = @_ ;
 	if (! $HTCONDOR_COLLECTOR_HOST) {
 		return;
 	}
+	$newline = "\n" if (! $newline);
 	my ($fields, $constraint, $sortfield);
 	if ($title eq 'assessment') {
 		$fields = \@assessment_fields;
@@ -62,18 +63,27 @@ sub show_collector_records { my ($HTCONDOR_COLLECTOR_HOST, $title, $as_table) = 
 	}
 	$sortfield = "SWAMP_vmu_${title}_vmhostname";
 	my $command = qq{condor_status -pool $HTCONDOR_COLLECTOR_HOST -sort $sortfield -any -af:V, };
+	if ($submit_node) {
+		$command = qq{ssh $submit_node condor_status -pool $HTCONDOR_COLLECTOR_HOST -sort $sortfield -any -af:V, };
+	}
 	foreach my $field (@$fields) {
 		$command .= ' ' . $field;
 	}
-	$command .= ' ' . $constraint if ($constraint);
+	if ($constraint) {
+		if ($submit_node) {
+			$constraint =~ s/\(/\\\(/g;
+			$constraint =~ s/\)/\\\)/g;
+		}
+		$command .= ' ' . $constraint;
+	}
 	my ($output, $status) = systemcall($command);
 	if ($status) {
 		return;
 	}
 	my @lines = split "\n", $output;
-	print "$title collector: [", scalar(@lines), "] $HTCONDOR_COLLECTOR_HOST\n";
+	print "$title collector: [", scalar(@lines), "] $HTCONDOR_COLLECTOR_HOST", $newline;
 	print "-" x length("$title collector:");
-	print "\n";
+	print $newline;
 	if ($as_table && @lines) {
 		print "execrunuid\t\t\t";
 		foreach my $field (@$fields) {
@@ -82,7 +92,7 @@ sub show_collector_records { my ($HTCONDOR_COLLECTOR_HOST, $title, $as_table) = 
 			$field_name =~ s/^SWAMP_vmu_${title}_//;
 			print "\t$field_name";
 		}
-		print "\n";
+		print $newline;
 	}
 	foreach my $line (@lines) {
 		my @parts = split ',', $line;
@@ -91,20 +101,20 @@ sub show_collector_records { my ($HTCONDOR_COLLECTOR_HOST, $title, $as_table) = 
 		s/\s+$//g for @parts;
 		print "execrunuid: " if (! $as_table);
 		print $parts[0];
-		print "\n" if (! $as_table);
+		print $newline if (! $as_table);
 		for (my $i = 1; $i < scalar(@parts); $i++) {
 			if (! $as_table) {
 				my $field_name = $fields->[$i];
 				$field_name =~ s/^SWAMP_vmu_${title}_//;
-				print "  $field_name: ", $parts[$i], "\n";
+				print "  $field_name: ", $parts[$i], $newline;
 			}
 			else {
 				print "\t", $parts[$i];
 			}
 		}
-		print "\n";
+		print $newline;
 	}
-	print "\n";
+	print $newline;
 }
 
 1;

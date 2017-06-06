@@ -14,8 +14,9 @@ RELAYHOST="$4"
 MODE="$5"
 SWAMP_LOGFILE="$6"
 SWAMP_CONTEXT="$7"
+SHORT_RELEASE_NUMBER="$8"
 
-. $BINDIR/../sbin/swampinabox_install_util.functions
+. $BINDIR/swampinabox_install_util.functions
 
 #
 # Sections guarded by a "$MODE" check should need to be executed only once,
@@ -32,42 +33,42 @@ echo "Build number: $BUILD_NUMBER"
 echo "Hostname: $HOSTNAME"
 echo "Postfix relay host: $RELAYHOST"
 
-if [ -x $BINDIR/../sbin/yum_install.bash ]; then
+if [ -x $BINDIR/yum_install.bash ]; then
     echo ""
     echo "########################################"
     echo "##### Installing Required Packages #####"
     echo "########################################"
-    $BINDIR/../sbin/yum_install.bash
+    $BINDIR/yum_install.bash
 fi
 
 echo ""
 echo "#############################"
 echo "##### Stopping Services #####"
 echo "#############################"
-if [ -x $BINDIR/../sbin/swampinabox_configure_services.bash ]; then
-    $BINDIR/../sbin/swampinabox_configure_services.bash
+if [ -x $BINDIR/swampinabox_configure_services.bash ]; then
+    $BINDIR/swampinabox_configure_services.bash
 fi
-$BINDIR/../sbin/manage_services.bash stop
+$BINDIR/manage_services.bash stop
 
 echo ""
 echo "##################################"
 echo "##### Configuring /etc/hosts #####"
 echo "##################################"
-$BINDIR/../sbin/configure_hosts.bash
+$BINDIR/configure_hosts.bash
 
-if [ -x $BINDIR/../sbin/configure_clock.bash ]; then
+if [ -x $BINDIR/configure_clock.bash ]; then
     echo ""
     echo "#############################"
     echo "##### Configuring Clock #####"
     echo "#############################"
-    $BINDIR/../sbin/configure_clock.bash "$MODE" "$SWAMP_CONTEXT"
+    $BINDIR/configure_clock.bash "$MODE" "$SWAMP_CONTEXT"
 fi
 
 echo ""
 echo "################################"
 echo "##### Configuring HTCondor #####"
 echo "################################"
-$BINDIR/../sbin/condor_install.bash
+$BINDIR/condor_install.bash
 
 echo ""
 echo "######################################"
@@ -79,78 +80,86 @@ chsh -s /bin/bash mysql
 # The "workspace" used by the RPM install script ($RPMWORKSPACE) depends
 # on whether we built the RPMs as part of the install.
 #
-if [ -x $BINDIR/../sbin/swampinabox_build_rpms.bash ]; then
+if [ -x $BINDIR/swampinabox_build_rpms.bash ]; then
     echo ""
     echo "#########################"
     echo "##### Building RPMS #####"
     echo "#########################"
-    $BINDIR/../sbin/swampinabox_build_rpms.bash singleserver "$WORKSPACE" "$RELEASE_NUMBER" "$BUILD_NUMBER" || abort_install
+    $BINDIR/swampinabox_build_rpms.bash singleserver "$WORKSPACE" "$RELEASE_NUMBER" "$BUILD_NUMBER" || abort_install
     RPMWORKSPACE="$WORKSPACE/deployment/swamp"
 else
     RPMWORKSPACE="$WORKSPACE"
 fi
 
-if [ -x $BINDIR/../sbin/swampinabox_clean_rpms.bash ]; then
+if [ -x $BINDIR/swampinabox_clean_rpms.bash ]; then
     echo ""
     echo "##########################################"
     echo "##### Cleaning RPM Build By-Products #####"
     echo "##########################################"
-    $BINDIR/../sbin/swampinabox_clean_rpms.bash "$WORKSPACE"
+    $BINDIR/swampinabox_clean_rpms.bash "$WORKSPACE"
 fi
 
 echo ""
 echo "###########################"
 echo "##### Installing RPMS #####"
 echo "###########################"
-$BINDIR/../sbin/swampinabox_install_rpms.bash "$RPMWORKSPACE" "$RELEASE_NUMBER" "$BUILD_NUMBER" "$MODE" || abort_install
+$BINDIR/swampinabox_install_rpms.bash "$RPMWORKSPACE" "$RELEASE_NUMBER" "$BUILD_NUMBER" "$MODE" || abort_install
 
 echo ""
 echo "##########################################"
 echo "##### Performing Database Operations #####"
 echo "##########################################"
-$BINDIR/../sbin/swampinabox_install_database.bash "$MODE" || abort_install
+$BINDIR//swampinabox_install_database.bash "$MODE" "$SWAMP_CONTEXT" || abort_install
+
+echo ""
+echo "#######################################################"
+echo "##### Setting Hostname in Configuration Locations #####"
+echo "#######################################################"
+/opt/swamp/bin/swamp_set_db_host "localhost"
+/opt/swamp/bin/swamp_set_htcondor_host "localhost.localdomain"
+/opt/swamp/bin/swamp_set_web_host "$HOSTNAME"
 
 if [ "$MODE" == "-install" ]; then
     echo ""
     echo "#######################################"
     echo "##### Patching Database Passwords #####"
     echo "#######################################"
-    $BINDIR/../sbin/swampinabox_patch_passwords.pl token
-
-    echo ""
-    echo "########################################"
-    echo "##### Configuring SWAMP Filesystem #####"
-    echo "########################################"
-    $BINDIR/../sbin/swampinabox_make_filesystem.bash
+    $BINDIR/swampinabox_patch_passwords.pl token
 
     echo ""
     echo "#############################"
     echo "##### Configuring Email #####"
     echo "#############################"
-    $BINDIR/../sbin/configure_mail.bash $RELAYHOST
+    $BINDIR/configure_mail.bash $RELAYHOST
 fi
 
-if [ -x $BINDIR/../sbin/swamp_install_platforms.bash ]; then
+echo ""
+echo "########################################"
+echo "##### Configuring SWAMP Filesystem #####"
+echo "########################################"
+$BINDIR/swampinabox_make_filesystem.bash
+
+if [ -x $BINDIR/swamp_install_platforms.bash ]; then
     echo ""
     echo "################################"
     echo "##### Installing Platforms #####"
     echo "################################"
-    $BINDIR/../sbin/swamp_install_platforms.bash
+    $BINDIR/swamp_install_platforms.bash "$SHORT_RELEASE_NUMBER"
 fi
 
-if [ -x $BINDIR/../sbin/swamp_install_tools.bash ]; then
+if [ -x $BINDIR/swamp_install_tools.bash ]; then
     echo ""
     echo "############################"
     echo "##### Installing Tools #####"
     echo "############################"
-    $BINDIR/../sbin/swamp_install_tools.bash
+    $BINDIR/swamp_install_tools.bash "$SHORT_RELEASE_NUMBER"
 fi
 
 echo ""
 echo "########################################"
 echo "##### Configuring sudo and libvirt #####"
 echo "########################################"
-$BINDIR/../sbin/sudo_libvirt.bash
+$BINDIR/sudo_libvirt.bash
 
 echo ""
 echo "###############################"
@@ -162,7 +171,7 @@ echo "###############################"
 # to pipe the output from this script safely, we need to ensure that that
 # stream isn't shared with this script's standard error stream.
 #
-coproc services_fds { $BINDIR/../sbin/manage_services.bash restart 2>&1; }
+coproc services_fds { $BINDIR/manage_services.bash restart 2>&1; }
 
 exec {services_fd}<&${services_fds[0]}
 
@@ -223,16 +232,6 @@ echo "############################################"
 echo "##### Removing Database Password Files #####"
 echo "############################################"
 remove_db_password_files
-
-if [ -x $BINDIR/swampinabox_cleanup_files.bash ]; then
-    if [ "$MODE" == "-upgrade" -a "$SWAMP_CONTEXT" == "-distribution" ]; then
-        echo ""
-        echo "#################################################"
-        echo "##### Removing Files From Previous Releases #####"
-        echo "#################################################"
-        $BINDIR/swampinabox_cleanup_files.bash
-    fi
-fi
 
 echo ""
 echo "###############################################"

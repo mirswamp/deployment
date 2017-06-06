@@ -9,10 +9,10 @@ BINDIR=`dirname "$0"`
 
 . "$BINDIR"/swampinabox_install_util.functions
 
-cp $BINDIR/../swampinabox_installer/10_slotusers /etc/sudoers.d/.
+cp $BINDIR/../config_templates/10_slotusers /etc/sudoers.d/.
 groupadd -f slotusers
 groupmems -g slotusers -a swa-daemon
-install -m 755 $BINDIR/../swampinabox_installer/qemu-kvm-us /usr/libexec/qemu-kvm-us
+install -m 755 $BINDIR/../config_templates/qemu-kvm-us /usr/libexec/qemu-kvm-us
 service libvirtd restart
 
 #
@@ -27,7 +27,7 @@ fi
 
 virsh net-uuid swampinabox 1>/dev/null 2>/dev/null
 if [ $? -ne 0 ]; then
-    virsh net-define $BINDIR/../swampinabox_installer/swampinabox.xml
+    virsh net-define $BINDIR/../config_templates/swampinabox.xml
     virsh net-autostart swampinabox
     virsh net-start swampinabox
 fi

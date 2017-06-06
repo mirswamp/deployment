@@ -1,4 +1,12 @@
 <?xml version="1.0"?>
+
+<!--
+    This file is subject to the terms and conditions defined in
+    'LICENSE.txt', which is part of this source code distribution.
+
+    Copyright 2012-2017 Software Assurance Marketplace
+-->
+
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
     <xsl:output method="html" encoding="UTF-8" doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN" 
         doctype-system="http://www.w3.org/TR/html4/loose.dtd" indent="yes"/>
@@ -531,58 +539,94 @@ var forEach = function(object, block, context) {
     </style>
 </head>
 <body>
-    <H2><xsl:value-of select="/AnalyzerReport/@tool_name"/> v<xsl:value-of select="/AnalyzerReport/@tool_version"/> Report</H2>
-    <hr/>
-    <h3>Summary</h3>
+    <!--<H2><xsl:value-of select="/AnalyzerReport/@tool_name"/> v<xsl:value-of select="/AnalyzerReport/@tool_version"/> Report</H2>-->
+    <H1><div class="icon"><i class="fa fa-trophy"></i></div>Native Viewer Report</H1>
+  <ol class="breadcrumb"><li><a href="#home"><i class="fa fa-home"></i>Home</a></li><li><i class="fa fa-info"></i>About</li></ol> 
+
+ <!--   <h2>Accessment Time</h2>
+  <p><xsl:value-of select="/AnalyzerReport/Accessment_Time"/></p>
+  <h2>Tool Name</h2>
+  <p><xsl:value-of select="/AnalyzerReport/@tool_name"/></p>
+  <h2>Tool Version</h2>
+  <p><xsl:value-of select="/AnalyzerReport/@tool_version"/></p>
+
+    <hr/>-->
+ <!--This line is used as a delimiter to locate the position of the Native Viewer Header,
+    and will be removed in vmu_launchviwer.pl -->
+    <h1>Place_to_insert_NativeViewer_Headerinfo</h1>	
+    <h2>Summary</h2>
+    <!--
     <table border="0" class="summary">
+      <thead>
       <tr>
         <th>Total</th>
       </tr>
       <tr>
         <td><xsl:value-of select="count(//BugInstance)"/></td>
       </tr>
-      </table>
+      </table>-->
+      <h3>Total <xsl:value-of select="count(//BugInstance)"/></h3>
+
     <xsl:if test="count(//BugInstance) > 0">
     <xsl:variable name="numGroup" select="count(//BugGroup)"/>
 	<xsl:variable name="showExplanation" select="false()"/>
 	<xsl:variable name="showEvents" select="false()"/>
-    <table border="0" width="100%" class="sortable"><xsl:attribute name="id">sortable_id_<xsl:value-of select="position()"/></xsl:attribute>
+   <xsl:variable name="numLine" select="count(//StartLine)"/>
+   <xsl:variable name="numColumn" select="count(//StartColumn)"/> 
+	<table class="results"><thead>
             <tr>
                 <xsl:if test="$numGroup > 0"> 
-				<th>Group</th>
+				<th><i class="fa fa-object-group"></i><span> Group</span></th>
                 </xsl:if> 
-                <th align="left">Code</th>
-				<th>File</th>
-                <th>Line</th>
-                <xsl:if test="$showExplanation = 'true'"> 
-                <th>Explanation</th>
+                <th align="left"><i class="fa fa-object-code"></i><span> Code</span></th>
+				<th><i class="fa fa-file"></i><span> File</span>></th>
+               	<xsl:if test="$numLine > 0">
+                <th><i class="fa fa-linode"></i><span> Line</span></th>
+                </xsl:if>
+                <xsl:if test="$numColumn > 0">
+                <th><i class="fa fa-columns"></i><span> Column</span></th>
+                </xsl:if> 
+				<xsl:if test="$showExplanation = 'true'"> 
+                <th><i class="fa fa-commenting"></i><span> Explanation</span></th>
 				</xsl:if>
                 <xsl:if test="$showEvents = 'true'"> 
-                <th>Events</th>
+                <th><i class="fa fa-calendar"></i><span> Events</span></th>
 				</xsl:if>
             </tr>
-    <br/>
+    </thead>
+    <tbody>
     <xsl:for-each select="//BugInstance">
         <tr>
         <xsl:if test="$numGroup > 0"> 
-        <td style="padding: 3px" align="left"><xsl:value-of select="BugGroup"/></td>
+        <td class="group" style="padding: 3px" align="left"><xsl:value-of select="BugGroup"/></td>
         </xsl:if> 
-			<td style="padding: 3px" align="left"><xsl:value-of select="BugCode"/></td>
-			<td style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location[@primary='true']/SourceFile"/></td>
-			<td style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location[@primary='true']/StartLine"/></td>
+			<td class="code" style="padding: 3px" align="left"><xsl:value-of select="BugCode"/></td>
+			<td class="file" style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location[@primary='true']/SourceFile"/></td>
+            <xsl:if test="$numLine > 0">
+			<td class="line" style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location[@primary='true']/StartLine"/></td>
+			</xsl:if>
+			<xsl:if test="$numColumn > 0">
+			<td class="col" style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location[@primary='true']/StartColumn"/></td>
+			</xsl:if>
 			<xsl:if test="$showExplanation = 'true'"> 
 			<td style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location[@primary='true']/Explanation"/></td>
 			</xsl:if>
 			<xsl:if test="$showEvents = 'true'"> 
-			<td style="padding: 3px" align="left"><pre><xsl:value-of select="BugMessage"/></pre></td>
+			<td class="message" style="padding: 3px" align="left"><xsl:value-of select="BugMessage"/></td>
 			</xsl:if>
         </tr>
     </xsl:for-each>
+    </tbody>
     </table>
     </xsl:if>
+    
     <xsl:if test="count(//BugInstance) = 0">
     <h3>No errors found</h3>
     </xsl:if>
+
+    <hr/>
+  <pre>Report generated: <xsl:value-of select="/AnalyzerReport/Report_Time"/></pre>
+
 </body>
 </html>
   </xsl:template>

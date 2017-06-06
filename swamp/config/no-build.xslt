@@ -1,4 +1,12 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+
+<!--
+    This file is subject to the terms and conditions defined in
+    'LICENSE.txt', which is part of this source code distribution.
+
+    Copyright 2012-2017 Software Assurance Marketplace
+-->
+
 <xsl:template match="/">
     <h3><a id="nobuild"><pre><xsl:value-of select="/source-compiles/package-short-name"/>-<xsl:value-of select="/source-compiles/package-version"/> no-build errors</pre></a></h3>
     <xsl:if test="count(//source-file) > 0">

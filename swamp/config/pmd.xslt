@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    This file is subject to the terms and conditions defined in
+    'LICENSE.txt', which is part of this source code distribution.
+
+    Copyright 2012-2017 Software Assurance Marketplace
+-->
+
 <!-- $Header$ -->
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <xsl:output method="html" encoding="UTF-8" doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN" 

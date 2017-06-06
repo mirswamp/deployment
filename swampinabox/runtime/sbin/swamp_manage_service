@@ -1,0 +1,156 @@
+#!/usr/bin/env perl
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2017 Software Assurance Marketplace
+
+#
+# Wrapper script for managing system services.
+# E.g., abstract out `service` vs. `systemctl`.
+#
+
+use strict;
+use warnings;
+use 5.010;
+
+use English qw( -no_match_vars );
+
+my $debug = 0;
+
+#
+# Test for whether `systemctl` is available.
+#
+print "Testing for systemctl ... " if $debug;
+
+if ($debug) {
+    print `which systemctl`;
+}
+else {
+    my $ignored = `which systemctl 1>/dev/null 2>/dev/null`;
+}
+
+my $is_systemctl_avail = (0 == $CHILD_ERROR);
+
+if ($is_systemctl_avail) {
+    print "Found 'systemctl'\n" if $debug;
+}
+else {
+    print "Did not find 'systemctl', assuming 'service'\n" if $debug;
+}
+
+#
+# Query or control a service using `service` or `systemctl`.
+#
+sub tell_service { my ($service, $command) = @_ ;
+    my $system_command;
+
+    if ($is_systemctl_avail) {
+        $system_command = "systemctl $command $service";
+    }
+    else {
+        $system_command = "service $service $command";
+    }
+
+    print "Calling: $system_command\n" if $debug;
+    return (`$system_command` || q{});
+}
+
+#
+# Determine whether a service is "stopped" or "running".
+# WARNING: Might not work in all contexts or for all services.
+#
+sub get_status { my ($service) = @_ ;
+    my $command = $is_systemctl_avail ? 'show --property ActiveState' : 'status';
+    my $status = tell_service($service, $command);
+
+    given ($status) {
+        when (/MySQL running|is running|=active/sm) { $status = 'running'; }
+        when (/not running|stopped|=inactive/sm)    { $status = 'stopped'; }
+        default                                     { $status = 'error'; }
+    }
+
+    print "status $service: $status\n" if $debug;
+    return $status;
+}
+
+#
+# Start or stop a service.
+#
+sub toggle_service { my ($service, $command, $old_state, $new_state) = @_;
+    my $status = get_status($service);
+
+    if ($status eq $new_state) {
+        print "$command $service: already $new_state\n" if $debug;
+        return 0;
+    }
+
+    if ($status eq $old_state) {
+        tell_service($service, $command);
+        $status = get_status($service);
+        if ($status eq $new_state) {
+            print "$command $service: succeeded\n" if $debug;
+            return 0;
+        }
+    }
+
+    print "$command $service: failed, status: $status\n" if $debug;
+    return 1;
+}
+
+sub start_service { my ($service) = @_ ;
+    print "Starting service: $service\n" if $debug;
+    return toggle_service($service, 'start', 'stopped', 'running');
+}
+
+sub stop_service { my ($service) = @_ ;
+    print "Stopping service: $service\n" if $debug;
+    return toggle_service($service, 'stop', 'running', 'stopped');
+}
+
+sub restart_service { my ($service) = @_ ;
+    my $status = get_status($service);
+
+    if ($status eq 'running') {
+        print "Restarting service: $service\n" if $debug;
+        tell_service($service, 'restart');
+        $status = get_status($service);
+    }
+    elsif ($status eq 'stopped') {
+        print "Starting service: $service\n" if $debug;
+        tell_service($service, 'start');
+        $status = get_status($service);
+    }
+
+    return ($status eq 'running' ? 0 : 1);
+}
+
+#
+# Main.
+#
+my $service = $ARGV[0];
+my $command = $ARGV[1];
+
+if (!$service || !$command) {
+    print "Usage: $PROGRAM_NAME <service> (status|start|stop|restart)\n";
+    exit 1;
+}
+
+if ($command eq 'status') {
+    my $status = get_status($service);
+    chomp $status;
+    print $status . "\n";
+    exit 0;
+}
+elsif ($command eq 'start') {
+    exit start_service($service);
+}
+elsif ($command eq 'stop') {
+    exit stop_service($service);
+}
+elsif ($command eq 'restart') {
+    exit restart_service($service);
+}
+
+print "Usage: $PROGRAM_NAME <service> (status|start|stop|restart)\n";
+exit 1;

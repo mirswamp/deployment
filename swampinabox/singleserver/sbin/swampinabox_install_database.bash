@@ -11,6 +11,7 @@ BINDIR=`dirname "$0"`
 
 # uses MODE
 MODE="$1"
+SWAMP_CONTEXT="$2"
 
 if [ "$MODE" == "-install" ]; then
 	echo "Install Database"
@@ -22,12 +23,12 @@ echo "MODE: $MODE"
 
 function install_directory() {
 	echo "install directory"
-    opt=--defaults-file=/opt/swamp/sql/sql.cnf
+	opt=--defaults-file=/opt/swamp/sql/sql.cnf
 }
 
 function upgrade_directory() {
 	echo "upgrade directory"
-    opt=--defaults-file=/opt/swamp/sql/sql.cnf
+	opt=--defaults-file=/opt/swamp/sql/sql.cnf
 	if [ -r /opt/swamp/sql/upgrades_directory/upgrade_script.sql ]
 	then
 		echo 'Running SQL upgrade script(s) against database...'
@@ -35,12 +36,12 @@ function upgrade_directory() {
 		mysql $opt < upgrade_script.sql
 	fi
 	echo "stored procedures"
-	mysql $opt < /opt/swamp/sql/project_procs.sql 
+	mysql $opt < /opt/swamp/sql/project_procs.sql
 }
 
 function install_data() {
 	echo "install data"
-    opt=--defaults-file=/opt/swamp/sql/sql.cnf
+	opt=--defaults-file=/opt/swamp/sql/sql.cnf
 	#
 	# Add database users. The passwords need to be escaped for SQL.
 	#
@@ -63,6 +64,12 @@ function install_data() {
 
 	echo "install prescript"
 	mysql $opt < /opt/swamp/sql/swamp_in_a_box_install_prescript.sql
+	if [ "$SWAMP_CONTEXT" == "-distribution" ]; then
+		mysql $opt < /opt/swamp/sql/swamp_in_a_box_install_prescript_distribution.sql
+	fi
+	if [ "$SWAMP_CONTEXT" == "-singleserver" ]; then
+		mysql $opt < /opt/swamp/sql/swamp_in_a_box_install_prescript_single_server.sql
+	fi
 
 	echo "install tables"
 	mysql $opt < /opt/swamp/sql/project_tables.sql
@@ -94,20 +101,18 @@ function install_data() {
 	mysql $opt < /opt/swamp/sql/populate_tool_shed.sql
 	echo "install populate: viewer_store"
 	mysql $opt < /opt/swamp/sql/populate_viewer_store.sql
-	echo "install populate: non_commercial"
-	mysql $opt < /opt/swamp/sql/populate_tools_non_commercial.sql
+
 	echo "install populate: metric"
 	mysql $opt < /opt/swamp/sql/populate_metric.sql
 
-	hostname=$HOSTNAME
-	outgoing="https://$hostname/results/"
-	codedx="https://$hostname/"
-	echo "base urls $outgoing and $codedx"
-	echo "INSERT INTO system_setting (system_setting_code, system_setting_value) VALUES ('OUTGOING_BASE_URL', '$outgoing');" | mysql $opt assessment
-	echo "INSERT INTO system_setting (system_setting_code, system_setting_value) VALUES ('CODEDX_BASE_URL', '$codedx');" | mysql $opt assessment
-
 	echo "install postscript"
 	mysql $opt < /opt/swamp/sql/swamp_in_a_box_install_postscript.sql
+	if [ "$SWAMP_CONTEXT" == "-distribution" ]; then
+		mysql $opt < /opt/swamp/sql/swamp_in_a_box_install_postscript_distribution.sql
+	fi
+	if [ "$SWAMP_CONTEXT" == "-singleserver" ]; then
+		mysql $opt < /opt/swamp/sql/swamp_in_a_box_install_postscript_single_server.sql
+	fi
 
 	echo "install admin user"
 	swampadmin=`openssl enc -d -aes-256-cbc -in /etc/.mysql_admin -pass pass:swamp`
@@ -115,17 +120,23 @@ function install_data() {
 	swampadmin=${swampadmin//\\/\\\\}
 	echo "INSERT INTO user (user_uid, username, password, first_name, last_name, preferred_name, email, address, phone, affiliation, admin, enabled_flag) VALUES ('80835e30-d527-11e2-8b8b-0800200c9a66', 'admin-s', '${swampadmin}', 'System', 'Admin', 'admin', null, null, null, null, 1, 1);" | mysql $opt project
 
-    if [ -r /opt/swamp/thirdparty/codedx/vendor/codedx.war ]; then
-        echo "install Code Dx"
-        /opt/swamp/bin/install_codedx
-    fi
+	if [ -r /opt/swamp/thirdparty/codedx/vendor/codedx.war ]; then
+		echo "install Code Dx"
+		/opt/swamp/bin/install_codedx
+	fi
 }
 
 function upgrade_data() {
 	echo "upgrade data"
-    opt=--defaults-file=/opt/swamp/sql/sql.cnf
+	opt=--defaults-file=/opt/swamp/sql/sql.cnf
 	echo "upgrade prescript"
 	mysql $opt < /opt/swamp/sql/swamp_in_a_box_upgrade_prescript.sql
+	if [ "$SWAMP_CONTEXT" == "-distribution" ]; then
+		mysql $opt < /opt/swamp/sql/swamp_in_a_box_upgrade_prescript_distribution.sql
+	fi
+	if [ "$SWAMP_CONTEXT" == "-singleserver" ]; then
+		mysql $opt < /opt/swamp/sql/swamp_in_a_box_upgrade_prescript_single_server.sql
+	fi
 
 	echo "upgrade scripts"
 	if [ -r /opt/swamp/sql/upgrades_data/upgrade_script.sql ]
@@ -142,32 +153,38 @@ function upgrade_data() {
 	mysql $opt < /opt/swamp/sql/viewer_store_procs.sql
 	mysql $opt < /opt/swamp/sql/metric_procs.sql
 
-    echo "upgrade viewer database"
-    if [ ! -e /opt/swamp/thirdparty/codedx/vendor/codedx.war ]
-    then
-        echo "Removing Code Dx viewer records (codedx.war not found)"
-        mysql $opt < /opt/swamp/sql/uninstall_codedx.sql
-    fi
+	echo "upgrade viewer database"
+	if [ ! -e /opt/swamp/thirdparty/codedx/vendor/codedx.war ]
+	then
+		echo "Removing Code Dx viewer records (codedx.war not found)"
+		mysql $opt < /opt/swamp/sql/uninstall_codedx.sql
+	fi
 
 	echo "upgrade postscript"
 	mysql $opt < /opt/swamp/sql/swamp_in_a_box_upgrade_postscript.sql
+	if [ "$SWAMP_CONTEXT" == "-distribution" ]; then
+		mysql $opt < /opt/swamp/sql/swamp_in_a_box_upgrade_postscript_distribution.sql
+	fi
+	if [ "$SWAMP_CONTEXT" == "-singleserver" ]; then
+		mysql $opt < /opt/swamp/sql/swamp_in_a_box_upgrade_postscript_single_server.sql
+	fi
 }
 
 function setup_dbroot_defaults_file() {
-    #
-    # In the options file for MySQL:
-    #   - Quote the password, in case it contains '#'.
-    #   - Escape backslashes (the only character that needs escaping).
-    #
-    # See: http://dev.mysql.com/doc/refman/5.7/en/option-files.html
-    #
-    dbroot=`openssl enc -d -aes-256-cbc -in /etc/.mysql_root  -pass pass:swamp`
-    dbroot=${dbroot//\\/\\\\}
-    echo '[client]' > /opt/swamp/sql/sql.cnf
+	#
+	# In the options file for MySQL:
+	#   - Quote the password, in case it contains '#'.
+	#   - Escape backslashes (the only character that needs escaping).
+	#
+	# See: http://dev.mysql.com/doc/refman/5.7/en/option-files.html
+	#
+	dbroot=`openssl enc -d -aes-256-cbc -in /etc/.mysql_root  -pass pass:swamp`
+	dbroot=${dbroot//\\/\\\\}
+	echo '[client]' > /opt/swamp/sql/sql.cnf
 	# chmod ASAP
-    chmod 400 /opt/swamp/sql/sql.cnf
-    echo "password='$dbroot'" >> /opt/swamp/sql/sql.cnf
-    echo "user='root'" >> /opt/swamp/sql/sql.cnf
+	chmod 400 /opt/swamp/sql/sql.cnf
+	echo "password='$dbroot'" >> /opt/swamp/sql/sql.cnf
+	echo "user='root'" >> /opt/swamp/sql/sql.cnf
 }
 
 if [ -r /etc/.mysql_root ]
@@ -203,9 +220,9 @@ then
 		service mysql stop
 	fi
 	# remove defaults-file for mysql database root password
-    /bin/rm -f /opt/swamp/sql/sql.cnf
+	/bin/rm -f /opt/swamp/sql/sql.cnf
 else
-    echo "mysql root password is unavailable"
+	echo "mysql root password is unavailable"
 	exit_with_error
 fi
 

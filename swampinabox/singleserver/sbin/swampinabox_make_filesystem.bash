@@ -16,11 +16,13 @@ mount -va -t glusterfs
 
 mkdir -p /swamp/incoming
 chown apache:apache /swamp/incoming
-chmod 1777 /swamp/incoming
+chmod 0775 /swamp/incoming
+chmod ugo-s /swamp/incoming
 
 mkdir -p /swamp/outgoing
 chown mysql:apache /swamp/outgoing
-chmod 3777 /swamp/outgoing
+chmod 2775 /swamp/outgoing
+chmod uo-s /swamp/outgoing
 
 mkdir -p /swamp/working
 chmod 755 /swamp/working

@@ -20,7 +20,7 @@ fi
 #
 
 stopServices=(cgconfig libvirtd mysql condor httpd swamp)
-startServices=(iptables ${stopServices[@]})
+startServices=(${stopServices[@]})
 restartServices=${startServices[@]}
 
 #

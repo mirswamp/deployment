@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2017 Software Assurance Marketplace
+
+#
+# Set the hostname of the database in all relevant configuration locations.
+#
+
+NEW_HOSTNAME="$1"
+
+if [ -z "$NEW_HOSTNAME" ]; then
+    echo "Usage: $0 <new hostname>"
+    exit 1
+fi
+
+IP_ADDRESS=$(perl -e 'use Socket; print inet_ntoa(inet_aton($ARGV[0]))' "$NEW_HOSTNAME" 2>/dev/null)
+
+if [ $? -ne 0 ]; then
+    echo "Error: Unable to determine an IP address for $NEW_HOSTNAME."
+    exit 1
+fi
+
+if [ "$(whoami)" != "root" ]; then
+    echo "Error: This utility must be run as root. Perhaps use 'sudo'."
+    exit 1
+fi
+
+echo "Beginning to configure $NEW_HOSTNAME as the database host"
+
+#
+# Simple function for abstracting out the invocation of 'sed'.
+#
+function update_config() {
+    key="$1"
+    val="$2"
+    target="$3"
+    nospace="$4"
+
+    val=${val//\//\\\/}
+
+    if [ -r "$target" ]; then
+        echo "Updating $target ($key)"
+        if [ "$nospace" = "-nospace" ]; then
+            sed -i "s/^\s*$key\s*=.*$/$key=$val/" "$target"
+        else
+            sed -i "s/^\s*$key\s*=.*$/$key = $val/" "$target"
+        fi
+    fi
+}
+
+#
+# Update swamp.conf (backend)
+#
+target="/opt/swamp/etc/swamp.conf"
+
+update_config "dbQuartermasterURL" "jdbc:mariadb://$NEW_HOSTNAME:3306/" "$target"
+
+#
+# Update .env (web server)
+#
+target="/var/www/swamp-web-server/.env"
+
+for key in ASSESSMENT_DB_HOST PACKAGE_DB_HOST PLATFORM_DB_HOST PROJECT_DB_HOST TOOL_DB_HOST VIEWER_DB_HOST; do
+    update_config "$key" "$NEW_HOSTNAME" "$target" -nospace
+done
+
+echo "Finished configuring $NEW_HOSTNAME as the database host"

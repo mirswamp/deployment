@@ -47,22 +47,23 @@ install -m 400 Data_Server/Assessment/populate_assessment.sql ${RPM_BUILD_ROOT}/
 install -m 400 Data_Server/Package_Store/populate_package_store.sql  ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Platform_Store/populate_platforms.sql  ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Tool_Shed/populate_tool_shed.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
+install -m 400 Data_Server/Tool_Shed/populate_tool_metadata.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Viewer_Store/populate_viewer_store.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 
-install -m 644 lib/SWAMP/vmu_Support.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_Support.pm 
-install -m 644 lib/SWAMP/vmu_AssessmentSupport.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_AssessmentSupport.pm 
-install -m 644 lib/SWAMP/vmu_ViewerSupport.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_ViewerSupport.pm 
+install -m 644 lib/SWAMP/vmu_Support.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_Support.pm
+install -m 644 lib/SWAMP/vmu_AssessmentSupport.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_AssessmentSupport.pm
+install -m 644 lib/SWAMP/vmu_ViewerSupport.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_ViewerSupport.pm
 
 install -m 400 Data_Server/Viewer_Store/install_codedx.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Viewer_Store/uninstall_codedx.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 SWAMP_in_a_Box/enable_metric_runs.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 
-install -m 644 lib/SWAMP/CodeDX.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/CodeDX.pm 
-install -m 644 lib/SWAMP/ThreadFix.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/ThreadFix.pm 
-install -m 644 lib/SWAMP/vmu_Locking.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_Locking.pm 
+install -m 644 lib/SWAMP/CodeDX.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/CodeDX.pm
+install -m 644 lib/SWAMP/ThreadFix.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/ThreadFix.pm
+install -m 644 lib/SWAMP/vmu_Locking.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_Locking.pm
 install -m 644 lib/SWAMP/vmu_Notification.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_Notification.pm
-install -m 644 lib/SWAMP/vmu_FrameworkUtils.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_FrameworkUtils.pm 
-install -m 644 lib/SWAMP/vmu_PackageTypes.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_PackageTypes.pm 
+install -m 644 lib/SWAMP/vmu_FrameworkUtils.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_FrameworkUtils.pm
+install -m 644 lib/SWAMP/vmu_PackageTypes.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_PackageTypes.pm
 
 install -m 755 swamp_config ${RPM_BUILD_ROOT}/opt/swamp/bin
 install -m 755 vmu_swamp_monitor ${RPM_BUILD_ROOT}/opt/swamp/bin
@@ -78,7 +79,7 @@ install -m 755 vmu_notifyuser.pl ${RPM_BUILD_ROOT}/opt/swamp/bin
 install -m 755 vmu_killrun.pl ${RPM_BUILD_ROOT}/opt/swamp/bin
 
 install -m 755 lib/commons-logging-1.1.jar $RPM_BUILD_ROOT/opt/swamp/lib/commons-logging-1.1.jar
-install -m 755 lib/guava-19.0.jar $RPM_BUILD_ROOT/opt/swamp/lib/guava-19.0.jar
+install -m 755 lib/guava-21.0.jar $RPM_BUILD_ROOT/opt/swamp/lib/guava-21.0.jar
 install -m 755 lib/log4j-1.2.17p.jar $RPM_BUILD_ROOT/opt/swamp/lib/log4j-1.2.17p.jar
 install -m 755 lib/mariadb-java-client-1.4.6.jar $RPM_BUILD_ROOT/opt/swamp/lib/mariadb-java-client-1.4.6.jar
 install -m 755 lib/ws-commons-util-1.0.2.jar $RPM_BUILD_ROOT/opt/swamp/lib/ws-commons-util-1.0.2.jar

@@ -1,4 +1,12 @@
 <?xml version="1.0"?>
+
+<!--
+    This file is subject to the terms and conditions defined in
+    'LICENSE.txt', which is part of this source code distribution.
+
+    Copyright 2012-2017 Software Assurance Marketplace
+-->
+
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
     <xsl:output method="html" encoding="UTF-8" doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN" 
         doctype-system="http://www.w3.org/TR/html4/loose.dtd" indent="yes"/>
@@ -531,9 +539,26 @@ var forEach = function(object, block, context) {
     </style>
 </head>
 <body>
-    <H2><xsl:value-of select="/AnalyzerReport/@tool_name"/> v<xsl:value-of select="/AnalyzerReport/@tool_version"/> Report</H2>
-    <hr/>
-    <h3>Summary</h3>
+    <!--<H2><xsl:value-of select="/AnalyzerReport/@tool_name"/> v<xsl:value-of select="/AnalyzerReport/@tool_version"/> Report</H2>-->
+<H1><div class="icon"><i class="fa fa-trophy"></i></div>Native Viewer Report</H1>
+  <ol class="breadcrumb"><li><a href="#home"><i class="fa fa-home"></i>Home</a></li><li><i class="fa fa-info"></i>About</li></ol> 
+
+
+
+<!--    <h2>Accessment Time</h2>
+  <p><xsl:value-of select="/AnalyzerReport/Accessment_Time"/></p>
+  <h2>Tool Name</h2>
+  <p><xsl:value-of select="/AnalyzerReport/@tool_name"/></p>
+  <h2>Tool Version</h2>
+  <p><xsl:value-of select="/AnalyzerReport/@tool_version"/></p>
+
+    <hr/>-->
+
+<!--This line is used as a delimiter to locate the position of the Native Viewer Header,
+    and will be removed in vmu_launchviwer.pl -->
+    <h1>Place_to_insert_NativeViewer_Headerinfo</h1>	
+    <h2>Summary</h2>
+    <!--
     <table border="0" class="summary">
       <tr>
         <th>Total</th>
@@ -541,29 +566,37 @@ var forEach = function(object, block, context) {
       <tr>
         <td><xsl:value-of select="count(//BugInstance)"/></td>
       </tr>
-      </table>
+      </table>-->
+    <h3>Total <xsl:value-of select="count(//BugInstance)"/></h3>
     <xsl:if test="count(//BugInstance) > 0">
-    <table border="0" width="100%" class="sortable"><xsl:attribute name="id">sortable_id_<xsl:value-of select="position()"/></xsl:attribute>
+    <table class="results"><thead>
             <tr>
-                <th align="left">Name</th>
-                <th align="left">Severity</th>
-                <th align="left">Description</th>
-                <th align="left">Resolution</th>
+                <th><i class="fa fa-pencil-square-o"></i><span> Name</span></th>
+                <th><i class="fa fa-exclamation"></i><span> Severity</span></th>
+                <th><i class="fa fa-info"></i><span> Description</span></th>
+                <th><i class="fa fa-wrench"></i><span> Resolution</span></th>
             </tr>
-    <br/>
+    </thead>
+    <tbody>
     <xsl:for-each select="//BugInstance">
         <tr>
-        <td style="padding: 3px" align="left"><xsl:value-of select="BugCode"/></td>
-        <td style="padding: 3px" align="left"><xsl:value-of select="BugSeverity"/></td>
-        <td style="padding: 3px" align="left"><xsl:value-of select="BugMessage"/></td>
+        <td class="code" style="padding: 3px" align="left"><xsl:value-of select="BugCode"/></td>
+        <td "style="padding: 3px" align="left"><xsl:value-of select="BugSeverity"/></td>
+        <td class="message" style="padding: 3px" align="left"><xsl:value-of select="BugMessage"/></td>
         <td style="padding: 3px" align="left"><xsl:value-of select="ResolutionSuggestion"/></td>
         </tr>
     </xsl:for-each>
+    </tbody>
     </table>
     </xsl:if>
+    
     <xsl:if test="count(//BugInstance) = 0">
     <h3>No errors found</h3>
     </xsl:if>
+
+    <hr/>
+  <pre>Report generated: <xsl:value-of select="/AnalyzerReport/Report_Time"/></pre>
+
 </body>
 </html>
   </xsl:template>

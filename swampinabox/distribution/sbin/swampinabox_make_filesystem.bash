@@ -16,8 +16,8 @@ function make_dir {
 }
 
 make_dir  0755  root:root      /swamp
-make_dir  1777  apache:apache  /swamp/incoming
-make_dir  3777  mysql:apache   /swamp/outgoing
+make_dir  0775  apache:apache  /swamp/incoming
+make_dir  2775  mysql:apache   /swamp/outgoing
 make_dir  0755  root:root      /swamp/working
 make_dir  0755  root:root      /swamp/working/project
 make_dir  0755  mysql:mysql    /swamp/working/results
@@ -26,7 +26,14 @@ make_dir  0755  root:root      /swamp/platforms/images
 make_dir  0755  root:root      /swamp/store
 make_dir  0755  mysql:mysql    /swamp/store/SCAPackages
 make_dir  0755  mysql:mysql    /swamp/store/SCATools
+make_dir  0755  mysql:mysql    /swamp/store/SCATools/add_on
+make_dir  0755  mysql:mysql    /swamp/store/SCATools/bundled
 make_dir  0755  mysql:mysql    /swamp/SCAProjects
+
+# CSA-2955: Clear sticky bits that were unnecessarily set in SWAMP-in-a-Box
+# releases prior to 1.30.
+chmod ugo-s /swamp/incoming
+chmod uo-s /swamp/outgoing
 
 rm -rf /var/lib/libvirt/images
 if [ ! -h /var/lib/libvirt/images ]; then

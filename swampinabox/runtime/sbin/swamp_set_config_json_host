@@ -1,0 +1,40 @@
+#!/opt/perl5/perls/perl-5.18.1/bin/perl
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2017 Software Assurance Marketplace
+
+#
+# Set the URL for the web backend in the web frontend configuration file.
+#
+
+use utf8;
+use strict;
+use warnings;
+
+use File::Slurp qw(read_file write_file);
+use JSON qw(from_json to_json);
+
+my $new_hostname = $ARGV[0];
+my $config_file = '/var/www/html/config/config.json';
+
+my $whoami = qx{whoami};
+chomp $whoami;
+
+if ($whoami ne 'root') {
+    die "Error: This script must be run as 'root', stopping";
+}
+
+if (! -r $config_file) {
+    die "Error: Unable to read $config_file, stopping";
+}
+
+my $config_file_contents = read_file($config_file);
+my $config_ref = from_json($config_file_contents, {'utf8' => 1});
+
+$config_ref->{'servers'}->{'web'} = "https://$new_hostname/swamp-web-server/public";
+$config_file_contents = to_json($config_ref, {'utf8' => 1, 'pretty' => 1, 'canonical' => 1});
+
+write_file($config_file, $config_file_contents);
+exit 0;

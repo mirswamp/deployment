@@ -8,6 +8,9 @@ find a file called "config.json". This file contains a set of parameter
 names and values (in JSON format) that are used to configure the front
 end web application.
 
+For SWAMP-in-a-Box, this file is located at:
+/var/www/html/config/config.json
+
 This file contains the following parameters:
 
 Web Services
@@ -29,40 +32,48 @@ installed.
 
 Support
 -------
-These parameters are related to the Contact Us page.
+These parameters are related to the display of information on the 
+Contact Us page.
 
     contact.support.email
-    : the email address displayed for Contact Us messages
+    : the email address displayed for Contact Us messages. This should
+    correspond with the value for the MAIL_CONTACT_ADDRESS parameter in
+    the backend configuration file.
+    (see SWAMP-web-backend-configuration-parameters.txt)
 
     contact.support.phoneNumber
-    : the phone number displayed for Contact Us messages
+    : the phone number displayed for Contact Us messages.
 
     contact.support.description
     : the description of the person or team receiving messages displayed
-    for Contact Us messages
+    for Contact Us messages.
 
     contact.support.message
-    : additional text displayed for Contact Us messages
+    : additional text displayed for Contact Us messages.
 
 Security
 --------
-These parameters are related to the Report Security Incident. If the
-Support section is defined but the Security section is not included
-in the file, the SWAMP web application does not proved a link from
-the Contact Us page to the Report Security Incident page.
+These parameters are related to the display of information on the 
+Report Security Incident page. If the Support section is defined 
+but the Security section is not included in the file, the SWAMP 
+web application does not proved a link from the Contact Us page 
+to the Report Security Incident page.
 
     contact.security.email
-    : the email address displayed for Report Security Incident messages
+    : the email address displayed for Report Security Incident messages.
+    This should correspond with the value for the MAIL_SECURITY_ADDRESS 
+    parameter in the backend configuration file.
+    (see SWAMP-web-backend-configuration-parameters.txt)
 
     contact.security.phoneNumber
-    : the phone number displayed for Report Security Incident messages
+    : the phone number displayed for Report Security Incident messages.
 
     contact.security.description
     : the description of the person or team receiving messages displayed
-    for Report Security Incident messages
+    for Report Security Incident messages.
 
     contact.security.message
-    : additional text displayed for Report Security Incident messages
+    : additional text displayed for Report Security Incident messages.
 
 Cookie settings
 ===============
@@ -72,7 +83,7 @@ Bar, State of the Show Numbering flag, State of the Auto Refresh flag,
 and State of the Show Grouping flag.
 
     cookie.name
-    This parameter is not currently used. This is set to "swampuuid"
+    The name given to the SWAMP layout cookie. This is set to "swamp"
     when SWAMP-in-a-Box is installed.
 
     cookie.domain
@@ -118,7 +129,7 @@ config.json without the Contact section
 	},
 
 	"cookie": {
-		"name": "swampuuid",
+		"name": "swamp",
 		"domain": null,
 		"path": "/",
 		"secure": false
@@ -159,7 +170,7 @@ config.json with the Contact section
 	},
 
 	"cookie": {
-		"name": "swampuuid",
+		"name": "swamp",
 		"domain": null,
 		"path": "/",
 		"secure": false

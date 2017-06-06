@@ -1,4 +1,12 @@
 <?xml version="1.0"?>
+
+<!--
+    This file is subject to the terms and conditions defined in
+    'LICENSE.txt', which is part of this source code distribution.
+
+    Copyright 2012-2017 Software Assurance Marketplace
+-->
+
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
     <xsl:output method="html" encoding="UTF-8" doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN" 
         doctype-system="http://www.w3.org/TR/html4/loose.dtd" indent="yes"/>
@@ -513,8 +521,6 @@ var forEach = function(object, block, context) {
         table.sortable tr td { background:#eeeee0; }
         table.classcount tr th { font-weight: bold; text-align:left; background:#a6caf0; }
         table.classcount tr td { background:#eeeee0; }
-        table.summary tr th { font-weight: bold; text-align:left; background:#a6caf0; }
-        table.summary tr td { background:#eeeee0; text-align:center;}
         .p1 { background:#FF9999; }
         .p2 { background:#FFCC66; }
         .p3 { background:#FFFF99; }
@@ -531,31 +537,50 @@ var forEach = function(object, block, context) {
     </style>
 </head>
 <body>
-    <H2><xsl:value-of select="/AnalyzerReport/@tool_name"/> v<xsl:value-of select="/AnalyzerReport/@tool_version"/> Report</H2>
-    <hr/>
-    <!--
-    <h3>Summary</h3>
-    <table border="0" class="summary">
+  <!--  <H2><xsl:value-of select="/AnalyzerReport/@tool_name"/> v<xsl:value-of select="/AnalyzerReport/@tool_version"/> Report</H2>
+    <hr/>-->
+	<H1><div class="icon"><i class="fa fa-trophy"></i></div>Native Viewer Report</H1>
+  <ol class="breadcrumb"><li><a href="#home"><i class="fa fa-home"></i>Home</a></li><li><i class="fa fa-info"></i>About</li></ol>
+    
+ <!-- <h2>Accessment Time</h2>
+  <p><xsl:value-of select="/AnalyzerReport/Accessment_Time"/></p>
+  <h2>Tool Name</h2>
+  <p><xsl:value-of select="/AnalyzerReport/@tool_name"/></p>
+  <h2>Tool Version</h2>
+  <p><xsl:value-of select="/AnalyzerReport/@tool_version"/></p>
+  <hr/>-->
+<!--This line is used as a delimiter to locate the position of the Native Viewer Header,
+    and will be removed in vmu_launchviwer.pl -->
+    <h1>Place_to_insert_NativeViewer_Headerinfo</h1>	
+  
+  <h2>Summary</h2>
+    <table class="summary" border="0" class="summary">
+      <thead>
       <tr>
-        <th>Total</th>
-        <th>Priority 1</th>
-        <th>Priority 2</th>
-        <th>Priority 3</th>
-        <th>Priority 4</th>
-        <th>Priority 5</th>
+        <th><i class="fa fa-globe"></i><span> Total</span></th>
+        <th><i class="fa fa-bug"></i><span> Priority 1</span></th>
+        <th><i class="fa fa-bug"></i><span> Priority 2</span></th>
+        <th><i class="fa fa-bug"></i><span> Priority 3</span></th>
+        <th><i class="fa fa-bug"></i><span> Priority 4</span></th>
+        <th><i class="fa fa-bug"></i><span> Priority 5</span></th>
       </tr>
+      </thead>
+      <tbody>
       <tr>
         <td><xsl:value-of select="count(//BugInstance)"/></td>
-        <td><div class="p1"><xsl:value-of select="count(//BugInstance[BugSeverity='1'])"/></div></td>
-        <td><div class="p2"><xsl:value-of select="count(//BugInstance[BugSeverity='2'])"/></div></td>
-        <td><div class="p3"><xsl:value-of select="count(//BugInstance[BugSeverity='3'])"/></div></td>
-        <td><div class="p4"><xsl:value-of select="count(//BugInstance[BugSeverity='4'])"/></div></td>
-        <td><div class="p5"><xsl:value-of select="count(//BugInstance[BugSeverity='5'])"/></div></td>
+        <td><xsl:value-of select="count(//BugInstance[BugSeverity='1'])"/></td>
+        <td><xsl:value-of select="count(//BugInstance[BugSeverity='2'])"/></td>
+        <td><xsl:value-of select="count(//BugInstance[BugSeverity='3'])"/></td>
+        <td><xsl:value-of select="count(//BugInstance[BugSeverity='4'])"/></td>
+        <td><xsl:value-of select="count(//BugInstance[BugSeverity='5'])"/></td>
       </tr>
+    </tbody>
+    
       </table>
-      -->
+      
+    <!--<h3>Total <xsl:value-of select="count(//BugInstance)"/></h3>-->
     <xsl:if test="count(//BugInstance) > 0">
-    <table border="0" width="100%" class="sortable"><xsl:attribute name="id">sortable_id_<xsl:value-of select="position()"/></xsl:attribute>
+    <!--<table border="0" width="100%" class="sortable"><xsl:attribute name="id">sortable_id_<xsl:value-of select="position()"/></xsl:attribute>
             <tr>
 				<th>Severity</th>
 				<th>Group</th>
@@ -574,10 +599,38 @@ var forEach = function(object, block, context) {
         </tr>
     </xsl:for-each>
     </table>
+    </xsl:if>-->
+
+    <table class="results"><thead>
+            <tr>
+        <th>Severity</th>
+        <th><i class="fa fa-object-group"></i><span> Group</span></th>
+				<th><i class="fa fa-codiepie"></i><span> Code</span></th>
+        <th><i class="fa fa-file"></i><span> File</span></th>
+                <th><i class="fa fa-linode"></i><span> Line</span></th>
+                <th><i class="fa fa-commenting"></i><span> Message</span></th>
+            </tr>
+          </thead>
+    <tbody>
+    <xsl:for-each select="//BugInstance">
+        <tr>
+        <td class="priority" style="padding: 3px" align="left"><div><xsl:attribute name="class"><xsl:call-template name="priorityDiv"/></xsl:attribute><xsl:value-of disable-output-escaping="yes" select="BugSeverity"/></div></td>
+        <td class="group" style="padding: 3px" align="left"><xsl:value-of select="BugGroup"/></td>
+        <td class="code" style="padding: 3px" align="left"><xsl:value-of select="BugCode"/></td>
+        <td class="file" style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location[@primary='true']/SourceFile"/></td>
+        <td class="line" style="padding: 3px" align="left"><xsl:value-of select="BugLocations/Location[@primary='true']/StartLine"/></td>
+        <td class="message" style="padding: 3px" align="left"><xsl:value-of select="BugMessage"/></td>
+        </tr>
+    </xsl:for-each>
+    </tbody>
+    </table>
     </xsl:if>
     <xsl:if test="count(//BugInstance) = 0">
     <h3>No errors found</h3>
     </xsl:if>
+
+    <hr/>
+    <pre>Report generated: <xsl:value-of select="/AnalyzerReport/Report_Time"/></pre>
 </body>
 </html>
   </xsl:template>

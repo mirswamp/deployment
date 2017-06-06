@@ -5,6 +5,11 @@
 #
 # Copyright 2012-2017 Software Assurance Marketplace
 
+#
+# Download the latest (most recent) SWAMP-in-a-Box release from
+# platform.swampinabox.org (or the location specified below).
+#
+
 BINDIR=`dirname "$0"`
 
 PLATFORM_HOST="platform.swampinabox.org"
