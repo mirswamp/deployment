@@ -209,7 +209,7 @@ echo ""
 echo "The SWAMP-in-a-Box installer has been downloaded to:"
 echo "$LOCAL_DESTINATION_DIR"
 echo ""
-echo "To install SWAMP-in-a-Box, start by reading the user manual,"
+echo "To install SWAMP-in-a-Box, start by reading the administrator manual,"
 echo "a copy of which can be found in '$LOCAL_DESTINATION_DIR'."
 
 exit 0
