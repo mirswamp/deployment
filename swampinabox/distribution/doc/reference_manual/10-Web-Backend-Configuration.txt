@@ -1,0 +1,609 @@
+[[backend-configuration]]
+SWAMP Web Application Backend Configuration
+-------------------------------------------
+
+The file `/var/www/swamp-web-server/.env` contains various parameter names
+and values that are used to configure the SWAMP web application's backend.
+You must have `root` access to modify this file.
+
+[IMPORTANT]
+This file should be readable only by the `apache` system user. It should
+*never* be world readable, because it contains usernames and passwords for
+accessing various resources.
+
+The remainder of this section describes the parameters. Some descriptions
+refer to https://laravel.com/[Laravel], which is the framework that the
+backend is built upon.
+
+
+[[backend-web-app]]
+Web Application Settings
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+`APP_ENV`::
+
+A description of the SWAMP's environment. This parameter is informational
+and does not affect the functioning of the backend. The SWAMP-in-a-Box
+installer sets this to "SWAMP-in-a-Box".
+
+`APP_DEBUG`::
+
+Whether verbose debugging is enabled. When set to "true", unexpected errors
+in the backend return a detailed error page. When set to "false", such
+errors return a page that says, "Whoops, looks like something went wrong."
+The SWAMP-in-a-Box installer sets this to "false".
+
+`APP_URL`::
+
+The URL used to access the SWAMP's web application routes. The
+SWAMP-in-a-Box installer sets this based on the hostname specified during
+the install process (usually, the host's detected hostname).
+
++
+When the hostname changes, use the `/opt/swamp/bin/swamp_set_web_host`
+utility script to update this parameter, because that script will update not
+only this parameter but also all other configuration locations where the
+hostname is referenced.
+
+`APP_CORS_URL`::
+
+The URL used to access the SWAMP's web site. The SWAMP-in-a-Box installer
+sets this based on the hostname specified during the install process
+(usually, the host's detected hostname).
+
++
+When the hostname changes, use the `/opt/swamp/bin/swamp_set_web_host`
+utility script to update this parameter, because that script will update not
+only this parameter but also all other configuration locations where the
+hostname is referenced.
+
+`APP_FLOODLIGHT`::
+
+The URL and port of the Floodlight server to contact. This is not applicable
+to a SWAMP-in-a-Box installation.
+
+`APP_INCOMING`::
+
+The path to the directory used to temporarily store files uploaded for new
+packages. This should always be set to "/swamp/incoming/".
+
+`APP_KEY`::
+
+An encryption key used by the Laravel framework. Allowed values are any 16
+or 32 character string. The SWAMP-in-a-Box installer sets this to a random
+32 character string.
+
+`APP_PASSWORD_ENCRYPTION_METHOD`::
+
+The encryption method used to hash user passwords before either storing them
+in the SWAMP's SQL database or sending them to an LDAP server. Allowed
+values are "BCRYPT", "SSHA", "SHA1", and "NONE". The SWAMP-in-a-Box
+installer sets this to "BCRYPT".
+
++
+This should be set to "NONE" only if `LDAP_ENABLED` is "true",
+`LDAP_READ_ONLY` is "false", and the LDAP server does its own encryption
+when given a new or changed user password. This is not applicable when
+`LDAP_ENABLED` is "true" and `LDAP_READ_ONLY` is "true".
+
+`APP_PASSWORD_MAX`::
+
+The maximum number of Application Passwords a user can create. Set this to
+an integer greater than zero to allow creation of one or more Application
+Passwords. Set this to zero to disallow creation of Application Passwords.
+The SWAMP-in-a-Box installer sets this to 10.
+
+
+HTCondor Settings
+~~~~~~~~~~~~~~~~~
+
+`HTCONDOR_COLLECTOR_HOST`::
+
+The hostname of the HTCondor collector to contact for information about the
+SWAMP's currently running assessments. The SWAMP-in-a-Box installer sets
+this to "localhost.localdomain".
+
+
+[[backend-mail-settings]]
+Mail Settings
+~~~~~~~~~~~~~
+
+These parameters are related to outgoing email sent by the SWAMP web
+application.
+
+SWAMP-in-a-Box is installed with outgoing email disabled. Prior to enabling
+and configuring outgoing email (instructions can be found in the
+SWAMP-in-a-Box User Manual), you must first configure an outgoing email
+server for use with the SWAMP-in-a-Box host.
+
+`MAIL_ENABLED`::
+
+Whether the SWAMP web application is configured for outgoing email. Set this
+to "true" or "false". When set to "false", outgoing email is disabled, and
+the mail-related settings described below are not applicable. When outgoing
+email is disabled, all functionality that would otherwise result in an email
+being sent by the system runs without sending the email. Specifically:
+
+  * Username is displayed instead of email throughout the web application.
+
+  * Workflows that rely on email, such as requesting a password reset,
+    are disabled.
+
+  * Permission requests, project invitations, and SWAMP administrator
+    invitations are handled exclusively through the notification system.
+
+  * New user accounts do not go through a "pending" state and are
+    instead immediately activated.
+
+  * The option to receive an email on completion of an assessment
+    is unavailable.
+
+  * The Administrator Settings page for Restricted Domains is unavailable.
+
+  * The Administrator Settings page for System Emails is unavailable.
+
+  * The Contact Us and Report Security Incident pages do not include a means
+    to submit a message directly through the web application.
+
++
+The SWAMP-in-a-Box installer sets this parameter to "false".
+
+`MAIL_DRIVER`::
+
+The driver used to send outgoing email. Set this to "smtp" or "sendmail".
+The "smtp" driver makes connections directly to the configured SMTP server
+(see the `MAIL_HOST` parameter below) to deliver email messages. The
+"sendmail" driver uses the host's postfix mail system to deliver email
+messages.
+
++
+With the "smtp" driver, when sending a message, the SWAMP web application
+will wait for an acknowledgment that the message was sent. With the
+"sendmail" driver, the SWAMP web application will *not* necessarily wait for
+an acknowledgment. Instead, if there are issues with the initial attempt to
+send the message, the web application will rely on postfix to continue
+attempting to deliver the message in the background.
+
++
+We recommend using the "sendmail" driver.
+
+`MAIL_HOST`::
+
+The hostname of the SMTP server. This is applicable only if `MAIL_DRIVER` is
+set to "smtp".
+
+`MAIL_PORT`::
+
+The port to connect to on the SMTP server. This is applicable only if
+`MAIL_DRIVER` is set to "smtp".
+
+`MAIL_FROM_ADDRESS`::
+
+The email address to be used as the sender of outgoing SWAMP email.
+
+`MAIL_FROM_NAME`::
+
+The name to be used as the sender of outgoing SWAMP email.
+
+`MAIL_CONTACT_ADDRESS`::
+
+The email address to which messages submitted via the Contact Us page are
+sent. Use this to direct contact messages to a specific administrator or
+help desk. This address is also displayed in the content of some SWAMP
+emails.
+
+`MAIL_CONTACT_NAME`::
+
+The name to which messages submitted via the Contact Us page are sent.
+
+`MAIL_SECURITY_ADDRESS`::
+
+The email address to which messages submitted via the Report Security
+Incident page are sent. Use this to direct security messages to a specific
+administrator or help desk. This address is also displayed in the content of
+some SWAMP emails.
+
+`MAIL_SECURITY_NAME`::
+
+The name to which messages submitted via the Report Security Incident page
+are sent.
+
+`MAIL_ENCRYPTION`::
+
+If `MAIL_DRIVER` is set to "smtp" and the SMTP server uses encryption, set
+this to the type of encryption used. Otherwise, set this to "null".
+
+`MAIL_USERNAME`::
+
+If `MAIL_DRIVER` is set to "smtp" and the SMTP server requires
+a username/password, set this to the username. Otherwise, set this to
+"null".
+
+`MAIL_PASSWORD`::
+
+If `MAIL_DRIVER` is set to "smtp" and the SMTP server requires
+a username/password, set this to the password. Otherwise, set this to
+"null".
+
+
+LDAP Settings
+~~~~~~~~~~~~~
+
+These parameters are related to configuring an LDAP server to store
+user-related personal information for a SWAMP instance. When the SWAMP is
+not configured to use an LDAP server, as is the case when SWAMP-in-a-Box is
+initially installed, user-related personal information is stored in the
+SWAMP's SQL database.
+
+`LDAP_ENABLED`::
+
+Whether the SWAMP uses an LDAP server for user authentication and storing of
+user data. When set to "false", a record is created for each SWAMP user in
+the `project` database. When set to "true", a record is created for each
+SWAMP user in the LDAP server. The SWAMP-in-a-Box installer sets this to
+"false".
+
+`LDAP_PASSWORD_VALIDATION`::
+
+Whether verification of a user's password on sign-in is done by LDAP. When
+set to "true", a user's password is authenticated through an LDAP bind. When
+set to "false", a user's password is authenticated in PHP by comparing it to
+the hash stored in LDAP.
+
++
+Set this to "true" when LDAP is enabled and your LDAP server is able to
+validate against the type of encryption used to store passwords. Set this to
+"false" when LDAP is enabled and LDAP is not able to validate against the
+type of encryption used to store passwords, such as when `LDAP_READ_ONLY` is
+"false" and `APP_PASSWORD_ENCRYPTION_METHOD` is "BCRYPT".
+
++
+The SWAMP-in-a-Box installer sets this to "false".
+
+`LDAP_READ_ONLY`::
+
+Whether the SWAMP is prevented from adding or editing user records in the
+LDAP server. When set to "false", the SWAMP assumes that it has total
+control over user attributes and LDAP entries. In this case, the SWAMP
+should be the only client of the LDAP server. When set to "true", the SWAMP
+assumes that creation and editing of user attributes and LDAP entries is to
+be done outside of the SWAMP. In this case, the SWAMP disables any workflows
+that would result in the creation or editing of user records, including user
+passwords. Specifically:
+
+  * The sign up button is removed from the SWAMP home page. However, any
+    user with a record in the LDAP server can sign in to the SWAMP, and
+    supporting records in the SWAMP's SQL database will be created
+    automatically on sign in.
+
+  * The "Reset my password" link is removed from the sign-in page.
+
+  * The Linked Account Use Policy page does not allow creation of new
+    accounts, only linking to existing accounts.
+
+  * The user profile page displays user demographics as stored in LDAP
+    but does not allow them to be edited in the SWAMP web application.
+
+  * The user profile page does not include options to change or reset
+    the user's password or to delete the account.
+
+  * The SWAMP administrator Review Accounts page does not provide options to
+    flag accounts as hibernated or to require a password reset.
+
++
+This should be set to "true" if you are using a pre-existing LDAP server.
+The SWAMP-in-a-Box installer sets this to "false".
+
+`LDAP_MIR_SWAMP`::
+
+Whether the LDAP server is configured with the schema used in the
+mir-swamp.org LDAP server. Set to "true" or "false". The purpose of this
+parameter is to support setting a legacy, required attribute in the LDAP
+server used by mir-swamp.org. In all other cases, this should be set to
+"false". The SWAMP-in-a-Box installer sets this to "false".
+
+`LDAP_HOST`::
+
+The URL of the LDAP server to connect to, including the protocol and host,
+e.g. "ldaps://ldap.example.org". The specified LDAP server must support LDAP
+protocol 3. This is applicable only if `LDAP_ENABLED` is set to "true".
+
+`LDAP_PORT`::
+
+The port to connect to on the configured `LDAP_HOST`. The SWAMP-in-a-Box
+installer sets this to "636". This is applicable only if `LDAP_ENABLED` is
+set to "true".
+
+`LDAP_BASE_DN`::
+
+The RDN search base for LDAP searches. This needs to be set based on the
+configuration of the base `dn` of the LDAP directory for your users. The
+SWAMP-in-a-Box installer sets this to "ow=people,o=SWAMP,dc=cosalab,dc=org".
+This is applicable only if `LDAP_ENABLED` is set to "true".
+
+`LDAP_USER_RDN_ATTR`::
+
+The Prefix RDN attribute for users in the LDAP server. This needs to be set
+based on how `dn` fields are formed in the LDAP server. The SWAMP-in-a-Box
+installer sets this to "swampUuid". This is applicable only if
+`LDAP_ENABLED` is set to "true".
+
+`LDAP_SWAMP_UID_ATTR`::
+
+The LDAP attribute to be used as an index into the SWAMP database. This must
+be set to an attribute that uniquely identifies each user and is
+unchangeable. Often, this will be the same as `LDAP_USER_RDN_ATTR`. The
+SWAMP-in-a-Box installer sets this to "swampUuid". This is applicable only
+if `LDAP_ENABLED` is set to "true".
+
++
+Note that this attribute will be used to identify users in the SWAMP's web
+application routes and, as such, will be displayed in URLs for the SWAMP's
+web pages with data for a specific user.
+
+`LDAP_FIRSTNAME_ATTR`::
+
+The LDAP attribute for users' first names. The SWAMP-in-a-Box installer sets
+this to "givenName". This is applicable only if `LDAP_ENABLED` is set to
+"true".
+
++
+If `LDAP_READ_ONLY` is set to "true" and your LDAP server does not have an
+attribute for users' first names, set this to "ignore". If `LDAP_READ_ONLY`
+is set to "false", this attribute can be edited through the SWAMP web
+interface.
+
+`LDAP_LASTNAME_ATTR`::
+
+The LDAP attribute for users' last names. The SWAMP-in-a-Box installer sets
+this to "sn" (surname). This is applicable only if `LDAP_ENABLED` is set to
+"true".
+
++
+If `LDAP_READ_ONLY` is set to "true" and your LDAP server does not have an
+attribute for users' last names, set this to "ignore". If `LDAP_READ_ONLY`
+is set to "false", this attribute can be edited through the SWAMP web
+interface.
+
+`LDAP_FULLNAME_ATTR`::
+
+The LDAP attribute for users' full names. The SWAMP-in-a-Box installer sets
+this to "cn" (common name). This is applicable only if `LDAP_ENABLED` is set
+to "true".
+
++
+If your LDAP server does not have an attribute for users' full names, set
+this to "ignore". If `LDAP_READ_ONLY` is set to "false", the SWAMP will
+generally set this attribute to either the first and last name of the given
+user or to "none". It is not directly editable in the SWAMP web interface.
+
+`LDAP_PASSWORD_ATTR`::
+
+The LDAP attribute for users' passwords. The SWAMP-in-a-Box installer sets
+this to "userPassword". This is applicable only if `LDAP_ENABLED` is set to
+"true".
+
++
+If `LDAP_READ_ONLY` is set to "false", a user will be able to set a password
+on signing up for the SWAMP and later be able to change it through the SWAMP
+web interface.
+
+`LDAP_USERNAME_ATTR`::
+
+The LDAP attribute to be mapped to the SWAMP username. The SWAMP-in-a-Box
+installer sets this to "uid". This is applicable only if `LDAP_ENABLED` is
+set to "true".
+
++
+This must be set to an attribute that uniquely identifies each user. If
+`LDAP_READ_ONLY` is set to "false", this attribute can be edited through the
+SWAMP web interface as long as the new value is unique.
+
+`LDAP_EMAIL_ATTR`::
+
+The LDAP attribute for users' email addresses. The SWAMP-in-a-Box installer
+sets this to "mail". This is applicable only if `LDAP_ENABLED` is set to
+"true".
+
++
+If `EMAIL_ENABLED` is set to "true" and `LDAP_READ_ONLY` is set to "false",
+this attribute can be edited through the SWAMP web interface. If
+`LDAP_READ_ONLY` is set to "false" and `EMAIL_ENABLED` is also set to
+"false", you can set `LDAP_EMAIL_ATTR` to "ignore" and the SWAMP will not
+set it. Otherwise, the SWAMP will set the email attribute in LDAP to
+a single space character.
+
+`LDAP_ORG_ATTR`::
+
+The LDAP attribute for users' affiliations. The SWAMP-in-a-Box installer
+sets this to "o" (organization). This is applicable only if `LDAP_ENABLED`
+is set to "true".
+
++
+This should be an optional attribute in LDAP. If `LDAP_READ_ONLY` is set to
+"true" and your LDAP server does not have an attribute for users'
+affiliations, set this to "ignore". If `LDAP_READ_ONLY` is set to "false",
+this attribute can be edited through the SWAMP web interface.
+
+`LDAP_OBJECTCLASS`::
+
+A comma-separated list of "objectClass" attributes to be set for each user.
+Set this to a comma-separated list of the "objectClass" attributes required
+by the LDAP server. The SWAMP-in-a-Box installer sets this to
+"top,person,organizationalPerson,inetOrgPerson,eduPerson,swampEntity", which
+defines the following "objectClass" attributes:
+
+  * objectClass: top
+
+  * objectClass: person
+
+  * objectClass: organizationalPerson
+
+  * objectClass: inetOrgPerson
+
+  * objectClass: eduPerson
+
+  * objectClass: swampEntity
+
++
+This is applicable only if `LDAP_ENABLED` is set to "true" and
+`LDAP_READ_ONLY` is set to "false".
+
+`LDAP_WEB_USER`::
+
+The full `dn` of a credentialed LDAP user with global LDAP read access. The
+SWAMP web server uses this to get information about SWAMP users from LDAP.
+This is applicable only if `LDAP_ENABLED` is set to "true".
+
+`LDAP_WEB_USER_PASSWORD`::
+
+The password for `LDAP_WEB_USER`. This is applicable only if `LDAP_ENABLED`
+is set to "true".
+
+`LDAP_PASSWORD_SET_USER`::
+
+The full `dn` of a credentialed LDAP user with permission to change other
+users' passwords. The SWAMP web server uses this to create and change user
+passwords in LDAP. This is applicable only if `LDAP_ENABLED` is set to
+"true" and `LDAP_READ_ONLY` is set to "false".
+
+`LDAP_PASSWORD_SET_USER_PASSWORD`::
+
+The password for `LDAP_SET_USER`. This is applicable only if `LDAP_ENABLED`
+is set to "true" and `LDAP_READ_ONLY` is set to "false".
+
+
+Third-Party Login Settings
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+These parameters can be set to allow users to sign in using credentials from
+third-party sites. Supported third-party sites are: GitHub, Google, and
+CILogon. Each site has a corresponding set of parameters; in the
+descriptions below, replace `[SITE]` with either `GITHUB`, `GOOGLE`, or
+`CILOGON`.
+
+SWAMP-in-a-Box is installed with third-party logins disabled. Prior to
+enabling third-party logins for a site, you must set up a corresponding
+OAuth Application with the site (instructions can be found in the
+SWAMP-in-a-Box User Manual).
+
+`[SITE]_ENABLED`::
+
+Whether the SWAMP web application allows signing in via the given site. When
+set to "true", the SWAMP provides a means to sign up and sign in via an
+account with the site. The SWAMP-in-a-Box installer sets this to "false".
+
+`[SITE]_CLIENT_ID`::
+
+The Client ID set in the OAuth Application for the site. This is applicable
+only when `[SITE]_ENABLED` is set to "true".
+
+`[SITE]_CLIENT_SECRET`::
+
+The Client Secret set in the OAuth Application for the site. This is
+applicable only when `[SITE]_ENABLED` is set to "true".
+
+
+API Settings
+~~~~~~~~~~~~
+
+`API_EXPLORER_ENABLED`::
+
+Whether the API Explorer interface for documenting the SWAMP web
+application's routes is made available. The SWAMP-in-a-Box installer sets
+this to "false", because the required database tables are not included with
+SWAMP-in-a-Box.
+
+
+Session Related Settings
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+These parameters determine how session (logon) cookies behave.
+
+`SESSION_DRIVER`::
+
+The driver used to manage session data. The SWAMP-in-a-Box installer sets
+this to "cookie". This should not be changed.
+
+`SESSION_LIFETIME`::
+
+Determines the expiration date for SWAMP session cookies, in minutes, from
+the time they are issued. The SWAMP-in-a-Box installer sets this to "2160"
+(36 hours). Set this to "0" if you are setting `SESSION_EXPIRE_ON_CLOSE` to
+"true".
+
+`SESSION_EXPIRE_ON_CLOSE`::
+
+Whether SWAMP session cookies expire when the browser session ends. The
+SWAMP-in-a-Box installer sets this to "false". Before changing this to
+"true", set `SESSION_LIFETIME` to "0".
+
+`SESSION_COOKIE_NAME`::
+
+The name of the SWAMP session cookie. The SWAMP-in-a-Box installer sets this
+to "swamp_session".
+
+`SESSION_COOKIE_DOMAIN`::
+
+The name of the domain for the session cookie. Set this to "null" to use the
+same domain name as `APP_URL`. The SWAMP-in-a-Box installer sets this to
+"null".
+
+`SESSION_COOKIE_SECURE`::
+
+Whether SWAMP session cookies are sent for encrypted connections only. The
+SWAMP-in-a-Box installer sets this to "true".
+
+
+Database Settings
+~~~~~~~~~~~~~~~~~
+
+These parameters provide the SWAMP web application with access to the
+SWAMP's SQL databases. There is a set of parameters for each of the
+following databases: `project`, `package`, `tool`, `platform`, `assessment`,
+and `viewer`. Each database has a corresponding set of parameters; in the
+descriptions below, replace `[DB]` with `PROJECT`, `PACKAGE`, `TOOL`,
+`PLATFORM`, `ASSESSMENT`, or `VIEWER`.
+
+`[DB]_HOST`::
+
+The hostname of the database server. The SWAMP-in-a-Box installer sets this
+to "localhost".
+
+`[DB]_PORT`::
+
+The port to connect to on the database server. The SWAMP-in-a-Box installer
+sets this "3306".
+
+`[DB]_DATABASE`::
+
+The name of the database ("project", "package", "tool", "platform",
+"assessment", or "viewer") for which the set of parameters applies.
+
+`[DB]_USERNAME`::
+
+The database user whose credentials will be used by the SWAMP web
+application to access the database. The SWAMP-in-a-Box installer sets this
+to "web".
+
+`[DB]_PASSWORD`::
+
+The password for the database user above for accessing the database. The
+SWAMP-in-a-Box installer sets this to the password entered during the
+install process.
+
+
+Miscellaneous Settings
+~~~~~~~~~~~~~~~~~~~~~~
+
+These parameters control various operations of the Laravel framework. Their
+values should not be changed from the ones set by the SWAMP-in-a-Box
+installer.
+
+`CACHE_DRIVER`::
+
+The SWAMP-in-a-Box installer sets this to "file".
+
+`QUEUE_DRIVER`::
+
+The SWAMP-in-a-Box installer sets this to "sync".

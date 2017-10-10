@@ -26,22 +26,3 @@ install -m 400 SWAMP_in_a_Box/swamp_in_a_box_upgrade_postscript_single_server.sq
 install -m 400 Data_Server/Metric/metric_tables.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Metric/metric_procs.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Metric/populate_metric.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
-
-install -m 400 Data_Server/Platform_Store/delete_platforms.sql  ${RPM_BUILD_ROOT}/opt/swamp/sql
-install -m 400 Data_Server/Platform_Store/platforms/*           ${RPM_BUILD_ROOT}/opt/swamp/sql
-
-mkdir -p ${RPM_BUILD_ROOT}/opt/swamp/sql/tools
-install -m 400 Data_Server/Metric/metric_tools/* ${RPM_BUILD_ROOT}/opt/swamp/sql/tools
-install -m 400 Data_Server/Tool_Shed/tools_MIR_and_SiaB/* ${RPM_BUILD_ROOT}/opt/swamp/sql/tools
-
-mkdir -p ${RPM_BUILD_ROOT}/opt/swamp/sql/tools_add_on
-install -m 400 Data_Server/Tool_Shed/tools_Siab_add_on/* ${RPM_BUILD_ROOT}/opt/swamp/sql/tools_add_on
-
-mkdir -p ${RPM_BUILD_ROOT}/opt/swamp/sql/tools_other
-install -m 400 Data_Server/Tool_Shed/tools_MIR_only/* ${RPM_BUILD_ROOT}/opt/swamp/sql/tools_other
-
-mkdir -p ${RPM_BUILD_ROOT}/opt/swamp/sql/util
-install -m 400 Data_Server/Tool_Shed/tool_install.sql ${RPM_BUILD_ROOT}/opt/swamp/sql/util
-install -m 400 Data_Server/Tool_Shed/tool_uninstall.sql ${RPM_BUILD_ROOT}/opt/swamp/sql/util
-install -m 400 Data_Server/Tool_Shed/delete_all_tools.sql  ${RPM_BUILD_ROOT}/opt/swamp/sql/util
-install -m 400 Data_Server/Tool_Shed/delete_non_user_tools.sql  ${RPM_BUILD_ROOT}/opt/swamp/sql/util

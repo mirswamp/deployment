@@ -9,26 +9,28 @@
 # Set the hostname of the database in all relevant configuration locations.
 #
 
+encountered_error=0
+trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+set -o errtrace
+
+############################################################################
+
 NEW_HOSTNAME="$1"
 
 if [ -z "$NEW_HOSTNAME" ]; then
-    echo "Usage: $0 <new hostname>"
+    echo "Usage: $0 <new hostname>" 1>&2
     exit 1
 fi
 
-IP_ADDRESS=$(perl -e 'use Socket; print inet_ntoa(inet_aton($ARGV[0]))' "$NEW_HOSTNAME" 2>/dev/null)
-
-if [ $? -ne 0 ]; then
-    echo "Error: Unable to determine an IP address for $NEW_HOSTNAME."
+if ! perl -e 'use Socket; print inet_ntoa(inet_aton($ARGV[0]))' "$NEW_HOSTNAME" 1>/dev/null 2>/dev/null ; then
+    echo "Error: Unable to determine an IP address for: $NEW_HOSTNAME" 1>&2
     exit 1
 fi
 
 if [ "$(whoami)" != "root" ]; then
-    echo "Error: This utility must be run as root. Perhaps use 'sudo'."
+    echo "Error: This utility must be run as root. Perhaps use 'sudo'." 1>&2
     exit 1
 fi
-
-echo "Beginning to configure $NEW_HOSTNAME as the database host"
 
 #
 # Simple function for abstracting out the invocation of 'sed'.
@@ -42,7 +44,7 @@ function update_config() {
     val=${val//\//\\\/}
 
     if [ -r "$target" ]; then
-        echo "Updating $target ($key)"
+        echo "Updating: $target: $key"
         if [ "$nospace" = "-nospace" ]; then
             sed -i "s/^\s*$key\s*=.*$/$key=$val/" "$target"
         else
@@ -56,7 +58,7 @@ function update_config() {
 #
 target="/opt/swamp/etc/swamp.conf"
 
-update_config "dbQuartermasterURL" "jdbc:mariadb://$NEW_HOSTNAME:3306/" "$target"
+update_config "dbPerlDsnHost" "$NEW_HOSTNAME" "$target"
 
 #
 # Update .env (web server)
@@ -67,4 +69,4 @@ for key in ASSESSMENT_DB_HOST PACKAGE_DB_HOST PLATFORM_DB_HOST PROJECT_DB_HOST T
     update_config "$key" "$NEW_HOSTNAME" "$target" -nospace
 done
 
-echo "Finished configuring $NEW_HOSTNAME as the database host"
+exit $encountered_error

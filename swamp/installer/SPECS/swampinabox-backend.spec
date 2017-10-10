@@ -28,7 +28,7 @@ Vendor: The Morgridge Institute for Research
 Packager: Support <support@continuousassurance.org>
 BuildRoot: /tmp/%{name}-buildroot
 BuildArch: noarch
-Requires: libguestfs-tools, swamp-rt-java, swamp-rt-perl
+Requires: libguestfs-tools, swamp-rt-perl
 Obsoletes: swamponabox-backend
 AutoReqProv: no
 

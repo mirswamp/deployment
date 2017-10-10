@@ -1,0 +1,39 @@
+Configuring Assessments to Run Without Internet Access
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default, when an assessment is performed, the platform will first attempt
+to update its collection of installed packages. This step will fail when the
+SWAMP-in-a-Box host's access to the internet is limited, which will in turn
+cause the assessment as a whole to fail. For such hosts, it is possible to
+configure SWAMP-in-a-Box such that platforms skip this step.
+
+[NOTE]
+This configuration will *not* make a difference if the package being
+assessed specifies additional dependencies or if it uses a build system or
+script that requires access to the internet. If the assessment framework
+cannot download and install the additional dependencies, or if the build
+fails due to not being able to access resources on the internet, the
+assessment will still fail.
+
+
+==== Before You Begin ====
+
+* You will need `root` access to the SWAMP-in-a-Box host.
+
+
+==== Procedure ====
+
+Modify `/opt/swamp/etc/swamp.conf` such that the line
+
+----
+SWAMP-in-a-Box.internet-inaccessible = false
+----
+
+reads instead as
+
+----
+SWAMP-in-a-Box.internet-inaccessible = true
+----
+
+Any assessments submitted after making this change should no longer fail due
+to not having access to the internet, subject to the caveats noted above.

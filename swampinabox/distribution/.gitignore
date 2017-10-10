@@ -1,4 +1,4 @@
-build_swampinabox
-build_swampinabox-src.tar.gz
 swampinabox-*-installer
 swampinabox-*-installer.tar.gz
+swampinabox-*-platforms.tar.gz
+swampinabox-*-tools.tar.gz

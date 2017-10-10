@@ -5,26 +5,51 @@
 #
 # Copyright 2012-2017 Software Assurance Marketplace
 
-BINDIR=`dirname $0`
+#
+# Make sure the current host is actually in /etc/hosts.
+#
 
-hostip=`$BINDIR/../sbin/find_ip_address.pl $HOSTNAME`
-if [ -z "$hostip" ]; then
-	echo "Error - cannot determine ip address for: $HOSTNAME"
-	echo "A manual adjustment of /etc/hosts is required"
-	exit
+encountered_error=0
+trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+set -o errtrace
+
+BINDIR="$(dirname "$0")"
+
+############################################################################
+
+if [ ! -f "/etc/hosts" ]; then
+    echo "Error: $0: No such file: /etc/hosts" 1>&2
+    exit 1
 fi
-domain=`$BINDIR/../sbin/find_domainname.pl $HOSTNAME`
+
+host_ip="$("$BINDIR/find_ip_address.pl" "$HOSTNAME")"
+if [ -z "$host_ip" ]; then
+    echo "Error: $0: Cannot determine an IP address for: $HOSTNAME" 1>&2
+    echo "A manual adjustment of '/etc/hosts' is required." 1>&2
+    exit 1
+fi
+
+domain="$("$BINDIR/find_domainname.pl" "$HOSTNAME")"
 if [ -z "$domain" ]; then
-	echo "Error - cannot determine domain for: $HOSTNAME"
-	echo "A manual adjustment of /etc/hosts is required"
-	exit
+    echo "Error: $0: Cannot determine the domain for: $HOSTNAME" 1>&2
+    echo "A manual adjustment of '/etc/hosts' is required." 1>&2
+    exit 1
 fi
-hostalias=${HOSTNAME%.$domain}
-echo "hostname: $HOSTNAME alias: $hostalias ip: $hostip domain: $domain"
-if grep $hostip /etc/hosts; then
-	echo "Contents of /etc/hosts:"
-	cat /etc/hosts
+
+host_alias="${HOSTNAME%.$domain}"
+
+if ! host_config="$(grep "^$host_ip\\>" /etc/hosts 2>/dev/null)" ; then
+    echo "Appending '$host_ip $HOSTNAME $host_alias' to '/etc/hosts'"
+    echo "$host_ip $HOSTNAME $host_alias" >> /etc/hosts
 else
-	echo "Adding $hostip $HOSTNAME $hostalias to /etc/hosts"
-	echo "$hostip $HOSTNAME $hostalias" >> /etc/hosts
+    echo "Detected host info:    $host_ip $HOSTNAME $host_alias"
+    echo "Info in '/etc/hosts':  $host_config"
+
+    if ! grep "$HOSTNAME" 1>/dev/null 2>/dev/null <<< "$host_config" ; then
+        echo "Warning: $0: '/etc/hosts' doesn't list '$HOSTNAME' for '$host_ip'." 1>&2
+        echo "A manual adjustment of '/etc/hosts' might be required." 1>&2
+        exit 1
+    fi
 fi
+
+exit $encountered_error

@@ -1,0 +1,41 @@
+Introduction
+------------
+
+
+What Is SWAMP
+~~~~~~~~~~~~~
+
+The Software Assurance Marketplace (SWAMP) is a platform for running
+software assurance tools on your code. It is a joint effort of four research
+institutions -- the Morgridge Institute for Research, Indiana University,
+the University of Illinois at Urbana-Champaign, and the University of
+Wisconsin-Madison -- to advance the capabilities and increase the adoption
+of software assurance technologies through an open continuous assurance
+facility. The SWAMP originally went live in February 2014 as a web
+application at https://www.mir-swamp.org, where it provides continuous
+software assurance capabilities to developers and researchers.
+
+The SWAMP is funded by the Department of Homeland Security (DHS) Science and
+Technology Directorate, Homeland Security Advanced Research Projects Agency,
+Cyber Security Division (DHS S&T/HSARPA/CSD); BAA 11-02; and Air Force
+Research Laboratory, Information Directorate under agreement number
+FA8750-12-2-0289.
+
+
+What Is SWAMP-in-a-Box
+~~~~~~~~~~~~~~~~~~~~~~
+
+For users that need or prefer to run software assurance tools on their own
+computing infrastructure, the SWAMP project offers a standalone software
+application called SWAMP-in-a-Box (SiB). It is, in essence, a local instance
+of the SWAMP that can be deployed on your own servers if you have higher
+security or compliance requirements for your software, or, being
+open-source, when you want to customize the software.
+
+
+Obtaining SWAMP-in-a-Box
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+SWAMP-in-a-Box is currently available as an open beta. Visit
+https://github.com/mirswamp/deployment for instructions on how to download
+SWAMP-in-a-Box as a pre-packaged installer or as source code.

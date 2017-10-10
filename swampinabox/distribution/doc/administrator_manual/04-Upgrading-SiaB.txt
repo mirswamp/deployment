@@ -1,0 +1,151 @@
+[[upgrading-siab]]
+Upgrading SWAMP-in-a-Box
+------------------------
+
+
+Significant Changes and Other Considerations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Changes that users of the SWAMP will see in each release of SWAMP-in-a-Box,
+such as new features and significant bug fixes, can be found in
+`/opt/swamp/doc/CHANGELOG.txt` on the SWAMP-in-a-Box host after the upgrade
+has completed. Changes and "gotchas" that are more relevant to the
+administrators of the SWAMP-in-a-Box host are listed below.
+
+.Changes Introduced in 1.31:
+
+  * The upgrade script no longer supports upgrading releases of
+    SWAMP-in-a-Box prior to 1.29. Older systems can be upgraded to 1.29 or
+    1.30 first, and then upgraded to 1.31.
+
+
+Before You Begin
+~~~~~~~~~~~~~~~~
+
+* You will need `root` access to the SWAMP-in-a-Box host.
+
+* You will need `root` access to the SWAMP-in-a-Box database.
+
+* The SWAMP-in-a-Box host must currently have version 1.29 or later of
+  SWAMP-in-a-Box installed. Upgrades from earlier versions are not supported
+  and will likely result in a non-working system. Older systems can be
+  upgraded to 1.29 or 1.30 first, and then upgraded to 1.31.
+
+* We strongly recommend running `yum update` (as `root` or using `sudo`)
+  to ensure that any software installed on the SWAMP-in-a-Box host is
+  up-to-date. This is especially important if there has been a new release
+  of CentOS (or whatever similar Linux distribution is installed on the
+  host) since the host was initially set up. The steps below will likely
+  cause a partial update to the new release, which might leave the host in
+  an inconsistent state.
+
+
+Obtain the SWAMP-in-a-Box Installer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Visit https://github.com/mirswamp/deployment for instructions on how to
+download SWAMP-in-a-Box as a pre-packaged installer, which is what the
+instructions below assume you are working with.
+
+
+Extract the Installer
+~~~~~~~~~~~~~~~~~~~~~
+
+On the SWAMP-in-a-Box host, move or copy the following files into the same
+directory (any user's home directory is sufficient, for example):
+
+  * `extract-installer.bash`
+  * `swampinabox-<version>-installer.tar.gz`
+  * `swampinabox-<version>-platforms.tar.gz`
+  * `swampinabox-<version>-tools.tar.gz`
+
+From that directory, run `extract-installer.bash`:
+
+----
+bash extract-installer.bash
+----
+
+When the script completes successfully, it will display the location of the
+SWAMP-in-a-Box installer. The instructions below will use `<installer-dir>`
+to refer to that directory.
+
+
+Install SWAMP-in-a-Box's Dependencies
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The directory `<installer-dir>/repos` contains set up scripts that will
+
+  * configure package repositories,
+  * install dependencies,
+  * enable required services, and
+  * create required user accounts.
+
+Even if you have gone through this step on the SWAMP-in-a-Box host for
+a previous release of SWAMP-in-a-Box, it is important to run the scripts for
+the current release as they will ensure that the correct versions of
+SWAMP-in-a-Box's dependencies are installed.
+
+If your host has unrestricted access to the internet, as `root` (or using
+`sudo`), run the `install-all.bash` script corresponding to your host's
+distribution:
+
+----
+<installer-dir>/repos/CentOS-6/install-all.bash
+<installer-dir>/repos/CentOS-7/install-all.bash
+----
+
+If your host has restricted access to the internet, see
+<<installing-dependencies>> for a list of SWAMP-in-a-Box's dependencies so
+that you can determine how best to install them on the host. Continue with
+the steps below after you have installed the dependencies.
+
+
+Run the Main SWAMP-in-a-Box Upgrade Script
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As `root` (or using `sudo`), run `upgrade_swampinabox.bash`:
+
+----
+<installer-dir>/bin/upgrade_swampinabox.bash
+----
+
+The script will prompt you for the database's `root` user's password and
+create a backup of the SWAMP's databases before making any modifications to
+them. Specifically, the following files will be created in the directory
+from which you run the upgrade:
+
+  * `bkup_all_databases.<YYYY_MM_DD>.sql`
+  * `bkup_information_schema.<YYYY_MM_DD>.sql`
+
+The script's output will be saved to a file, the exact location of which
+will be listed at the end of the upgrade. If the upgrade is unsuccessful,
+the log will be helpful in determining the cause.
+
+
+Verify that the Upgrade Was Successful
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. In a web browser, navigate to https://<SWAMP-in-a-Box-hostname>/.
+
+2. Sign in with the administrator account/user:
+
+  - Username: admin-s
+  - Password: <the one previously set for the `admin-s` user>
+
+3. Upload a package, create and run a new assessment of it, and view the
+   results. Sample packages can be found in `<installer-dir>/sample_packages`;
+   see the `README.txt` file in that directory for more information.
+
+
+Check for Updates
+~~~~~~~~~~~~~~~~~
+
+The SWAMP-in-a-Box upgrade script does not necessarily update all components
+of SWAMP-in-a-Box for which a newer version might be available. For example,
+if you have previously added on an <<add-on-platforms,additional assessment
+platform>> and there is an updated version of that platform available, you
+will have to download the new version separately and install it.
+
+There is a utility script that you can run that that will identify such
+components for you. See the section on <<checking-for-updates,checking for
+updates>> for further information.

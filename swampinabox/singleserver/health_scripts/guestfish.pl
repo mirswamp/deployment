@@ -12,7 +12,7 @@ use Getopt::Long;
 my $debug = 0;
 my $verbose = 0;
 
-sub guestfish_display_file { my ($vmname, $file, $preserve) = @_ ;
+sub guestfish_fetch_file { my ($vmname, $file, $preserve) = @_ ;
 	print "Fetching: $file from: $vmname with preserve: $preserve\n";
 	my $result;
     if ($preserve) {
@@ -21,11 +21,43 @@ sub guestfish_display_file { my ($vmname, $file, $preserve) = @_ ;
     else {
     	$result = `guestfish --ro -d $vmname -m /dev/sdc:/mnt/out -m /dev/sdb:/mnt/in -i cat $file 2>&1`;
     }
-    print "$result\n";
+    return $result;
+}
+
+sub guestfish_display_file { my ($vmname, $file, $preserve) = @_ ;
+	my $result = guestfish_fetch_file($vmname, $file, $preserve);
+	print $result, "\n";
+}
+
+sub guestfish_check_status { my ($vmname) = @_ ;
+	my $result = guestfish_fetch_file($vmname, '/mnt/out/status.out', 0);
+	if (! $result) {
+		print "Error - status.out not found in: $vmname\n";
+		return;
+	}
+	my @lines = split "\n", $result;
+	my $pass = 0;
+	my $finish = 0;
+	my $fail;
+	foreach my $line (@lines) {
+		$pass = 1 if ($line =~ m/PASS:\s+all/);
+		$finish = 1 if ($line =~ m/NOTE:\s+end/);
+	}
+	if ($finish) {
+		if ($pass) {
+			print "$vmname assessment finished with success\n";
+		}
+		else {
+			print "$vmname assessment finished with failure\n";
+		}
+	}
+	else {
+		print "$vmname assessment has not finished\n";
+	}
 }
 
 sub usage {
-	print "usage: $0 [-help -debug -verbose -runout|-catalina|-mysql|-file <string> -preserve] <vmname>\n"; 
+	print "usage: $0 [-help -debug -verbose -statusout|-runout|-catalina|-mysql|-file <string> -preserve] <vmname>\n"; 
 	exit;
 }
 
@@ -38,6 +70,8 @@ my $preserve = 0;
 my $runout = 0;
 my $catalina = 0;
 my $mysql = 0;
+my $statusout = 0;
+my $checkstatus = 0;
 my $result = GetOptions(
 	'help'			=> \$help,
 	'debug'			=> \$debug,
@@ -45,15 +79,19 @@ my $result = GetOptions(
 	'file=s'		=> \$file,
 	'preserve'		=> \$preserve,
 	'runout'		=> \$runout,
+	'statusout'		=> \$statusout,
 	'catalina'		=> \$catalina,
 	'mysql'			=> \$mysql,
+	'checkstatus'	=> \$checkstatus,
 );
 usage() if ($help || ! $result);
 $vmname = $ARGV[0] if (defined($ARGV[0]));
 usage() if (! $vmname);
-$runout = 1 if (! $file && ! $runout && ! $catalina && ! $mysql);
+$checkstatus = 1 if (! $file && ! $runout && ! $statusout && ! $catalina && ! $mysql);
 
 guestfish_display_file($vmname, $file, $preserve) if ($file);
 guestfish_display_file($vmname, '/mnt/out/run.out', $preserve) if ($runout);
+guestfish_display_file($vmname, '/mnt/out/status.out', $preserve) if ($statusout);
 guestfish_display_file($vmname, '/var/log/tomcat6/catalina.out', $preserve) if ($catalina);
 guestfish_display_file($vmname, "/var/lib/mysql/$vmname.err", $preserve) if ($mysql);
+guestfish_check_status($vmname) if ($checkstatus);

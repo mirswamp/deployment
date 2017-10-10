@@ -83,10 +83,10 @@ function check_os_dist_and_ver() {
     string_with_target_os=$1
 
     version_string=$(get_os_dist_and_ver)
-    short_os_name=$(echo $version_string | awk 'BEGIN { FS = "|" } { print $1 }')
-    long_os_name=$(echo $version_string | awk 'BEGIN { FS = "|" } { print $2 }')
+    short_os_name=$(echo "$version_string" | awk 'BEGIN { FS = "|" } { print $1 }')
+    long_os_name=$(echo "$version_string" | awk 'BEGIN { FS = "|" } { print $2 }')
 
-    if [[ "$string_with_target_os" =~ "$short_os_name" ]]; then
+    if [ "$string_with_target_os" == "$short_os_name" ]; then
         echo "Found $long_os_name."
     else
         if [ "$short_os_name" == "Unknown-Unknown" ]; then
@@ -103,6 +103,47 @@ function check_os_dist_and_ver() {
         fi
     fi
 
+    return 0
+}
+
+function check_os_dist_upgrade() {
+    if yum_confirm centos-release 1>/dev/null 2>/dev/null ; then
+        if [ -z "$SWAMP_YUM_MAKECACHE" ]; then
+            echo ""
+            echo "Running 'yum makecache' ..."
+            yum makecache
+            export SWAMP_YUM_MAKECACHE="done"
+        fi
+
+        echo ""
+        echo "Running 'yum check-update centos-release' ..."
+        yum check-update centos-release 1>/dev/null 2>/dev/null
+        ok=$?
+
+        if [ $ok -eq 100 ]; then
+            echo ""
+            echo "Warning: The 'centos-release' package is out of date."
+            echo "This probably means that a significant update is available."
+            echo ""
+            echo "Running this setup script might cause inconsistent versions"
+            echo "of various packages to be installed on the system that yum/rpm"
+            echo "might not warn about."
+            echo ""
+            echo "Consider running 'yum update' first, before continuing with"
+            echo "this script."
+            echo ""
+            echo -n "Continue anyway? [N/y] "
+            read ANSWER
+            if [ "$ANSWER" != "y" ]; then
+                return 1
+            fi
+        elif [ $ok -ne 0 ]; then
+            echo ""
+            echo "Error: Failed to run 'yum check-update centos-release'."
+            echo "Perhaps check that repositories are configured correctly."
+            return 1
+        fi
+    fi
     return 0
 }
 

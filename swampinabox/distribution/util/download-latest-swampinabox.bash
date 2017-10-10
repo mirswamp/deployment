@@ -10,21 +10,20 @@
 # platform.swampinabox.org (or the location specified below).
 #
 
-BINDIR=`dirname "$0"`
-
+BINDIR="$(dirname "$0")"
 PLATFORM_HOST="platform.swampinabox.org"
 PLATFORM_RELEASE_DIR="siab-latest-release"
 PLATFORM_BASE_URL="https://$PLATFORM_HOST/$PLATFORM_RELEASE_DIR"
 
 function exit_with_incomplete {
     echo ""
-    echo "Downloads are not complete."
+    echo "Downloads are not complete." 1>&2
     exit 1
 }
 
 function exit_with_error {
     echo ""
-    echo "Error encountered. Downloads are not complete."
+    echo "Error encountered. Downloads are not complete." 1>&2
     exit 1
 }
 
@@ -56,7 +55,7 @@ fi
 
 if [ -z "$DOWNLOAD_TO_STDOUT" ]; then
     echo ""
-    echo "Error: Didn't find a suitable program for downloading files."
+    echo "Error: Didn't find a suitable program for downloading files." 1>&2
     exit_with_error
 fi
 
@@ -69,9 +68,11 @@ echo "Determining SWAMP-in-a-Box version"
 VERSION=$($DOWNLOAD_TO_STDOUT "$PLATFORM_BASE_URL/version.txt")
 
 if [[ "$VERSION" =~ ^[0-9]+.[0-9]+ ]]; then
+    echo ""
     echo "Found SWAMP-in-a-Box version: $VERSION"
 else
-    echo "Found SWAMP-in-a-Box version: (error: $VERSION)"
+    echo ""
+    echo "Found SWAMP-in-a-Box version: (error: $VERSION)" 1>&2
     exit_with_error
 fi
 
@@ -87,7 +88,7 @@ echo "$LOCAL_DESTINATION_DIR"
 
 if [ $md5sum_ok -ne 0 ]; then
     echo ""
-    echo "Warning: md5sum is not in $USER's path. Unable to verify downloaded files."
+    echo "Warning: 'md5sum' is not in $USER's path. Unable to verify downloaded files." 1>&2
 fi
 
 echo ""
@@ -98,18 +99,17 @@ if [ "$ANSWER" != "y" ]; then
 fi
 
 echo ""
-echo "Creating $LOCAL_DESTINATION_DIR"
+echo "Creating: $LOCAL_DESTINATION_DIR"
 mkdir -p "$LOCAL_DESTINATION_DIR" || exit_with_error
 cd "$LOCAL_DESTINATION_DIR" || exit_with_error
-
-echo "Current working directory:" `pwd`
+echo "Current working directory: $(pwd)"
 
 #
 # Download the list of files to download and their checksums.
 #
 
 if [ -e "md5sums.txt" ]; then
-    echo "Removing md5sums.txt"
+    echo "Removing: md5sums.txt"
     rm -f md5sums.txt
 fi
 
@@ -141,7 +141,7 @@ while read checksum filename; do
     #
 
     if [ $md5sum_ok -eq 0 -a -e "$filename" ]; then
-        echo -n "Verifying checksum for $filename ... "
+        echo -n "Verifying checksum for '$filename' ... "
         md5sum -c "$filename.md5" 1>/dev/null 2>/dev/null
 
         if [ $? -eq 0 ]; then
@@ -152,21 +152,21 @@ while read checksum filename; do
         fi
     fi
 
-    if [ "$needs_download" == "yes" ]; then
+    if [ "$needs_download" = "yes" ]; then
         if [ $md5sum_ok -eq 0 ]; then
-            echo "Downloading $filename"
+            echo "Downloading: $filename"
             $DOWNLOAD_W_CONTINUE "$PLATFORM_BASE_URL/$filename"
         else
             if [ -e "$filename" ]; then
-                echo "Removing $filename"
+                echo "Removing: $filename"
                 rm -f "$filename"
             fi
-            echo "Downloading $filename"
+            echo "Downloading: $filename"
             $DOWNLOAD_WO_CONTINUE "$PLATFORM_BASE_URL/$filename"
         fi
 
         if [ $md5sum_ok -eq 0 ]; then
-            echo -n "Verifying checksum for $filename ... "
+            echo -n "Verifying checksum for '$filename' ... "
             md5sum -c "$filename.md5" 1>/dev/null 2>/dev/null
 
             if [ $? -eq 0 ]; then
@@ -178,7 +178,7 @@ while read checksum filename; do
         fi
     fi
 
-    echo "Removing $filename.md5"
+    echo "Removing: $filename.md5"
     rm -f "$filename.md5"
 done <<< "$(cat md5sums.txt)"
 
@@ -186,15 +186,15 @@ done <<< "$(cat md5sums.txt)"
 # Post-process the downloaded files.
 #
 
-if [ "$downloads_failed" == "yes" ]; then
+if [ "$downloads_failed" = "yes" ]; then
     echo ""
-    echo "Error: Some files could not be downloaded successfully."
+    echo "Error: Some files could not be downloaded successfully." 1>&2
     exit_with_error
 fi
 
 if [ -e "extract-installer.bash" ]; then
     echo ""
-    echo "Making extract-installer.bash executable"
+    echo "Making 'extract-installer.bash' executable"
     chmod +x extract-installer.bash
 fi
 
@@ -209,7 +209,7 @@ echo ""
 echo "The SWAMP-in-a-Box installer has been downloaded to:"
 echo "$LOCAL_DESTINATION_DIR"
 echo ""
-echo "To install SWAMP-in-a-Box, start by reading:"
-echo "$LOCAL_DESTINATION_DIR/README-INSTALL.md"
+echo "To install SWAMP-in-a-Box, start by reading the user manual,"
+echo "a copy of which can be found in '$LOCAL_DESTINATION_DIR'."
 
 exit 0

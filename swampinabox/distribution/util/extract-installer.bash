@@ -10,23 +10,23 @@
 # Assumes that this script is in the same directory as the tarballs.
 #
 
-BINDIR=`dirname "$0"`
+BINDIR="$(dirname "$0")"
 VERSION="SED_VERSION"
 INSTALLER_TARBALL="$BINDIR/swampinabox-${VERSION}-installer.tar.gz"
 INSTALLER_DIR="$BINDIR/swampinabox-${VERSION}-installer"
 
 exit_with_error() {
     echo ""
-    echo "Error encountered. Check above for details."
+    echo "Error encountered. Check above for details." 1>&2
     exit 1
 }
 
 if [ ! -r "$INSTALLER_TARBALL" ]; then
-    echo "Error: $INSTALLER_TARBALL does not exist or is not readable"
+    echo "Error: No such file (or file is not readable): $INSTALLER_TARBALL" 1>&2
     exit 1
 fi
 
-echo "Extracting $INSTALLER_TARBALL"
+echo "Extracting: $INSTALLER_TARBALL"
 echo ""
 tar -xzv --no-same-owner --no-same-permissions -C "$BINDIR" -f "$INSTALLER_TARBALL" || exit_with_error
 echo ""

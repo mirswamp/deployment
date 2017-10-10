@@ -6,15 +6,22 @@
 # Copyright 2012-2017 Software Assurance Marketplace
 
 #
-# Execute a SQL script as the database 'root' user.
+# Execute a SQL script as the database's 'root' user.
 #
 
 script_file="$1"
 cnf_file="/opt/swamp/sql/sql.cnf"
+cnf_file_needs_removal="no"
+started_mysql_service="no"
 
 function do_clean_up {
     stty echo
-    rm -f "$cnf_file"
+    if [ "$cnf_file_needs_removal" != "no" ]; then
+        rm -f "$cnf_file"
+    fi
+    if [ "$started_mysql_service" != "no" ]; then
+        /opt/swamp/sbin/swamp_manage_service mysql stop
+    fi
 }
 
 function exit_normally {
@@ -24,7 +31,7 @@ function exit_normally {
 
 function exit_with_error {
     do_clean_up
-    echo "$0: Error while attempting to execute $script_file"
+    echo "Error: $0: Error while attempting to execute: $script_file" 1>&2
     exit 1
 }
 
@@ -36,44 +43,43 @@ trap 'exit_with_error' INT TERM
 ############################################################################
 
 if [ -z "$script_file" ]; then
-    echo "Usage: $0 <SQL script file>"
+    echo "Usage: $0 <SQL script file>" 1>&2
     exit 1
 fi
 
 if [ ! -r "$script_file" ]; then
-    echo "Error: $script_file is not readable"
+    echo "Error: $0: No such file (or file is not readable): $script_file" 1>&2
     exit 1
 fi
 
-started_mysql_service="no"
 initial_mysql_service_status=$(/opt/swamp/sbin/swamp_manage_service mysql status)
 
-if [ "$initial_mysql_service_status" = "stopped" ]; then
-    /opt/swamp/sbin/swamp_manage_service mysql start
-    started_mysql_service="yes"
+if [ $? -ne 0 ]; then
+    exit_with_error
 fi
 
-if [ -r /etc/.mysql_root ]; then
+if [ "$initial_mysql_service_status" = "stopped" ]; then
+    started_mysql_service="yes"
+    /opt/swamp/sbin/swamp_manage_service mysql start || exit_with_error
+fi
+
+if [ -r /etc/.mysql_root -o -r /etc/.mysql ]; then
     # Allow for the possibility that we're running in a context
     # where the configuration file has already been created.
 
-    if [ ! -r "$cnf_file" ]; then
-        /opt/swamp/sbin/create_mysql_root_cnf "$cnf_file" || exit_with_error
+    if [ ! -e "$cnf_file" ]; then
         cnf_file_needs_removal="yes"
+        /opt/swamp/sbin/create_mysql_root_cnf "$cnf_file" || exit_with_error
     fi
 
     mysql --defaults-file="$cnf_file" < "$script_file" || exit_with_error
 
-    if [ "$cnf_file_needs_removal" == "yes" ]; then
+    if [ "$cnf_file_needs_removal" != "no" ]; then
         rm -f "$cnf_file"
     fi
 else
-    echo "Enter the password for the database 'root' user"
+    echo "Enter the password for the database's 'root' user:"
     mysql -u root -p < "$script_file" || exit_with_error
-fi
-
-if [ "$started_mysql_service" = "yes" ]; then
-    /opt/swamp/sbin/swamp_manage_service mysql stop
 fi
 
 exit_normally

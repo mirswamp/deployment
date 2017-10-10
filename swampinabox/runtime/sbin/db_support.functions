@@ -1,0 +1,59 @@
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2017 Software Assurance Marketplace
+
+#
+# The functions below are meant to be called in pairs:
+#
+#   - {create,remove}_mysql_options_file
+#   - {start,stop}_mysql_service
+#
+# Each pair leaves the system in the same state it was before
+# the pair was called.
+#
+
+mysql_options_file="/opt/swamp/sql/sql.cnf"
+mysql_command="mysql --defaults-file=$mysql_options_file"
+
+############################################################################
+#
+# Manage the options file for the 'mysql' client.
+#
+cnf_file_needs_removal="no"
+
+function create_mysql_options_file() {
+    if [ ! -e "$mysql_options_file" ]; then
+        if [ -r /etc/.mysql_root -o -r /etc/.mysql ]; then
+            cnf_file_needs_removal="yes"
+            /opt/swamp/sbin/create_mysql_root_cnf "$mysql_options_file"
+        fi
+    fi
+}
+
+function remove_mysql_options_file() {
+    if [ "$cnf_file_needs_removal" != "no" ]; then
+        rm -f "$mysql_options_file"
+    fi
+}
+
+############################################################################
+#
+# Manage the MySQL service. Start/stop it only if it isn't already running.
+#
+started_mysql_service="no"
+
+function start_mysql_service() {
+    initial_mysql_service_status=$(/opt/swamp/sbin/swamp_manage_service mysql status)
+
+    if [ "$initial_mysql_service_status" = "stopped" ]; then
+        started_mysql_service="yes"
+        /opt/swamp/sbin/swamp_manage_service mysql start
+    fi
+}
+
+function stop_mysql_service() {
+    if [ "$started_mysql_service" != "no" ]; then
+        /opt/swamp/sbin/swamp_manage_service mysql stop
+    fi
+}

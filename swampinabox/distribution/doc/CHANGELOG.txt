@@ -1,3 +1,31 @@
+Noteworthy Changes in SWAMP-in-a-Box 1.31
+-----------------------------------------
+
+1. Synopsis Static Analysis (Coverity), a tool for assessing C/C++ packages,
+can now be added to a SWAMP-in-a-Box installation. You must license Synopsis
+Static Analysis and obtain either the 32-bit or 64-bit tool archive files
+separately from Synopsis, Inc.
+
+2. Documentation for SWAMP-in-a-Box has been reorganized into an
+Administrator Manual and a Reference Manual. Each comes as a PDF and HTML
+document, which can be found in `/opt/swamp/doc` on the SWAMP-in-a-Box host.
+
+3. New versions of the CentOS and Scientific Linux 6.7 (32-bit and 64-bit)
+assessment platforms are available. If any of these platforms was previously
+installed as an add on, we recommend you download and install the updated
+versions.
+
+4. The CentOS and Scientific Linux 5.11 (32-bit and 64-bit) assessment
+platforms are no longer supported. If any of these platforms was previously
+installed as an add on, they will be removed as part of the upgrade to
+SWAMP-in-a-Box 1.31.
+
+5. Added new versions and/or updates for the following assessment tools:
+Checkstyle, error-prone, Findbugs, PMD, and XML Lint.
+
+6. General enhancements and bug fixes.
+
+
 Noteworthy Changes in SWAMP-in-a-Box 1.30
 -----------------------------------------
 

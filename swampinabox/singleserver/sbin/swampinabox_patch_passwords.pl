@@ -49,19 +49,12 @@ sub patch_value { my ($file, $key, $value) = @_ ;
 
 my $patch_token = $ARGV[0];
 
-#
-# swamp.conf is interpreted by the java.util.Properties class.
-# Therefore, backslashes in the password need to be escaped.
-#
-# https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html
-#
 if ( -r '/etc/.mysql_java' ) {
 	my $javapassword = `openssl enc -d -aes-256-cbc -in /etc/.mysql_java -pass pass:swamp`;
 	chomp $javapassword;
-	$javapassword =~ s{\\}{\\\\}smg;
 
-	print "Patching swamp.conf dbQuartermasterPass\n";
-	patch_value('/opt/swamp/etc/swamp.conf', '^dbQuartermasterPass', $javapassword);
+	print "Patching swamp.conf dbPerlPass\n";
+	patch_value('/opt/swamp/etc/swamp.conf', '^dbPerlPass', $javapassword);
 }
 
 #

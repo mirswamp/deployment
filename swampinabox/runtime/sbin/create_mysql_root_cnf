@@ -7,40 +7,69 @@
 
 #
 # Create a configuration file for use with 'mysql --defaults-file'
-# that logs in as the database 'root' user.
+# for logging into the database as the given user ('root' by default).
 #
 
-src_file="/etc/.mysql_root"
 dest_file="$1"
-
-if [ ! -r "$src_file" ]; then
-    echo "Error: $src_file is not readable"
-    exit 1
-fi
+src_file="$2"
+db_user="$3"
 
 if [ -z "$dest_file" ]; then
-    echo "Usage: $0 <destination file>"
+    echo "Usage: $0 <destination file> [password file] [database user]" 1>&2
     exit 1
 fi
 
 if [ -e "$dest_file" ]; then
-    echo "Error: $dest_file already exists"
+    echo "Error: $0: Already exists: $dest_file" 1>&2
+    exit 1
+fi
+
+if [ ! -z "$src_file" -a ! -r "$src_file" ]; then
+    echo "Error: $0: Unable to read password file: $src_file" 1>&2
     exit 1
 fi
 
 #
+# For the password file, try a couple of defaults.
+#
+
+if [ -z "$src_file" ]; then
+    src_file="/etc/.mysql_root"
+fi
+
+if [ ! -r "$src_file" ]; then
+    src_file="/etc/.mysql"
+fi
+
+if [ ! -r "$src_file" ]; then
+    echo "Error: $0: Unable to read password file" 1>&2
+    exit 1
+fi
+
+#
+# For the database user, default to 'root'.
+#
+
+if [ -z "$db_user" ]; then
+    db_user="root"
+fi
+
+#
 # In the options file for MySQL:
-#   - Quote the password, in case it contains '#'.
+#   - Quote values, in case they contain '#'.
 #   - Escape backslashes (the only character that needs escaping).
 #
 # See: http://dev.mysql.com/doc/refman/5.7/en/option-files.html
 #
-dbroot=`openssl enc -d -aes-256-cbc -in /etc/.mysql_root -pass pass:swamp`
-dbroot=${dbroot//\\/\\\\}
+db_user=${db_user//\\/\\\\}
+db_password=$(openssl enc -d -aes-256-cbc -in "$src_file" -pass pass:swamp)
+db_password=${db_password//\\/\\\\}
 
+umask 077
 touch "$dest_file"
-chmod 400 "$dest_file"
+chmod 600 "$dest_file"
 
-echo '[client]' > "$dest_file"
-echo "password='$dbroot'" >> "$dest_file"
-echo "user='root'" >> "$dest_file"
+echo "[client]" > "$dest_file"
+echo "password='$db_password'" >> "$dest_file"
+echo "user='$db_user'" >> "$dest_file"
+chmod 400 "$dest_file"

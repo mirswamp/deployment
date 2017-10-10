@@ -83,9 +83,9 @@ sub get_condor_exec_nodes {
 
 sub show_swamp_processes { my ($host) = @_ ;
 	return if (! $host);
-	my $command = "ps aux | egrep 'PID|vmu_|java' | grep -v grep";
+	my $command = "ps aux | egrep 'PID|vmu_' | grep -v grep";
 	if ($host ne $hostname) {
-		$command = "ssh $host ps aux | egrep 'vmu_|java' | grep -v grep";
+		$command = "ssh $host ps aux | egrep 'vmu_' | grep -v grep";
 	}
 	my ($output, $status) = systemcall($command);
 	if ($status) {
@@ -97,7 +97,6 @@ sub show_swamp_processes { my ($host) = @_ ;
 	my $vmuA = [];
 	my $vmuV = [];
 	my $vmu = [];
-	my $java = [];
 	my $other = [];
 	foreach my $line (@lines) {
 		if ($line =~ m/PID/) {
@@ -111,9 +110,6 @@ sub show_swamp_processes { my ($host) = @_ ;
 		}
 		elsif ($line =~ m/vmu_.*.pl/) {
 			push @$vmu, $line;
-		}
-		elsif ($line =~ m/java/) {
-			push @$java, $line;
 		}
 		else {
 			push @$other, $line;
@@ -152,13 +148,12 @@ sub show_swamp_processes { my ($host) = @_ ;
 			return $acmp cmp $bcmp;
 		}
 	} @$vmuV;
-	my $header = "vmu_ and java processes on $host";
+	my $header = "vmu_ processes on $host";
 	# discount fields line in count
 	$header .= " T:[" . (scalar(@lines)-1) . "]";
 	$header .= " A:[" . (scalar(@$vmuA)) . "]";
 	$header .= " V:[" . (scalar(@$vmuV)) . "]";
 	$header .= " v:[" . (scalar(@$vmu)) . "]";
-	$header .= " j:[" . (scalar(@$java)) . "]";
 	$header .= " o:[" . (scalar(@$other)) . "]";
 	print $header, newline();
 	my $under = "-" x length($header);
@@ -171,10 +166,6 @@ sub show_swamp_processes { my ($host) = @_ ;
 	if (@$vmu) {
 		print newline();
 		print $_, newline() foreach (@$vmu);
-	}
-	if (@$java) {
-		print newline();
-		print $_, newline() foreach (@$java);
 	}
 	if (@$other) {
 		print newline();

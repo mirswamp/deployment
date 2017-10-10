@@ -5,8 +5,16 @@
 #
 # Copyright 2012-2017 Software Assurance Marketplace
 
+#
+# Patch php.ini for SWAMP-in-a-Box.
+# Specifically, enable "large" uploads.
+#
+
+use utf8;
 use strict;
 use warnings;
+
+use English qw( -no_match_vars );
 use POSIX qw(strftime);
 
 #
@@ -14,8 +22,7 @@ use POSIX qw(strftime);
 #
 
 if (scalar(@ARGV) <= 0) {
-    print "Error: php.ini file to patch must be specified on the command line.\n";
-    exit 1;
+    die "Usage: $PROGRAM_NAME <php.ini file to patch>\n";
 }
 
 #
@@ -30,16 +37,14 @@ if (open my $fh, '<', $php_ini_file) {
     close $fh;
 }
 else {
-    print "Error: Unable to open $php_ini_file.\n";
-    exit 1;
+    die "Error: $PROGRAM_NAME: Unable to open: $php_ini_file\n";
 }
 
 my $current_datetime = strftime('%Y%m%d%H%M%S', localtime);
 my $cp_ok = system 'cp', '-p', $php_ini_file, $php_ini_file . ".$current_datetime";
 
 if ($cp_ok != 0) {
-    print "Error: Unable to create a backup copy of $php_ini_file.\n";
-    exit 1;
+    die "Error: $PROGRAM_NAME: Unable to create backup of: $php_ini_file\n";
 }
 
 #
@@ -78,8 +83,7 @@ if (open my $fh, '>', $php_ini_file) {
     close $fh;
 }
 else {
-    print "Error: Unable to write to $php_ini_file.\n";
-    exit 1;
+    die "Error: $PROGRAM_NAME: Unable to write: $php_ini_file\n";
 }
 
 exit 0;

@@ -5,33 +5,64 @@
 #
 # Copyright 2012-2017 Software Assurance Marketplace
 
-function usage() {
-    echo "usage $0 (start | stop | restart | status | status-short | list | help) [service1 service2 ...]"
-    exit
+encountered_error=0
+trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+set -o errtrace
+
+BINDIR="$(dirname "$0")"
+
+#
+# "Import" the 'yum_confirm' function.
+#
+. "$BINDIR/swampinabox_install_util.functions"
+
+############################################################################
+
+function ignore_error() {
+    return 0
+}
+
+function show_usage_and_exit() {
+    echo "Usage: $0 (start | stop | restart | status | list | help) [service1 service2 ...]" 1>&2
+    exit 1
 }
 
 if [ $# -eq 0 ]; then
-    usage
-    exit 1
+    show_usage_and_exit
 fi
 
 #
-# Define default lists of services. The ordering is important.
+# Define default lists of services. The ordering is important. Assume that
+# the SWAMP-in-a-Box "set up" scripts have been run, so that the only
+# possibly-missing service is 'swamp', because it hasn't been installed yet.
 #
 
-stopServices=(cgconfig libvirtd mysql condor httpd swamp)
+if yum_confirm swampinabox-backend 1>/dev/null 2>/dev/null ; then
+    stopServices=(libvirtd mysql condor httpd swamp)
+else
+    stopServices=(libvirtd mysql condor httpd)
+fi
+
 startServices=(${stopServices[@]})
 restartServices=${startServices[@]}
+
+#
+# Determine the "service" command to use.
+#
+
+if [ -x "$BINDIR/swamp_manage_service" ]; then
+    service_cmd="$BINDIR/swamp_manage_service"
+elif [ -x "$BINDIR/../../runtime/sbin/swamp_manage_service" ]; then
+    service_cmd="$BINDIR/../../runtime/sbin/swamp_manage_service"
+else
+    service_cmd="service"
+fi
 
 #
 # Ensure that the systemd manager configuration is up-to-date.
 #
 
-echo -n "Testing for systemctl ... "
-which systemctl
-
-if [ $? -eq 0 ]; then
-    echo "Calling systemctl daemon-reload"
+if which systemctl 1>/dev/null 2>/dev/null ; then
     systemctl daemon-reload
 fi
 
@@ -55,7 +86,7 @@ else
         restart)
             services=${stopServices[@]}
             ;;
-        status|status-short)
+        status)
             services=${startServices[@]}
             ;;
     esac
@@ -69,44 +100,29 @@ case $command in
     start)
         for service in ${services[@]}
         do
-            service $service start
+            echo "Starting service: $service"
+            $service_cmd $service start || ignore_error
         done
         ;;
     stop)
         for service in ${services[@]}
         do
-            service $service stop
+            echo "Stopping service: $service"
+            $service_cmd $service stop || ignore_error
         done
         ;;
     restart)
         for service in ${services[@]}
         do
-            service $service restart
+            echo "Restarting service: $service"
+            $service_cmd $service restart || ignore_error
         done
         ;;
     status)
         for service in ${services[@]}
         do
-            echo -n "Service: $service "
-            service $service status
-        done
-        ;;
-    status-short)
-        for service in ${services[@]}
-        do
-            if [[ $(systemctl 2>&1) =~ "command not found" ]]; then
-                # No well-defined meaning for "short".
-                service $service status
-            else
-                IFS="=" read ignored raw_status <<< `systemctl show --property=ActiveState ${service}`
-                if [[ $raw_status =~ "inactive" ]]; then
-                    echo "stopped"
-                elif [[ $raw_status =~ "active" ]]; then
-                    echo "running"
-                else
-                    echo $raw_status
-                fi
-            fi
+            echo -n "Status of service '$service': "
+            $service_cmd $service status || ignore_error
         done
         ;;
     list)
@@ -115,10 +131,12 @@ case $command in
         echo "restartServices: ${restartServices[@]}"
         ;;
     help)
-        usage
+        show_usage_and_exit
         ;;
     *)
-        echo "unknown command: $arg"
-        usage
+        echo "Unknown command: $command" 1>&2
+        show_usage_and_exit
         ;;
 esac
+
+exit $encountered_error

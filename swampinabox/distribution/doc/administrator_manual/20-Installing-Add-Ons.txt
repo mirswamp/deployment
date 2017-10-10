@@ -1,0 +1,310 @@
+Installing Additional Components
+--------------------------------
+
+
+[[add-on-platforms]]
+Installing Additional Assessment Platforms
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The SWAMP-in-a-Box installer includes only the Ubuntu 16.04 platform for
+performing assessments. For C/C++ packages, additional platforms are
+available, including releases of CentOS, Debian, Fedora, Scientific Linux,
+and older releases of Ubuntu. (Packages for other languages will always be
+assessed on Ubuntu 16.04.)
+
+
+==== Before You Begin ====
+
+* You will need `root` access to the SWAMP-in-a-Box host.
+* You will need `root` access to the SWAMP-in-a-Box database.
+
+
+==== Procedure ====
+
+1. Visit https://platform.swampinabox.org/platform-images/.
+
+2. Download and copy to the SWAMP-in-a-Box host the `.qcow2.gz` files
+corresponding to the additional platforms you wish to perform assessments
+on. The naming scheme for these files is as follows:
+
++
+----
+condor-<Linux distribution>-<version>-<32 or 64 bit>-master-<YYYYMMDD>.qcow2.gz
+----
+
++
+When downloading the files, name the copies exactly as shown on
+https://platform.swampinabox.org/. Otherwise, they will not be recognized as
+supported platforms in the next step.
+
+3. On the SWAMP-in-a-Box host, for each file, as `root` (or using `sudo`),
+run the `install_platform` script, providing the path to the `.qcow2.gz`
+file:
+
++
+----
+/opt/swamp/bin/install_platform <path to .qcow2.gz file>
+----
+
++
+When prompted, provide the password for the database's `root` user, which is
+needed to add the platform to the database and make it available in the
+SWAMP. Note that `install_platform` will likely take several minutes to
+complete due to the size of the file.
+
+
+Installing Additional Assessment Tools
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The SWAMP-in-a-Box installer includes variety of tools for assessing
+packages. For C/C++ packages, two additional tools can be installed:
+CodeSonar and Coverity.
+
+
+==== About CodeSonar ====
+
+SWAMP-in-a-Box can be used with CodeSonar, a deep-path static analysis tool
+provided by GrammaTech, Inc. CodeSonar finds cases of undefined behavior
+(such as buffer overruns, null pointer dereferences, ...), API Misuse (use
+after free, socket API, ...), as well as suspicious behavior (dead code,
+unused variables, concurrency violations, taint, ...), and works on source
+code and binaries.
+
+Contact information for obtaining CodeSonar and licensing information for
+CodeSonar can be found at:
+
+  * sales@grammatech.com,
+  * +1-888-695-2668, or
+  * https://www.grammatech.com/products/codesonar.
+
+CodeSonar is third party software created and maintained by GrammaTech, Inc.
+Copyright 2017 GrammaTech, Inc. CodeSonar is a registered trademark of
+GrammaTech, Inc. All rights reserved.
+
+
+==== About Coverity ====
+
+SWAMP-in-a-Box can be used with Synopsys Static Analysis (Coverity).
+Synopsys Static Analysis is an accurate and comprehensive static analysis
+solution for finding critical quality defects and security violations. Its
+high-fidelity analysis delivers business relevant findings for developers
+and security audit teams alike. Synopsys' SAST solutions are uniquely
+designed to scale from safety-critical IoT software to global enterprise
+systems.
+
+Contact information for obtaining Synopsys Static Analysis (Coverity) and
+licensing information for Synopsys Static Analysis can be found at:
+
+  * software-integrity-sales@synopsys.com,
+  * U.S. Sales +1-800-873-8193,
+  * International Sales +1-415-321-5237, or
+  * https://www.synopsys.com/software-integrity/security-testing/static-analysis-sast.html.
+
+Synopsys Static Analysis (Coverity) is third party software maintained by
+Synopsys, Inc. Copyright 2017 Synopsys, Inc. Synopsys Static Analysis
+(Coverity) is a registered trademark of Synopsys, Inc. All rights reserved
+worldwide.
+
+
+==== Before You Begin ====
+
+* You will need `root` access to the SWAMP-in-a-Box host.
+
+* You will need `root` access to the SWAMP-in-a-Box database.
+
+* You will need to obtain one or both of the 32-bit and 64-bit Linux
+  archives for the tool you wish to install from its vendor.
+
++
+The archives for CodeSonar should be named:
+
++
+----
+codesonar-<version>.<YYYYMMDD>-i686-pc-linux.tar.gz    (32-bit)
+codesonar-<version>.<YYYYMMDD>-x86_64-pc-linux.tar.gz  (64-bit)
+----
+
++
+The archives for Coverity should be named (the `.sh` "installers" will not
+work):
+
++
+----
+cov-analysis-linux-<version>.tar.gz    (32-bit)
+cov-analysis-linux64-<version>.tar.gz  (64-bit)
+----
+
+* You will need the hostname and port for the tool's license server.
+  (Contact the tool's vendor if you need help setting up and configuring the
+  license server.) The SWAMP-in-a-Box host will need to be able to contact
+  the license server in order to successfully perform assessments using the
+  tool; the scripts used below will not modify any firewall configurations.
+
+* You will need to know or decide the maximum number of simultaneous
+  instances of the tool the SWAMP may run.
+
+
+==== Procedure ====
+
+1. Run the `make_swamp_tool` script to package the vendor's installers into
+the archive format that the SWAMP uses.
+
++
+----
+/opt/swamp/bin/make_swamp_tool \
+    --tool-name <gt-csonar or coverity> \
+    --tool-version <version> \
+    --installer-linux32 <path to 32-bit archive> \
+    --installer-linux64 <path to 64-bit archive>
+----
+
++
+Specify `gt-csonar` or `coverity` for the `--tool-name` option, depending on
+the tool being packaged. Omit the `--installer-linux32` option if you have
+only the 64-bit installer, and similarly for the `--installer-linux64`
+option.
+
++
+When `make_swamp_tool` completes, the output should include the path to the
+SWAMP tool archive file that was created. Note that it will likely take
+several minutes to complete due to the size of the installers.
+
+2. As `root` (or using `sudo`), run the `install_tool` script with the
+`--add` option, providing the version of tool being installed and the path
+to the SWAMP tool archive file produced in the previous step. (The first
+option should be `--codesonar` or `--coverity`, depending on the tool being
+installed.)
+
++
+----
+/opt/swamp/bin/install_tool \
+    [--codesonar or --coverity] \
+    --add \
+    --tool-version <version> \
+    --tool-archive <path to SWAMP tool archive file>
+----
+
++
+Note that `install_tool` will likely take several minutes to complete due to
+the size of the archive.
+
+3. As `root` (or using `sudo`), run the `install_tool` script a second time,
+this time with the `--configure` option, providing the hostname and port of
+the tool's license server, and the maximum number of simultaneous instances
+of the tool that may run.
+
++
+----
+/opt/swamp/bin/install_tool \
+    [--codesonar or --coverity] \
+    --configure \
+    --license-server-host <hostname of the license server> \
+    --license-server-port <port number> \
+    --limit <max number of simultaneous instances>
+----
+
+
+==== Managing the Installed Versions of CodeSonar and Coverity ====
+
+* Additional versions of each tool can be installed using the directions
+  above. In the SWAMP web application, the "latest" version of the tool will
+  be whichever version was *installed* most recently. We recommend
+  installing multiple versions in order (e.g., 1.0, 2.0, 2.1, 3.0, etc.) so
+  that the "latest" version matches users' expectations.
+
+* If you have previously installed, say, only the 32-bit version of a tool
+  and now wish to make both the 32-bit and 64-bit versions available, first
+  run the `make_swamp_tool` script, as above, to package the 32-bit and
+  64-bit archives together for the SWAMP. Then as `root` (or using `sudo`),
+  run the `install_tool` script with the `--replace` option:
+
++
+----
+/opt/swamp/bin/install_tool
+    [--codesonar or --coverity] \
+    --replace
+    --tool-version <version>
+    --tool-archive <path to gt-csonar-<version>.tar.gz file>
+----
+
+* If you wish to remove a version of a tool from the SWAMP, as `root` (or
+  using `sudo`), run the `install_tool` script with the `--remove` option,
+  providing the version to remove.
+
++
+----
+/opt/swamp/bin/install_tool
+    [--codesonar or --coverity] \
+    --remove
+    --tool-version <version>
+----
+
+
+[[add-on-viewers]]
+Installing Additional Viewers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For viewing the results of an assessment, the SWAMP instance installed by
+SWAMP-in-a-Box includes a "native" viewer and additionally provides a link
+to download the "raw" results as a SCARF `.xml` file.
+
+It is also possible to install a SWAMP-specific version of Code Dx for
+viewing results. (SWAMP-in-a-Box currently does *not* support integrating
+with an existing Code Dx installation.)
+
+
+==== About Code Dx ====
+
+Through SWAMP's partnership with Code Dx, Inc., a SWAMP-specific version of
+Code Dx software has been created to be solely used with SWAMP software.
+Code Dx software shall not be redistributed with SWAMP software without
+written consent of Code Dx, Inc.
+
+To obtain a SWAMP version of Code Dx, contact Code Dx, Inc. at:
+
+  * sales@codedx.com,
+  * +1-631-759-3993, or
+  * https://codedx.com/support/?v=7516fd43adaa.
+
+After contacting Code Dx, Inc., you will be asked to agree to an End User's
+License Agreement (EULA) with Code Dx, Inc. Once you have agreed to the
+EULA, you will receive a download kit from Code Dx, Inc.
+
+Code Dx is third party software created and maintained by Code Dx, Inc.
+Copyright 2010-2018 Code Dx, Inc. All rights reserved.
+
+
+==== Before You Begin ====
+
+* You will need `root` access to the SWAMP-in-a-Box host.
+
+* You will need `root` access to the SWAMP-in-a-Box database.
+
+* You will need to obtain the `.war` file for the SWAMP-specific version of
+  Code Dx from Code Dx, Inc. If you are provided with a `.zip` file or some
+  other archive format, first expand the archive and locate the `.war` file
+  within the expanded contents.
+
++
+Note that the SWAMP officially supports version 1.8.3 of Code Dx. Later
+versions might work, but the experience for end users will be significantly
+different from 1.8.3.
+
+
+==== Procedure ====
+
+1. Copy the Code Dx `.war` file obtained from Code Dx, Inc. to the
+SWAMP-in-a-Box host.
+
+2. On the SWAMP-in-a-Box host, as `root` (or using `sudo`), run the
+`install_codedx` script, providing the path to the `.war` file:
+
++
+----
+/opt/swamp/bin/install_codedx <path to Code Dx .war file>
+----
+
++
+When prompted, provide the password for the database's `root` user, which is
+needed to add the Code Dx to the database and make it available in the
+SWAMP.

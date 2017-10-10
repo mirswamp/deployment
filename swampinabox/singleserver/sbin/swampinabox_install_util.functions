@@ -8,26 +8,15 @@
 # Control flow.
 #
 
-function abort_install {
-    echo ""
-    echo "Aborting installation"
-
+function abort_install() {
     remove_db_password_files
-
-    echo ""
-    echo "Installation is not complete."
+    echo "FAILURE! Aborting installation. Installation is not complete." 1>&2
     exit 1
 }
 
-function exit_with_error {
-    echo ""
-    echo "Error encountered."
+function exit_with_error() {
+    echo "Error encountered." 1>&2
     exit 1
-}
-
-function continue_anyway {
-    echo "Continuing with the install"
-    return 0
 }
 
 function confirm_continue() {
@@ -38,22 +27,21 @@ function confirm_continue() {
     fi
     read answer
     if [ "$answer" != "y" ]; then
-        echo ""
-        echo "Installation is not complete."
+        echo "Stopping. Installation is not complete." 1>&2
         return 1
     fi
     return 0
 }
 
-function remove_db_password_files {
+function remove_db_password_files() {
     for file in \
             /opt/swamp/sql/sql.cnf \
             /etc/.mysql_root \
             /etc/.mysql_web \
             /etc/.mysql_java \
-            /etc/.mysql_admin; do
-        if [ -e "$file" ]; then
-            echo "Removing '$file'"
+            /etc/.mysql_admin \
+            ; do
+        if [ -f "$file" ]; then
             rm -f "$file"
         fi
     done
@@ -61,80 +49,81 @@ function remove_db_password_files {
 
 ############################################################################
 #
-# Working with 'yum'.
+# Working with 'yum' and RPMs.
 #
 
 function yum_erase() {
-    echo ""
     echo "Erasing: $*"
     yum -y erase $*
 }
 
 function yum_install() {
-    echo ""
     echo "Installing: $*"
     yum -y install $*
 }
 
 function yum_confirm() {
-    echo -n "Checking that packages were actually installed ... "
-
-    actually_installed=$(yum list installed)
-    not_actually_installed=""
+    encountered_not_installed=0
+    installed_pkgs_list="$(yum list installed)"
 
     for pkg in $*; do
-        grep ^$pkg\\. >/dev/null <<< "$actually_installed"
-        if [ $? -eq 0 ]; then
-            echo -n "$pkg "
+        echo -n "Checking for RPM $pkg ... "
+        if grep ^$pkg\\. 1>/dev/null 2>/dev/null <<< "$installed_pkgs_list" ; then
+            echo "installed"
         else
-            not_actually_installed="$not_actually_installed $pkg"
+            echo "not installed"
+            encountered_not_installed=1
         fi
     done
+    return $encountered_not_installed
+}
 
-    if [ -z "$not_actually_installed" ]; then
-        echo "(ok: found what we were looking for)"
+function get_rpm_version() {
+    pkg="$1"
+    if yum_confirm "$pkg" 1>/dev/null 2>/dev/null ; then
+        rpm -q --qf '%{VERSION}-%{RELEASE}' "$pkg"
     else
-        echo "(problem: didn't find at least one package)"
         echo ""
-        echo "Error: The following packages were not installed:$not_actually_installed"
-        return 1
     fi
+}
 
+function check_os_dist_upgrade() {
+    if yum_confirm centos-release 1>/dev/null 2>/dev/null ; then
+        echo "Running 'yum makecache' ..."
+        yum makecache
+
+        echo "Running 'yum check-update centos-release' ..."
+        yum check-update centos-release 1>/dev/null 2>/dev/null
+        ok=$?
+
+        if [ $ok -eq 100 ]; then
+            echo ""
+            echo "Warning: The 'centos-release' package is out of date."
+            echo "This probably means that a significant update is available."
+            echo ""
+            echo "Consider running 'yum update' first, before continuing with"
+            echo "the installation."
+            echo ""
+            confirm_continue || return 1
+        elif [ $ok -ne 0 ]; then
+            echo ""
+            echo "Error: Failed to run 'yum check-update centos-release'."
+            echo "Perhaps check that repositories are configured correctly."
+            return 1
+        fi
+    fi
     return 0
 }
 
-############################################################################
-#
-# Manage the options file for the 'mysql' client.
-#
-mysql_options_file="/opt/swamp/sql/sql.cnf"
-mysql_command="mysql --defaults-file=$mysql_options_file"
+function check_rpm_versions() {
+    version="$1"
+    rpms_with_wrong_version=()
 
-function create_mysql_options_file() {
-    /opt/swamp/sbin/create_mysql_root_cnf "$mysql_options_file"
-}
+    for pkg in ${*:2} ; do
+        if [ "$(get_rpm_version "$pkg")" != "$version" ]; then
+            rpms_with_wrong_version+=($pkg)
+        fi
+    done
 
-function remove_mysql_options_file() {
-    rm -f "$mysql_options_file"
-}
-
-############################################################################
-#
-# Manage the MySQL service. Start/stop it only if it isn't already running.
-#
-started_mysql_service="no"
-
-function start_mysql_service() {
-    initial_mysql_service_status=$(/opt/swamp/sbin/swamp_manage_service mysql status)
-
-    if [ "$initial_mysql_service_status" = "stopped" ]; then
-        /opt/swamp/sbin/swamp_manage_service mysql start
-        started_mysql_service="yes"
-    fi
-}
-
-function stop_mysql_service() {
-    if [ "$started_mysql_service" = "yes" ]; then
-        /opt/swamp/sbin/swamp_manage_service mysql stop
-    fi
+    echo "${rpms_with_wrong_version[@]}"
 }

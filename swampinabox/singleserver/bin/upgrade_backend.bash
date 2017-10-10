@@ -28,11 +28,6 @@ echo "INITIALDIR: $INITIALDIR"
 echo ""
 export RELEASE_NUMBER
 
-cd $WORKSPACE
-cd services/java
-pwd
-ant -file swamp08.xml jar
-
 export PATH=/opt/perl5/perls/perl-5.18.1/bin:$PATH
 
 cd $WORKSPACE/deployment/swamp/installer

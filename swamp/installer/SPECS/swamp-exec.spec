@@ -73,20 +73,28 @@ fi
 # Floodlight and License Servers
 iam=`hostname -s`
 floodlight=""
+
 parasoft_flowprefix=""
 parasoft_server_ip=""
 tool_ps_ctest_license_host=""
 tool_ps_jtest_license_host=""
-grammatech_flowprefix=""
-grammatech_server_ip=""
-tool_gt_csonar_license_host=""
+
 redlizard_flowprefix=""
 redlizard_server_ip=""
 tool_rl_goanna_license_host=""
+
+grammatech_flowprefix=""
+grammatech_server_ip=""
+tool_gt_csonar_license_host=""
+
+synopsys_flowprefix=""
+synopsys_server_ip=""
+tool_sy_coverity_license_host=""
+
 nameserver=""
 
 if [ $(expr "$iam" : "swa-exec-dd" ) = $(expr length "swa-exec-dd") ];then
-    floodlight=http://swa-flood-dt-01.mirsam.org:8080
+    floodlight=http://swa-flood-dd-01.mirsam.org:8080
 	parasoft_flowprefix=ps-dt-license
 	parasoft_server_ip=128.104.7.8
 	tool_ps_ctest_license_host=lic-ps-dt-01.cosalab.org
@@ -97,6 +105,9 @@ if [ $(expr "$iam" : "swa-exec-dd" ) = $(expr length "swa-exec-dd") ];then
 	grammatech_flowprefix=gt-dt-license
 	grammatech_server_ip=128.104.7.9
 	tool_gt_csonar_license_host=lic-gt-dt-01.cosalab.org
+	synopsys_flowprefix=sy-dt-license
+	synopsys_server_ip=128.104.7.15
+	tool_sy_coverity_license_host=lic-sy-dt-01.cosalab.org
 	nameserver=128.104.7.5
 elif [ $(expr "$iam" : "swa-exec-dt" ) = $(expr length "swa-exec-dt") ];then
     floodlight=http://swa-flood-dt-01.mirsam.org:8080
@@ -110,6 +121,9 @@ elif [ $(expr "$iam" : "swa-exec-dt" ) = $(expr length "swa-exec-dt") ];then
 	grammatech_flowprefix=gt-dt-license
 	grammatech_server_ip=128.104.7.9
 	tool_gt_csonar_license_host=lic-gt-dt-01.cosalab.org
+	synopsys_flowprefix=sy-dt-license
+	synopsys_server_ip=128.104.7.15
+	tool_sy_coverity_license_host=lic-sy-dt-01.cosalab.org
 	nameserver=128.104.7.5
 elif [ $(expr "$iam" : "swa-exec-it" ) = $(expr length "swa-exec-it") ];then
     floodlight=http://swa-flood-it-01.mirsam.org:8080
@@ -123,6 +137,9 @@ elif [ $(expr "$iam" : "swa-exec-it" ) = $(expr length "swa-exec-it") ];then
 	grammatech_flowprefix=gt-it-license
 	grammatech_server_ip=128.104.7.10
 	tool_gt_csonar_license_host=lic-gt-it-01.cosalab.org
+	synopsys_flowprefix=sy-it-license
+	synopsys_server_ip=128.104.7.16
+	tool_sy_coverity_license_host=lic-sy-it-01.cosalab.org
 	nameserver=128.104.7.5
 elif [ $(expr "$iam" : "swa-exec-pd" ) = $(expr length "swa-exec-pd") ];then
     floodlight=http://swa-flood-pd-01.mirsam.org:8080
@@ -136,6 +153,9 @@ elif [ $(expr "$iam" : "swa-exec-pd" ) = $(expr length "swa-exec-pd") ];then
 	grammatech_flowprefix=gt-pd-license
 	grammatech_server_ip=128.105.64.8
 	tool_gt_csonar_license_host=lic-gt-pd-01.mir-swamp.org
+	synopsys_flowprefix=sy-pd-license
+	synopsys_server_ip=128.105.64.10
+	tool_sy_coverity_license_host=lic-sy-pd-01.mir-swamp.org
 	nameserver=128.105.64.5
 fi
 if [ "$floodlight" != "" ];then
@@ -197,7 +217,24 @@ fi
 if [ "$tool_gt_csonar_license_host" != "" ];then
     /bin/sed -i "s|^tool.gt-csonar.license.host\ =\ .*$|tool.gt-csonar.license.host=$tool_gt_csonar_license_host|" /opt/swamp/etc/swamp.conf
 else
-    echo Please update the tool.gt-csonar.license.host item in /opt/swamp/etc/swamp.conf with the appropriate grammatech codesonar license server hostname
+    echo Please update the tool.gt-csonar.license.host item in /opt/swamp/etc/swamp.conf with the appropriate grammatech license server hostname
+fi
+
+# Synopsys License Server
+if [ "$synopsys_flowprefix" != "" ];then
+    /bin/sed -i "s|^synopsys_flowprefix\ =\ .*$|synopsys_flowprefix=$synopsys_flowprefix|" /opt/swamp/etc/swamp.conf
+else
+    echo Please update the synopsys_flowprefix item in /opt/swamp/etc/swamp.conf with the appropriate prefix value: sy-*-license
+fi
+if [ "$synopsys_server_ip" != "" ];then
+    /bin/sed -i "s|^synopsys_server_ip\ =\ .*$|synopsys_server_ip=$synopsys_server_ip|" /opt/swamp/etc/swamp.conf
+else
+    echo Please update the synopsys_server_ip item in /opt/swamp/etc/swamp.conf with the appropriate synopsys license server ip address
+fi
+if [ "$tool_sy_coverity_license_host" != "" ];then
+    /bin/sed -i "s|^tool.sy-coverity.license.host\ =\ .*$|tool.sy-coverity.license.host=$tool_sy_coverity_license_host|" /opt/swamp/etc/swamp.conf
+else
+    echo Please update the tool.gt-csonar.license.host item in /opt/swamp/etc/swamp.conf with the appropriate synopsys license server hostname
 fi
 
 if [ "$nameserver" != "" ];then

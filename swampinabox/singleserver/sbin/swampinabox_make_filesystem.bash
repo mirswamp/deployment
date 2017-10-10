@@ -5,63 +5,64 @@
 #
 # Copyright 2012-2017 Software Assurance Marketplace
 
+#
+# Create the directories needed by the SWAMP's backend.
+#
+
+encountered_error=0
+trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+set -o errtrace
+
+############################################################################
+
+function make_dir() {
+    mode="$1"
+    owner="$2"
+    target="$3"
+
+    mkdir  -p        "$target"
+    chmod  "$mode"   "$target"
+    chown  "$owner"  "$target"
+}
+
 mkdir -p /everglades
 chown root:root /everglades
 chmod 755 /everglades
-if ! grep everglades /etc/fstab; then
+if ! grep everglades /etc/fstab 1>/dev/null 2>/dev/null ; then
 	echo 'swa-gfs-dt-01:/ev0	/everglades	 glusterfs	defaults,_netdev	0 0' >> /etc/fstab
 fi
 mount -a
 mount -va -t glusterfs
 
-mkdir -p /swamp/incoming
-chown apache:apache /swamp/incoming
-chmod 0775 /swamp/incoming
-chmod ugo-s /swamp/incoming
-
-mkdir -p /swamp/outgoing
-chown mysql:apache /swamp/outgoing
-chmod 2775 /swamp/outgoing
-chmod uo-s /swamp/outgoing
-
-mkdir -p /swamp/working
-chmod 755 /swamp/working
-
-mkdir -p /swamp/working/results
-chown mysql:mysql /swamp/working/results
-chmod 755 /swamp/working/results
-
-mkdir -p /swamp/working/project
-chown root:root /swamp/working/project
-chmod 755 /swamp/working/project
-
-mkdir -p /swamp/platforms
-chmod 755 /swamp/platforms
-
-rm -rf /var/lib/libvirt/images
-if [ ! -h /var/lib/libvirt/images ]; then
-	ln -s /everglades/platforms/images /var/lib/libvirt/images
-fi
+make_dir  0755  root:root      /swamp
+make_dir  0775  apache:apache  /swamp/incoming
+make_dir  2775  mysql:apache   /swamp/outgoing
+make_dir  0755  root:root      /swamp/working
+make_dir  0755  root:root      /swamp/working/project
+make_dir  0755  mysql:mysql    /swamp/working/results
+make_dir  0755  root:root      /swamp/platforms
+make_dir  0755  root:root      /swamp/store
+make_dir  0755  mysql:mysql    /swamp/store/SCAPackages
+make_dir  0755  mysql:mysql    /swamp/SCAProjects
 
 rm -rf /swamp/platforms/images
 if [ ! -h /swamp/platforms/images ]; then
 	ln -s /everglades/platforms/images /swamp/platforms/images
 fi
 
-mkdir -p /swamp/SCAProjects
-chown mysql:mysql /swamp/SCAProjects
-chmod 755 /swamp/SCAProjects
-
-mkdir -p /swamp/store
-chmod 755 /swamp/store
-
-mkdir -p /swamp/store/SCAPackages
-chown mysql:mysql /swamp/store/SCAPackages
-chmod 755 /swamp/store/SCAPackages
-
 rm -rf /swamp/store/SCATools
 if [ ! -h /swamp/store/SCATools ]; then
 	ln -s /everglades/store/SCATools /swamp/store/SCATools
+fi
+
+# CSA-2955: Clear sticky bits that were unnecessarily set in SWAMP-in-a-Box
+# releases prior to 1.30. (The numeric modes above won't clear them.)
+chmod ugo-s /swamp/incoming
+chmod uo-s /swamp/outgoing
+
+rm -rf /var/lib/libvirt/images
+if [ ! -h /var/lib/libvirt/images ]; then
+	ln -s /everglades/platforms/images /var/lib/libvirt/images
 fi
 
 if [ ! -h /var/www/html/results ]; then
@@ -79,3 +80,5 @@ fi
 if [ ! -h /var/www/html/swamp-web-server/public/results ]; then
 	ln -s /var/www/html/results /var/www/html/swamp-web-server/public/results
 fi
+
+exit $encountered_error

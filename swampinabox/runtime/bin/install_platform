@@ -9,16 +9,17 @@
 # Install a VM disk image as a new platform for assessments.
 #
 
-mysql_cnf_file="/opt/swamp/sql/sql.cnf"
-mysql_passwd_file="/etc/.mysql_root"
-platforms_image_dest="/swamp/platforms/images"
-platforms_script_root="/opt/swamp/sql"
+##########################################################################
 
+platforms_image_store="/swamp/platforms/images"
+platforms_script_store="/opt/swamp/sql/platforms"
 vm_image_src="$1"
-vm_image_dest="$platforms_image_dest/$(basename "$vm_image_src")"
-platform=$(basename "$vm_image_src")
-platform="${platform//condor-/}"
-platform="${platform//-master*/}"
+vm_image_dest="$platforms_image_store/$(basename "$vm_image_src")"
+
+##########################################################################
+
+mysql_passwd_file="/etc/.mysql_root"
+mysql_cnf_file="/opt/swamp/sql/sql.cnf"
 
 function do_clean_up {
     stty echo
@@ -33,7 +34,7 @@ function exit_normally {
 
 function exit_with_error {
     do_clean_up
-    echo "$0: Error while attempting to install $vm_image_src"
+    echo "$0: Error while attempting to install: $vm_image_src" 1>&2
     exit 1
 }
 
@@ -45,96 +46,107 @@ trap 'exit_with_error' INT TERM
 ##########################################################################
 
 ask_pass() {
-    PROMPT=$1
-    if [ "$2" = "-confirm" ]; then NEED_CONFIRM=1; else NEED_CONFIRM=0; fi
-    NEED_PASSWORD=1
+    prompt="$1"
+    if [ "$2" = "-confirm" ]; then need_confirm=1; else need_confirm=0; fi
+    need_password=1
 
-    while [ "$NEED_PASSWORD" -eq 1 ]; do
+    while [ "$need_password" -eq 1 ]; do
         ANSWER=""
         CONFIRMATION=""
 
-        read -r -e -s -p "$PROMPT " ANSWER
+        read -r -s -p "$prompt " ANSWER
         echo
 
         if [ -z "$ANSWER" ]; then
             echo "*** Password cannot be empty. ***"
         else
-            if [ "$NEED_CONFIRM" -eq 1 ]; then
-                stty -echo
-                echo -n "Retype password: "
-                read -r CONFIRMATION
+            if [ "$need_confirm" -eq 1 ]; then
+                read -r -s -p "Retype password: " CONFIRMATION
                 echo
-                stty echo
 
                 if [ "$ANSWER" != "$CONFIRMATION" ]; then
                     echo "*** Passwords do not match. ***"
                 else
-                    NEED_PASSWORD=0
+                    need_password=0
                 fi
             else
-                NEED_PASSWORD=0
+                need_password=0
             fi
         fi
     done
 }
 
-function test_db_password {
-    username="$1"
+function save_password_to_disk() {
+    destination="$1"
     password="$2"
 
-    #
-    # In the options file for MySQL:
-    #   - Quote the password, in case it contains '#'.
-    #   - Escape backslashes (the only character that needs escaping).
-    #
-    # See: http://dev.mysql.com/doc/refman/5.7/en/option-files.html
-    #
-    password=${password//\\/\\\\}
+    reset_umask="$(umask -p)"
+    umask 377
 
-    echo '[client]' > "$mysql_cnf_file"
-    chmod 400 "$mysql_cnf_file"
-    echo "password='$password'" >> "$mysql_cnf_file"
-    echo "user='$username'" >> "$mysql_cnf_file"
+    rm -f "$destination"
+    echo "$password" | sudo openssl enc -aes-256-cbc -salt -out "$destination" -pass pass:swamp
+    chmod 400 "$destination"
 
-    mysql --defaults-file="$mysql_cnf_file" <<< ';'
-    success=$?
+    $reset_umask
+}
 
-    rm -f "$mysql_cnf_file"
+function test_db_password() {
+    username="$1"
+    password="$2"
+    encountered_error=0
 
-    if [ $success -ne 0 ]; then
-        echo "Error: Failed to log into the database as $username"
-        return 1
+    save_password_to_disk "$mysql_passwd_file" "$password"
+    /opt/swamp/sbin/create_mysql_root_cnf "$mysql_cnf_file" "$mysql_passwd_file" "$username"
+
+    if ! mysql --defaults-file="$mysql_cnf_file" <<< ';' ; then
+        echo "Error: Failed to log into the database as '$username'" 1>&2
+        encountered_error=1
     fi
 
-    return 0
+    do_clean_up
+    return $encountered_error
 }
 
 ##########################################################################
 
 if [ -z "$vm_image_src" ]; then
-    echo "Usage: $0 <VM platform .qcow2 or .qcow2.gz file>"
+    echo "Usage: $0 <VM platform .qcow2 or .qcow2.gz file>" 1>&2
     exit 1
 fi
 
 if [ ! -r "$vm_image_src" ]; then
-    echo "Error: $vm_image_src is not readable"
+    echo "Error: File does not exist or is not readable: $vm_image_src" 1>&2
     exit 1
 fi
 
-if [[ !("$vm_image_src" =~ .qcow2$) && !("$vm_image_src" =~ .qcow2.gz$) ]]; then
-    echo "Error: $vm_image_src does not look like a .qcow2 or .qcow.gz file"
+if [[ ! ( "$vm_image_src" =~ .qcow2$ ) && ! ( "$vm_image_src" =~ .qcow2.gz$ ) ]]; then
+    echo "Error: Not a '.qcow2' or 'qcow2.gz' file: $vm_image_src" 1>&2
     exit 1
 fi
 
-echo "$(basename "$vm_image_src") looks like the following platform: $platform"
+platform_install_sql=""
+for platform_sql in "$platforms_script_store"/*.sql ; do
+    platform=$(basename "$platform_sql" .sql)
+    platform=${platform/\.minorversion/}
 
-if [ ! -e "$platforms_script_root/$platform.sql" ]; then
-    echo "Error: $platform is not recognized as an installable platform"
+    if [[ $platform =~ (.*)(-32|-64) ]]; then
+        distribution=${BASH_REMATCH[1]}
+        bits=${BASH_REMATCH[2]}
+
+        if [[ $(basename "$vm_image_src") =~ ^"condor-$distribution".*"$bits-master".*".qcow2" ]]; then
+            platform_install_sql="$platform_sql"
+            break
+        fi
+    fi
+done
+
+if [ -z "$platform_install_sql" ]; then
+    echo "Error: Not a recognized installable platform: $vm_image_src" 1>&2
     exit 1
 fi
 
 if [ "$(whoami)" != "root" ]; then
-    echo "Error: The install must be performed as root."
+    echo "Error: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
     exit 1
 fi
 
@@ -143,7 +155,7 @@ fi
 success=1
 while [ $success -ne 0 ]; do
     ask_pass "Enter database root password:"
-    DBROOT=$ANSWER
+    DBROOT="$ANSWER"
 
     test_db_password root "$DBROOT"
     success=$?
@@ -152,10 +164,7 @@ done
 ##########################################################################
 
 if [[ "$vm_image_src" =~ .qcow2$ ]]; then
-    echo "Copying $(basename "$vm_image_src") to $platforms_image_dest"
-
-    # echo src: "$vm_image_src"
-    # echo dest: "$vm_image_dest"
+    echo "Copying '$(basename "$vm_image_src")' to '$platforms_image_store'"
 
     cp    "$vm_image_src" "$vm_image_dest" || exit_with_error
     chown root:root       "$vm_image_dest" || exit_with_error
@@ -163,12 +172,9 @@ if [[ "$vm_image_src" =~ .qcow2$ ]]; then
 fi
 
 if [[ "$vm_image_src" =~ .gz$ ]]; then
-    echo "Unzipping $(basename "$vm_image_src") into $platforms_image_dest"
+    echo "Unzipping '$(basename "$vm_image_src")' into '$platforms_image_store'"
 
     vm_image_dest=${vm_image_dest%%.gz}
-
-    # echo src: "$vm_image_src"
-    # echo dest: "$vm_image_dest"
 
     gunzip -c "$vm_image_src" > "$vm_image_dest" || exit_with_error
     chown root:root  "$vm_image_dest" || exit_with_error
@@ -179,14 +185,10 @@ fi
 
 echo "Updating database records"
 
-echo "$DBROOT" | sudo openssl enc -aes-256-cbc -salt -out "$mysql_passwd_file" -pass pass:swamp
-chmod 400 "$mysql_passwd_file"
-/opt/swamp/sbin/execute_sql_script "$platforms_script_root/$platform.sql" || exit_with_error
-rm -f "$mysql_passwd_file"
+save_password_to_disk "$mysql_passwd_file" "$DBROOT"       || exit_with_error
+/opt/swamp/sbin/execute_sql_script "$platform_install_sql" || exit_with_error
 
 ##########################################################################
 
-echo ""
-echo "$platform should now be available for performing assessments"
-
+echo "Install completed normally"
 exit_normally

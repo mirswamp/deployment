@@ -11,6 +11,7 @@ BINDIR=`dirname "$0"`
 
 check_user                        || exit_with_error
 check_os_dist_and_ver "CentOS-6"  || exit_with_error
+check_os_dist_upgrade             || exit_with_error
 
 echo ""
 echo "###########################"

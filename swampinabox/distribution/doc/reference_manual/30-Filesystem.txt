@@ -1,0 +1,140 @@
+SWAMP-in-a-Box's Filesystem
+---------------------------
+
+
+[[configuration-files]]
+Configuration Files
+~~~~~~~~~~~~~~~~~~~
+
+`/opt/swamp/etc/swamp.conf`::
+`/opt/swamp/etc/log4perl.conf`::
+`/opt/swamp/etc/swampmonitor.conf`::
+
+SWAMP backend configuration files. Directions for modifying `swamp.conf` can
+be found in the SWAMP-in-a-Box User Manual. There should be no need to
+modify `log4perl.conf` and `swampmonitor.conf`.
+
+`/etc/condor/condor_config`::
+`/etc/condor/config.d/swampinabox_*.conf`::
+
+HTCondor configuration files. The SWAMP-in-a-Box installer preserves the
+version of `condor_config` installed by the HTCondor RPMs and installs
+several files into the `/etc/condor/config.d` directory. There should be no
+need to directly modify any of these files.
+
+`/etc/httpd/conf/httpd.conf`::
+`/etc/httpd/conf.d/ssl.conf`::
+
+Apache configuration files. The SWAMP-in-a-Box installer replaces
+`httpd.conf` with a version that's included with the installer and modifies
+`ssl.conf` to use more secure settings for the SSL protocols and cipher
+suites than the settings installed by the `mod_ssl` RPM.
+
+`/etc/php.ini`::
+
+PHP configuration file. The SWAMP-in-a-Box installer modifies this to allow
+uploads up to 800M.
+
+
+[[long-term-storage]]
+Long-term Storage Files
+~~~~~~~~~~~~~~~~~~~~~~~
+
+`/swamp/platforms/images`::
+
+Directory containing the virtual machine images for performing assessments
+and running the optional Code Dx viewer. The SWAMP-in-a-Box installer makes
+`/var/lib/libvirt/images` a symbolic link to this directory.
+
+`/swamp/SCAProjects`::
+
+Directory containing assessment results. Each sub-directory contains the
+results for one project.
+
+`/swamp/store/SCAPackages`::
+
+Directory containing package archives. Each sub-directory contains the
+archive for one package version.
+
+`/swamp/store/SCATools`::
+
+Directory containing assessment and metric tools. The `bundled`
+sub-directory contains tools that are included with the SWAMP-in-a-Box
+installer. The `add-on` sub-directory contains tools that were added to the
+system after the initial SWAMP-in-a-Box install.
+
+`/var/lib/mysql`::
+
+Directory containing MariaDB's storage files for the SWAMP's SQL databases.
+
+
+[[log-files]]
+Log Files
+~~~~~~~~~
+
+`/opt/swamp/log`::
+
+Directory containing the SWAMP backend's log files.
+
+`/var/log/condor`::
+`/var/lib/condor`::
+
+Directories containing HTCondor's log files.
+
+`/var/log/httpd`::
+
+Directory containing Apache's log files.
+
+`/var/log/libvirt`::
+
+Directory containing libvirt's log files.
+
+`/var/log/mariadb`::
+
+Directory containing MariaDB's log files.
+
+`/var/www/swamp-web-server/storage/logs`::
+
+Directory containing the SWAMP web backend's log files.
+
+
+[[temporary-files]]
+Temporary Files
+~~~~~~~~~~~~~~~
+
+`/opt/swamp/run`::
+`/swamp/working/project`::
+`/swamp/working/results`::
+
+Directories containing temporary files used by the SWAMP backend.
+
+`/slots`::
+
+Directory containing working directories of currently executing HTCondor
+jobs.
+
+`/swamp/incoming`::
+
+Directory containing user-uploaded packages.
+
+`/swamp/outgoing`::
+
+Directory containing files that SWAMP users view or download.
+
+`/var/lib/libvirt`::
+
+Directory containing temporary files used by libvirt.
+
+
+Reclaiming Disk Space
+~~~~~~~~~~~~~~~~~~~~~
+
+Log files can be deleted without impacting the normal functioning of the
+system, although debugging issues will be more difficult if pertinent log
+files are missing. Temporary files can also be deleted so long as they are
+not still in use.
+
+Deleting long-term storage files *will* impact the normal functioning of the
+system. Deleting package archives, tool archives, platform images, and
+assessment results will render those objects unavailable to the system, even
+if they continue appear to be available in the SWAMP.

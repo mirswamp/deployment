@@ -52,6 +52,13 @@ cp -r swamp-web-server $RPM_BUILD_ROOT/var/www
 mv $RPM_BUILD_ROOT/var/www/html/config/config.sample.json $RPM_BUILD_ROOT/var/www/html/config/config.json
 mv $RPM_BUILD_ROOT/var/www/swamp-web-server/env.sample $RPM_BUILD_ROOT/var/www/swamp-web-server/.env
 
+mkdir -p $RPM_BUILD_ROOT/var/www/swamp-web-server/storage/app
+mkdir -p $RPM_BUILD_ROOT/var/www/swamp-web-server/storage/framework
+mkdir -p $RPM_BUILD_ROOT/var/www/swamp-web-server/storage/framework/cache
+mkdir -p $RPM_BUILD_ROOT/var/www/swamp-web-server/storage/framework/sessions
+mkdir -p $RPM_BUILD_ROOT/var/www/swamp-web-server/storage/framework/views
+mkdir -p $RPM_BUILD_ROOT/var/www/swamp-web-server/storage/logs
+
 find $RPM_BUILD_ROOT -type f -exec chmod 0644 '{}' ';'
 find $RPM_BUILD_ROOT -type d -exec chmod 0755 '{}' ';'
 chmod 400 $RPM_BUILD_ROOT/var/www/swamp-web-server/.env
@@ -80,61 +87,86 @@ rm -rf $RPM_BUILD_ROOT
 
 %pre
 if [ "$1" = "2" ]; then
-    # preserve config.js just to assist in manual conversion to json
+    #
+    # Preserve config.js to assist in manual conversion to configjson
+    #
     if [ -f /var/www/html/scripts/config/config.js ]; then
-        # found a config file from 1.28 or later
+        # Config file from 1.28 or later
         mv /var/www/html/scripts/config/config.js /var/www/html/scripts/config/config.js.swampsave
     elif [ -f /var/www/html/scripts/config.js ]; then
-        # found a config file from 1.27 or earlier
+        # Config file from 1.27 or earlier
         mv /var/www/html/scripts/config.js /var/www/html/scripts/config.js.swampsave
     fi
-    # preserve config.json
+
+    #
+    # Preserve config.json
+    #
     if [ -f /var/www/html/config/config.json ]; then
         cp /var/www/html/config/config.json /tmp/.
     fi
 fi
 
 %post
+#
+# Arguments to post are {1=>new, 2=>upgrade}
+#
+if [ "$1" = "1" ]; then
+    echo "Running RPM post script (mode: install)"
+elif [ "$1" = "2" ]; then
+    echo "Running RPM post script (mode: upgrade)"
+fi
+
 if [ "$1" = "2" ]; then
-    # restore config.json
+    #
+    # Restore config.json
+    #
     if [ -f /tmp/config.json ]; then
         mv /tmp/config.json /var/www/html/config/config.json
     fi
+
+    #
+    # Preserve .env settings
+    #
+    if [ -r /var/www/swamp-web-server/.env.rpmsave ]; then
+        src="/var/www/swamp-web-server/.env.rpmsave"
+        dest="/var/www/swamp-web-server/.env"
+
+        conf_keys="$(awk -F= '{print $1}' "$dest" | awk '{print $1}' | grep -E '^[^#]')"
+
+        echo "Updating '$dest' from '$src'"
+
+        while read -r key; do
+            if grep -q "^\s*$key\s*=" "$src" 1>/dev/null 2>/dev/null; then
+                echo ".. Updating: $key"
+
+                val=$(grep "^\s*$key\s*=" "$src" | sed "s/^\s*$key\s*=\s*\(.*\)$/\1/")
+
+                # Escape special characters for sed's 's//'
+                val=${val//\\/\\\\}  # escape back slash
+                val=${val//\//\\\/}  # escape forward slash
+                val=${val//&/\\&}    # escape ampersands
+
+                sed -i "s/^\s*$key\s*=.*$/$key=$val/" "$dest"
+            fi
+        done <<< "$conf_keys"
+
+        #
+        # CSA-3107: Rename the source file so that future upgrades don't
+        # accidentally copy values from it again.
+        #
+        now="$(date +"%Y%m%d%H%M%S")"
+        renamed_src="$src.$now"
+
+        echo ".. Renaming '$src' to '$renamed_src'"
+        mv "$src" "$renamed_src"
+
+        echo "Finished updating '$dest'"
+    fi
 fi
 
-# Preserve .env settings
 #
-# We go through this path for both installs and upgrades because the
-# SWAMP-in-a-Box installer needs to erase the 1.27 version of the RPM
-# instead of allowing yum/rpm to upgrade it normally.
-#
-if [ -r /var/www/swamp-web-server/.env.rpmsave ]; then
-    src=/var/www/swamp-web-server/.env.rpmsave
-    dest=/var/www/swamp-web-server/.env
-
-    conf_keys=$(awk -F= '{print $1}' "$dest" | awk '{print $1}' | grep -E '^[^#]')
-
-    echo Beginning to update $dest from $src
-
-    while read -r key; do
-        if grep -q "^\s*$key\s*=" "$src" 1>/dev/null 2>/dev/null; then
-            echo Updating $key
-
-            val=$(grep "^\s*$key\s*=" "$src" | sed "s/^\s*$key\s*=\s*\(.*\)$/\1/")
-
-            # Escape special characters for sed's 's//'
-            val=${val//\\/\\\\}  # escape back slash
-            val=${val//\//\\\/}  # escape forward slash
-            val=${val//&/\\&}    # escape ampersands
-
-            sed -i "s/^\s*$key\s*=.*$/$key=$val/" "$dest"
-        fi
-    done <<< "$conf_keys"
-
-    echo Finished updating $dest
-fi
-
 # CSA-2846: Enforce permissions on %config files.
+#
 chown root:root     /var/www/html/config/config.json
 chmod 0444          /var/www/html/config/config.json
 chown apache:apache /var/www/swamp-web-server/.env

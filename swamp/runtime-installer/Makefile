@@ -10,18 +10,12 @@ BUILD_NUMBER ?= dev
 CP=/bin/cp -p
 TAR=tar
 
-.PHONY: dirs rpm java perl
+.PHONY: dirs rpm perl
 
-rpm: dirs java perl
-
-java: dirs SOURCES/jre.tar
-	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS java
+rpm: dirs perl
 
 perl: dirs SOURCES/perlbin.tgz
 	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS perl
-
-SOURCES/jre.tar: SOURCES
-	$(TAR) -C SOURCES --exclude='.git' --exclude='.svn' -cvf $@ ../../../jdk1.8.0_112/linux/jre
 
 SOURCES/perlbin.tgz: SOURCES
 	$(CP) -r ../../perl/perlbin_exec_w-5.18.1.tar.gz SOURCES/perlbin.tgz

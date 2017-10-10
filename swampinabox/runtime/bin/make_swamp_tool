@@ -30,9 +30,16 @@ use Config;
 my $verbose = 0;
 
 
-my $version = '1.0.4 (May 10, 2017)';
+my $version = '1.1.0 (Aug 07, 2017)';
 
 my %toolProps = (
+	'coverity'	=> {
+		bitIndependent		=> 0,
+		revision		=> 0,
+		implemented		=> 1,
+		confFunc		=> \&MakeCoverityConf,
+		validateInstallers	=> \&ValidateCoverityInstallers,
+	    },
 	'gt-csonar'	=> {
 		bitIndependent		=> 0,
 		revision		=> 0,
@@ -163,7 +170,7 @@ sub ValidateOptions
 	    }
 	}  else  {
 	    if (!defined $installerLinux32 && !defined $installerLinux64)  {
-		push @errors, "Required option not set:  --installer-linux32 or --installer64";
+		push @errors, "Required option not set:  --installer-linux32 or --installer-linux64";
 	    }  else  {
 		if (defined $installerLinux32 && !-f $installerLinux32)  {
 		    push @errors, "File not found for --install-linux32 $installerLinux32";
@@ -303,8 +310,9 @@ sub ProcessOptions
     # Error checking of options goes here
     my $errors = ValidateOptions(\%options);
     if (@$errors)  {
-	print STDERR "Options error:\n", (map {"  $_\n"} @$errors), "\n";
+	print STDERR "ERROR, invalid options:\n", (map {"  $_\n"} @$errors);
 	$ok = 0;
+	exit !$ok;
     }
 
     return \%options
@@ -642,6 +650,99 @@ sub CheckTarGzContainsFiles
 }
 
 
+sub GetCreationData
+{
+    my ($ts) = @_;
+
+    use Sys::Hostname;
+    my $host = hostname();
+
+    # These two lines would be better since above is not FQDN, but they produce
+    # a warning in the perl library code on some systems
+    #
+    # use Net::Domain qw(hostfqdn);
+    # my $host = hostfqdn();
+      
+    my $username = getpwuid($<);
+    my $program = $0;
+    $program =~ s/^.*\///;
+
+    my $s = <<EOF ;
+creation-program = $program
+creation-date = $ts
+creation-host = $host
+creation-user = $username
+EOF
+
+    return $s;
+}
+
+
+sub ValidateCoverityInstallers
+{
+    my ($version, $installerLinux, $installerLinux32, $installerLinux64) = @_;
+
+    my @errors;
+    my $re32 = "(^|\/)cov-analysis-linux-$version.tar.gz\$";
+    my $re64 = "(^|\/)cov-analysis-linux64-$version.tar.gz\$";
+    my @files = (qw( bin/cov-configure bin/cov-translate bin/cov-analyze bin/cov-format-errors ));
+
+    if (defined $installerLinux32 && -f $installerLinux32)  {
+	if ($installerLinux32 !~ /$re32/)  {
+	    push @errors, "32-bit installer, $installerLinux32, does not match $re32";
+	}  else  {
+	    my @reqFiles = map {"cov-analysis-linux-$version/$_"} @files;
+	    my $e = CheckTarGzContainsFiles($installerLinux32, @reqFiles);
+	    push @errors, @$e;
+	}
+    }
+
+    if (defined $installerLinux64 && -f $installerLinux64)  {
+	if ($installerLinux64 !~ /$re64/)  {
+	    push @errors, "64-bit installer, $installerLinux64, does not match $re32";
+	}  else  {
+	    my @reqFiles = map {"cov-analysis-linux64-$version/$_"} @files;
+	    my $e = CheckTarGzContainsFiles($installerLinux64, @reqFiles);
+	    push @errors, @$e;
+	}
+    }
+
+    return \@errors;
+}
+
+
+sub MakeCoverityConf
+{
+    my ($toolArchive, $toolType, $version, $ts, $bits) = @_;
+
+    my $creationData = GetCreationData($ts);
+    my $plat = "linux";
+    $plat .= $bits if $bits eq '64';
+
+    my $s =<<EOF;
+tool-archive = $toolArchive
+tool-dir = cov-analysis-$plat-$version
+tool-cmd = bin/cov-analyze
+tool-type = coverity
+tool-version = $version
+
+tool-license-dat-file = bin/license.dat
+tool-license-config-file = bin/license.config
+tool-coverity-config-file = coverity_config.xml
+tool-coverity-data = cov-data
+
+tool-coverity-configure = bin/cov-configure
+tool-coverity-translate = bin/cov-translate
+tool-coverity-analyze = bin/cov-analyze
+tool-coverity-format-errors = bin/cov-format-errors
+
+$creationData
+EOF
+
+    return $s;
+}
+
+
 sub ValidateGtInstallers
 {
     my ($version, $installerLinux, $installerLinux32, $installerLinux64) = @_;
@@ -675,11 +776,9 @@ sub ValidateGtInstallers
 
 sub MakeGtCsonarConf
 {
-    my ($toolArchive, $toolType, $version, $ts) = @_;
+    my ($toolArchive, $toolType, $version, $ts, $bits) = @_;
 
-    use Sys::Hostname;
-    my $host = hostname();
-    my $username = getpwuid($<);
+    my $creationData = GetCreationData($ts);
 
     my $s =<<EOF;
 tool-archive = $toolArchive
@@ -697,9 +796,7 @@ tool-codesonar-hub-license = license.txt
 tool-codesonar-hub-pw-env = CSHUB_PASSWORD
 tool-codesonar-hub-pw = doijwerowern
 
-creation-date = $ts
-creation-host = $host
-creation-user = $username
+$creationData
 EOF
 
     return $s;
@@ -735,7 +832,7 @@ sub MakeSwampPackagedTool
     $year += 1900;
     ++$mon;
 
-    my $ts = sprintf "%04d-%02d-%02dT%02d:%02d:%02d",
+    my $ts = sprintf "%04d-%02d-%02dT%02d:%02d:%02dZ",
 		    $year, $mon, $mday, $hour, $min, $sec;
 
     Mkdir $toolDir, $options;
@@ -753,7 +850,7 @@ sub MakeSwampPackagedTool
 
 	CpFile $installerLinux32, $inFilesDirInstaller, $options;
 
-	my $confData = $confFunc->($installer, $toolName, $toolVersion, $ts);
+	my $confData = $confFunc->($installer, $toolName, $toolVersion, $ts, '32');
 	WriteFile $confFile, $confData, $options;
 
 	foreach my $d (@linux32Plats)  {
@@ -777,7 +874,7 @@ sub MakeSwampPackagedTool
 
 	CpFile $installerLinux64, $inFilesDirInstaller, $options;
 
-	my $confData = $confFunc->($installer, $toolName, $toolVersion, $ts);
+	my $confData = $confFunc->($installer, $toolName, $toolVersion, $ts, '64');
 	WriteFile $confFile, $confData, $options;
 
 	foreach my $d (@linux64Plats)  {

@@ -9,7 +9,8 @@ BINDIR=`dirname "$0"`
 
 . "$BINDIR"/common-helper.functions
 
-check_user || exit_with_error
+check_user             || exit_with_error
+check_os_dist_upgrade  || exit_with_error
 
 echo ""
 echo "#################################################"

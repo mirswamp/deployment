@@ -31,13 +31,21 @@ $(TARBALL): SOURCES/composer
 
 dirs: $(DIRS)
 
-# Replace the text 'BUILD_VERSION' in version.js with the actual build version.
+# Replace the text 'BUILD_VERSION' in version.json with the actual build version html and swamp-web-server.
 version: 
-	$(TAR) --delete -vf $(TARBALL) html/scripts/version.js
-	mkdir -p SOURCES/html/scripts
-	sed -e's#BUILD_VERSION#$(RELEASE_NUMBER).$(BUILD_NUMBER)#' ../../../www-front-end/scripts/version.js > SOURCES/html/scripts/version.js
+	$(TAR) --delete -vf $(TARBALL) html/version.json
+	$(TAR) --delete -vf $(TARBALL) swamp-web-server/public/version.json
+	mkdir -p SOURCES/html
+	mkdir -p SOURCES/swamp-web-server/public
+
+	sed -e's#RELEASE_NUMBER#$(RELEASE_NUMBER)#' ../../../www-front-end/version.json | sed -e's#BUILD_NUMBER#$(BUILD_NUMBER)#' > SOURCES/html/version.json
+
+	sed -e's#RELEASE_NUMBER#$(RELEASE_NUMBER)#' ../../../swamp-web-server/public/version.json | sed -e's#BUILD_NUMBER#$(BUILD_NUMBER)#' > SOURCES/swamp-web-server/public/version.json
+
 	$(TAR) -rf $(TARBALL) -C SOURCES html
+	$(TAR) -rf $(TARBALL) -C SOURCES swamp-web-server/public
 	/bin/rm -rf SOURCES/html
+	/bin/rm -rf SOURCES/swamp-web-server/public
 
 
 SOURCES/composer: ../scripts/composer.phar.c33c5196b19c77ea89b05a81c573d88543d3a93d

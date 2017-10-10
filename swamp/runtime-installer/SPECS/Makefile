@@ -3,12 +3,10 @@
 #
 # Copyright 2012-2017 Software Assurance Marketplace
 
-.PHONY: install rpms java perl
+.PHONY: install rpm perl
 
 install: rpm
-rpm: java perl
+rpm: perl
 
-java:
-	rpmbuild --verbose --define '_topdir $(TOPDIR)' -bb swamp-rt-java.spec
 perl:
 	rpmbuild --verbose --define '_topdir $(TOPDIR)' -bb swamp-rt-perl.spec

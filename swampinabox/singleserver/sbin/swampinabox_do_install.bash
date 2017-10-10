@@ -5,8 +5,15 @@
 #
 # Copyright 2012-2017 Software Assurance Marketplace
 
-BINDIR=`dirname "$0"`
+#
+# Install SWAMP-in-a-Box on the current host.
+#
 
+encountered_error=0
+trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+set -o errtrace
+
+BINDIR="$(dirname "$0")"
 WORKSPACE="$1"
 RELEASE_NUMBER="$2"
 BUILD_NUMBER="$3"
@@ -15,151 +22,152 @@ MODE="$5"
 SWAMP_LOGFILE="$6"
 SWAMP_CONTEXT="$7"
 SHORT_RELEASE_NUMBER="$8"
+ERROR_LOGFILE="$9"
 
-. $BINDIR/swampinabox_install_util.functions
+. "$BINDIR/swampinabox_install_util.functions"
 
-#
-# Sections guarded by a "$MODE" check should need to be executed only once,
-# when SWAMP-in-a-Box is initially installed. However, ideally, they should
-# be safe to execute multiple times.
-#
+############################################################################
 
+echo "Starting main SWAMP-in-a-Box install script: $0 $*"
 echo ""
-echo "########################################"
-echo "##### SWAMP-in-a-Box Configuration #####"
-echo "########################################"
-echo "Release number: $RELEASE_NUMBER"
+echo "Release number: $RELEASE_NUMBER ($SHORT_RELEASE_NUMBER)"
 echo "Build number: $BUILD_NUMBER"
 echo "Hostname: $HOSTNAME"
 echo "Postfix relay host: $RELAYHOST"
 
-if [ -x $BINDIR/yum_install.bash ]; then
+if [ -x "$BINDIR/yum_install.bash" ]; then
     echo ""
     echo "########################################"
     echo "##### Installing Required Packages #####"
     echo "########################################"
-    $BINDIR/yum_install.bash
+    "$BINDIR/yum_install.bash" || abort_install
 fi
 
 echo ""
 echo "#############################"
 echo "##### Stopping Services #####"
 echo "#############################"
-if [ -x $BINDIR/swampinabox_configure_services.bash ]; then
-    $BINDIR/swampinabox_configure_services.bash
-fi
-$BINDIR/manage_services.bash stop
+"$BINDIR/manage_services.bash" stop
 
 echo ""
 echo "##################################"
 echo "##### Configuring /etc/hosts #####"
 echo "##################################"
-$BINDIR/configure_hosts.bash
+"$BINDIR/configure_hosts.bash"
 
-if [ -x $BINDIR/configure_clock.bash ]; then
-    echo ""
-    echo "#############################"
-    echo "##### Configuring Clock #####"
-    echo "#############################"
-    $BINDIR/configure_clock.bash "$MODE" "$SWAMP_CONTEXT"
-fi
+echo ""
+echo "#############################"
+echo "##### Configuring Clock #####"
+echo "#############################"
+"$BINDIR/configure_clock.bash" "$SWAMP_CONTEXT"
+
+echo ""
+echo "######################################"
+echo "##### Configuring Apache (httpd) #####"
+echo "######################################"
+"$BINDIR/configure_httpd.bash"
 
 echo ""
 echo "################################"
 echo "##### Configuring HTCondor #####"
 echo "################################"
-$BINDIR/condor_install.bash
+"$BINDIR/configure_htcondor.bash"
 
 echo ""
 echo "######################################"
 echo "##### Setting mysql User's Shell #####"
 echo "######################################"
-chsh -s /bin/bash mysql
+if [[ ! ( $(getent passwd mysql) =~ :/bin/bash$ ) ]]; then
+    chsh -s /bin/bash mysql
+fi
 
 #
 # The "workspace" used by the RPM install script ($RPMWORKSPACE) depends
 # on whether we built the RPMs as part of the install.
 #
-if [ -x $BINDIR/swampinabox_build_rpms.bash ]; then
+if [ -x "$BINDIR/swampinabox_build_rpms.bash" ]; then
     echo ""
     echo "#########################"
     echo "##### Building RPMS #####"
     echo "#########################"
-    $BINDIR/swampinabox_build_rpms.bash singleserver "$WORKSPACE" "$RELEASE_NUMBER" "$BUILD_NUMBER" || abort_install
+    "$BINDIR/swampinabox_build_rpms.bash" "singleserver" "$WORKSPACE" "$RELEASE_NUMBER" "$BUILD_NUMBER" || abort_install
     RPMWORKSPACE="$WORKSPACE/deployment/swamp"
 else
     RPMWORKSPACE="$WORKSPACE"
-fi
-
-if [ -x $BINDIR/swampinabox_clean_rpms.bash ]; then
-    echo ""
-    echo "##########################################"
-    echo "##### Cleaning RPM Build By-Products #####"
-    echo "##########################################"
-    $BINDIR/swampinabox_clean_rpms.bash "$WORKSPACE"
 fi
 
 echo ""
 echo "###########################"
 echo "##### Installing RPMS #####"
 echo "###########################"
-$BINDIR/swampinabox_install_rpms.bash "$RPMWORKSPACE" "$RELEASE_NUMBER" "$BUILD_NUMBER" "$MODE" || abort_install
+if ! "$BINDIR/swampinabox_install_rpms.bash" "$RPMWORKSPACE" "$RELEASE_NUMBER" "$BUILD_NUMBER" "$MODE" ; then
+    encountered_error=1
+    echo "Error: $0: Failed to install and/or configure SWAMP-in-a-Box RPMs" 1>&2
+
+    rpms_with_wrong_version=$(check_rpm_versions "${RELEASE_NUMBER}-${BUILD_NUMBER}" swamp-rt-perl swampinabox-backend swamp-web-server)
+
+    if [ ! -z "$rpms_with_wrong_version" ]; then
+        abort_install
+    else
+        echo "Warning: $0: Continuing, correct versions of RPMs appear to be installed" 1>&2
+    fi
+fi
 
 echo ""
-echo "##########################################"
-echo "##### Performing Database Operations #####"
-echo "##########################################"
-$BINDIR//swampinabox_install_database.bash "$MODE" "$SWAMP_CONTEXT" || abort_install
+echo "###############################################################"
+echo "##### Installing Database Tables, Procedures, and Records #####"
+echo "###############################################################"
+if ! "$BINDIR/swampinabox_install_database.bash" "$MODE" "$SWAMP_CONTEXT" ; then
+    encountered_error=1
+    echo "Error: $0: Failed to install SWAMP database tables, procedures, and records" 1>&2
+    abort_install
+fi
 
 echo ""
 echo "#######################################################"
-echo "##### Setting Hostname in Configuration Locations #####"
+echo "##### Setting Hostname in the SWAMP Configuration #####"
 echo "#######################################################"
-/opt/swamp/bin/swamp_set_db_host "localhost"
-/opt/swamp/bin/swamp_set_htcondor_host "localhost.localdomain"
-/opt/swamp/bin/swamp_set_web_host "$HOSTNAME"
+/opt/swamp/bin/swamp_set_db_host        "localhost"
+/opt/swamp/bin/swamp_set_htcondor_host  "localhost.localdomain"
+/opt/swamp/bin/swamp_set_web_host       "$HOSTNAME"
 
 if [ "$MODE" == "-install" ]; then
     echo ""
     echo "#######################################"
     echo "##### Patching Database Passwords #####"
     echo "#######################################"
-    $BINDIR/swampinabox_patch_passwords.pl token
+    "$BINDIR/swampinabox_patch_passwords.pl" token
 
     echo ""
     echo "#############################"
     echo "##### Configuring Email #####"
     echo "#############################"
-    $BINDIR/configure_mail.bash $RELAYHOST
+    "$BINDIR/configure_mail.bash" "$RELAYHOST"
 fi
 
 echo ""
 echo "########################################"
 echo "##### Configuring SWAMP Filesystem #####"
 echo "########################################"
-$BINDIR/swampinabox_make_filesystem.bash
+"$BINDIR/swampinabox_make_filesystem.bash"
 
-if [ -x $BINDIR/swamp_install_platforms.bash ]; then
-    echo ""
-    echo "################################"
-    echo "##### Installing Platforms #####"
-    echo "################################"
-    $BINDIR/swamp_install_platforms.bash "$SHORT_RELEASE_NUMBER"
-fi
+echo ""
+echo "################################"
+echo "##### Installing Platforms #####"
+echo "################################"
+"$BINDIR/swamp_install_platforms.bash" "$SWAMP_CONTEXT" "$SHORT_RELEASE_NUMBER"
 
-if [ -x $BINDIR/swamp_install_tools.bash ]; then
-    echo ""
-    echo "############################"
-    echo "##### Installing Tools #####"
-    echo "############################"
-    $BINDIR/swamp_install_tools.bash "$SHORT_RELEASE_NUMBER"
-fi
+echo ""
+echo "############################"
+echo "##### Installing Tools #####"
+echo "############################"
+"$BINDIR/swamp_install_tools.bash" "$SWAMP_CONTEXT" "$SHORT_RELEASE_NUMBER"
 
 echo ""
 echo "########################################"
 echo "##### Configuring sudo and libvirt #####"
 echo "########################################"
-$BINDIR/sudo_libvirt.bash
+"$BINDIR/configure_sudo_libvirt.bash"
 
 echo ""
 echo "###############################"
@@ -171,14 +179,17 @@ echo "###############################"
 # to pipe the output from this script safely, we need to ensure that that
 # stream isn't shared with this script's standard error stream.
 #
-coproc services_fds { $BINDIR/manage_services.bash restart 2>&1; }
+coproc services_fds { "$BINDIR/manage_services.bash" restart 2>&1; }
 
 exec {services_fd}<&${services_fds[0]}
 
 success=0
 while [ $success -eq 0 ]; do
-    read -r -d '' -n 1 -t 1 -u ${services_fd}
-    success=$?
+    if read -r -d '' -n 1 -t 1 -u "${services_fd}" ; then
+        success=0
+    else
+        success=1
+    fi
     echo -n "$REPLY"
     if [ $success -ne 0 -a ! -z "${services_fds[0]}" ]; then
         # Keep waiting as long as manage_services.bash is alive.
@@ -186,60 +197,17 @@ while [ $success -eq 0 ]; do
     fi
 done
 
-echo ""
-echo "####################################"
-echo "##### Installation Diagnostics #####"
-echo "####################################"
-echo "SELinux: `getenforce`"
-echo ""
-echo "==========================="
-echo "=== yum Repository List ==="
-echo "==========================="
-yum repolist
-echo ""
-echo "=========================="
-echo "=== Installed Packages ==="
-echo "=========================="
-yum list installed | egrep 'mariadb|php|swamp'
-echo""
-echo "======================"
-echo "=== IPTABLES Rules ==="
-echo "======================"
-iptables --list-rules
-echo ""
-echo "==========================================="
-echo "=== Web Configuration: swamp-web-server ==="
-echo "==========================================="
-cat /var/www/swamp-web-server/.env | grep -v -i 'password[ ]*='
-echo ""
-echo "==============================="
-echo "=== Web Configuration: html ==="
-echo "==============================="
-cat /var/www/html/config/config.json
-echo ""
-echo "============================="
-echo "=== Backend Configuration ==="
-echo "============================="
-cat /opt/swamp/etc/swamp.conf | grep -v -i 'pass[ ]*='
-# echo ""
-# echo "====================="
-# echo "=== System Health ==="
-# echo "====================="
-# /opt/perl5/perls/perl-5.18.1/bin/perl $BINDIR/../health_scripts/swamphealth.pl -all
-
-echo ""
-echo "############################################"
-echo "##### Removing Database Password Files #####"
-echo "############################################"
+#
+# Clean up and report the final disposition of the install/upgrade.
+#
 remove_db_password_files
 
-echo ""
-echo "###############################################"
-echo "##### SWAMP-in-a-Box Install Has Finished #####"
-echo "###############################################"
-echo ""
-echo "Output from this install has been saved to:"
-echo "$SWAMP_LOGFILE"
-echo ""
-echo "SWAMP-in-a-Box should be available at:"
-echo "https://$HOSTNAME"
+if [ $encountered_error -eq 0 ]; then
+    echo ""
+    echo "The install process has completed."
+else
+    echo ""
+    echo "Warning: The install process has completed, but with errors." 1>&2
+fi
+
+exit $encountered_error

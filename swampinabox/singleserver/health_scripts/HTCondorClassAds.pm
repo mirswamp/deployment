@@ -18,6 +18,8 @@ my @assessment_fields = qw(
 	Name 
 	SWAMP_vmu_assessment_vmhostname
 	SWAMP_vmu_assessment_status
+	SWAMP_vmu_assessment_user_uuid 
+	SWAMP_vmu_assessment_projectid 
 );
 my $assessment_constraint = qq{-constraint \"isString(SWAMP_vmu_assessment_status)\"};
 
@@ -28,7 +30,8 @@ my @viewer_fields = qw(
 	SWAMP_vmu_viewer_state 
 	SWAMP_vmu_viewer_status 
 	SWAMP_vmu_viewer_vmip 
-	SWAMP_vmu_viewer_project 
+	SWAMP_vmu_viewer_user_uuid 
+	SWAMP_vmu_viewer_projectid
 	SWAMP_vmu_viewer_instance_uuid 
 	SWAMP_vmu_viewer_apikey 
 	SWAMP_vmu_viewer_url_uuid

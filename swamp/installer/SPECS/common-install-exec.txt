@@ -24,8 +24,6 @@ mkdir -p $RPM_BUILD_ROOT/etc/profile.d
 mkdir -p $RPM_BUILD_ROOT/usr/local/empty
 mkdir -p $RPM_BUILD_ROOT/usr/project
 
-install -m 755 cloc-1.68.pl $RPM_BUILD_ROOT/opt/swamp/bin
-
 install -m 644 lib/SWAMP/vmu_Support.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_Support.pm
 install -m 644 lib/SWAMP/vmu_AssessmentSupport.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_AssessmentSupport.pm
 install -m 644 lib/SWAMP/vmu_ViewerSupport.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_ViewerSupport.pm
@@ -60,6 +58,7 @@ install -m 444 c-assess.tar.gz $RPM_BUILD_ROOT/opt/swamp/thirdparty
 install -m 444 ruby-assess.tar $RPM_BUILD_ROOT/opt/swamp/thirdparty
 install -m 444 script-assess.tar $RPM_BUILD_ROOT/opt/swamp/thirdparty
 install -m 444 resultparser.tar $RPM_BUILD_ROOT/opt/swamp/thirdparty
+install -m 755 cloc $RPM_BUILD_ROOT/opt/swamp/thirdparty
 
 install -m 755 common/vrunchecktimeout $RPM_BUILD_ROOT/opt/swamp/thirdparty/common
 install -m 755 common/checktimeout.pl $RPM_BUILD_ROOT/opt/swamp/thirdparty/common

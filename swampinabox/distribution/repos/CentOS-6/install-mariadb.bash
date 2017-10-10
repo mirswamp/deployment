@@ -11,6 +11,7 @@ BINDIR=`dirname "$0"`
 
 check_user                        || exit_with_error
 check_os_dist_and_ver "CentOS-6"  || exit_with_error
+check_os_dist_upgrade             || exit_with_error
 
 echo ""
 echo "##########################"
@@ -23,8 +24,8 @@ cp "$BINDIR"/MariaDB55.repo /etc/yum.repos.d
 echo "Importing GPG key"
 rpm --import https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
 
-yum_install MariaDB-client MariaDB-server
-yum_confirm MariaDB-client MariaDB-server || exit_with_error
+yum_install MariaDB-client MariaDB-server MariaDB-shared
+yum_confirm MariaDB-client MariaDB-server MariaDB-shared || exit_with_error
 
 echo ""
 echo "Finished installing MariaDB"

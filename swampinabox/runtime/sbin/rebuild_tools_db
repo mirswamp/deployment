@@ -1,0 +1,104 @@
+#!/bin/bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2017 Software Assurance Marketplace
+
+#
+# Rebuild the "tools" tables in the database based on the
+# tool install SQL files available on the filesystem.
+#
+
+encountered_error=0
+trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+set -o errtrace
+
+if [ "$(whoami)" != "root" ]; then
+    echo "Error: $0: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
+    exit 1
+fi
+
+############################################################################
+
+SWAMP_CONTEXT="$1"
+
+. /opt/swamp/sbin/db_support.functions
+trap 'remove_mysql_options_file; stop_mysql_service; exit 1' INT TERM
+
+start_mysql_service
+create_mysql_options_file
+
+############################################################################
+
+script_to_remove_tools=""
+dirs_with_tool_scripts=""
+tool_install_script="/opt/swamp/sql/util/tool_install.sql"
+
+if [ "$SWAMP_CONTEXT" = -distribution ]; then
+
+    script_to_remove_tools="/opt/swamp/sql/util/delete_non_user_tools.sql"
+    dirs_with_tool_scripts="/opt/swamp/sql/tools"
+
+elif [ "$SWAMP_CONTEXT" = "-singleserver" -o "$SWAMP_CONTEXT" = "-mir-swamp" ]; then
+
+    script_to_remove_tools="/opt/swamp/sql/util/delete_all_tools.sql"
+    dirs_with_tool_scripts="/opt/swamp/sql/tools /opt/swamp/sql/tools_other"
+
+else
+
+    echo "Error: $0: Unknown or missing SWAMP context: $SWAMP_CONTEXT" 1>&2
+    exit 1
+
+fi
+
+############################################################################
+
+echo "Removing existing bundled tools from the database"
+
+if ! $mysql_command < "$script_to_remove_tools" ; then
+
+    echo "Error: $0: Failed to remove existing tools from the database" 1>&2
+    encountered_error=1
+
+fi
+
+############################################################################
+
+echo "Adding bundled tools for the current release to the database"
+
+for dir in $dirs_with_tool_scripts; do
+    for tool_params_script in "$dir"/*.sql; do
+
+        tool="$tool_params_script"
+        tool="$(basename "$tool" .sql)"
+
+        default_params=$(cat "$tool_params_script")
+        install_script=$(cat "$tool_install_script")
+
+        echo ".. Adding: $tool"
+
+        if ! $mysql_command <<< "$default_params $install_script" ; then
+
+            echo "Error: $0: Failed to add: $tool" 1>&2
+            encountered_error=1
+
+        fi
+    done
+done
+
+############################################################################
+
+echo "Populating metadata into the database for all tools"
+
+if ! $mysql_command < "/opt/swamp/sql/populate_tool_metadata.sql" ; then
+
+    echo "Error: $0: Failed to populate metadata into the database" 1>&2
+    encountered_error=1
+
+fi
+
+remove_mysql_options_file
+stop_mysql_service
+
+exit $encountered_error

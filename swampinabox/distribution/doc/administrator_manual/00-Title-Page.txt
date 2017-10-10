@@ -1,0 +1,2 @@
+= SWAMP-in-a-Box Administrator Manual =
+v1.31

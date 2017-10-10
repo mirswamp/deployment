@@ -8,13 +8,18 @@
 use strict;
 use warnings;
 use Log::Log4perl qw(:easy);
-use HTCondorClassAds qw(show_collector_records);
+use HTCondorClassAds qw(
+	get_condor_collector_host
+	show_collector_records
+);
 
 my $as_table = 0;
 
 Log::Log4perl->easy_init($OFF);
 
-show_collector_records('assessment', $as_table);
-show_collector_records('viewer', $as_table);
+my $condor_collector_host = get_condor_collector_host();
+
+show_collector_records($condor_collector_host, 'assessment', $as_table);
+show_collector_records($condor_collector_host, 'viewer', $as_table);
 
 print "Hello World!\n";

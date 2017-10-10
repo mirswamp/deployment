@@ -20,7 +20,7 @@ Vendor:    The Morgridge Institute for Research
 Packager:  Support <support@continuousassurance.org>
 URL:       http://www.continuousassurance.org
 
-Obsoletes: swamp-rt,swamp-rt-exec
+Obsoletes: swamp-rt,swamp-rt-exec,swamp-rt-java
 Source:    perlbin.tgz
 BuildRoot: /tmp/%{name}-buildroot
 BuildArch: noarch

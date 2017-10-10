@@ -1,0 +1,10 @@
+Documentation for Users of the SWAMP
+------------------------------------
+
+Documentation for users of the SWAMP includes:
+
+  * https://www.swampinabox.org/doc/SWAMP-User-Manual.pdf[SWAMP User Manual]
+  * https://www.swampinabox.org/doc/statusout.pdf[Status.out and Debugging SWAMP Failures]
+
+Links to these documents can be found on the Help page of the SWAMP web
+application.

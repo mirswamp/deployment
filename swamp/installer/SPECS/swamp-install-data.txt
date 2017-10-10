@@ -7,20 +7,8 @@
 
 install -m 400 Data_Server/Project/project_procs.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 
-install -m 644 dsmonitor.conf $RPM_BUILD_ROOT/opt/swamp/etc/swampmonitor.conf
-
-mkdir -p ${RPM_BUILD_ROOT}/opt/swamp/sql/tools
-install -m 400 Data_Server/Metric/metric_tools/* ${RPM_BUILD_ROOT}/opt/swamp/sql/tools
-install -m 400 Data_Server/Tool_Shed/tools_MIR_and_SiaB/* ${RPM_BUILD_ROOT}/opt/swamp/sql/tools
-
-mkdir -p ${RPM_BUILD_ROOT}/opt/swamp/sql/tools_add_on
-install -m 400 Data_Server/Tool_Shed/tools_Siab_add_on/* ${RPM_BUILD_ROOT}/opt/swamp/sql/tools_add_on
-
-mkdir -p ${RPM_BUILD_ROOT}/opt/swamp/sql/tools_other
-install -m 400 Data_Server/Tool_Shed/tools_MIR_only/* ${RPM_BUILD_ROOT}/opt/swamp/sql/tools_other
-
-mkdir -p ${RPM_BUILD_ROOT}/opt/swamp/sql/util
-install -m 400 Data_Server/Tool_Shed/tool_install.sql ${RPM_BUILD_ROOT}/opt/swamp/sql/util
-install -m 400 Data_Server/Tool_Shed/tool_uninstall.sql ${RPM_BUILD_ROOT}/opt/swamp/sql/util
-install -m 400 Data_Server/Tool_Shed/delete_all_tools.sql  ${RPM_BUILD_ROOT}/opt/swamp/sql/util
-install -m 400 Data_Server/Tool_Shed/delete_non_user_tools.sql  ${RPM_BUILD_ROOT}/opt/swamp/sql/util
+install -m 700 swampinabox/sbin/create_mysql_root_cnf  ${RPM_BUILD_ROOT}/opt/swamp/sbin
+install -m 700 swampinabox/sbin/db_support.functions   ${RPM_BUILD_ROOT}/opt/swamp/sbin
+install -m 700 swampinabox/sbin/rebuild_platforms_db   ${RPM_BUILD_ROOT}/opt/swamp/sbin
+install -m 700 swampinabox/sbin/rebuild_tools_db       ${RPM_BUILD_ROOT}/opt/swamp/sbin
+install -m 700 swampinabox/sbin/swamp_manage_service   ${RPM_BUILD_ROOT}/opt/swamp/sbin

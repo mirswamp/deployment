@@ -28,7 +28,7 @@ Vendor: The Morgridge Institute for Research
 Packager: Support <support@continuousassurance.org>
 BuildRoot: /tmp/%{name}-buildroot
 BuildArch: noarch
-Requires: swamp-rt-java,swamp-rt-perl
+Requires: swamp-rt-perl
 Conflicts: swamp-exec,swamp-ds
 AutoReqProv: no
 
@@ -85,7 +85,7 @@ fi
 iam=`hostname -s`
 floodlight=""
 if [ "$iam" = "swa-csasub-dd-01" ];then
-    floodlight=http://swa-flood-dt-01.mirsam.org:8080
+    floodlight=http://swa-flood-dd-01.mirsam.org:8080
 elif [ "$iam" = "swa-csasub-dt-01" -o "$iam" = "swa-build-1" ];then
     floodlight=http://swa-flood-dt-01.mirsam.org:8080
 elif [ "$iam" = "swa-csasub-it-01" -o "$iam" = "dbrhel6test" ];then

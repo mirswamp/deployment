@@ -8,7 +8,6 @@
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/bin
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/etc
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/lib
-mkdir -p $RPM_BUILD_ROOT/opt/swamp/jar
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/run
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/log
 chmod 01777 $RPM_BUILD_ROOT/opt/swamp/log
@@ -36,18 +35,5 @@ install -m 755 vmu_LaunchPad.pl $RPM_BUILD_ROOT/opt/swamp/bin
 
 install -m 644 log4perl.conf $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 400 swamp.conf $RPM_BUILD_ROOT/opt/swamp/etc
-ln -s ../etc/swamp.conf $RPM_BUILD_ROOT/opt/swamp/jar/swamp.conf
-sed -e's/log4j.appender.SYSLOG.tag=DummyTag/log4j.appender.SYSLOG.tag=AgentDispatcher/' log4j.properties > tmp.$$ && mv tmp.$$ log4j.properties
-install -m 755 log4j.properties $RPM_BUILD_ROOT/opt/swamp/etc
-ln -s ../etc/log4j.properties $RPM_BUILD_ROOT/opt/swamp/jar/log4j.properties
 install -m 755 swamp.sh $RPM_BUILD_ROOT/etc/profile.d
 
-install -m 755 lib/commons-logging-1.1.jar $RPM_BUILD_ROOT/opt/swamp/lib/commons-logging-1.1.jar
-install -m 755 lib/guava-21.0.jar $RPM_BUILD_ROOT/opt/swamp/lib/guava-21.0.jar
-install -m 755 lib/log4j-1.2.17p.jar $RPM_BUILD_ROOT/opt/swamp/lib/log4j-1.2.17p.jar
-install -m 755 lib/mariadb-java-client-1.4.6.jar $RPM_BUILD_ROOT/opt/swamp/lib/mariadb-java-client-1.4.6.jar
-install -m 755 lib/ws-commons-util-1.0.2.jar $RPM_BUILD_ROOT/opt/swamp/lib/ws-commons-util-1.0.2.jar
-install -m 755 lib/xmlrpc-client-3.1.3.jar $RPM_BUILD_ROOT/opt/swamp/lib/xmlrpc-client-3.1.3.jar
-install -m 755 lib/xmlrpc-common-3.1.3.jar $RPM_BUILD_ROOT/opt/swamp/lib/xmlrpc-common-3.1.3.jar
-install -m 755 lib/xmlrpc-server-3.1.3.jar $RPM_BUILD_ROOT/opt/swamp/lib/xmlrpc-server-3.1.3.jar
-install -m 755 jar/agentdispatcher.jar $RPM_BUILD_ROOT/opt/swamp/jar/agentdispatcher.jar

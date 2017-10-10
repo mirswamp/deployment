@@ -5,14 +5,24 @@
 #
 # Copyright 2012-2017 Software Assurance Marketplace
 
-function make_dir {
+#
+# Create the directories needed by the SWAMP's backend.
+#
+
+encountered_error=0
+trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+set -o errtrace
+
+############################################################################
+
+function make_dir() {
     mode="$1"
     owner="$2"
     target="$3"
 
-    mkdir -p        "$target"
-    chmod "$mode"   "$target"
-    chown "$owner"  "$target"
+    mkdir  -p        "$target"
+    chmod  "$mode"   "$target"
+    chown  "$owner"  "$target"
 }
 
 make_dir  0755  root:root      /swamp
@@ -31,7 +41,7 @@ make_dir  0755  mysql:mysql    /swamp/store/SCATools/bundled
 make_dir  0755  mysql:mysql    /swamp/SCAProjects
 
 # CSA-2955: Clear sticky bits that were unnecessarily set in SWAMP-in-a-Box
-# releases prior to 1.30.
+# releases prior to 1.30. (The numeric modes above won't clear them.)
 chmod ugo-s /swamp/incoming
 chmod uo-s /swamp/outgoing
 
@@ -55,3 +65,5 @@ fi
 if [ ! -h /var/www/html/swamp-web-server/public/results ]; then
 	ln -s /var/www/html/results /var/www/html/swamp-web-server/public/results
 fi
+
+exit $encountered_error

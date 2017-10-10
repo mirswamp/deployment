@@ -13,21 +13,28 @@ use utf8;
 use strict;
 use warnings;
 
+use English qw( -no_match_vars );
 use File::Slurp qw(read_file write_file);
 use JSON qw(from_json to_json);
 
 my $new_hostname = $ARGV[0];
-my $config_file = '/var/www/html/config/config.json';
+my $config_file  = '/var/www/html/config/config.json';
 
-my $whoami = qx{whoami};
+############################################################################
+
+my $whoami = qx(whoami);
 chomp $whoami;
 
-if ($whoami ne 'root') {
-    die "Error: This script must be run as 'root', stopping";
+if (!$new_hostname) {
+    die "Usage: $PROGRAM_NAME <new hostname>\n";
 }
 
-if (! -r $config_file) {
-    die "Error: Unable to read $config_file, stopping";
+if (!-e $config_file) {
+    die "Error: $PROGRAM_NAME: No such file: $config_file\n";
+}
+
+if ($whoami ne 'root') {
+    die "Error: $PROGRAM_NAME: This script must be run as 'root'\n";
 }
 
 my $config_file_contents = read_file($config_file);

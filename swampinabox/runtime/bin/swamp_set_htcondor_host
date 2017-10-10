@@ -7,30 +7,32 @@
 
 #
 # Set the hostname of the HTCondor installation in all relevant
-# configuration locations.  There's an implicit assumption here that the
+# configuration locations. There's an implicit assumption here that the
 # entire installation is running on one host.
 #
+
+encountered_error=0
+trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+set -o errtrace
+
+############################################################################
 
 NEW_HOSTNAME="$1"
 
 if [ -z "$NEW_HOSTNAME" ]; then
-    echo "Usage: $0 <new hostname>"
+    echo "Usage: $0 <new hostname>" 1>&2
     exit 1
 fi
 
-IP_ADDRESS=$(perl -e 'use Socket; print inet_ntoa(inet_aton($ARGV[0]))' "$NEW_HOSTNAME" 2>/dev/null)
-
-if [ $? -ne 0 ]; then
-    echo "Error: Unable to determine an IP address for $NEW_HOSTNAME."
+if ! IP_ADDRESS=$(perl -e 'use Socket; print inet_ntoa(inet_aton($ARGV[0]))' "$NEW_HOSTNAME" 2>/dev/null) ; then
+    echo "Error: Unable to determine an IP address for: $NEW_HOSTNAME" 1>&2
     exit 1
 fi
 
 if [ "$(whoami)" != "root" ]; then
-    echo "Error: This utility must be run as root. Perhaps use 'sudo'."
+    echo "Error: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
     exit 1
 fi
-
-echo "Beginning to configure $NEW_HOSTNAME as the HTCondor host"
 
 #
 # Simple function for abstracting out the invocation of 'sed'.
@@ -44,7 +46,7 @@ function update_config() {
     val=${val//\//\\\/}
 
     if [ -r "$target" ]; then
-        echo "Updating $target ($key)"
+        echo "Updating: $target: $key"
         if [ "$nospace" = "-nospace" ]; then
             sed -i "s/^\s*$key\s*=.*$/$key=$val/" "$target"
         else
@@ -58,18 +60,14 @@ function update_config() {
 #
 target="/opt/swamp/etc/swamp.conf"
 
-for key in htcondor_collector_host; do
-    update_config "$key" "$NEW_HOSTNAME" "$target"
-done
+update_config "htcondor_collector_host" "$NEW_HOSTNAME" "$target"
 
 #
 # Update .env (web server)
 #
 target="/var/www/swamp-web-server/.env"
 
-for key in HTCONDOR_COLLECTOR_HOST; do
-    update_config "$key" "$NEW_HOSTNAME" "$target" -nospace
-done
+update_config "HTCONDOR_COLLECTOR_HOST" "$NEW_HOSTNAME" "$target" -nospace
 
 #
 # Update /etc/condor/config.d (HTCondor itself)
@@ -87,4 +85,4 @@ if [ "$htcondor_service_status" = "running" ]; then
     /opt/swamp/sbin/swamp_manage_service condor restart
 fi
 
-echo "Finished configuring $NEW_HOSTNAME as the HTCondor host"
+exit $encountered_error

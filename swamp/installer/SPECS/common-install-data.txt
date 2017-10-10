@@ -8,12 +8,18 @@
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/bin
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/etc
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/lib
-mkdir -p $RPM_BUILD_ROOT/opt/swamp/jar
-mkdir -p $RPM_BUILD_ROOT/opt/swamp/run
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/log
 chmod 01777 $RPM_BUILD_ROOT/opt/swamp/log
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/run
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/sbin
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/perl5/SWAMP
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql/platforms
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql/tools
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql/tools_add_on
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql/tools_other
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql/upgrades_data
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql/util
 mkdir -p $RPM_BUILD_ROOT/usr/local/bin
 mkdir -p $RPM_BUILD_ROOT/etc/profile.d
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
@@ -45,7 +51,6 @@ install -m 400 Data_Server/upgrades/* ${RPM_BUILD_ROOT}/opt/swamp/sql/upgrades_d
 # install path specific table populate files
 install -m 400 Data_Server/Assessment/populate_assessment.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Package_Store/populate_package_store.sql  ${RPM_BUILD_ROOT}/opt/swamp/sql
-install -m 400 Data_Server/Platform_Store/populate_platforms.sql  ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Tool_Shed/populate_tool_shed.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Tool_Shed/populate_tool_metadata.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Viewer_Store/populate_viewer_store.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
@@ -78,36 +83,35 @@ install -m 755 vmu_launchviewer.pl ${RPM_BUILD_ROOT}/opt/swamp/bin
 install -m 755 vmu_notifyuser.pl ${RPM_BUILD_ROOT}/opt/swamp/bin
 install -m 755 vmu_killrun.pl ${RPM_BUILD_ROOT}/opt/swamp/bin
 
-install -m 755 lib/commons-logging-1.1.jar $RPM_BUILD_ROOT/opt/swamp/lib/commons-logging-1.1.jar
-install -m 755 lib/guava-21.0.jar $RPM_BUILD_ROOT/opt/swamp/lib/guava-21.0.jar
-install -m 755 lib/log4j-1.2.17p.jar $RPM_BUILD_ROOT/opt/swamp/lib/log4j-1.2.17p.jar
-install -m 755 lib/mariadb-java-client-1.4.6.jar $RPM_BUILD_ROOT/opt/swamp/lib/mariadb-java-client-1.4.6.jar
-install -m 755 lib/ws-commons-util-1.0.2.jar $RPM_BUILD_ROOT/opt/swamp/lib/ws-commons-util-1.0.2.jar
-install -m 755 lib/xmlrpc-client-3.1.3.jar $RPM_BUILD_ROOT/opt/swamp/lib/xmlrpc-client-3.1.3.jar
-install -m 755 lib/xmlrpc-common-3.1.3.jar $RPM_BUILD_ROOT/opt/swamp/lib/xmlrpc-common-3.1.3.jar
-install -m 755 lib/xmlrpc-server-3.1.3.jar $RPM_BUILD_ROOT/opt/swamp/lib/xmlrpc-server-3.1.3.jar
-install -m 755 jar/quartermaster.jar $RPM_BUILD_ROOT/opt/swamp/jar/quartermaster.jar
-
 install -m 400 swamp.conf $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 findbugs.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 pmd.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 cppcheck.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 clang-sa.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 clang-sa_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 gcc_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 cppcheck_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 pmd_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 findbugs_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 androidlint_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 644 archie_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 dawn_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 reveal_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 clang-sa_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 clang-sa.xslt $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 644 codesonar_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 cppcheck_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 cppcheck.xslt $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 dawn_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 findbugs_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 findbugs.xslt $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 gcc_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 644 generic_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 644 no-build.xslt $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 pmd_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 pmd.xslt $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 reveal_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
 
-ln -s ../etc/swamp.conf $RPM_BUILD_ROOT/opt/swamp/jar/swamp.conf
-sed -e's/log4j.appender.SYSLOG.tag=DummyTag/log4j.appender.SYSLOG.tag=QuarterMaster/' log4j.properties > tmp.$$ && mv tmp.$$ log4j.properties
-install -m 755 log4j.properties $RPM_BUILD_ROOT/opt/swamp/etc
-ln -s ../etc/log4j.properties $RPM_BUILD_ROOT/opt/swamp/jar/log4j.properties
 install -m 644 log4perl.conf $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 755 swamp.sh $RPM_BUILD_ROOT/etc/profile.d
+
+install -m 400 Data_Server/Platform_Store/platforms/*          $RPM_BUILD_ROOT/opt/swamp/sql/platforms
+install -m 400 Data_Server/Platform_Store/delete_platforms.sql $RPM_BUILD_ROOT/opt/swamp/sql/util
+
+install -m 400 Data_Server/Metric/metric_tools/*               $RPM_BUILD_ROOT/opt/swamp/sql/tools
+install -m 400 Data_Server/Tool_Shed/tools_MIR_and_SiaB/*      $RPM_BUILD_ROOT/opt/swamp/sql/tools
+install -m 400 Data_Server/Tool_Shed/tools_Siab_add_on/*       $RPM_BUILD_ROOT/opt/swamp/sql/tools_add_on
+install -m 400 Data_Server/Tool_Shed/tools_MIR_only/*          $RPM_BUILD_ROOT/opt/swamp/sql/tools_other
+install -m 400 Data_Server/Tool_Shed/tool_install.sql          $RPM_BUILD_ROOT/opt/swamp/sql/util
+install -m 400 Data_Server/Tool_Shed/tool_uninstall.sql        $RPM_BUILD_ROOT/opt/swamp/sql/util
+install -m 400 Data_Server/Tool_Shed/delete_all_tools.sql      $RPM_BUILD_ROOT/opt/swamp/sql/util
+install -m 400 Data_Server/Tool_Shed/delete_non_user_tools.sql $RPM_BUILD_ROOT/opt/swamp/sql/util

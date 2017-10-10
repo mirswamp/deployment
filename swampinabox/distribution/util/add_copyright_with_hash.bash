@@ -12,8 +12,12 @@
 SOURCE_FILE="$1"
 TMP_FILE="/tmp/$USER.$(basename "$SOURCE_FILE").$RANDOM"
 
-if [ ! -e "$SOURCE_FILE" ]; then
-    echo "Error: $SOURCE_FILE does not exist"
+if [ ! -r "$SOURCE_FILE" ]; then
+    echo "Error: No such file (or file is not readable): $SOURCE_FILE" 1>&2
+    exit 1
+fi
+if [ -e "$TMP_FILE" ]; then
+    echo "Error: Temporary file already exists: $TMP_FILE" 1>&2
     exit 1
 fi
 
@@ -32,7 +36,7 @@ echo -n "Add notice to this file? [N/y] "
 read answer
 if [ "$answer" != "y" ]; then
     echo ""
-    echo "Not modifying $source_file"
+    echo "Not modifying: $SOURCE_FILE"
     exit 0
 fi
 
@@ -44,7 +48,7 @@ if [ -z "$skip_lines" ]; then
     skip_lines=0
 fi
 
-cp -f "$SOURCE_FILE" "$TMP_FILE"  # capture the file's permission bits
+cp -f "$SOURCE_FILE" "$TMP_FILE"    # capture the file's permission bits
 
 head -n "$skip_lines" "$SOURCE_FILE" > "$TMP_FILE"
 
@@ -58,6 +62,6 @@ echo "#" >> "$TMP_FILE"
 echo "# Copyright 2012-2017 Software Assurance Marketplace" >> "$TMP_FILE"
 echo "" >> "$TMP_FILE"
 
-tail -n +"$(($skip_lines + 1))" "$SOURCE_FILE" >> "$TMP_FILE"
+tail -n +"$((skip_lines + 1))" "$SOURCE_FILE" >> "$TMP_FILE"
 
 mv -f "$TMP_FILE" "$SOURCE_FILE"

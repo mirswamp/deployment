@@ -1,0 +1,3655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.6.1">
+<meta name="author" content="v1.31">
+<title>SWAMP-in-a-Box Administrator Manual</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/* Asciidoctor default stylesheet | MIT License | http://asciidoctor.org */
+/* Remove comment around @import statement below when using as a custom stylesheet */
+/*@import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700";*/
+article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section,summary{display:block}
+audio,canvas,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+[hidden],template{display:none}
+script{display:none!important}
+html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}
+a{background:transparent}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+abbr[title]{border-bottom:1px dotted}
+b,strong{font-weight:bold}
+dfn{font-style:italic}
+hr{-moz-box-sizing:content-box;box-sizing:content-box;height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type="button"],input[type="reset"],input[type="submit"]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type="checkbox"],input[type="radio"]{box-sizing:border-box;padding:0}
+input[type="search"]{-webkit-appearance:textfield;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;box-sizing:content-box}
+input[type="search"]::-webkit-search-cancel-button,input[type="search"]::-webkit-search-decoration{-webkit-appearance:none}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,*:before,*:after{-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;font-weight:400;font-style:normal;line-height:1;position:relative;cursor:auto;tab-size:4;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.center{margin-left:auto;margin-right:auto}
+.spread{width:100%}
+p.lead,.paragraph.lead>p,#preamble>.sectionbody>.paragraph:first-of-type p{font-size:1.21875em;line-height:1.6}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0;direction:ltr}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:none}
+p{font-family:inherit;font-weight:400;font-size:1em;line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #ddddd8;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em;height:0}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{font-size:1em;line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0;font-size:1em}
+ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
+ul.square{list-style-type:square}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+abbr,acronym{text-transform:uppercase;font-size:90%;color:rgba(0,0,0,.8);border-bottom:1px dotted #ddd;cursor:help}
+abbr{text-transform:none}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote cite{display:block;font-size:.9375em;color:rgba(0,0,0,.6)}
+blockquote cite:before{content:"\2014 \0020"}
+blockquote cite a,blockquote cite a:visited{color:rgba(0,0,0,.6)}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media only screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:solid 1px #dedede}
+table thead,table tfoot{background:#f7f8f7;font-weight:bold}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt,table tr:nth-of-type(even){background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{display:table-cell;line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.clearfix:before,.clearfix:after,.float-group:before,.float-group:after{content:" ";display:table}
+.clearfix:after,.float-group:after{clear:both}
+*:not(pre)>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background-color:#f7f7f8;-webkit-border-radius:4px;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed;word-wrap:break-word}
+*:not(pre)>code.nobreak{word-wrap:normal}
+*:not(pre)>code.nowrap{white-space:nowrap}
+pre,pre>code{line-height:1.45;color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;text-rendering:optimizeSpeed}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background-color:#f7f7f7;border:1px solid #ccc;-webkit-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em white inset;box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em #fff inset;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button:before,b.button:after{position:relative;top:-1px;font-weight:400}
+b.button:before{content:"[";padding:0 3px 0 2px}
+b.button:after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin-left:auto;margin-right:auto;margin-top:0;margin-bottom:0;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header:before,#header:after,#content:before,#content:after,#footnotes:before,#footnotes:after,#footer:before,#footer:after{content:" ";display:table}
+#header:after,#content:after,#footnotes:after,#footer:after{clear:both}
+#content{margin-top:1.25em}
+#content:before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #ddddd8}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #ddddd8;padding-bottom:8px}
+#header .details{border-bottom:1px solid #ddddd8;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:-ms-flexbox;display:-webkit-flex;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span:before{content:"\00a0\2013\00a0"}
+#header .details br+span.author:before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark:before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber:after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #ddddd8;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #efefed;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media only screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background-color:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #efefed;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #efefed;left:auto;right:0}}
+@media only screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border-style:solid;border-width:1px;border-color:#e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;-webkit-border-radius:4px;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:100%;background-color:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:rgba(255,255,255,.8);line-height:1.44}
+.sect1{padding-bottom:.625em}
+@media only screen and (min-width:768px){.sect1{padding-bottom:1.25em}}
+.sect1+.sect1{border-top:1px solid #efefed}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor:before,h2>a.anchor:before,h3>a.anchor:before,#toctitle>a.anchor:before,.sidebarblock>.content>.title>a.anchor:before,h4>a.anchor:before,h5>a.anchor:before,h6>a.anchor:before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock>caption.title{white-space:nowrap;overflow:visible;max-width:0}
+.paragraph.lead>p,#preamble>.sectionbody>.paragraph:first-of-type p{color:rgba(0,0,0,.85)}
+table.tableblock #preamble>.sectionbody>.paragraph:first-of-type p{font-size:inherit}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:initial}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #ddddd8;color:rgba(0,0,0,.6)}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border-style:solid;border-width:1px;border-color:#e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;-webkit-border-radius:4px;border-radius:4px}
+.exampleblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child{margin-bottom:0}
+.sidebarblock{border-style:solid;border-width:1px;border-color:#e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;-webkit-border-radius:4px;border-radius:4px}
+.sidebarblock>:first-child{margin-top:0}
+.sidebarblock>:last-child{margin-bottom:0}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock pre:not(.highlight),.listingblock pre[class="highlight"],.listingblock pre[class^="highlight "],.listingblock pre.CodeRay,.listingblock pre.prettyprint{background:#f7f7f8}
+.sidebarblock .literalblock pre,.sidebarblock .listingblock pre:not(.highlight),.sidebarblock .listingblock pre[class="highlight"],.sidebarblock .listingblock pre[class^="highlight "],.sidebarblock .listingblock pre.CodeRay,.sidebarblock .listingblock pre.prettyprint{background:#f2f1f1}
+.literalblock pre,.literalblock pre[class],.listingblock pre,.listingblock pre[class]{-webkit-border-radius:4px;border-radius:4px;word-wrap:break-word;padding:1em;font-size:.8125em}
+.literalblock pre.nowrap,.literalblock pre[class].nowrap,.listingblock pre.nowrap,.listingblock pre[class].nowrap{overflow-x:auto;white-space:pre;word-wrap:normal}
+@media only screen and (min-width:768px){.literalblock pre,.literalblock pre[class],.listingblock pre,.listingblock pre[class]{font-size:.90625em}}
+@media only screen and (min-width:1280px){.literalblock pre,.literalblock pre[class],.listingblock pre,.listingblock pre[class]{font-size:1em}}
+.literalblock.output pre{color:#f7f7f8;background-color:rgba(0,0,0,.9)}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;-webkit-border-radius:4px;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]:before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:#999}
+.listingblock:hover code[data-lang]:before{display:block}
+.listingblock.terminal pre .command:before{content:attr(data-prompt);padding-right:.5em;color:#999}
+.listingblock.terminal pre .command:not([data-prompt]):before{content:"$"}
+table.pyhltable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.pyhltable td{vertical-align:top;padding-top:0;padding-bottom:0;line-height:1.45}
+table.pyhltable td.code{padding-left:.75em;padding-right:0}
+pre.pygments .lineno,table.pyhltable td:not(.code){color:#999;padding-left:0;padding-right:.5em;border-right:1px solid #ddddd8}
+pre.pygments .lineno{display:inline-block;margin-right:.25em}
+table.pyhltable .linenodiv{background:none!important;padding-right:0!important}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock blockquote p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote:before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.5em;margin-right:.5ex;text-align:right}
+.quoteblock .quoteblock{margin-left:0;margin-right:0;padding:.5em 0;border-left:3px solid rgba(0,0,0,.6)}
+.quoteblock .quoteblock blockquote{padding:0 0 0 .75em}
+.quoteblock .quoteblock blockquote:before{display:none}
+.verseblock{margin:0 1em 1.25em 1em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract{margin:0 0 1.25em 0;display:block}
+.quoteblock.abstract blockquote,.quoteblock.abstract blockquote p{text-align:left;word-spacing:0}
+.quoteblock.abstract blockquote:before,.quoteblock.abstract blockquote p:first-of-type:before{display:none}
+table.tableblock{max-width:100%;border-collapse:separate}
+table.tableblock td>.paragraph:last-child p>p:last-child,table.tableblock th>p:last-child,table.tableblock td>p:last-child{margin-bottom:0}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>thead>tr>.tableblock,table.grid-all>tbody>tr>.tableblock{border-width:0 1px 1px 0}
+table.grid-all>tfoot>tr>.tableblock{border-width:1px 1px 0 0}
+table.grid-cols>*>tr>.tableblock{border-width:0 1px 0 0}
+table.grid-rows>thead>tr>.tableblock,table.grid-rows>tbody>tr>.tableblock{border-width:0 0 1px 0}
+table.grid-rows>tfoot>tr>.tableblock{border-width:1px 0 0 0}
+table.grid-all>*>tr>.tableblock:last-child,table.grid-cols>*>tr>.tableblock:last-child{border-right-width:0}
+table.grid-all>tbody>tr:last-child>.tableblock,table.grid-all>thead:last-child>tr>.tableblock,table.grid-rows>tbody>tr:last-child>.tableblock,table.grid-rows>thead:last-child>tr>.tableblock{border-bottom-width:0}
+table.frame-all{border-width:1px}
+table.frame-sides{border-width:0 1px}
+table.frame-topbot{border-width:1px 0}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{display:table-cell;line-height:1.6;background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+td>div.verse{white-space:pre}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+ol>li p,ul>li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+ul.checklist{margin-left:.625em}
+ul.checklist li>p:first-child>.fa-square-o:first-child,ul.checklist li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist li>p:first-child>input[type="checkbox"]:first-child{margin-right:.25em}
+ul.inline{margin:0 auto .625em auto;margin-left:-1.375em;margin-right:0;padding:0;list-style:none;overflow:hidden}
+ul.inline>li{list-style:none;float:left;margin-left:1.375em;display:block}
+ul.inline>li>*{display:block}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist>table tr>td:first-of-type{padding:.4em .75em 0 .75em;line-height:1;vertical-align:top}
+.colist>table tr>td:first-of-type img{max-width:initial}
+.colist>table tr>td:last-of-type{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:solid 4px #fff;-webkit-box-shadow:0 0 0 1px #ddd;box-shadow:0 0 0 1px #ddd}
+.imageblock.left,.imageblock[style*="float: left"]{margin:.25em .625em 1.25em 0}
+.imageblock.right,.imageblock[style*="float: right"]{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em 0;border-width:1px 0 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;text-indent:-1.05em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+.gist .file-data>table{border:0;background:#fff;width:100%;margin-bottom:0}
+.gist .file-data>table td.line-data{width:99%}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background-color:#00fafa}
+.black{color:#000}
+.black-background{background-color:#000}
+.blue{color:#0000bf}
+.blue-background{background-color:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background-color:#fa00fa}
+.gray{color:#606060}
+.gray-background{background-color:#7d7d7d}
+.green{color:#006000}
+.green-background{background-color:#007d00}
+.lime{color:#00bf00}
+.lime-background{background-color:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background-color:#7d0000}
+.navy{color:#000060}
+.navy-background{background-color:#00007d}
+.olive{color:#606000}
+.olive-background{background-color:#7d7d00}
+.purple{color:#600060}
+.purple-background{background-color:#7d007d}
+.red{color:#bf0000}
+.red-background{background-color:#fa0000}
+.silver{color:#909090}
+.silver-background{background-color:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background-color:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background-color:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background-color:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note:before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip:before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning:before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution:before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important:before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background-color:rgba(0,0,0,.8);-webkit-border-radius:100px;border-radius:100px;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]:after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,span.alt{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background-color:#fffef7;border-color:#e0e0dc;-webkit-box-shadow:0 1px 4px #e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@media print{@page{margin:1.25cm .75cm}
+*{-webkit-box-shadow:none!important;box-shadow:none!important;text-shadow:none!important}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare):after,a[href^="https:"]:not(.bare):after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]:after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #ddddd8!important;padding-bottom:0!important}
+.sect1{padding-bottom:0!important}
+.sect1+.sect1{border:0!important}
+#header>h1:first-child{margin-top:1.25rem}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em 0}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span:before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]:before{display:block}
+#footer{background:none!important;padding:0 .9375em}
+#footer-text{color:rgba(0,0,0,.6)!important;font-size:.9em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
+</head>
+<body class="article" style="max-width: 55em;">
+<div id="header">
+<h1>SWAMP-in-a-Box Administrator Manual</h1>
+<div class="details">
+<span id="author" class="author">v1.31</span><br>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_introduction">1. Introduction</a>
+<ul class="sectlevel2">
+<li><a href="#_what_is_swamp">1.1. What Is SWAMP</a></li>
+<li><a href="#_what_is_swamp_in_a_box">1.2. What Is SWAMP-in-a-Box</a></li>
+<li><a href="#_obtaining_swamp_in_a_box">1.3. Obtaining SWAMP-in-a-Box</a></li>
+</ul>
+</li>
+<li><a href="#_system_requirements">2. System Requirements</a>
+<ul class="sectlevel2">
+<li><a href="#_hardware_requirements">2.1. Hardware Requirements</a></li>
+<li><a href="#_supported_operating_systems">2.2. Supported Operating Systems</a></li>
+<li><a href="#_supported_disk_partitioning_schemes">2.3. Supported Disk Partitioning Schemes</a></li>
+<li><a href="#_disabling_selinux">2.4. Disabling SELinux</a></li>
+<li><a href="#_creating_a_user_account_with_full_code_sudo_code_privileges">2.5. Creating a User Account with Full <code>sudo</code> Privileges</a></li>
+<li><a href="#_configuring_firewalls">2.6. Configuring Firewalls</a></li>
+</ul>
+</li>
+<li><a href="#installing-siab">3. Installing SWAMP-in-a-Box</a>
+<ul class="sectlevel2">
+<li><a href="#_before_you_begin">3.1. Before You Begin</a></li>
+<li><a href="#_obtain_the_swamp_in_a_box_installer">3.2. Obtain the SWAMP-in-a-Box Installer</a></li>
+<li><a href="#_extract_the_installer">3.3. Extract the Installer</a></li>
+<li><a href="#_install_swamp_in_a_box_s_dependencies">3.4. Install SWAMP-in-a-Box&#8217;s Dependencies</a></li>
+<li><a href="#_run_the_main_swamp_in_a_box_install_script">3.5. Run the Main SWAMP-in-a-Box Install Script</a></li>
+<li><a href="#_verify_that_the_install_was_successful">3.6. Verify that the Install Was Successful</a></li>
+</ul>
+</li>
+<li><a href="#upgrading-siab">4. Upgrading SWAMP-in-a-Box</a>
+<ul class="sectlevel2">
+<li><a href="#_significant_changes_and_other_considerations">4.1. Significant Changes and Other Considerations</a></li>
+<li><a href="#_before_you_begin_2">4.2. Before You Begin</a></li>
+<li><a href="#_obtain_the_swamp_in_a_box_installer_2">4.3. Obtain the SWAMP-in-a-Box Installer</a></li>
+<li><a href="#_extract_the_installer_2">4.4. Extract the Installer</a></li>
+<li><a href="#_install_swamp_in_a_box_s_dependencies_2">4.5. Install SWAMP-in-a-Box&#8217;s Dependencies</a></li>
+<li><a href="#_run_the_main_swamp_in_a_box_upgrade_script">4.6. Run the Main SWAMP-in-a-Box Upgrade Script</a></li>
+<li><a href="#_verify_that_the_upgrade_was_successful">4.7. Verify that the Upgrade Was Successful</a></li>
+<li><a href="#_check_for_updates">4.8. Check for Updates</a></li>
+</ul>
+</li>
+<li><a href="#_configuring_swamp_in_a_box">5. Configuring SWAMP-in-a-Box</a>
+<ul class="sectlevel2">
+<li><a href="#_configuring_assessments_to_run_without_internet_access">5.1. Configuring Assessments to Run Without Internet Access</a></li>
+<li><a href="#_configuring_an_ssl_certificate_for_swamp_in_a_box">5.2. Configuring an SSL Certificate for SWAMP-in-a-Box</a></li>
+<li><a href="#_configuring_outgoing_email_for_swamp_in_a_box">5.3. Configuring Outgoing Email for SWAMP-in-a-Box</a></li>
+<li><a href="#_configuring_ldap_for_user_authentication_and_attributes">5.4. Configuring LDAP for User Authentication and Attributes</a></li>
+<li><a href="#_configuring_3rd_party_sign_in_via_oauth2_providers">5.5. Configuring 3rd-party Sign-in via OAuth2 Providers</a></li>
+</ul>
+</li>
+<li><a href="#_installing_additional_components">6. Installing Additional Components</a>
+<ul class="sectlevel2">
+<li><a href="#add-on-platforms">6.1. Installing Additional Assessment Platforms</a></li>
+<li><a href="#_installing_additional_assessment_tools">6.2. Installing Additional Assessment Tools</a></li>
+<li><a href="#add-on-viewers">6.3. Installing Additional Viewers</a></li>
+</ul>
+</li>
+<li><a href="#_administrative_commands">7. Administrative Commands</a>
+<ul class="sectlevel2">
+<li><a href="#checking-for-updates">7.1. Checking for Updates</a></li>
+<li><a href="#_updating_the_host_s_hostname">7.2. Updating the Host&#8217;s Hostname</a></li>
+<li><a href="#_managing_the_code_swamp_code_system_service">7.3. Managing the <code>swamp</code> System Service</a></li>
+<li><a href="#_other_components">7.4. Other Components</a></li>
+</ul>
+</li>
+<li><a href="#_documentation_for_users_of_the_swamp">8. Documentation for Users of the SWAMP</a></li>
+<li><a href="#_support_and_contact_information">9. Support and Contact Information</a></li>
+<li><a href="#installing-dependencies">Appendix A: Installing Dependencies</a>
+<ul class="sectlevel2">
+<li><a href="#dependencies-htcondor">A.1. HTCondor 8.6</a></li>
+<li><a href="#dependencies-mariadb">A.2. MariaDB 5.5</a></li>
+<li><a href="#dependencies-php">A.3. PHP 7.0</a></li>
+<li><a href="#dependencies-other">A.4. Other Assorted Utilities</a></li>
+</ul>
+</li>
+<li><a href="#_license_and_notices">Appendix B: License and Notices</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_introduction">1. Introduction</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_what_is_swamp">1.1. What Is SWAMP</h3>
+<div class="paragraph">
+<p>The Software Assurance Marketplace (SWAMP) is a platform for running
+software assurance tools on your code. It is a joint effort of four research
+institutions&#8201;&#8212;&#8201;the Morgridge Institute for Research, Indiana University,
+the University of Illinois at Urbana-Champaign, and the University of
+Wisconsin-Madison&#8201;&#8212;&#8201;to advance the capabilities and increase the adoption
+of software assurance technologies through an open continuous assurance
+facility. The SWAMP originally went live in February 2014 as a web
+application at <a href="https://www.mir-swamp.org" class="bare">https://www.mir-swamp.org</a>, where it provides continuous
+software assurance capabilities to developers and researchers.</p>
+</div>
+<div class="paragraph">
+<p>The SWAMP is funded by the Department of Homeland Security (DHS) Science and
+Technology Directorate, Homeland Security Advanced Research Projects Agency,
+Cyber Security Division (DHS S&amp;T/HSARPA/CSD); BAA 11-02; and Air Force
+Research Laboratory, Information Directorate under agreement number
+FA8750-12-2-0289.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_what_is_swamp_in_a_box">1.2. What Is SWAMP-in-a-Box</h3>
+<div class="paragraph">
+<p>For users that need or prefer to run software assurance tools on their own
+computing infrastructure, the SWAMP project offers a standalone software
+application called SWAMP-in-a-Box (SiB). It is, in essence, a local instance
+of the SWAMP that can be deployed on your own servers if you have higher
+security or compliance requirements for your software, or, being
+open-source, when you want to customize the software.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_obtaining_swamp_in_a_box">1.3. Obtaining SWAMP-in-a-Box</h3>
+<div class="paragraph">
+<p>SWAMP-in-a-Box is currently available as an open beta. Visit
+<a href="https://github.com/mirswamp/deployment" class="bare">https://github.com/mirswamp/deployment</a> for instructions on how to download
+SWAMP-in-a-Box as a pre-packaged installer or as source code.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_system_requirements">2. System Requirements</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>SWAMP-in-a-Box is designed to be installed on a dedicated host, one that is
+not providing other services (including Apache, MySQL/MariaDB, and HTCondor).</p>
+</div>
+<div class="sect2">
+<h3 id="_hardware_requirements">2.1. Hardware Requirements</h3>
+<div class="ulist">
+<div class="title">Minimum:</div>
+<ul>
+<li>
+<p>Memory: 16G</p>
+</li>
+<li>
+<p>Disk:   256G</p>
+</li>
+<li>
+<p>Cores:  4</p>
+</li>
+</ul>
+</div>
+<div class="ulist">
+<div class="title">Recommended:</div>
+<ul>
+<li>
+<p>Memory: 64G</p>
+</li>
+<li>
+<p>Disk:   1T</p>
+</li>
+<li>
+<p>Cores:  8</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>SWAMP-in-a-Box uses virtual machines managed by an HTCondor pool to perform
+assessments of packages and to run the optional Code Dx results viewer from
+Code Dx, Inc. Each virtual machine is provisioned with 6G of RAM and 1 core.
+The minimum requirements above are intended to allow the host machine to run
+two virtual machines simultaneously while leaving resources available to run
+the web server and database that together provide the SWAMP web application
+to users.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_supported_operating_systems">2.2. Supported Operating Systems</h3>
+<div class="paragraph">
+<p>CentOS 6 and 7 are both supported. Other similar Linux distributions, such
+as Red Hat Enterprise Linux, might work but are untested.</p>
+</div>
+<div class="paragraph">
+<p>If you are installing SWAMP-in-a-Box in a virtual machine, the hypervisor
+must support and be configured for nested virtualization, because
+SWAMP-in-a-Box itself uses virtual machines to perform assessments of
+packages and to run the optional Code Dx results viewer from Code Dx, Inc.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_supported_disk_partitioning_schemes">2.3. Supported Disk Partitioning Schemes</h3>
+<div class="paragraph">
+<p>As much space as possible should be allocated to the <code>/</code> partition without
+deleting or shrinking required system partitions, e.g., <code>/boot</code> and <code>swap</code>.
+For example, if there is a separate partition for <code>/home</code>, delete it, and
+allocate the space to the <code>/</code> partition.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_disabling_selinux">2.4. Disabling SELinux</h3>
+<div class="paragraph">
+<p>SWAMP-in-a-Box will not install or function correctly when SELinux is in
+<code>enforcing</code> mode, in part because the various software packages that
+SWAMP-in-a-Box relies on do not all support SELinux.</p>
+</div>
+<div class="paragraph">
+<p>To disable SELinux, add or update <code>/etc/selinux/config</code> on the host to
+include the following line (you will need <code>root</code> access to edit this file):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>SELINUX=disabled</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then reboot the host.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_creating_a_user_account_with_full_code_sudo_code_privileges">2.5. Creating a User Account with Full <code>sudo</code> Privileges</h3>
+<div class="paragraph">
+<p>We recommend creating a normal user account with full <code>sudo</code> privileges so
+that the SWAMP-in-a-Box host can be administered without being logged in as
+<code>root</code> all the time. To create such an account:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Log in as <code>root</code>.</p>
+</li>
+<li>
+<p>Create the new user account (replace <code>&lt;username&gt;</code> with the name of the
+new account):</p>
+<div class="listingblock">
+<div class="content">
+<pre>useradd &lt;username&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Set the new account&#8217;s password:</p>
+<div class="listingblock">
+<div class="content">
+<pre>passwd &lt;username&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run <code>visudo</code>, which will let you edit the <code>sudoers</code> file in the <code>vi</code> text
+editor. Find the line similar to</p>
+<div class="listingblock">
+<div class="content">
+<pre>root ALL=(ALL) ALL</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Add below it</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;username&gt; ALL=(ALL) ALL</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Whenever a task requires <code>root</code> access to the SWAMP-in-a-Box host, it can be
+run while logged in as the user created above by prefixing the relevant
+commands with <code>sudo</code>. For example, to use the <code>vi</code> text editor to edit
+<code>/opt/swamp/etc/swamp.conf</code> as <code>root</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>sudo vi /opt/swamp/etc/swamp.conf</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuring_firewalls">2.6. Configuring Firewalls</h3>
+<div class="paragraph">
+<p>With regards to network traffic, the SWAMP-in-a-Box host is expected to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Respond to incoming HTTPS (port 443) network traffic, as it is required
+to access the SWAMP web application and for the web application to
+function correctly.</p>
+</li>
+<li>
+<p>Potentially generate outgoing traffic while performing an assessment of
+a package, typically using HTTP, HTTPS, FTP, FTPS, SSH, and rsync.
+Traffic can include updating of the platform&#8217;s currently installed set
+of packages (this can be disabled, if desired) and downloading of
+user-specified dependencies for the package being assessed. The
+package&#8217;s build system might also require access to the internet.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Any firewall(s) protecting the SWAMP-in-a-Box host must be configured to
+allow the above network traffic. The SWAMP-in-a-Box installer will not
+modify the host&#8217;s firewall configuration.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Restart the <code>libvirtd</code> service on the host whenever the host&#8217;s firewall
+configuration is modified. To do so, as <code>root</code> (or using <code>sudo</code>), run the
+following command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>service libvirtd restart</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>libvirtd</code> service modifies the host&#8217;s firewall configuration in order
+to allow the virtual machines started by it to access the host&#8217;s network,
+but it does not make the configuration changes permanent.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="exampleblock">
+<div class="title">Example 1. Allowing Incoming HTTPS and SSH Traffic with <code>iptables</code></div>
+<div class="content">
+<div class="paragraph">
+<p>For systems that use <code>iptables</code>, such as CentOS 6 by default, a sample
+configuration file can be found in the <code>config_templates</code> directory of the
+SWAMP-in-a-Box installer. Copy the <code>iptables</code> file from that directory to
+<code>/etc/sysconfig</code>. Then restart the <code>iptables</code> service. For example, as
+<code>root</code> (or using <code>sudo</code>), run the following commands:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>cp &lt;installer-dir&gt;/config_templates/iptables /etc/sysconfig
+service iptables restart
+service libvirtd restart</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 2. Allowing Incoming HTTPS and SSH Traffic with <code>firewalld</code></div>
+<div class="content">
+<div class="paragraph">
+<p>For systems that use <code>firewalld</code>, such as CentOS 7 by default, use
+<code>firewall-cmd</code> to permanently allow HTTPS and SSH traffic. Then restart the
+<code>firewalld</code> service. For example, as <code>root</code> (or using <code>sudo</code>), run the
+following commands:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>firewall-cmd --zone=public --permanent --add-service=https
+firewall-cmd --zone=public --permanent --add-service=ssh
+systemctl restart firewalld
+systemctl restart libvirtd</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="installing-siab">3. Installing SWAMP-in-a-Box</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_before_you_begin">3.1. Before You Begin</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>You will need <code>root</code> access to the SWAMP-in-a-Box host.</p>
+</li>
+<li>
+<p>The install script will prompt for the DNS hostname to use for the host.
+It must match the hostname that users will use to access the SWAMP web
+application and the hostname on the SSL certificates for the host&#8217;s web
+server.</p>
+</li>
+<li>
+<p>The install script will prompt for the initial values to use for the
+following passwords, which can then be used to access the SWAMP web
+application and database that are installed as part of SWAMP-in-a-Box:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Database <code>root</code> password: SWAMP-in-a-Box uses MariaDB as its database
+backend. This is the password for the database&#8217;s <code>root</code> user. It may be
+different from the host operating system&#8217;s <code>root</code> user&#8217;s password (the
+database maintains a separate collection of user accounts for accessing
+it).</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<strong>Do not forget this password. It is required to upgrade SWAMP-in-a-Box and
+reset the passwords below.</strong>
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Database web password: This is the password used by the SWAMP web
+application&#8217;s backend to connect to the database.</p>
+</li>
+<li>
+<p>Database SWAMP services password: This is the password used by
+SWAMP-in-a-Box&#8217;s system daemons and backend processes to connect to the
+database.</p>
+</li>
+<li>
+<p>SWAMP administrator account password: This is the password for the
+SWAMP web application&#8217;s <code>admin-s</code> account, which is created during the
+install process and can be used to administer the SWAMP.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>We strongly recommend running <code>yum update</code> (as <code>root</code> or using <code>sudo</code>)
+to ensure that any software installed on the SWAMP-in-a-Box host is up to
+date. This is especially important if there has been a new release of
+CentOS (or whatever similar Linux distribution is installed on the host)
+since the host was initially set up. The steps below will likely cause
+a partial update to the new release, which might leave the host in an
+inconsistent state.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_obtain_the_swamp_in_a_box_installer">3.2. Obtain the SWAMP-in-a-Box Installer</h3>
+<div class="paragraph">
+<p>Visit <a href="https://github.com/mirswamp/deployment" class="bare">https://github.com/mirswamp/deployment</a> for instructions on how to
+download SWAMP-in-a-Box as a pre-packaged installer, which is what the
+instructions below assume you are working with.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_extract_the_installer">3.3. Extract the Installer</h3>
+<div class="paragraph">
+<p>On the SWAMP-in-a-Box host, move or copy the following files into the same
+directory (any user&#8217;s home directory is sufficient, for example):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>extract-installer.bash</code></p>
+</li>
+<li>
+<p><code>swampinabox-&lt;version&gt;-installer.tar.gz</code></p>
+</li>
+<li>
+<p><code>swampinabox-&lt;version&gt;-platforms.tar.gz</code></p>
+</li>
+<li>
+<p><code>swampinabox-&lt;version&gt;-tools.tar.gz</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>From that directory, run <code>extract-installer.bash</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>bash extract-installer.bash</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When the script completes successfully, it will display the location of the
+SWAMP-in-a-Box installer. The instructions below will use <code>&lt;installer-dir&gt;</code>
+to refer to that directory.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_install_swamp_in_a_box_s_dependencies">3.4. Install SWAMP-in-a-Box&#8217;s Dependencies</h3>
+<div class="paragraph">
+<p>The directory <code>&lt;installer-dir&gt;/repos</code> contains set up scripts that will</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>configure package repositories,</p>
+</li>
+<li>
+<p>install dependencies,</p>
+</li>
+<li>
+<p>enable required services, and</p>
+</li>
+<li>
+<p>create required user accounts.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Even if you have gone through this step on the SWAMP-in-a-Box host for
+a previous release of SWAMP-in-a-Box, it is important to run the scripts for
+the current release as they will ensure that the correct versions of
+SWAMP-in-a-Box&#8217;s dependencies are installed.</p>
+</div>
+<div class="paragraph">
+<p>If your host has unrestricted access to the internet, as <code>root</code> (or using
+<code>sudo</code>), run the <code>install-all.bash</code> script corresponding to your host&#8217;s
+distribution:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;installer-dir&gt;/repos/CentOS-6/install-all.bash
+&lt;installer-dir&gt;/repos/CentOS-7/install-all.bash</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If your host has restricted access to the internet, see
+<a href="#installing-dependencies">Installing Dependencies</a> for a list of SWAMP-in-a-Box&#8217;s dependencies so
+that you can determine how best to install them on the host. Continue with
+the steps below after you have installed the dependencies.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_run_the_main_swamp_in_a_box_install_script">3.5. Run the Main SWAMP-in-a-Box Install Script</h3>
+<div class="paragraph">
+<p>As <code>root</code> (or using <code>sudo</code>), run <code>install_swampinabox.bash</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;installer-dir&gt;/bin/install_swampinabox.bash</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The script will prompt you for the hostname and passwords listed above.</p>
+</div>
+<div class="paragraph">
+<p>The script&#8217;s output will be saved to a file, the exact location of which
+will be listed at the end of the install. If the install is unsuccessful,
+the log will be helpful in determining the cause.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_verify_that_the_install_was_successful">3.6. Verify that the Install Was Successful</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>In a web browser, navigate to <a href="https://&lt;SWAMP-in-a-Box-hostname&gt;/" class="bare">https://&lt;SWAMP-in-a-Box-hostname&gt;/</a>.</p>
+</li>
+<li>
+<p>Sign in with the administrator account/user:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Username: admin-s</p>
+</li>
+<li>
+<p>Password: &lt;the one entered during the install process&gt;</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Upload a package, create and run a new assessment of it, and view the
+results. Sample packages can be found in <code>&lt;installer-dir&gt;/sample_packages</code>;
+see the <code>README.txt</code> file in that directory for more information.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="upgrading-siab">4. Upgrading SWAMP-in-a-Box</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_significant_changes_and_other_considerations">4.1. Significant Changes and Other Considerations</h3>
+<div class="paragraph">
+<p>Changes that users of the SWAMP will see in each release of SWAMP-in-a-Box,
+such as new features and significant bug fixes, can be found in
+<code>/opt/swamp/doc/CHANGELOG.txt</code> on the SWAMP-in-a-Box host after the upgrade
+has completed. Changes and "gotchas" that are more relevant to the
+administrators of the SWAMP-in-a-Box host are listed below.</p>
+</div>
+<div class="ulist">
+<div class="title">Changes Introduced in 1.31:</div>
+<ul>
+<li>
+<p>The upgrade script no longer supports upgrading releases of
+SWAMP-in-a-Box prior to 1.29. Older systems can be upgraded to 1.29 or
+1.30 first, and then upgraded to 1.31.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_before_you_begin_2">4.2. Before You Begin</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>You will need <code>root</code> access to the SWAMP-in-a-Box host.</p>
+</li>
+<li>
+<p>You will need <code>root</code> access to the SWAMP-in-a-Box database.</p>
+</li>
+<li>
+<p>The SWAMP-in-a-Box host must currently have version 1.29 or later of
+SWAMP-in-a-Box installed. Upgrades from earlier versions are not supported
+and will likely result in a non-working system. Older systems can be
+upgraded to 1.29 or 1.30 first, and then upgraded to 1.31.</p>
+</li>
+<li>
+<p>We strongly recommend running <code>yum update</code> (as <code>root</code> or using <code>sudo</code>)
+to ensure that any software installed on the SWAMP-in-a-Box host is
+up-to-date. This is especially important if there has been a new release
+of CentOS (or whatever similar Linux distribution is installed on the
+host) since the host was initially set up. The steps below will likely
+cause a partial update to the new release, which might leave the host in
+an inconsistent state.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_obtain_the_swamp_in_a_box_installer_2">4.3. Obtain the SWAMP-in-a-Box Installer</h3>
+<div class="paragraph">
+<p>Visit <a href="https://github.com/mirswamp/deployment" class="bare">https://github.com/mirswamp/deployment</a> for instructions on how to
+download SWAMP-in-a-Box as a pre-packaged installer, which is what the
+instructions below assume you are working with.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_extract_the_installer_2">4.4. Extract the Installer</h3>
+<div class="paragraph">
+<p>On the SWAMP-in-a-Box host, move or copy the following files into the same
+directory (any user&#8217;s home directory is sufficient, for example):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>extract-installer.bash</code></p>
+</li>
+<li>
+<p><code>swampinabox-&lt;version&gt;-installer.tar.gz</code></p>
+</li>
+<li>
+<p><code>swampinabox-&lt;version&gt;-platforms.tar.gz</code></p>
+</li>
+<li>
+<p><code>swampinabox-&lt;version&gt;-tools.tar.gz</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>From that directory, run <code>extract-installer.bash</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>bash extract-installer.bash</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When the script completes successfully, it will display the location of the
+SWAMP-in-a-Box installer. The instructions below will use <code>&lt;installer-dir&gt;</code>
+to refer to that directory.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_install_swamp_in_a_box_s_dependencies_2">4.5. Install SWAMP-in-a-Box&#8217;s Dependencies</h3>
+<div class="paragraph">
+<p>The directory <code>&lt;installer-dir&gt;/repos</code> contains set up scripts that will</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>configure package repositories,</p>
+</li>
+<li>
+<p>install dependencies,</p>
+</li>
+<li>
+<p>enable required services, and</p>
+</li>
+<li>
+<p>create required user accounts.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Even if you have gone through this step on the SWAMP-in-a-Box host for
+a previous release of SWAMP-in-a-Box, it is important to run the scripts for
+the current release as they will ensure that the correct versions of
+SWAMP-in-a-Box&#8217;s dependencies are installed.</p>
+</div>
+<div class="paragraph">
+<p>If your host has unrestricted access to the internet, as <code>root</code> (or using
+<code>sudo</code>), run the <code>install-all.bash</code> script corresponding to your host&#8217;s
+distribution:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;installer-dir&gt;/repos/CentOS-6/install-all.bash
+&lt;installer-dir&gt;/repos/CentOS-7/install-all.bash</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If your host has restricted access to the internet, see
+<a href="#installing-dependencies">Installing Dependencies</a> for a list of SWAMP-in-a-Box&#8217;s dependencies so
+that you can determine how best to install them on the host. Continue with
+the steps below after you have installed the dependencies.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_run_the_main_swamp_in_a_box_upgrade_script">4.6. Run the Main SWAMP-in-a-Box Upgrade Script</h3>
+<div class="paragraph">
+<p>As <code>root</code> (or using <code>sudo</code>), run <code>upgrade_swampinabox.bash</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;installer-dir&gt;/bin/upgrade_swampinabox.bash</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The script will prompt you for the database&#8217;s <code>root</code> user&#8217;s password and
+create a backup of the SWAMP&#8217;s databases before making any modifications to
+them. Specifically, the following files will be created in the directory
+from which you run the upgrade:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>bkup_all_databases.&lt;YYYY_MM_DD&gt;.sql</code></p>
+</li>
+<li>
+<p><code>bkup_information_schema.&lt;YYYY_MM_DD&gt;.sql</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The script&#8217;s output will be saved to a file, the exact location of which
+will be listed at the end of the upgrade. If the upgrade is unsuccessful,
+the log will be helpful in determining the cause.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_verify_that_the_upgrade_was_successful">4.7. Verify that the Upgrade Was Successful</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>In a web browser, navigate to <a href="https://&lt;SWAMP-in-a-Box-hostname&gt;/" class="bare">https://&lt;SWAMP-in-a-Box-hostname&gt;/</a>.</p>
+</li>
+<li>
+<p>Sign in with the administrator account/user:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Username: admin-s</p>
+</li>
+<li>
+<p>Password: &lt;the one previously set for the <code>admin-s</code> user&gt;</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Upload a package, create and run a new assessment of it, and view the
+results. Sample packages can be found in <code>&lt;installer-dir&gt;/sample_packages</code>;
+see the <code>README.txt</code> file in that directory for more information.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_check_for_updates">4.8. Check for Updates</h3>
+<div class="paragraph">
+<p>The SWAMP-in-a-Box upgrade script does not necessarily update all components
+of SWAMP-in-a-Box for which a newer version might be available. For example,
+if you have previously added on an <a href="#add-on-platforms">additional assessment
+platform</a> and there is an updated version of that platform available, you
+will have to download the new version separately and install it.</p>
+</div>
+<div class="paragraph">
+<p>There is a utility script that you can run that that will identify such
+components for you. See the section on <a href="#checking-for-updates">checking for
+updates</a> for further information.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_swamp_in_a_box">5. Configuring SWAMP-in-a-Box</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For additional information on the configuration options discussed below, see
+the SWAMP-in-a-Box Reference Manual.</p>
+</div>
+<div class="sect2">
+<h3 id="_configuring_assessments_to_run_without_internet_access">5.1. Configuring Assessments to Run Without Internet Access</h3>
+<div class="paragraph">
+<p>By default, when an assessment is performed, the platform will first attempt
+to update its collection of installed packages. This step will fail when the
+SWAMP-in-a-Box host&#8217;s access to the internet is limited, which will in turn
+cause the assessment as a whole to fail. For such hosts, it is possible to
+configure SWAMP-in-a-Box such that platforms skip this step.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This configuration will <strong>not</strong> make a difference if the package being
+assessed specifies additional dependencies or if it uses a build system or
+script that requires access to the internet. If the assessment framework
+cannot download and install the additional dependencies, or if the build
+fails due to not being able to access resources on the internet, the
+assessment will still fail.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_before_you_begin_3">5.1.1. Before You Begin</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>You will need <code>root</code> access to the SWAMP-in-a-Box host.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_procedure">5.1.2. Procedure</h4>
+<div class="paragraph">
+<p>Modify <code>/opt/swamp/etc/swamp.conf</code> such that the line</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>SWAMP-in-a-Box.internet-inaccessible = false</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>reads instead as</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>SWAMP-in-a-Box.internet-inaccessible = true</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Any assessments submitted after making this change should no longer fail due
+to not having access to the internet, subject to the caveats noted above.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuring_an_ssl_certificate_for_swamp_in_a_box">5.2. Configuring an SSL Certificate for SWAMP-in-a-Box</h3>
+<div class="paragraph">
+<p>A self-signed certification is included by default when <code>httpd</code> and
+<code>mod_ssl</code> are installed for SWAMP-in-a-Box. Most web browsers will flag your
+SWAMP-in-a-Box website as insecure when using the self-signed certification.
+This section provides instructions for configuring SWAMP-in-a-Box to use
+an SSL certificate signed by a trusted certificate authority.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Below, the fully qualified domain name (FQDN) needs to correspond to the
+main URL for your SWAMP-in-a-Box website, for example
+<code><a href="https://mysib.example.org" class="bare">https://mysib.example.org</a></code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_acquire_the_ssl_certificate">5.2.1. Acquire the SSL Certificate</h4>
+<div class="paragraph">
+<p>The first step is to acquire a SSL certificate matching your SWAMP-in-a-Box
+domain name from a trusted certificate authority (CA). For the example
+above, the SSL certificate would match <code>mysib.example.org</code>.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Generate a private key without a passphrase. For the example domain name
+used above, the command would be:</p>
+<div class="listingblock">
+<div class="content">
+<pre>openssl genres -des3 -out mysib.example.org.private.key</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create your CSR. For the example domain name used above, the command
+would be:</p>
+<div class="listingblock">
+<div class="content">
+<pre>openssl req -new -key mysib.example.org.private.key -out mysib.example.org.csr</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Purchase the SSL certificate by submitting your CSR. The vendor will send
+you the signed SSL certificate and any required intermediate certificates.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_install_the_ssl_certificate">5.2.2. Install the SSL Certificate</h4>
+<div class="paragraph">
+<p>The second step is to install the certificate on your SWAMP-in-a-Box and
+configure it for use with Apache (<code>httpd</code>).</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Copy the certificates, along with the private key, to the SWAMP-in-a-Box
+host, typically in <code>/etc/pki/tls/certs</code> and <code>/etc/pki/tls/private</code>.</p>
+</li>
+<li>
+<p>Make the private key readable only by <code>root</code>.</p>
+</li>
+<li>
+<p>Make the certificates readable by the web server (i.e., world readable).</p>
+</li>
+<li>
+<p>Modify <code>/etc/httpd/conf.d/ssl.conf</code>.</p>
+<div class="paragraph">
+<p>Set the path to your certificate and private key (based on the example
+domain used above):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>SSLCertificateFile /etc/pki/tls/certs/mysib.example.org.cert
+SSLCertificateKeyFile /etc/pki/tls/private/mysib.example.org.private.key</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Depending on the specific SSL certificate, you may also need to set the path
+to the following files:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>SSLCertificateChainFile
+SSLCACertificateFile</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Set the following parameters as shown:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>SSLProtocol all -SSLv2 -SSLv3
+SSLCipherSuite EDH+CAMELLIA:EDH+aRSA:EECDH+aRSA+AESGCM:EECDH+aRSA+SHA256:EECDH:+CAMELLIA128:+AES128:+SSLv3:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!DSS:!RC4:!SEED:!IDEA:!ECDSA:kEDH:CAMELLIA128-SHA:AES128-SHA
+SSLHonorCipherOrder On</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuring_outgoing_email_for_swamp_in_a_box">5.3. Configuring Outgoing Email for SWAMP-in-a-Box</h3>
+<div class="paragraph">
+<p>Enabling outgoing email allows the SWAMP to send email notifications to
+users. The following functionality is enabled when outgoing email is
+enabled:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>New user accounts are "pending" until email address is verified.</p>
+</li>
+<li>
+<p>Users can edit email addresses. Changes take place once verified.</p>
+</li>
+<li>
+<p>User email addresses are displayed throughout the user interface.</p>
+</li>
+<li>
+<p>Users can request a password reset through an email link.</p>
+</li>
+<li>
+<p>Users can request an email indicating the username associated with
+an email address.</p>
+</li>
+<li>
+<p>Permission requests, project invitations, and SWAMP admin
+invitations are handled through email notifications in addition to the
+notification system in the SWAMP UI.</p>
+</li>
+<li>
+<p>Users can opt to receive an email on completion of an assessment.</p>
+</li>
+<li>
+<p>SWAMP Administrators can configure Restricted Domains for email
+addresses.</p>
+</li>
+<li>
+<p>SWAMP Administrators can send system emails to one or more SWAMP users.</p>
+</li>
+<li>
+<p>SWAMP Administrators can flag users to force a password reset the next
+time they sign in.</p>
+</li>
+<li>
+<p>SWAMP Administrators can flag inactive users as hibernated. This forces
+a password reset the next time the user signs in.</p>
+</li>
+<li>
+<p>Contact Us and Report Security Incident pages (if enabled)
+include a means to submit a message directly through the web interface.</p>
+</li>
+<li>
+<p>Emails are sent to notify users of events such as removal from project
+membership and disabling and re-enabling of projects and user accounts.</p>
+</li>
+</ul>
+</div>
+<div class="sect3">
+<h4 id="_before_you_begin_4">5.3.1. Before You Begin</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>You need <code>root</code> access to the SWAMP-in-a-Box host.</p>
+</li>
+<li>
+<p>You need an SMTP server that you are authorized to relay mail through.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_modify_code_etc_postfix_main_cf_code_to_use_your_smtp_server">5.3.2. Modify <code>/etc/postfix/main.cf</code> to Use Your SMTP Server</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Set the <code>relayhost</code> attribute to your SMTP server.</p>
+</li>
+<li>
+<p>Restart the postfix service by running the following command as <code>root</code> (or
+using <code>sudo</code>):</p>
+<div class="listingblock">
+<div class="content">
+<pre>service postfix restart</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_modify_code_var_www_swamp_web_server_env_code_to_enable_outgoing_swamp_email">5.3.3. Modify <code>/var/www/swamp-web-server/.env</code> to Enable Outgoing SWAMP Email</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Set <code>MAIL_ENABLED</code> to "true".</p>
+</li>
+<li>
+<p>Set <code>MAIL_DRIVER</code> to "sendmail".</p>
+</li>
+<li>
+<p>Set the <code>MAIL_FROM_ADDRESS</code> and <code>MAIL_FROM_NAME</code> to the email address and
+name you want to use as the sender of outgoing SWAMP emails.</p>
+</li>
+<li>
+<p>Set the <code>MAIL_CONTACT_ADDRESS</code> to the email address you want to receive
+contact email from users. This is displayed in the content of some SWAMP
+emails.</p>
+</li>
+<li>
+<p>Set the <code>MAIL_SECURITY_ADDRESS</code> to the email address you want to receive
+security reports from users. This is displayed in the content of some
+SWAMP emails.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_modify_code_opt_swamp_etc_swamp_conf_code_to_configure_outgoing_email">5.3.4. Modify <code>/opt/swamp/etc/swamp.conf</code> to Configure Outgoing Email</h4>
+<div class="paragraph">
+<p>These settings enable email notifications that assessments have completed.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+There is a known bug that prevents these emails from being sent.
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Set <code>email.host</code> to your SMTP server.</p>
+</li>
+<li>
+<p>Set <code>email.arun.subject</code> to the subject line to be used for assessment
+completion notification emails.</p>
+</li>
+<li>
+<p>Set <code>email.from</code> to the name and email address you want to use as the
+sender of assessment completion notification emails.</p>
+</li>
+<li>
+<p>Restart the <code>swamp</code> service so your changes to <code>swamp.conf</code> are in
+effect by running the following command as <code>root</code> (or using <code>sudo</code>):</p>
+<div class="listingblock">
+<div class="content">
+<pre>service swamp restart</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_enable_contact_us_for_swamp_in_a_box">5.3.5. Enable "Contact Us" for SWAMP-in-a-Box</h4>
+<div class="paragraph">
+<p>Enabling "Contact Us" creates a Contact link in the SWAMP menu bar. This
+link provides access to the "Contact Us" page, which displays general
+contact information and, if email is enabled, provides a form for users to
+submit a contact/support message.</p>
+</div>
+<div class="paragraph">
+<p>Step 1: Modify <code>/var/www/html/config/config.json</code> to enable the "Contact Us"
+page and set display parameters.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Add a <code>contact</code> array containing a <code>support</code> array.</p>
+</li>
+<li>
+<p>Add <code>email</code>, <code>phoneNumber</code>, <code>description</code>, and <code>message</code>, values to the
+<code>support</code> array.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Note:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The <code>config.json</code> file defines parameters within JSON arrays. Therefore,
+it is important to maintain the array format when editing, adding, or
+removing parameters in this file.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Sample:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  "contact": {
+    "support": {
+      "email": "&lt;Support email address (optional)&gt;",
+      "phoneNumber": "&lt;Support phone number (optional)&gt;",
+      "description": "Support staff",
+      "message": "Feel free to contact us with questions."
+    }
+  },</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Step 2: Modify <code>/var/www/swamp-web-server/.env</code> to configure contact message
+recipients. This is only necessary if outgoing email is enabled.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Set <code>MAIL_CONTACT_ADDRESS</code> to the email address of the recipient of
+"Contact Us" messages.</p>
+</li>
+<li>
+<p>Set <code>MAIL_CONTACT_NAME</code> to the name of the recipient of "Contact Us"
+messages.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_enable_report_security_incident_for_swamp_in_a_box">5.3.6. Enable "Report Security Incident" for SWAMP-in-a-Box</h4>
+<div class="paragraph">
+<p>Enabling "Report Security Incident" creates a Security link on the SWAMP
+Contact Us page. This link provides access to the "Report Security Incident"
+page, which displays information about reporting a security incident and, if
+email is enabled, provides a form for users to submit a security incident
+report.</p>
+</div>
+<div class="paragraph">
+<p>You must have already enabled the "Contact Us" page (see above).</p>
+</div>
+<div class="paragraph">
+<p>Step 1: Modify <code>/var/www/html/config/config.json</code> to enable the "Report
+Security Incident" page and set display parameters.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Add a <code>security</code> array to the <code>contact</code> array (see sample).</p>
+</li>
+<li>
+<p>Add <code>email</code>, <code>phoneNumber</code>, <code>description</code>, and <code>message</code>, values to the
+"security" array (see sample).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Note:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The <code>config.json</code> file defines parameters within JSON arrays. Therefore,
+it is important to maintain the array format when editing, adding, or
+removing parameters in this file.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Sample:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  "contact": {
+    "support": {
+      "email": "&lt;Support email address (optional)&gt;",
+      "phoneNumber": "&lt;Support phone number (optional)&gt;",
+      "description": "Support staff",
+      "message": "Feel free to contact us with questions."
+    },
+    "security": {
+      "email": "&lt;Security email address (optional)&gt;",
+      "phoneNumber": "&lt;Security phone number (optional)&gt;",
+      "description": "Security team",
+      "message": "&lt;Security message here (optional)&gt;"
+    }
+  },</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Step 2: Modify <code>/var/www/swamp-web-server/.env</code> to configure security
+incident message recipients. This is only necessary if outgoing email is
+enabled.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Set <code>MAIL_SECURITY_ADDRESS</code> to the email address of the recipient of
+"Report Security Incident" messages.</p>
+</li>
+<li>
+<p>Set <code>MAIL_SECURITY_NAME</code> to the name of the recipient of "Report Security
+Incident" messages.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuring_ldap_for_user_authentication_and_attributes">5.4. Configuring LDAP for User Authentication and Attributes</h3>
+<div class="paragraph">
+<p>In a basic installation of SWAMP-in-a-Box, user information for the SWAMP is
+stored in the <code>project</code> database in the <code>user</code> table with the following
+information (attributes):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>SWAMP user UID</p>
+</li>
+<li>
+<p>username</p>
+</li>
+<li>
+<p>password (encrypted using BCRYPT)</p>
+</li>
+<li>
+<p>first name</p>
+</li>
+<li>
+<p>last name</p>
+</li>
+<li>
+<p>full name</p>
+</li>
+<li>
+<p>email</p>
+</li>
+<li>
+<p>affiliation</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>It is possible to configure the SWAMP to use a local LDAP or Active
+Directory (AD) server&#8201;&#8212;&#8201;assuming Active Directory has been configured to
+act as an LDAP server, as is the default&#8201;&#8212;&#8201;to store user records and their
+attributes.</p>
+</div>
+<div class="paragraph">
+<p>You can configure your SWAMP-in-a-Box to access user accounts in the LDAP/AD
+server in one of two ways: with read-only access or with the ability to
+create and edit records in the LDAP/AD server.</p>
+</div>
+<div class="paragraph">
+<p>You would configure your SWAMP-in-a-Box with read-only access to an LDAP/AD
+server when the LDAP/AD server is managed by processes external to the
+SWAMP. Your SWAMP-in-a-Box may then be one of multiple clients of the
+LDAP/AD server. In this case, the SWAMP does not provide workflows to create
+user records or edit any of the user attributes described above.</p>
+</div>
+<div class="paragraph">
+<p>If you configure SWAMP-in-a-Box with the ability to create and edit user
+records in the LDAP/AD server, it is assumed that the SWAMP is the primary,
+if not only, client of the LDAP/AD server. In this case, the SWAMP provides
+the same workflows for creating and editing user records that it does when
+it is not configured with an LDAP/AD server. The only difference is that the
+user records and attributes described above are stored in the LDAP/AD server
+instead of in the <code>user</code> table in the SWAMP&#8217;s local database.</p>
+</div>
+<div class="sect3">
+<h4 id="_configuring_ldap_options_in_the_web_backend_configuration_file">5.4.1. Configuring LDAP Options in the Web Backend Configuration File</h4>
+<div class="sect4">
+<h5 id="_before_you_begin_5">Before You Begin</h5>
+<div class="ulist">
+<ul>
+<li>
+<p>You will need <code>root</code> access to the SWAMP-in-a-Box host.</p>
+</li>
+<li>
+<p>Consult the SWAMP-in-a-Box Reference Manual for detailed descriptions of
+the parameters discussed below.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_procedure_2">Procedure</h5>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>As <code>root</code> (or using <code>sudo</code>), edit the web backend configuration file:</p>
+<div class="listingblock">
+<div class="content">
+<pre>vi /var/www/swamp-web-server/.env</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Set the following parameters to enable LDAP and configure whether LDAP is
+read-only:</p>
+<div class="listingblock">
+<div class="content">
+<pre>LDAP_ENABLED
+LDAP_READ_ONLY</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Set the following parameters to determine how user passwords are
+validated:</p>
+<div class="listingblock">
+<div class="content">
+<pre>APP_PASSWORD_ENCRYPTION_METHOD
+LDAP_PASSWORD_VALIDATION</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Set the following parameters to identify your LDAP/AD server and provide
+SWAMP-in-a-Box access to it:</p>
+<div class="listingblock">
+<div class="content">
+<pre>LDAP_HOST
+LDAP_PORT
+LDAP_WEB_USER
+LDAP_WEB_USER_PASSWORD
+LDAP_PASSWORD_SET_USER (only if LDAP_READ_ONLY=false)
+LDAP_PASSWORD_SET_USER_PASSWORD (only if LDAP_READ_ONLY=false)</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Set the following parameters to identify where in the LDAP/AD structure
+user records are stored:</p>
+<div class="listingblock">
+<div class="content">
+<pre>LDAP_BASE_DN
+LDAP_USER_RDN_ATTR</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Set the following parameters to map SWAMP user attributes to the
+corresponding attributes in your LDAP/AD server:</p>
+<div class="listingblock">
+<div class="content">
+<pre>LDAP_SWAMP_UID_ATTR
+LDAP_FIRSTNAME_ATTR
+LDAP_LASTNAME_ATTR
+LDAP_FULLNAME_ATTR
+LDAP_PASSWORD_ATTR
+LDAP_USERNAME_ATTR
+LDAP_EMAIL_ATTR
+LDAP_ORG_ATTR</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Set the following parameter with a comma-separated list of the
+<code>objectClass</code> attributes required for new user records in your LDAP/AD
+server. This is applicable only if <code>LDAP_READ_ONLY=false</code>.</p>
+<div class="listingblock">
+<div class="content">
+<pre>LDAP_OBJECTCLASS</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Save your changes to the <code>.env</code> file.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_designating_an_initial_swamp_administrator">5.4.2. Designating an Initial SWAMP Administrator</h4>
+<div class="paragraph">
+<p>When SWAMP-in-a-Box is installed, a default SWAMP administrator user is set
+up. The user record for this SWAMP administrator, the "admin-s" user, is
+stored in the SWAMP&#8217;s local database. You can sign in as this user and
+invite other SWAMP users to become SWAMP administrators, as needed.</p>
+</div>
+<div class="paragraph">
+<p>However, SWAMP-in-a-Box is designed to access only one source of user
+records. Therefore, when you configure SWAMP-in-a-Box to use an LDAP/AD
+server for user records, you can no longer sign in to your SWAMP with users
+whose records are stored in the local database. This means that initially,
+on configuring SWAMP-in-a-Box to use a local LDAP/AD server, your SWAMP will
+have no administrator users.</p>
+</div>
+<div class="paragraph">
+<p>You can use the following procedure to promote a user to a SWAMP administrator.</p>
+</div>
+<div class="sect4">
+<h5 id="_before_you_begin_6">Before You Begin</h5>
+<div class="ulist">
+<ul>
+<li>
+<p>You will need access to the SWAMP-in-a-Box host.</p>
+</li>
+<li>
+<p>You should have configured the SWAMP-in-a-Box to use an LDAP/AD server.</p>
+</li>
+<li>
+<p>You should have signed up or signed in to your SWAMP with the user to be
+promoted.</p>
+</li>
+<li>
+<p>You will need the <code>SWAMP_UID</code> value for the user to be promoted. This is
+the value which corresponds to the <code>LDAP_SWAMP_UID_ATTR</code> attribute for the
+user.</p>
+</li>
+<li>
+<p>You will need the password for the <code>web</code> database user for the SWAMP&#8217;s
+SQL database. This can be found in <code>/var/www/swamp-web-server/.env</code> on the
+SWAMP-in-a-Box host. Note that <code>root</code> access is required to view this
+file.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_procedure_3">Procedure</h5>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Enter the following on the command line for your SWAMP-in-a-Box host:</p>
+<div class="listingblock">
+<div class="content">
+<pre>export PROJECT_DB_HOST=localhost
+export PROJECT_DB_PORT=3306
+export PROJECT_DB_DATABASE=project
+export PROJECT_DB_USERNAME=web
+export SWAMP_UID=&lt;unique SWAMP_UID of new admin user&gt;
+mysql -h $PROJECT_DB_HOST -P $PROJECT_DB_PORT -u $PROJECT_DB_USERNAME -p \
+      -e "USE $PROJECT_DB_DATABASE; UPDATE user_account SET admin_flag=1 \
+      WHERE user_uid='$SWAMP_UID';"</pre>
+</div>
+</div>
+</li>
+<li>
+<p>When prompted, enter the password for the <code>web</code> database user.</p>
+</li>
+<li>
+<p>Sign in to the SWAMP with the user and confirm that the user now has
+SWAMP administrator access.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_examples">5.4.3. Examples</h4>
+<div class="paragraph">
+<p>Below are some examples showing the output of a command line <code>ldapsearch</code>
+query and the corresponding <code>.env</code> configuration.</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 3. Secure LDAP Server with Anonymous Read Access</div>
+<div class="content">
+<div class="listingblock">
+<div class="title">ldapsearch command</div>
+<div class="content">
+<pre>ldapsearch -LLL -x -H ldaps://ldap.ncsa.illinois.edu \
+           -b "dc=ncsa,dc=illinois,dc=edu" "(sn=*smith*)"</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">ldapsearch output</div>
+<div class="content">
+<pre>dn: uid=jsmith,ou=People,dc=ncsa,dc=illinois,dc=edu
+cn: John Smith
+givenName: John
+sn: Smith
+uid: jsmith
+mail: jsmith@illinois.edu
+employeeType: all_ncsa_employe
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: inetUser
+objectClass: posixAccount
+uidNumber: 28064
+gidNumber: 202
+homeDirectory: /afs/ncsa/.u7/jsmith
+loginShell: /bin/csh
+memberOf: cn=jira-users,ou=Groups,dc=ncsa,dc=illinois,dc=edu
+memberOf: cn=grp_bw_ncsa_staf,ou=Groups,dc=ncsa,dc=illinois,dc=edu
+memberOf: cn=org_all_groups,ou=Groups,dc=ncsa,dc=illinois,dc=edu
+memberOf: cn=org_do,ou=Groups,dc=ncsa,dc=illinois,dc=edu
+memberOf: cn=all_ncsa_employe,ou=Groups,dc=ncsa,dc=illinois,dc=edu
+memberOf: cn=grp_jira_users,ou=Groups,dc=ncsa,dc=illinois,dc=edu
+memberOf: cn=all_users,ou=Groups,dc=ncsa,dc=illinois,dc=edu
+memberOf: cn=grp_bldg_ncsa,ou=Groups,dc=ncsa,dc=illinois,dc=edu
+memberOf: cn=grp_bldg_both,ou=Groups,dc=ncsa,dc=illinois,dc=edu
+memberOf: cn=org_cisr,ou=Groups,dc=ncsa,dc=illinois,dc=edu
+memberOf: cn=org_ici,ou=Groups,dc=ncsa,dc=illinois,dc=edu
+memberOf: cn=org_csd,ou=Groups,dc=ncsa,dc=illinois,dc=edu
+memberOf: cn=prj_cerb_users,ou=Groups,dc=ncsa,dc=illinois,dc=edu
+memberOf: cn=iam_sec_testing,ou=Groups,dc=ncsa,dc=illinois,dc=edu
+memberOf: cn=lsst_users,ou=Groups,dc=ncsa,dc=illinois,dc=edu
+memberOf: cn=lsst_security,ou=Groups,dc=ncsa,dc=illinois,dc=edu
+memberOf: cn=ncsa-ca,ou=Groups,dc=ncsa,dc=illinois,dc=edu</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Corresponding <code>.env</code> entry</div>
+<div class="content">
+<pre>LDAP_ENABLED=true
+LDAP_PASSWORD_VALIDATION=true
+LDAP_READ_ONLY=true
+LDAP_HOST=ldaps://ldap.ncsa.illinois.edu
+LDAP_PORT=636
+LDAP_BASE_DN=ou=People,dc=ncsa,dc=illinois,dc=edu
+LDAP_USER_RDN_ATTR=uid
+LDAP_SWAMP_UID_ATTR=uid
+LDAP_FIRSTNAME_ATTR=givenName
+LDAP_LASTNAME_ATTR=sn
+LDAP_FULLNAME_ATTR=cn
+LDAP_PASSWORD_ATTR=userPassword
+LDAP_USERNAME_ATTR=uid
+LDAP_EMAIL_ATTR=mail
+LDAP_ORG_ATTR=ignore
+LDAP_OBJECTCLASS=&lt;not applicable, ldap is read-only&gt;
+LDAP_WEB_USER=&lt;user here&gt;
+LDAP_WEB_USER_PASSWORD=&lt;password here&gt;
+LDAP_PASSWORD_SET_USER=&lt;not applicable, ldap is read-only&gt;
+LDAP_PASSWORD_SET_USER_PASSWORD=&lt;not applicable, ldap is read-only&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<div class="title">Notes</div>
+<p>In the query response, you should see:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>dn: uid=jsmith,ou=People,dc=ncsa,dc=illinois,dc=edu</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this case, the <code>LDAP_USER_RDN_ATTR</code> is the key for the <code>uid=jsmith</code>
+portion of the <code>dn</code>, and the <code>LDAP_BASE_DN</code> is the rest of the <code>dn</code> string.</p>
+</div>
+<div class="paragraph">
+<p>Since the <code>uid</code> field is globally unique in the LDAP directory, we set that
+for <code>LDAP_SWAMP_UID_ATTR</code>.</p>
+</div>
+<div class="paragraph">
+<p>We also want the user to enter "jsmith" for username/password, so we use the
+default value for <code>LDAP_USERNAME_ATTR=uid</code>.</p>
+</div>
+<div class="paragraph">
+<p>Finally, we use the default value of <code>LDAP_PORT=636</code> because we are
+connecting with <code>ldaps://</code>.</p>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 4. Insecure Active Directory Server with Credentialed User</div>
+<div class="content">
+<div class="listingblock">
+<div class="title">ldapsearch command</div>
+<div class="content">
+<pre>ldapsearch -LLL -x -H ldap://128.104.100.232 \
+           -b "dc=swamp,dc=ad" \
+           -D "ldapquery@swamp.ad" \
+           -W "(sAMAccountName=*jsmith*)"
+Enter LDAP Password: &lt;password entered&gt;</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">ldapsearch output</div>
+<div class="content">
+<pre>dn: CN=John Smith,CN=Users,DC=swamp,DC=ad
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: user
+cn: John Smith
+sn: Smith
+telephoneNumber: +1 555 5551234
+givenName: John
+distinguishedName: CN=John Smith,CN=Users,DC=swamp,DC=ad
+instanceType: 4
+whenCreated: 20161102135807.0Z
+whenChanged: 20161103141526.0Z
+displayName: John Smith
+uSNCreated: 65515
+memberOf: CN=Domain Admins,CN=Users,DC=swamp,DC=ad
+uSNChanged: 66272
+streetAddress:: MTIwNSBXLiBDbGFyayBTdC4NClVyYmFuYSwgSUwgNjE4MjE=
+name: John Smith
+objectGUID:: 4YwXKKIRxEOMD9BK4WaXGQ==
+userAccountControl: 66048
+badPwdCount: 0
+codePage: 0
+countryCode: 0
+badPasswordTime: 131231177822233920
+lastLogoff: 0
+lastLogon: 131231177936769682
+pwdLastSet: 131225686874147433
+primaryGroupID: 513
+objectSid:: AQUAAAAAAAUVAAAA7H5IDl2Zlbb2qCf1UgQAAA==
+adminCount: 1
+accountExpires: 9223372036854775807
+logonCount: 1
+sAMAccountName: jsmith
+sAMAccountType: 805306368
+userPrincipalName: jsmith@swamp.ad
+objectCategory: CN=Person,CN=Schema,CN=Configuration,DC=swamp,DC=ad
+dSCorePropagationData: 20161102144813.0Z
+dSCorePropagationData: 16010101000000.0Z
+lastLogonTimestamp: 131226561268705498
+mail: jsmith@illinois.edu</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Corresponding <code>.env</code> entry</div>
+<div class="content">
+<pre>LDAP_ENABLED=true
+LDAP_PASSWORD_VALIDATION=true
+LDAP_READ_ONLY=true
+LDAP_HOST=ldap://128.104.100.232
+LDAP_PORT=389
+LDAP_BASE_DN=cn=Users,dc=swamp,dc=ad
+LDAP_USER_RDN_ATTR=cn
+LDAP_SWAMP_UID_ATTR=userPrincipalName
+LDAP_FIRSTNAME_ATTR=givenName
+LDAP_LASTNAME_ATTR=sn
+LDAP_FULLNAME_ATTR=cn
+LDAP_PASSWORD_ATTR=userPassword
+LDAP_USERNAME_ATTR=sAMAccountName
+LDAP_EMAIL_ATTR=mail
+LDAP_ORG_ATTR=ignore
+LDAP_OBJECTCLASS=&lt;not applicable, ldap is read-only&gt;
+LDAP_WEB_USER=ldapquery@swamp.ad
+LDAP_WEB_USER_PASSWORD=&lt;password here&gt;
+LDAP_PASSWORD_SET_USER=&lt;not applicable, ldap is read-only&gt;
+LDAP_PASSWORD_SET_USER_PASSWORD=&lt;not applicable, ldap is read-only&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<div class="title">Notes</div>
+<p>In the query response, you should see:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>dn: CN=John Smith,CN=Users,DC=swamp,DC=ad</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this case, the <code>LDAP_USER_RDN_ATTR</code> is the key for the <code>cn=John Smith</code>
+portion of the <code>dn</code>, and the <code>LDAP_BASE_DN</code> is the rest of the <code>dn</code> string.</p>
+</div>
+<div class="paragraph">
+<p>The user "<a href="mailto:ldapquery@swamp.ad">ldapquery@swamp.ad</a>" was configured in the AD server to have read
+access for the other users in the server. This was an out-of-band step.</p>
+</div>
+<div class="paragraph">
+<p>We need a unique AD identifier to store in the local SWAMP database. In this
+case, we configure <code>LDAP_SWAMP_UID_ATTR=userPrincipalName</code>, but any other
+unique identifier could be used.</p>
+</div>
+<div class="paragraph">
+<p>We want the user to enter "jsmith" for username/password, so we use
+<code>LDAP_USERNAME_ATTR=sAMAccountName</code>.</p>
+</div>
+<div class="paragraph">
+<p>Since <code>LDAP_HOST</code> is using <code>ldap://</code>, we configure <code>LDAP_PORT=389</code>
+(insecure). Note that it is a bad idea to use an insecure LDAP protocol
+since user passwords would be transmitted in the clear.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_other_considerations">5.4.4. Other Considerations</h4>
+<div class="sect4">
+<h5 id="_required_attributes">Required Attributes</h5>
+<div class="paragraph">
+<p>When the SWAMP creates new users, it will always populate the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>SWAMP user UID</p>
+</li>
+<li>
+<p>username</p>
+</li>
+<li>
+<p>password</p>
+</li>
+<li>
+<p>first name</p>
+</li>
+<li>
+<p>last name</p>
+</li>
+<li>
+<p>full name</p>
+</li>
+<li>
+<p>email (unless email is disabled)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If you want to configure SWAMP-in-a-Box to be able to add and edit user
+records in an LDAP/AD server, you must have a unique corresponding attribute
+mapped for each of these values.</p>
+</div>
+<div class="paragraph">
+<p>Similarly, if you have required attributes for user records in your LDAP/AD
+server, each must be mappable to one of the above values. Otherwise, the
+SWAMP will not be able to set them, and any attempt by the SWAMP to create
+new user records will fail.</p>
+</div>
+<div class="paragraph">
+<p>If email is a required attribute for your LDAP/AD server but you want to
+configure SWAMP-in-a-Box with email disabled, you can map your email
+attribute, and the SWAMP will populate that attribute with a space (" ")
+when it creates new user records.</p>
+</div>
+<div class="paragraph">
+<p>If you have more required attributes for your LDAP/AD server than the SWAMP
+can accommodate, you should configure SWAMP-in-a-Box to access your LDAP/AD
+server as read only.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_password_validation">Password Validation</h5>
+<div class="paragraph">
+<p>If SWAMP-in-a-Box is configured for read-only access to the LDAP/AD server,
+then the LDAP/AD server should validate passwords.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Set <code>LDAP_PASSWORD_VALIDATION=true</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If SWAMP-in-a-Box is configured to be able to add and edit records in the
+LDAP/AD server, and your LDAP/AD server is configured to encrypt user
+passwords itself, then the SWAMP should not encrypt passwords, and the
+LDAP/AD server should validate passwords.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Set <code>APP_PASSWORD_ENCRYPTION_METHOD=NONE</code></p>
+</li>
+<li>
+<p>Set <code>LDAP_PASSWORD_VALIDATION=true</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If SWAMP-in-a-Box is configured to be able to add and edit records in the
+LDAP/AD server, and your LDAP/AD server is not configured to encrypt user
+passwords, then the SWAMP should handle password encryption and validation.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Set <code>APP_PASSWORD_ENCRYPTION_METHOD=BCRYPT</code></p>
+</li>
+<li>
+<p>Set <code>LDAP_PASSWORD_VALIDATION=false</code></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_ldap_size">LDAP Size</h5>
+<div class="paragraph">
+<p>If your LDAP/AD server has several thousand users, your SWAMP administrator
+user many not be able to manage users. This is dependent on how the limits
+on the LDAP/AD server are configured. If the server limits the number of
+records that can be returned on a search, the SWAMP may receive only
+a subset of users when asking for all users. This in turn affects the
+"Review Accounts" page by causing it to show only a subset of the SWAMP&#8217;s
+users.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuring_3rd_party_sign_in_via_oauth2_providers">5.5. Configuring 3rd-party Sign-in via OAuth2 Providers</h3>
+<div class="paragraph">
+<p>The SWAMP can be configured to use external OAuth2 identity providers.
+Currently, the following identity providers are supported:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://developer.github.com/v3/oauth/">GitHub</a></p>
+</li>
+<li>
+<p><a href="https://developers.google.com/identity/protocols/OAuth2">Google</a></p>
+</li>
+<li>
+<p><a href="https://cilogon.org/oauth2/register">CILogon</a></p>
+</li>
+</ul>
+</div>
+<div class="sect3">
+<h4 id="_creating_a_github_oauth_application_for_your_swamp_in_a_box">5.5.1. Creating a GitHub OAuth Application for Your SWAMP-in-a-Box</h4>
+<div class="sect4">
+<h5 id="_before_you_begin_7">Before You Begin</h5>
+<div class="ulist">
+<ul>
+<li>
+<p>You will need a GitHub account or organization for which to register an
+OAuth application.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_procedure_4">Procedure</h5>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Sign in to your GitHub account, or sign in and access your organization.</p>
+</li>
+<li>
+<p>Navigate to the user&#8217;s or organization&#8217;s "Settings" page.</p>
+</li>
+<li>
+<p>Under "Developer Settings", navigate to the "OAuth Applications" page:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>User: <a href="https://github.com/settings/developers" class="bare">https://github.com/settings/developers</a></p>
+</li>
+<li>
+<p>Organization: <a href="https://github.com/organizations/&lt;organization_name&gt;/settings/applications" class="bare">https://github.com/organizations/&lt;organization_name&gt;/settings/applications</a></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Click the "Register a new application" button.</p>
+</li>
+<li>
+<p>Enter the following information:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Application name: "SWAMP-in-a-Box" or the name of your SWAMP-in-a-Box</p>
+</li>
+<li>
+<p>Homepage URL: The URL to your SWAMP-in-a-Box&#8217;s or organization&#8217;s home
+page</p>
+</li>
+<li>
+<p>Application description: Optional, you can leave this blank</p>
+</li>
+<li>
+<p>Authorized callback URL: "https://&lt;hostname&gt;/oauth2", using your
+SWAMP-in-a-Box&#8217;s hostname</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Click the "Register application" button.</p>
+</li>
+<li>
+<p>(Optional) Add an application logo on the summary screen. Click the
+"Update application" button when finished.</p>
+</li>
+<li>
+<p>Copy down the "Client ID" and "Client Secret".</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_enabling_github_as_an_oauth2_provider">5.5.2. Enabling GitHub as an OAuth2 Provider</h4>
+<div class="sect4">
+<h5 id="_before_you_begin_8">Before You Begin</h5>
+<div class="ulist">
+<ul>
+<li>
+<p>You will need <code>root</code> access to the SWAMP-in-a-Box host.</p>
+</li>
+<li>
+<p>You will need the "Client ID" and "Client Secret" for your
+SWAMP-in-a-Box&#8217;s GitHub OAuth application.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_procedure_5">Procedure</h5>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>As <code>root</code> (or using <code>sudo</code>), edit the web backend configuration file:</p>
+<div class="listingblock">
+<div class="content">
+<pre>vi /var/www/swamp-web-server/.env</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Set the following parameters:</p>
+<div class="listingblock">
+<div class="content">
+<pre>GITHUB_ENABLED=true
+GITHUB_CLIENT_ID=&lt;Your Client ID&gt;
+GITHUB_CLIENT_SECRET=&lt;Your Client Secret&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Save your changes.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_creating_google_oauth_credentials_for_your_swamp_in_a_box">5.5.3. Creating Google OAuth Credentials for Your SWAMP-in-a-Box</h4>
+<div class="sect4">
+<h5 id="_before_you_begin_9">Before You Begin</h5>
+<div class="ulist">
+<ul>
+<li>
+<p>You will need a Google account for which to enable the Google+ API and
+create OAuth credentials.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_procedure_6">Procedure</h5>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Sign in to your Google account.</p>
+</li>
+<li>
+<p>Navigate to the Google API Manager: <a href="https://console.developers.google.com/" class="bare">https://console.developers.google.com/</a>.</p>
+</li>
+<li>
+<p>Select or create a Project for your SWAMP-in-a-Box OAuth credentials.</p>
+</li>
+<li>
+<p>Enable the Google+ API for your project:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>On the left, under API Manager, select "Library".</p>
+</li>
+<li>
+<p>On the right, under Social APIs, select the link for "Google+ API".</p>
+</li>
+<li>
+<p>Click the "Enable" button.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Configure the OAuth consent screen:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>On the left, under API Manager, select "Credentials".</p>
+</li>
+<li>
+<p>On the right, under Credentials, select "OAuth consent screen".</p>
+</li>
+<li>
+<p>Enter the following information:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Email address: Your email</p>
+</li>
+<li>
+<p>Product name shown to users: "SWAMP-in-a-Box" or the name of your
+SWAMP-in-a-Box</p>
+</li>
+<li>
+<p>Homepage URL: The URL to your SWAMP-in-a-Box&#8217;s or organization&#8217;s
+home page</p>
+</li>
+<li>
+<p>Product logo URL: The URL to a logo for your SWAMP-in-a-Box.
+For example, mir-swamp.org uses:
+<a href="https://www.mir-swamp.org/images/logos/swamp-icon-small.png" class="bare">https://www.mir-swamp.org/images/logos/swamp-icon-small.png</a></p>
+</li>
+<li>
+<p>Privacy policy URL: The URL to your privacy policy.
+For example, mir-swamp.org uses:
+<a href="https://www.swampinabox.org/doc/SWAMP-Privacy-Policy.pdf" class="bare">https://www.swampinabox.org/doc/SWAMP-Privacy-Policy.pdf</a></p>
+</li>
+<li>
+<p>Terms of service URL: The URL to your terms of service.
+For example, mir-swamp.org uses:
+<a href="https://www.mir-swamp.org/#policies/acceptable-use-policy" class="bare">https://www.mir-swamp.org/#policies/acceptable-use-policy</a></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Click "Save".</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Configure OAuth Client ID Credentials:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>On the left, under API Manager, select "Credentials".</p>
+</li>
+<li>
+<p>On the right, under Credentials, select "OAuth client ID" from the
+"Create credentials" menu.</p>
+</li>
+<li>
+<p>Under "Application type", select "Web application".</p>
+</li>
+<li>
+<p>Enter the following information:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Name: "SWAMP-in-a-Box" or the name of your SWAMP-in-a-Box</p>
+</li>
+<li>
+<p>Authorized JavaScript origins: "https://&lt;hostname&gt;", using your
+SWAMP-in-a-Box&#8217;s hostname</p>
+</li>
+<li>
+<p>Authorized redirect URIs: "https://&lt;hostname&gt;/oauth2", using your
+SWAMP-in-a-Box&#8217;s hostname</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Click "Create".</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Copy down the "Client ID" and "Client Secret".</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_enabling_google_as_an_oauth2_provider">5.5.4. Enabling Google as an OAuth2 Provider</h4>
+<div class="sect4">
+<h5 id="_before_you_begin_10">Before You Begin</h5>
+<div class="ulist">
+<ul>
+<li>
+<p>You will need <code>root</code> access to the SWAMP-in-a-Box host.</p>
+</li>
+<li>
+<p>You will need the "Client ID" and "Client Secret" for your
+SWAMP-in-a-Box&#8217;s Google OAuth credentials.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_procedure_7">Procedure</h5>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>As <code>root</code> (or using <code>sudo</code>), edit the web backend configuration file:</p>
+<div class="listingblock">
+<div class="content">
+<pre>vi /var/www/swamp-web-server/.env</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Set the following parameters:</p>
+<div class="listingblock">
+<div class="content">
+<pre>GOOGLE_ENABLED=true
+GOOGLE_CLIENT_ID=&lt;Your Client ID&gt;
+GOOGLE_CLIENT_SECRET=&lt;Your Client Secret&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Save your changes.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_registering_for_cilogon_oauth2_credentials">5.5.5. Registering for CILogon OAuth2 Credentials</h4>
+<div class="sect4">
+<h5 id="_procedure_8">Procedure</h5>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Go to <a href="https://cilogon.org/oauth2/register" class="bare">https://cilogon.org/oauth2/register</a>.</p>
+</li>
+<li>
+<p>Enter the following information:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Client Name: "SWAMP-in-a-Box" or the name of your SWAMP-in-a-Box</p>
+</li>
+<li>
+<p>Contact email: Your email address</p>
+</li>
+<li>
+<p>Home URL: The URL to your SWAMP-in-a-Box&#8217;s or organization&#8217;s home page</p>
+</li>
+<li>
+<p>Uncheck "Use Limited Proxy Certificates"</p>
+</li>
+<li>
+<p>Callback URLs: "https://&lt;hostname&gt;/oauth2", using your SWAMP-in-a-Box&#8217;s
+hostname</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Click the "Submit" button.</p>
+</li>
+<li>
+<p>Copy down the client identifier and client secret.</p>
+</li>
+<li>
+<p>Wait for email approval from CILogon Administrator.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_enabling_cilogon_as_an_oauth2_provider">5.5.6. Enabling CILogon as an OAuth2 Provider</h4>
+<div class="sect4">
+<h5 id="_before_you_begin_11">Before You Begin</h5>
+<div class="ulist">
+<ul>
+<li>
+<p>You will need <code>root</code> access to the SWAMP-in-a-Box host.</p>
+</li>
+<li>
+<p>You will need the client identifier and client secret for your
+SWAMP-in-a-Box&#8217;s CILogon OAuth2 credentials.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_procedure_9">Procedure</h5>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>As <code>root</code> (or using <code>sudo</code>), edit the web backend configuration file:</p>
+<div class="listingblock">
+<div class="content">
+<pre>vi /var/www/swamp-web-server/.env</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Set the following parameters:</p>
+<div class="listingblock">
+<div class="content">
+<pre>CILOGON_ENABLED=true
+CILOGON_CLIENT_ID=&lt;Your Client ID&gt;
+CILOGON_CLIENT_SECRET=&lt;Your Client Secret&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Save your changes.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_installing_additional_components">6. Installing Additional Components</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="add-on-platforms">6.1. Installing Additional Assessment Platforms</h3>
+<div class="paragraph">
+<p>The SWAMP-in-a-Box installer includes only the Ubuntu 16.04 platform for
+performing assessments. For C/C++ packages, additional platforms are
+available, including releases of CentOS, Debian, Fedora, Scientific Linux,
+and older releases of Ubuntu. (Packages for other languages will always be
+assessed on Ubuntu 16.04.)</p>
+</div>
+<div class="sect3">
+<h4 id="_before_you_begin_12">6.1.1. Before You Begin</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>You will need <code>root</code> access to the SWAMP-in-a-Box host.</p>
+</li>
+<li>
+<p>You will need <code>root</code> access to the SWAMP-in-a-Box database.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_procedure_10">6.1.2. Procedure</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Visit <a href="https://platform.swampinabox.org/platform-images/" class="bare">https://platform.swampinabox.org/platform-images/</a>.</p>
+</li>
+<li>
+<p>Download and copy to the SWAMP-in-a-Box host the <code>.qcow2.gz</code> files
+corresponding to the additional platforms you wish to perform assessments
+on. The naming scheme for these files is as follows:</p>
+<div class="listingblock">
+<div class="content">
+<pre>condor-&lt;Linux distribution&gt;-&lt;version&gt;-&lt;32 or 64 bit&gt;-master-&lt;YYYYMMDD&gt;.qcow2.gz</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When downloading the files, name the copies exactly as shown on
+<a href="https://platform.swampinabox.org/" class="bare">https://platform.swampinabox.org/</a>. Otherwise, they will not be recognized as
+supported platforms in the next step.</p>
+</div>
+</li>
+<li>
+<p>On the SWAMP-in-a-Box host, for each file, as <code>root</code> (or using <code>sudo</code>),
+run the <code>install_platform</code> script, providing the path to the <code>.qcow2.gz</code>
+file:</p>
+<div class="listingblock">
+<div class="content">
+<pre>/opt/swamp/bin/install_platform &lt;path to .qcow2.gz file&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When prompted, provide the password for the database&#8217;s <code>root</code> user, which is
+needed to add the platform to the database and make it available in the
+SWAMP. Note that <code>install_platform</code> will likely take several minutes to
+complete due to the size of the file.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_installing_additional_assessment_tools">6.2. Installing Additional Assessment Tools</h3>
+<div class="paragraph">
+<p>The SWAMP-in-a-Box installer includes variety of tools for assessing
+packages. For C/C++ packages, two additional tools can be installed:
+CodeSonar and Coverity.</p>
+</div>
+<div class="sect3">
+<h4 id="_about_codesonar">6.2.1. About CodeSonar</h4>
+<div class="paragraph">
+<p>SWAMP-in-a-Box can be used with CodeSonar, a deep-path static analysis tool
+provided by GrammaTech, Inc. CodeSonar finds cases of undefined behavior
+(such as buffer overruns, null pointer dereferences, &#8230;&#8203;), API Misuse (use
+after free, socket API, &#8230;&#8203;), as well as suspicious behavior (dead code,
+unused variables, concurrency violations, taint, &#8230;&#8203;), and works on source
+code and binaries.</p>
+</div>
+<div class="paragraph">
+<p>Contact information for obtaining CodeSonar and licensing information for
+CodeSonar can be found at:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="mailto:sales@grammatech.com">sales@grammatech.com</a>,</p>
+</li>
+<li>
+<p>+1-888-695-2668, or</p>
+</li>
+<li>
+<p><a href="https://www.grammatech.com/products/codesonar" class="bare">https://www.grammatech.com/products/codesonar</a>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>CodeSonar is third party software created and maintained by GrammaTech, Inc.
+Copyright 2017 GrammaTech, Inc. CodeSonar is a registered trademark of
+GrammaTech, Inc. All rights reserved.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_about_coverity">6.2.2. About Coverity</h4>
+<div class="paragraph">
+<p>SWAMP-in-a-Box can be used with Synopsys Static Analysis (Coverity).
+Synopsys Static Analysis is an accurate and comprehensive static analysis
+solution for finding critical quality defects and security violations. Its
+high-fidelity analysis delivers business relevant findings for developers
+and security audit teams alike. Synopsys' SAST solutions are uniquely
+designed to scale from safety-critical IoT software to global enterprise
+systems.</p>
+</div>
+<div class="paragraph">
+<p>Contact information for obtaining Synopsys Static Analysis (Coverity) and
+licensing information for Synopsys Static Analysis can be found at:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="mailto:software-integrity-sales@synopsys.com">software-integrity-sales@synopsys.com</a>,</p>
+</li>
+<li>
+<p>U.S. Sales +1-800-873-8193,</p>
+</li>
+<li>
+<p>International Sales +1-415-321-5237, or</p>
+</li>
+<li>
+<p><a href="https://www.synopsys.com/software-integrity/security-testing/static-analysis-sast.html" class="bare">https://www.synopsys.com/software-integrity/security-testing/static-analysis-sast.html</a>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Synopsys Static Analysis (Coverity) is third party software maintained by
+Synopsys, Inc. Copyright 2017 Synopsys, Inc. Synopsys Static Analysis
+(Coverity) is a registered trademark of Synopsys, Inc. All rights reserved
+worldwide.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_before_you_begin_13">6.2.3. Before You Begin</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>You will need <code>root</code> access to the SWAMP-in-a-Box host.</p>
+</li>
+<li>
+<p>You will need <code>root</code> access to the SWAMP-in-a-Box database.</p>
+</li>
+<li>
+<p>You will need to obtain one or both of the 32-bit and 64-bit Linux
+archives for the tool you wish to install from its vendor.</p>
+<div class="paragraph">
+<p>The archives for CodeSonar should be named:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>codesonar-&lt;version&gt;.&lt;YYYYMMDD&gt;-i686-pc-linux.tar.gz    (32-bit)
+codesonar-&lt;version&gt;.&lt;YYYYMMDD&gt;-x86_64-pc-linux.tar.gz  (64-bit)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The archives for Coverity should be named (the <code>.sh</code> "installers" will not
+work):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>cov-analysis-linux-&lt;version&gt;.tar.gz    (32-bit)
+cov-analysis-linux64-&lt;version&gt;.tar.gz  (64-bit)</pre>
+</div>
+</div>
+</li>
+<li>
+<p>You will need the hostname and port for the tool&#8217;s license server.
+(Contact the tool&#8217;s vendor if you need help setting up and configuring the
+license server.) The SWAMP-in-a-Box host will need to be able to contact
+the license server in order to successfully perform assessments using the
+tool; the scripts used below will not modify any firewall configurations.</p>
+</li>
+<li>
+<p>You will need to know or decide the maximum number of simultaneous
+instances of the tool the SWAMP may run.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_procedure_11">6.2.4. Procedure</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Run the <code>make_swamp_tool</code> script to package the vendor&#8217;s installers into
+the archive format that the SWAMP uses.</p>
+<div class="listingblock">
+<div class="content">
+<pre>/opt/swamp/bin/make_swamp_tool \
+    --tool-name &lt;gt-csonar or coverity&gt; \
+    --tool-version &lt;version&gt; \
+    --installer-linux32 &lt;path to 32-bit archive&gt; \
+    --installer-linux64 &lt;path to 64-bit archive&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Specify <code>gt-csonar</code> or <code>coverity</code> for the <code>--tool-name</code> option, depending on
+the tool being packaged. Omit the <code>--installer-linux32</code> option if you have
+only the 64-bit installer, and similarly for the <code>--installer-linux64</code>
+option.</p>
+</div>
+<div class="paragraph">
+<p>When <code>make_swamp_tool</code> completes, the output should include the path to the
+SWAMP tool archive file that was created. Note that it will likely take
+several minutes to complete due to the size of the installers.</p>
+</div>
+</li>
+<li>
+<p>As <code>root</code> (or using <code>sudo</code>), run the <code>install_tool</code> script with the
+<code>--add</code> option, providing the version of tool being installed and the path
+to the SWAMP tool archive file produced in the previous step. (The first
+option should be <code>--codesonar</code> or <code>--coverity</code>, depending on the tool being
+installed.)</p>
+<div class="listingblock">
+<div class="content">
+<pre>/opt/swamp/bin/install_tool \
+    [--codesonar or --coverity] \
+    --add \
+    --tool-version &lt;version&gt; \
+    --tool-archive &lt;path to SWAMP tool archive file&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that <code>install_tool</code> will likely take several minutes to complete due to
+the size of the archive.</p>
+</div>
+</li>
+<li>
+<p>As <code>root</code> (or using <code>sudo</code>), run the <code>install_tool</code> script a second time,
+this time with the <code>--configure</code> option, providing the hostname and port of
+the tool&#8217;s license server, and the maximum number of simultaneous instances
+of the tool that may run.</p>
+<div class="listingblock">
+<div class="content">
+<pre>/opt/swamp/bin/install_tool \
+    [--codesonar or --coverity] \
+    --configure \
+    --license-server-host &lt;hostname of the license server&gt; \
+    --license-server-port &lt;port number&gt; \
+    --limit &lt;max number of simultaneous instances&gt;</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_managing_the_installed_versions_of_codesonar_and_coverity">6.2.5. Managing the Installed Versions of CodeSonar and Coverity</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Additional versions of each tool can be installed using the directions
+above. In the SWAMP web application, the "latest" version of the tool will
+be whichever version was <strong>installed</strong> most recently. We recommend
+installing multiple versions in order (e.g., 1.0, 2.0, 2.1, 3.0, etc.) so
+that the "latest" version matches users' expectations.</p>
+</li>
+<li>
+<p>If you have previously installed, say, only the 32-bit version of a tool
+and now wish to make both the 32-bit and 64-bit versions available, first
+run the <code>make_swamp_tool</code> script, as above, to package the 32-bit and
+64-bit archives together for the SWAMP. Then as <code>root</code> (or using <code>sudo</code>),
+run the <code>install_tool</code> script with the <code>--replace</code> option:</p>
+<div class="listingblock">
+<div class="content">
+<pre>/opt/swamp/bin/install_tool
+    [--codesonar or --coverity] \
+    --replace
+    --tool-version &lt;version&gt;
+    --tool-archive &lt;path to gt-csonar-&lt;version&gt;.tar.gz file&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>If you wish to remove a version of a tool from the SWAMP, as <code>root</code> (or
+using <code>sudo</code>), run the <code>install_tool</code> script with the <code>--remove</code> option,
+providing the version to remove.</p>
+<div class="listingblock">
+<div class="content">
+<pre>/opt/swamp/bin/install_tool
+    [--codesonar or --coverity] \
+    --remove
+    --tool-version &lt;version&gt;</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="add-on-viewers">6.3. Installing Additional Viewers</h3>
+<div class="paragraph">
+<p>For viewing the results of an assessment, the SWAMP instance installed by
+SWAMP-in-a-Box includes a "native" viewer and additionally provides a link
+to download the "raw" results as a SCARF <code>.xml</code> file.</p>
+</div>
+<div class="paragraph">
+<p>It is also possible to install a SWAMP-specific version of Code Dx for
+viewing results. (SWAMP-in-a-Box currently does <strong>not</strong> support integrating
+with an existing Code Dx installation.)</p>
+</div>
+<div class="sect3">
+<h4 id="_about_code_dx">6.3.1. About Code Dx</h4>
+<div class="paragraph">
+<p>Through SWAMP&#8217;s partnership with Code Dx, Inc., a SWAMP-specific version of
+Code Dx software has been created to be solely used with SWAMP software.
+Code Dx software shall not be redistributed with SWAMP software without
+written consent of Code Dx, Inc.</p>
+</div>
+<div class="paragraph">
+<p>To obtain a SWAMP version of Code Dx, contact Code Dx, Inc. at:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="mailto:sales@codedx.com">sales@codedx.com</a>,</p>
+</li>
+<li>
+<p>+1-631-759-3993, or</p>
+</li>
+<li>
+<p><a href="https://codedx.com/support/?v=7516fd43adaa" class="bare">https://codedx.com/support/?v=7516fd43adaa</a>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>After contacting Code Dx, Inc., you will be asked to agree to an End User&#8217;s
+License Agreement (EULA) with Code Dx, Inc. Once you have agreed to the
+EULA, you will receive a download kit from Code Dx, Inc.</p>
+</div>
+<div class="paragraph">
+<p>Code Dx is third party software created and maintained by Code Dx, Inc.
+Copyright 2010-2018 Code Dx, Inc. All rights reserved.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_before_you_begin_14">6.3.2. Before You Begin</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>You will need <code>root</code> access to the SWAMP-in-a-Box host.</p>
+</li>
+<li>
+<p>You will need <code>root</code> access to the SWAMP-in-a-Box database.</p>
+</li>
+<li>
+<p>You will need to obtain the <code>.war</code> file for the SWAMP-specific version of
+Code Dx from Code Dx, Inc. If you are provided with a <code>.zip</code> file or some
+other archive format, first expand the archive and locate the <code>.war</code> file
+within the expanded contents.</p>
+<div class="paragraph">
+<p>Note that the SWAMP officially supports version 1.8.3 of Code Dx. Later
+versions might work, but the experience for end users will be significantly
+different from 1.8.3.</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_procedure_12">6.3.3. Procedure</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Copy the Code Dx <code>.war</code> file obtained from Code Dx, Inc. to the
+SWAMP-in-a-Box host.</p>
+</li>
+<li>
+<p>On the SWAMP-in-a-Box host, as <code>root</code> (or using <code>sudo</code>), run the
+<code>install_codedx</code> script, providing the path to the <code>.war</code> file:</p>
+<div class="listingblock">
+<div class="content">
+<pre>/opt/swamp/bin/install_codedx &lt;path to Code Dx .war file&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When prompted, provide the password for the database&#8217;s <code>root</code> user, which is
+needed to add the Code Dx to the database and make it available in the
+SWAMP.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_administrative_commands">7. Administrative Commands</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="checking-for-updates">7.1. Checking for Updates</h3>
+<div class="paragraph">
+<p>The SWAMP-in-a-Box upgrade script does not necessarily update all components
+of SWAMP-in-a-Box for which a newer version might be available. For example,
+if you have previously added on an <a href="#add-on-platforms">additional assessment
+platform</a> and there is an updated version of that platform available, you
+will have to download the new version separately and install it.</p>
+</div>
+<div class="paragraph">
+<p>To check whether updated assessment platforms are available, run the
+following command (it does not require <code>root</code> access):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>/opt/swamp/bin/swamp_check_platform_images</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Assessment platforms are currently the only component of SWAMP-in-a-Box that
+are not necessarily updated by the SWAMP-in-a-Box upgrade script.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_updating_the_host_s_hostname">7.2. Updating the Host&#8217;s Hostname</h3>
+<div class="paragraph">
+<p>During the SWAMP-in-a-Box install process, the hostname specified for the
+host (usually, the host&#8217;s detected hostname) is set in various configuration
+locations. When the host&#8217;s hostname changes, those configuration locations
+need to be updated in order for the system to continue functioning
+correctly. To do so, as <code>root</code> (or using <code>sudo</code>), run the following command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>/opt/swamp/bin/swamp_set_web_host &lt;new hostname&gt;</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_managing_the_code_swamp_code_system_service">7.3. Managing the <code>swamp</code> System Service</h3>
+<div class="paragraph">
+<p>SWAMP-in-a-Box installs a collection of daemons that run on the host, all
+managed by the <code>swamp</code> system service. These daemons must be running in
+order to perform assessments. The <code>swamp</code> service, and by extension all of
+the daemons, may be stopped and started using the standard commands for
+interacting with system services (the commands must be run as <code>root</code> or
+using <code>sudo</code>). For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>service swamp start
+service swamp stop
+service swamp restart</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_other_components">7.4. Other Components</h3>
+<div class="paragraph">
+<p>SWAMP-in-a-Box also makes use of the Apache HTTP Server, HTCondor, and
+MariaDB. For instructions on how to interact with or administer Apache HTTP
+Server, HTCondor, and MariaDB, refer to the specific documentation
+associated with each product. Be aware that the install and upgrade process
+for SWAMP-in-a-Box makes changes to their default configurations; see the
+SWAMP-in-a-Box reference manual for further details.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_documentation_for_users_of_the_swamp">8. Documentation for Users of the SWAMP</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Documentation for users of the SWAMP includes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://www.swampinabox.org/doc/SWAMP-User-Manual.pdf">SWAMP User Manual</a></p>
+</li>
+<li>
+<p><a href="https://www.swampinabox.org/doc/statusout.pdf">Status.out and Debugging SWAMP Failures</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Links to these documents can be found on the Help page of the SWAMP web
+application.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_support_and_contact_information">9. Support and Contact Information</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We welcome your feedback and contributions at:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Email: <a href="mailto:sib@continuousassurance.org">sib@continuousassurance.org</a></p>
+</li>
+<li>
+<p>Phone: +1 (317) 274-3942</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>We also host a mailing list for the user community:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Email: <a href="mailto:swampinabox@lists.discovery.wisc.edu">swampinabox@lists.discovery.wisc.edu</a></p>
+</li>
+<li>
+<p>Sign up: <a href="https://lists.cosalab.org/mailman/listinfo/swampinabox" class="bare">https://lists.cosalab.org/mailman/listinfo/swampinabox</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="installing-dependencies">Appendix A: Installing Dependencies</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The software packages that SWAMP-in-a-Box depends on include:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="#dependencies-htcondor">HTCondor 8.6</a>,</p>
+</li>
+<li>
+<p><a href="#dependencies-mariadb">MariaDB 5.5</a>,</p>
+</li>
+<li>
+<p><a href="#dependencies-php">PHP 7.0</a>, and</p>
+</li>
+<li>
+<p><a href="#dependencies-other">other assorted utilities</a>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>All of these dependencies must be installed in order for SWAMP-in-a-Box to
+function correctly.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+In the sections below, <code>&lt;installer-dir&gt;</code> refers to the directory containing
+the SWAMP-in-a-Box installer. See <a href="#installing-siab">Installing SWAMP-in-a-Box</a> and <a href="#upgrading-siab">Upgrading SWAMP-in-a-Box</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="dependencies-htcondor">A.1. HTCondor 8.6</h3>
+<div class="paragraph">
+<p>The set-up scripts configure and download HTCondor from the repository
+hosted by the University of Wisconsin-Madison, generally following the
+instructions provided on the project&#8217;s home page
+(<a href="https://research.cs.wisc.edu/htcondor/index.html" class="bare">https://research.cs.wisc.edu/htcondor/index.html</a>). The specific packages
+installed are <code>condor-all</code> and its dependencies.</p>
+</div>
+<div class="paragraph">
+<p>The following distribution-dependent scripts will install HTCondor using the
+process described above:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;installer-dir&gt;/repos/CentOS-6/install-htcondor.bash
+&lt;installer-dir&gt;/repos/CentOS-7/install-htcondor.bash</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="dependencies-mariadb">A.2. MariaDB 5.5</h3>
+<div class="paragraph">
+<p>For CentOS 6, the set-up scripts configure and download MariaDB from the
+repository hosted by the MariaDB Foundation, using the configuration file
+produced by the "repository configuration" tool at
+<a href="https://downloads.mariadb.org/mariadb/repositories/" class="bare">https://downloads.mariadb.org/mariadb/repositories/</a>. The specific packages
+installed are <code>MariaDB-client</code>, <code>MariaDB-server</code>, <code>MariaDB-shared</code>, and
+their dependencies.</p>
+</div>
+<div class="paragraph">
+<p>For CentOS 7, the set-up scripts download MariaDB from CentOS&#8217;s default
+repositories. The specific packages installed are <code>mariadb</code>,
+<code>mariadb-server</code>, <code>mariadb-libs</code>, and their dependencies.</p>
+</div>
+<div class="paragraph">
+<p>The following distribution-dependent scripts will install MariaDB using the
+process described above:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;installer-dir&gt;/repos/CentOS-6/install-mariadb.bash
+&lt;installer-dir&gt;/repos/CentOS-7/install-mariadb.bash</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="dependencies-php">A.3. PHP 7.0</h3>
+<div class="paragraph">
+<p>The set-up scripts configure and download PHP from Remi&#8217;s RPM Repository,
+using the instructions produced by the "configuration wizard" at
+<a href="http://rpms.famillecollet.com/" class="bare">http://rpms.famillecollet.com/</a>. The specific packages installed are <code>php</code>,
+<code>php-ldap</code>, <code>php-mbstring</code>, <code>php-mcrypt</code>, <code>php-mysqlnd</code>, <code>php-pecl-zip</code>,
+<code>php-xml</code>, and their dependencies.</p>
+</div>
+<div class="paragraph">
+<p>The following distribution-dependent scripts will install PHP using the
+process described above:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;installer-dir&gt;/repos/CentOS-6/install-php.bash
+&lt;installer-dir&gt;/repos/CentOS-7/install-php.bash</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="dependencies-other">A.4. Other Assorted Utilities</h3>
+<div class="paragraph">
+<p>In addition to HTCondor, MariaDB, and PHP, the set-up scripts download
+assorted software packages from CentOS&#8217;s default repositories. The specific
+packages installed are</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>ant</code>,</p>
+</li>
+<li>
+<p><code>bind-utils</code>,</p>
+</li>
+<li>
+<p><code>git</code>,</p>
+</li>
+<li>
+<p><code>httpd</code>,</p>
+</li>
+<li>
+<p><code>libguestfs</code>,</p>
+</li>
+<li>
+<p><code>libguestfs-tools</code>,</p>
+</li>
+<li>
+<p><code>libguestfs-tools-c</code>,</p>
+</li>
+<li>
+<p><code>libvirt</code>,</p>
+</li>
+<li>
+<p><code>mod_ssl</code>,</p>
+</li>
+<li>
+<p><code>ncompress</code>,</p>
+</li>
+<li>
+<p><code>patch</code>,</p>
+</li>
+<li>
+<p><code>perl</code>,</p>
+</li>
+<li>
+<p><code>zip</code>,</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>and their dependencies.</p>
+</div>
+<div class="paragraph">
+<p>The following script will install these packages and perform additional,
+necessary configuration of the SWAMP-in-a-Box host. It must be run after
+HTCondor, MariaDB, and PHP are installed, as described above.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;installer-dir&gt;/repos/common/install-and-configure-deps.bash</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_license_and_notices">Appendix B: License and Notices</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Software Assurance Marketplace (SWAMP) is released under the open source
+Apache License, Version 2.0, reproduced below.</p>
+</div>
+<div class="paragraph">
+<p>Additional notices for the SWAMP can be found at the end of this section.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   Copyright 2012-2017 Software Assurance Marketplace</pre>
+</div>
+</div>
+<div class="ulist">
+<div class="title">NOTICES</div>
+<ul>
+<li>
+<p>This product includes HTCondor
+(<a href="https://research.cs.wisc.edu/htcondor/index.html" class="bare">https://research.cs.wisc.edu/htcondor/index.html</a>) software developed by the
+Center for High Throughput Computing at the University of Wisconsin-Madison.
+All rights reserved.  More details about HTCondor license can be found at
+<a href="https://research.cs.wisc.edu/htcondor/license.html" class="bare">https://research.cs.wisc.edu/htcondor/license.html</a>.</p>
+</li>
+<li>
+<p>This product contains Laravel (<a href="https://laravel.com/" class="bare">https://laravel.com/</a>), an open source PHP
+framework licensed under the MIT license
+(<a href="https://opensource.org/licenses/MIT" class="bare">https://opensource.org/licenses/MIT</a>).  Copyright Taylor Otwell.</p>
+</li>
+<li>
+<p>This product contains Code Dx, a commercial product created by Code Dx, Inc.
+Copyright 2010-2018 Code Dx, Inc. All rights Reserved.  SWAMP has a
+partnership with Code Dx, Inc. and offers a SWAMP specific version of Code
+Dx software to be used solely with SWAMP software.  Code Dx software shall
+not be redistributed with SWAMP software without written consent of SWAMP or
+Code Dx, Inc.  Contact for licensing information and support for Code Dx can
+be found at <a href="mailto:sales@codedx.com">sales@codedx.com</a>, +1-631-759-3993, or
+<a href="https://codedx.com/support/?v=7516fd43adaa" class="bare">https://codedx.com/support/?v=7516fd43adaa</a>.</p>
+</li>
+<li>
+<p>This product includes a compiled, unmodified version of lib_mysql_sys
+library, an open source library developed by Roland Bouman and Bernardo
+Damele A.G. and licensed under LGPL v3.0, the GNU Lesser General Public
+License v3.0 (<a href="https://www.gnu.org/licenses/lgpl-3.0.en.html" class="bare">https://www.gnu.org/licenses/lgpl-3.0.en.html</a>).  Copyright
+2007, 2008-2009 Roland Bouman and Bernardo Damele A.G. All rights reserved.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2017-10-09 13:58:54 CDT
+</div>
+</div>
+</body>
+</html>

@@ -8,22 +8,8 @@ agentMonitorPort = 8080
 agentMonitorJobPort = 8085
 agentMonitorHost = localhost
 
-# dispatcher should point to the submit node. Set these values on the data server, and submit and execute node(s).
-dispatcherPort = 8083
-dispatcherHost = localhost
-controllerPort = 8084
-controllerHost = localhost
-
-# quartermaster should point to the data server. Set these values on data server and submit node.
-quartermasterPort = 8084
-quartermasterHost = localhost
-
 # Normal workflow results root directory
 resultsFolder = /swamp/working/results/
-
-# AgentDispatcher flag: true for using a subordinate quartermaster to return the BOG, false to make
-# the usual XML-RPC call to the Quartermaster process.
-subordinateQuartermaster = true
 
 # Failed assessment report
 reporturl = https://HOSTNAME/results/
@@ -52,48 +38,18 @@ email.from = no-reply@example.com
 tool.gt-csonar.license.host = license-server.example.com
 tool.gt-csonar.license.port = 7350
 
-# Quartermaster database properties. Set these values on the data server and submit node.
-dbQuartermasterURL  = jdbc:mariadb://HOSTNAME:3306/
-dbQuartermasterUser = java_agent
-dbQuartermasterPass = password
+# Synopsys services.conf contents
+tool.sy-coverity.license.host = license-server.example.com
+tool.sy-coverity.license.port = 27000
 
-# XMLRPC method names
-method.QUARTERMASTER_BILLOFGOODS   = swamp.quartermaster.getBillOfGoods
-method.QUARTERMASTER_STOREVIEWER   = swamp.viewer.storeViewerDatabase
-method.QUARTERMASTER_UPDATEVIEWER  = swamp.viewer.updateViewerInstance
-method.RUNCONTROLLER_DORUN         = swamp.runController.doRun
-method.GATOR_LISTTOOLS             = swamp.gator.listTools
-method.GATOR_LISTPACKAGES          = swamp.gator.listPackages
-method.GATOR_LISTPLATFORMS         = swamp.gator.listPlatforms
-method.VIEWER_MONITOR_SETUP        = swamp.viewerMonitor.setup
-method.VIEWER_MONITOR_TEARDOWN     = swamp.viewerMonitor.teardown
-method.AGENT_MONITOR_CREATEVMID    = swamp.agentMonitor.createVmID
-method.AGENT_MONITOR_REMOVEVMID    = swamp.agentMonitor.removeVmID
-method.AGENT_MONITOR_LISTVMID      = swamp.agentMonitor.listVmID
-method.AGENT_MONITOR_QUERYVMID     = swamp.agentMonitor.queryVmID
-method.AGENT_MONITOR_ADDVMID       = swamp.agentMonitor.addVmID
-method.AGENT_MONITOR_LOGSTATUS     = swamp.agentMonitor.logStatus
-method.AGENT_MONITOR_LOGSTATE      = swamp.agentMonitor.logState
-method.AGENT_MONITOR_LOGLOG        = swamp.agentMonitor.logLog
-method.AGENT_MONITOR_SAVERESULT    = swamp.agentMonitor.saveResult
-method.AGENT_MONITOR_UPDATERESULT  = swamp.agentMonitor.updateResult
-method.AGENT_MONITOR_LISTJOBS      = swamp.agentMonitor.listJobs
-method.AGENT_MONITOR_JOBSTATUS     = swamp.agentMonitor.clusterJobStatus
-method.AGENT_MONITOR_JOBLOG        = swamp.agentMonitor.clusterJobLog
-method.AGENT_MONITOR_DOMAINSTATE   = swamp.agentMonitor.getDomainState
-method.AGENT_MONITOR_JOBCOUNTBYIP  = swamp.agentMonitor.getJobCount
-method.LOG_COLLECTOR_LOGSTATUS     = swamp.logCollector.logStatus
-method.LOG_COLLECTOR_LOGSTATE      = swamp.logCollector.logState
-method.LOG_COLLECTOR_LOGLOG        = swamp.logCollector.logLog
-method.RESULT_COLLECTOR_SAVERESULT = swamp.resultCollector.saveResult
-method.EXEC_COLLECTOR_UPDATERESULT = swamp.execCollector.updateExecutionResults
-method.EXEC_COLLECTOR_GETSINGLEEXECUTIONRECORD = swamp.execCollector.getSingleExecutionRecord
-method.LAUNCHPAD_START             = swamp.launchPad.start
-method.LAUNCHPAD_CREATEEXECID      = swamp.launchPad.createExecID
-method.CSAAGENT_STOP               = swamp.csaAgent.stop
-method.CSAAGENT_FINISHED           = swamp.csaAgent.finished
-method.CSAAGENT_GETMACHINELIST     = swamp.csaAgent.getMachineList
-method.CSAAGENT_OKTOLAUNCH         = swamp.csaAgent.okToLaunch
+# Sonatype ApplicationHealthCheck sonatype-data.conf contents
+sonatype_integrator = SWAMP
+
+# Perl database properties. Set these values on the data server and submit node.
+dbPerlDsnHost = localhost
+dbPerlDsnPort = 3306
+dbPerlUser = java_agent
+dbPerlPass = password
 
 # Status
 SWAMPState = ON

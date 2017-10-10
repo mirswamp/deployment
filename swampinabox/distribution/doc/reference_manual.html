@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.6.1">
+<meta name="author" content="v1.31">
+<title>SWAMP-in-a-Box Reference Manual</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/* Asciidoctor default stylesheet | MIT License | http://asciidoctor.org */
+/* Remove comment around @import statement below when using as a custom stylesheet */
+/*@import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700";*/
+article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section,summary{display:block}
+audio,canvas,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+[hidden],template{display:none}
+script{display:none!important}
+html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}
+a{background:transparent}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+abbr[title]{border-bottom:1px dotted}
+b,strong{font-weight:bold}
+dfn{font-style:italic}
+hr{-moz-box-sizing:content-box;box-sizing:content-box;height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type="button"],input[type="reset"],input[type="submit"]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type="checkbox"],input[type="radio"]{box-sizing:border-box;padding:0}
+input[type="search"]{-webkit-appearance:textfield;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;box-sizing:content-box}
+input[type="search"]::-webkit-search-cancel-button,input[type="search"]::-webkit-search-decoration{-webkit-appearance:none}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,*:before,*:after{-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;font-weight:400;font-style:normal;line-height:1;position:relative;cursor:auto;tab-size:4;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.center{margin-left:auto;margin-right:auto}
+.spread{width:100%}
+p.lead,.paragraph.lead>p,#preamble>.sectionbody>.paragraph:first-of-type p{font-size:1.21875em;line-height:1.6}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0;direction:ltr}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:none}
+p{font-family:inherit;font-weight:400;font-size:1em;line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #ddddd8;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em;height:0}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{font-size:1em;line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0;font-size:1em}
+ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
+ul.square{list-style-type:square}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+abbr,acronym{text-transform:uppercase;font-size:90%;color:rgba(0,0,0,.8);border-bottom:1px dotted #ddd;cursor:help}
+abbr{text-transform:none}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote cite{display:block;font-size:.9375em;color:rgba(0,0,0,.6)}
+blockquote cite:before{content:"\2014 \0020"}
+blockquote cite a,blockquote cite a:visited{color:rgba(0,0,0,.6)}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media only screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:solid 1px #dedede}
+table thead,table tfoot{background:#f7f8f7;font-weight:bold}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt,table tr:nth-of-type(even){background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{display:table-cell;line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.clearfix:before,.clearfix:after,.float-group:before,.float-group:after{content:" ";display:table}
+.clearfix:after,.float-group:after{clear:both}
+*:not(pre)>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background-color:#f7f7f8;-webkit-border-radius:4px;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed;word-wrap:break-word}
+*:not(pre)>code.nobreak{word-wrap:normal}
+*:not(pre)>code.nowrap{white-space:nowrap}
+pre,pre>code{line-height:1.45;color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;text-rendering:optimizeSpeed}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background-color:#f7f7f7;border:1px solid #ccc;-webkit-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em white inset;box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em #fff inset;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button:before,b.button:after{position:relative;top:-1px;font-weight:400}
+b.button:before{content:"[";padding:0 3px 0 2px}
+b.button:after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin-left:auto;margin-right:auto;margin-top:0;margin-bottom:0;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header:before,#header:after,#content:before,#content:after,#footnotes:before,#footnotes:after,#footer:before,#footer:after{content:" ";display:table}
+#header:after,#content:after,#footnotes:after,#footer:after{clear:both}
+#content{margin-top:1.25em}
+#content:before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #ddddd8}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #ddddd8;padding-bottom:8px}
+#header .details{border-bottom:1px solid #ddddd8;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:-ms-flexbox;display:-webkit-flex;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span:before{content:"\00a0\2013\00a0"}
+#header .details br+span.author:before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark:before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber:after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #ddddd8;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #efefed;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media only screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background-color:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #efefed;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #efefed;left:auto;right:0}}
+@media only screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border-style:solid;border-width:1px;border-color:#e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;-webkit-border-radius:4px;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:100%;background-color:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:rgba(255,255,255,.8);line-height:1.44}
+.sect1{padding-bottom:.625em}
+@media only screen and (min-width:768px){.sect1{padding-bottom:1.25em}}
+.sect1+.sect1{border-top:1px solid #efefed}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor:before,h2>a.anchor:before,h3>a.anchor:before,#toctitle>a.anchor:before,.sidebarblock>.content>.title>a.anchor:before,h4>a.anchor:before,h5>a.anchor:before,h6>a.anchor:before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock>caption.title{white-space:nowrap;overflow:visible;max-width:0}
+.paragraph.lead>p,#preamble>.sectionbody>.paragraph:first-of-type p{color:rgba(0,0,0,.85)}
+table.tableblock #preamble>.sectionbody>.paragraph:first-of-type p{font-size:inherit}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:initial}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #ddddd8;color:rgba(0,0,0,.6)}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border-style:solid;border-width:1px;border-color:#e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;-webkit-border-radius:4px;border-radius:4px}
+.exampleblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child{margin-bottom:0}
+.sidebarblock{border-style:solid;border-width:1px;border-color:#e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;-webkit-border-radius:4px;border-radius:4px}
+.sidebarblock>:first-child{margin-top:0}
+.sidebarblock>:last-child{margin-bottom:0}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock pre:not(.highlight),.listingblock pre[class="highlight"],.listingblock pre[class^="highlight "],.listingblock pre.CodeRay,.listingblock pre.prettyprint{background:#f7f7f8}
+.sidebarblock .literalblock pre,.sidebarblock .listingblock pre:not(.highlight),.sidebarblock .listingblock pre[class="highlight"],.sidebarblock .listingblock pre[class^="highlight "],.sidebarblock .listingblock pre.CodeRay,.sidebarblock .listingblock pre.prettyprint{background:#f2f1f1}
+.literalblock pre,.literalblock pre[class],.listingblock pre,.listingblock pre[class]{-webkit-border-radius:4px;border-radius:4px;word-wrap:break-word;padding:1em;font-size:.8125em}
+.literalblock pre.nowrap,.literalblock pre[class].nowrap,.listingblock pre.nowrap,.listingblock pre[class].nowrap{overflow-x:auto;white-space:pre;word-wrap:normal}
+@media only screen and (min-width:768px){.literalblock pre,.literalblock pre[class],.listingblock pre,.listingblock pre[class]{font-size:.90625em}}
+@media only screen and (min-width:1280px){.literalblock pre,.literalblock pre[class],.listingblock pre,.listingblock pre[class]{font-size:1em}}
+.literalblock.output pre{color:#f7f7f8;background-color:rgba(0,0,0,.9)}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;-webkit-border-radius:4px;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]:before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:#999}
+.listingblock:hover code[data-lang]:before{display:block}
+.listingblock.terminal pre .command:before{content:attr(data-prompt);padding-right:.5em;color:#999}
+.listingblock.terminal pre .command:not([data-prompt]):before{content:"$"}
+table.pyhltable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.pyhltable td{vertical-align:top;padding-top:0;padding-bottom:0;line-height:1.45}
+table.pyhltable td.code{padding-left:.75em;padding-right:0}
+pre.pygments .lineno,table.pyhltable td:not(.code){color:#999;padding-left:0;padding-right:.5em;border-right:1px solid #ddddd8}
+pre.pygments .lineno{display:inline-block;margin-right:.25em}
+table.pyhltable .linenodiv{background:none!important;padding-right:0!important}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock blockquote p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote:before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.5em;margin-right:.5ex;text-align:right}
+.quoteblock .quoteblock{margin-left:0;margin-right:0;padding:.5em 0;border-left:3px solid rgba(0,0,0,.6)}
+.quoteblock .quoteblock blockquote{padding:0 0 0 .75em}
+.quoteblock .quoteblock blockquote:before{display:none}
+.verseblock{margin:0 1em 1.25em 1em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract{margin:0 0 1.25em 0;display:block}
+.quoteblock.abstract blockquote,.quoteblock.abstract blockquote p{text-align:left;word-spacing:0}
+.quoteblock.abstract blockquote:before,.quoteblock.abstract blockquote p:first-of-type:before{display:none}
+table.tableblock{max-width:100%;border-collapse:separate}
+table.tableblock td>.paragraph:last-child p>p:last-child,table.tableblock th>p:last-child,table.tableblock td>p:last-child{margin-bottom:0}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>thead>tr>.tableblock,table.grid-all>tbody>tr>.tableblock{border-width:0 1px 1px 0}
+table.grid-all>tfoot>tr>.tableblock{border-width:1px 1px 0 0}
+table.grid-cols>*>tr>.tableblock{border-width:0 1px 0 0}
+table.grid-rows>thead>tr>.tableblock,table.grid-rows>tbody>tr>.tableblock{border-width:0 0 1px 0}
+table.grid-rows>tfoot>tr>.tableblock{border-width:1px 0 0 0}
+table.grid-all>*>tr>.tableblock:last-child,table.grid-cols>*>tr>.tableblock:last-child{border-right-width:0}
+table.grid-all>tbody>tr:last-child>.tableblock,table.grid-all>thead:last-child>tr>.tableblock,table.grid-rows>tbody>tr:last-child>.tableblock,table.grid-rows>thead:last-child>tr>.tableblock{border-bottom-width:0}
+table.frame-all{border-width:1px}
+table.frame-sides{border-width:0 1px}
+table.frame-topbot{border-width:1px 0}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{display:table-cell;line-height:1.6;background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+td>div.verse{white-space:pre}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+ol>li p,ul>li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+ul.checklist{margin-left:.625em}
+ul.checklist li>p:first-child>.fa-square-o:first-child,ul.checklist li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist li>p:first-child>input[type="checkbox"]:first-child{margin-right:.25em}
+ul.inline{margin:0 auto .625em auto;margin-left:-1.375em;margin-right:0;padding:0;list-style:none;overflow:hidden}
+ul.inline>li{list-style:none;float:left;margin-left:1.375em;display:block}
+ul.inline>li>*{display:block}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist>table tr>td:first-of-type{padding:.4em .75em 0 .75em;line-height:1;vertical-align:top}
+.colist>table tr>td:first-of-type img{max-width:initial}
+.colist>table tr>td:last-of-type{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:solid 4px #fff;-webkit-box-shadow:0 0 0 1px #ddd;box-shadow:0 0 0 1px #ddd}
+.imageblock.left,.imageblock[style*="float: left"]{margin:.25em .625em 1.25em 0}
+.imageblock.right,.imageblock[style*="float: right"]{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em 0;border-width:1px 0 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;text-indent:-1.05em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+.gist .file-data>table{border:0;background:#fff;width:100%;margin-bottom:0}
+.gist .file-data>table td.line-data{width:99%}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background-color:#00fafa}
+.black{color:#000}
+.black-background{background-color:#000}
+.blue{color:#0000bf}
+.blue-background{background-color:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background-color:#fa00fa}
+.gray{color:#606060}
+.gray-background{background-color:#7d7d7d}
+.green{color:#006000}
+.green-background{background-color:#007d00}
+.lime{color:#00bf00}
+.lime-background{background-color:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background-color:#7d0000}
+.navy{color:#000060}
+.navy-background{background-color:#00007d}
+.olive{color:#606000}
+.olive-background{background-color:#7d7d00}
+.purple{color:#600060}
+.purple-background{background-color:#7d007d}
+.red{color:#bf0000}
+.red-background{background-color:#fa0000}
+.silver{color:#909090}
+.silver-background{background-color:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background-color:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background-color:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background-color:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note:before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip:before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning:before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution:before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important:before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background-color:rgba(0,0,0,.8);-webkit-border-radius:100px;border-radius:100px;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]:after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,span.alt{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background-color:#fffef7;border-color:#e0e0dc;-webkit-box-shadow:0 1px 4px #e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@media print{@page{margin:1.25cm .75cm}
+*{-webkit-box-shadow:none!important;box-shadow:none!important;text-shadow:none!important}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare):after,a[href^="https:"]:not(.bare):after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]:after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #ddddd8!important;padding-bottom:0!important}
+.sect1{padding-bottom:0!important}
+.sect1+.sect1{border:0!important}
+#header>h1:first-child{margin-top:1.25rem}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em 0}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span:before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]:before{display:block}
+#footer{background:none!important;padding:0 .9375em}
+#footer-text{color:rgba(0,0,0,.6)!important;font-size:.9em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
+</head>
+<body class="article" style="max-width: 55em;">
+<div id="header">
+<h1>SWAMP-in-a-Box Reference Manual</h1>
+<div class="details">
+<span id="author" class="author">v1.31</span><br>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#backend-configuration">1. SWAMP Web Application Backend Configuration</a>
+<ul class="sectlevel2">
+<li><a href="#backend-web-app">1.1. Web Application Settings</a></li>
+<li><a href="#_htcondor_settings">1.2. HTCondor Settings</a></li>
+<li><a href="#backend-mail-settings">1.3. Mail Settings</a></li>
+<li><a href="#_ldap_settings">1.4. LDAP Settings</a></li>
+<li><a href="#_third_party_login_settings">1.5. Third-Party Login Settings</a></li>
+<li><a href="#_api_settings">1.6. API Settings</a></li>
+<li><a href="#_session_related_settings">1.7. Session Related Settings</a></li>
+<li><a href="#_database_settings">1.8. Database Settings</a></li>
+<li><a href="#_miscellaneous_settings">1.9. Miscellaneous Settings</a></li>
+</ul>
+</li>
+<li><a href="#frontend-configuration">2. SWAMP Web Application Frontend Configuration</a>
+<ul class="sectlevel2">
+<li><a href="#_web_services">2.1. Web Services</a></li>
+<li><a href="#_contact_information">2.2. Contact Information</a></li>
+<li><a href="#_cookies">2.3. Cookies</a></li>
+<li><a href="#_other_configurable_behaviors">2.4. Other Configurable Behaviors</a></li>
+<li><a href="#config-json-examples">2.5. Examples</a></li>
+</ul>
+</li>
+<li><a href="#_swamp_in_a_box_s_filesystem">3. SWAMP-in-a-Box&#8217;s Filesystem</a>
+<ul class="sectlevel2">
+<li><a href="#configuration-files">3.1. Configuration Files</a></li>
+<li><a href="#long-term-storage">3.2. Long-term Storage Files</a></li>
+<li><a href="#log-files">3.3. Log Files</a></li>
+<li><a href="#temporary-files">3.4. Temporary Files</a></li>
+<li><a href="#_reclaiming_disk_space">3.5. Reclaiming Disk Space</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="backend-configuration">1. SWAMP Web Application Backend Configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The file <code>/var/www/swamp-web-server/.env</code> contains various parameter names
+and values that are used to configure the SWAMP web application&#8217;s backend.
+You must have <code>root</code> access to modify this file.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+This file should be readable only by the <code>apache</code> system user. It should
+<strong>never</strong> be world readable, because it contains usernames and passwords for
+accessing various resources.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The remainder of this section describes the parameters. Some descriptions
+refer to <a href="https://laravel.com/">Laravel</a>, which is the framework that the
+backend is built upon.</p>
+</div>
+<div class="sect2">
+<h3 id="backend-web-app">1.1. Web Application Settings</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>APP_ENV</code></dt>
+<dd>
+<p>A description of the SWAMP&#8217;s environment. This parameter is informational
+and does not affect the functioning of the backend. The SWAMP-in-a-Box
+installer sets this to "SWAMP-in-a-Box".</p>
+</dd>
+<dt class="hdlist1"><code>APP_DEBUG</code></dt>
+<dd>
+<p>Whether verbose debugging is enabled. When set to "true", unexpected errors
+in the backend return a detailed error page. When set to "false", such
+errors return a page that says, "Whoops, looks like something went wrong."
+The SWAMP-in-a-Box installer sets this to "false".</p>
+</dd>
+<dt class="hdlist1"><code>APP_URL</code></dt>
+<dd>
+<p>The URL used to access the SWAMP&#8217;s web application routes. The
+SWAMP-in-a-Box installer sets this based on the hostname specified during
+the install process (usually, the host&#8217;s detected hostname).</p>
+<div class="paragraph">
+<p>When the hostname changes, use the <code>/opt/swamp/bin/swamp_set_web_host</code>
+utility script to update this parameter, because that script will update not
+only this parameter but also all other configuration locations where the
+hostname is referenced.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>APP_CORS_URL</code></dt>
+<dd>
+<p>The URL used to access the SWAMP&#8217;s web site. The SWAMP-in-a-Box installer
+sets this based on the hostname specified during the install process
+(usually, the host&#8217;s detected hostname).</p>
+<div class="paragraph">
+<p>When the hostname changes, use the <code>/opt/swamp/bin/swamp_set_web_host</code>
+utility script to update this parameter, because that script will update not
+only this parameter but also all other configuration locations where the
+hostname is referenced.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>APP_FLOODLIGHT</code></dt>
+<dd>
+<p>The URL and port of the Floodlight server to contact. This is not applicable
+to a SWAMP-in-a-Box installation.</p>
+</dd>
+<dt class="hdlist1"><code>APP_INCOMING</code></dt>
+<dd>
+<p>The path to the directory used to temporarily store files uploaded for new
+packages. This should always be set to "/swamp/incoming/".</p>
+</dd>
+<dt class="hdlist1"><code>APP_KEY</code></dt>
+<dd>
+<p>An encryption key used by the Laravel framework. Allowed values are any 16
+or 32 character string. The SWAMP-in-a-Box installer sets this to a random
+32 character string.</p>
+</dd>
+<dt class="hdlist1"><code>APP_PASSWORD_ENCRYPTION_METHOD</code></dt>
+<dd>
+<p>The encryption method used to hash user passwords before either storing them
+in the SWAMP&#8217;s SQL database or sending them to an LDAP server. Allowed
+values are "BCRYPT", "SSHA", "SHA1", and "NONE". The SWAMP-in-a-Box
+installer sets this to "BCRYPT".</p>
+<div class="paragraph">
+<p>This should be set to "NONE" only if <code>LDAP_ENABLED</code> is "true",
+<code>LDAP_READ_ONLY</code> is "false", and the LDAP server does its own encryption
+when given a new or changed user password. This is not applicable when
+<code>LDAP_ENABLED</code> is "true" and <code>LDAP_READ_ONLY</code> is "true".</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>APP_PASSWORD_MAX</code></dt>
+<dd>
+<p>The maximum number of Application Passwords a user can create. Set this to
+an integer greater than zero to allow creation of one or more Application
+Passwords. Set this to zero to disallow creation of Application Passwords.
+The SWAMP-in-a-Box installer sets this to 10.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_htcondor_settings">1.2. HTCondor Settings</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>HTCONDOR_COLLECTOR_HOST</code></dt>
+<dd>
+<p>The hostname of the HTCondor collector to contact for information about the
+SWAMP&#8217;s currently running assessments. The SWAMP-in-a-Box installer sets
+this to "localhost.localdomain".</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="backend-mail-settings">1.3. Mail Settings</h3>
+<div class="paragraph">
+<p>These parameters are related to outgoing email sent by the SWAMP web
+application.</p>
+</div>
+<div class="paragraph">
+<p>SWAMP-in-a-Box is installed with outgoing email disabled. Prior to enabling
+and configuring outgoing email (instructions can be found in the
+SWAMP-in-a-Box User Manual), you must first configure an outgoing email
+server for use with the SWAMP-in-a-Box host.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>MAIL_ENABLED</code></dt>
+<dd>
+<p>Whether the SWAMP web application is configured for outgoing email. Set this
+to "true" or "false". When set to "false", outgoing email is disabled, and
+the mail-related settings described below are not applicable. When outgoing
+email is disabled, all functionality that would otherwise result in an email
+being sent by the system runs without sending the email. Specifically:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Username is displayed instead of email throughout the web application.</p>
+</li>
+<li>
+<p>Workflows that rely on email, such as requesting a password reset,
+are disabled.</p>
+</li>
+<li>
+<p>Permission requests, project invitations, and SWAMP administrator
+invitations are handled exclusively through the notification system.</p>
+</li>
+<li>
+<p>New user accounts do not go through a "pending" state and are
+instead immediately activated.</p>
+</li>
+<li>
+<p>The option to receive an email on completion of an assessment
+is unavailable.</p>
+</li>
+<li>
+<p>The Administrator Settings page for Restricted Domains is unavailable.</p>
+</li>
+<li>
+<p>The Administrator Settings page for System Emails is unavailable.</p>
+</li>
+<li>
+<p>The Contact Us and Report Security Incident pages do not include a means
+to submit a message directly through the web application.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The SWAMP-in-a-Box installer sets this parameter to "false".</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>MAIL_DRIVER</code></dt>
+<dd>
+<p>The driver used to send outgoing email. Set this to "smtp" or "sendmail".
+The "smtp" driver makes connections directly to the configured SMTP server
+(see the <code>MAIL_HOST</code> parameter below) to deliver email messages. The
+"sendmail" driver uses the host&#8217;s postfix mail system to deliver email
+messages.</p>
+<div class="paragraph">
+<p>With the "smtp" driver, when sending a message, the SWAMP web application
+will wait for an acknowledgment that the message was sent. With the
+"sendmail" driver, the SWAMP web application will <strong>not</strong> necessarily wait for
+an acknowledgment. Instead, if there are issues with the initial attempt to
+send the message, the web application will rely on postfix to continue
+attempting to deliver the message in the background.</p>
+</div>
+<div class="paragraph">
+<p>We recommend using the "sendmail" driver.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>MAIL_HOST</code></dt>
+<dd>
+<p>The hostname of the SMTP server. This is applicable only if <code>MAIL_DRIVER</code> is
+set to "smtp".</p>
+</dd>
+<dt class="hdlist1"><code>MAIL_PORT</code></dt>
+<dd>
+<p>The port to connect to on the SMTP server. This is applicable only if
+<code>MAIL_DRIVER</code> is set to "smtp".</p>
+</dd>
+<dt class="hdlist1"><code>MAIL_FROM_ADDRESS</code></dt>
+<dd>
+<p>The email address to be used as the sender of outgoing SWAMP email.</p>
+</dd>
+<dt class="hdlist1"><code>MAIL_FROM_NAME</code></dt>
+<dd>
+<p>The name to be used as the sender of outgoing SWAMP email.</p>
+</dd>
+<dt class="hdlist1"><code>MAIL_CONTACT_ADDRESS</code></dt>
+<dd>
+<p>The email address to which messages submitted via the Contact Us page are
+sent. Use this to direct contact messages to a specific administrator or
+help desk. This address is also displayed in the content of some SWAMP
+emails.</p>
+</dd>
+<dt class="hdlist1"><code>MAIL_CONTACT_NAME</code></dt>
+<dd>
+<p>The name to which messages submitted via the Contact Us page are sent.</p>
+</dd>
+<dt class="hdlist1"><code>MAIL_SECURITY_ADDRESS</code></dt>
+<dd>
+<p>The email address to which messages submitted via the Report Security
+Incident page are sent. Use this to direct security messages to a specific
+administrator or help desk. This address is also displayed in the content of
+some SWAMP emails.</p>
+</dd>
+<dt class="hdlist1"><code>MAIL_SECURITY_NAME</code></dt>
+<dd>
+<p>The name to which messages submitted via the Report Security Incident page
+are sent.</p>
+</dd>
+<dt class="hdlist1"><code>MAIL_ENCRYPTION</code></dt>
+<dd>
+<p>If <code>MAIL_DRIVER</code> is set to "smtp" and the SMTP server uses encryption, set
+this to the type of encryption used. Otherwise, set this to "null".</p>
+</dd>
+<dt class="hdlist1"><code>MAIL_USERNAME</code></dt>
+<dd>
+<p>If <code>MAIL_DRIVER</code> is set to "smtp" and the SMTP server requires
+a username/password, set this to the username. Otherwise, set this to
+"null".</p>
+</dd>
+<dt class="hdlist1"><code>MAIL_PASSWORD</code></dt>
+<dd>
+<p>If <code>MAIL_DRIVER</code> is set to "smtp" and the SMTP server requires
+a username/password, set this to the password. Otherwise, set this to
+"null".</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ldap_settings">1.4. LDAP Settings</h3>
+<div class="paragraph">
+<p>These parameters are related to configuring an LDAP server to store
+user-related personal information for a SWAMP instance. When the SWAMP is
+not configured to use an LDAP server, as is the case when SWAMP-in-a-Box is
+initially installed, user-related personal information is stored in the
+SWAMP&#8217;s SQL database.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>LDAP_ENABLED</code></dt>
+<dd>
+<p>Whether the SWAMP uses an LDAP server for user authentication and storing of
+user data. When set to "false", a record is created for each SWAMP user in
+the <code>project</code> database. When set to "true", a record is created for each
+SWAMP user in the LDAP server. The SWAMP-in-a-Box installer sets this to
+"false".</p>
+</dd>
+<dt class="hdlist1"><code>LDAP_PASSWORD_VALIDATION</code></dt>
+<dd>
+<p>Whether verification of a user&#8217;s password on sign-in is done by LDAP. When
+set to "true", a user&#8217;s password is authenticated through an LDAP bind. When
+set to "false", a user&#8217;s password is authenticated in PHP by comparing it to
+the hash stored in LDAP.</p>
+<div class="paragraph">
+<p>Set this to "true" when LDAP is enabled and your LDAP server is able to
+validate against the type of encryption used to store passwords. Set this to
+"false" when LDAP is enabled and LDAP is not able to validate against the
+type of encryption used to store passwords, such as when <code>LDAP_READ_ONLY</code> is
+"false" and <code>APP_PASSWORD_ENCRYPTION_METHOD</code> is "BCRYPT".</p>
+</div>
+<div class="paragraph">
+<p>The SWAMP-in-a-Box installer sets this to "false".</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>LDAP_READ_ONLY</code></dt>
+<dd>
+<p>Whether the SWAMP is prevented from adding or editing user records in the
+LDAP server. When set to "false", the SWAMP assumes that it has total
+control over user attributes and LDAP entries. In this case, the SWAMP
+should be the only client of the LDAP server. When set to "true", the SWAMP
+assumes that creation and editing of user attributes and LDAP entries is to
+be done outside of the SWAMP. In this case, the SWAMP disables any workflows
+that would result in the creation or editing of user records, including user
+passwords. Specifically:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>The sign up button is removed from the SWAMP home page. However, any
+user with a record in the LDAP server can sign in to the SWAMP, and
+supporting records in the SWAMP&#8217;s SQL database will be created
+automatically on sign in.</p>
+</li>
+<li>
+<p>The "Reset my password" link is removed from the sign-in page.</p>
+</li>
+<li>
+<p>The Linked Account Use Policy page does not allow creation of new
+accounts, only linking to existing accounts.</p>
+</li>
+<li>
+<p>The user profile page displays user demographics as stored in LDAP
+but does not allow them to be edited in the SWAMP web application.</p>
+</li>
+<li>
+<p>The user profile page does not include options to change or reset
+the user&#8217;s password or to delete the account.</p>
+</li>
+<li>
+<p>The SWAMP administrator Review Accounts page does not provide options to
+flag accounts as hibernated or to require a password reset.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This should be set to "true" if you are using a pre-existing LDAP server.
+The SWAMP-in-a-Box installer sets this to "false".</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>LDAP_MIR_SWAMP</code></dt>
+<dd>
+<p>Whether the LDAP server is configured with the schema used in the
+mir-swamp.org LDAP server. Set to "true" or "false". The purpose of this
+parameter is to support setting a legacy, required attribute in the LDAP
+server used by mir-swamp.org. In all other cases, this should be set to
+"false". The SWAMP-in-a-Box installer sets this to "false".</p>
+</dd>
+<dt class="hdlist1"><code>LDAP_HOST</code></dt>
+<dd>
+<p>The URL of the LDAP server to connect to, including the protocol and host,
+e.g. "ldaps://ldap.example.org". The specified LDAP server must support LDAP
+protocol 3. This is applicable only if <code>LDAP_ENABLED</code> is set to "true".</p>
+</dd>
+<dt class="hdlist1"><code>LDAP_PORT</code></dt>
+<dd>
+<p>The port to connect to on the configured <code>LDAP_HOST</code>. The SWAMP-in-a-Box
+installer sets this to "636". This is applicable only if <code>LDAP_ENABLED</code> is
+set to "true".</p>
+</dd>
+<dt class="hdlist1"><code>LDAP_BASE_DN</code></dt>
+<dd>
+<p>The RDN search base for LDAP searches. This needs to be set based on the
+configuration of the base <code>dn</code> of the LDAP directory for your users. The
+SWAMP-in-a-Box installer sets this to "ow=people,o=SWAMP,dc=cosalab,dc=org".
+This is applicable only if <code>LDAP_ENABLED</code> is set to "true".</p>
+</dd>
+<dt class="hdlist1"><code>LDAP_USER_RDN_ATTR</code></dt>
+<dd>
+<p>The Prefix RDN attribute for users in the LDAP server. This needs to be set
+based on how <code>dn</code> fields are formed in the LDAP server. The SWAMP-in-a-Box
+installer sets this to "swampUuid". This is applicable only if
+<code>LDAP_ENABLED</code> is set to "true".</p>
+</dd>
+<dt class="hdlist1"><code>LDAP_SWAMP_UID_ATTR</code></dt>
+<dd>
+<p>The LDAP attribute to be used as an index into the SWAMP database. This must
+be set to an attribute that uniquely identifies each user and is
+unchangeable. Often, this will be the same as <code>LDAP_USER_RDN_ATTR</code>. The
+SWAMP-in-a-Box installer sets this to "swampUuid". This is applicable only
+if <code>LDAP_ENABLED</code> is set to "true".</p>
+<div class="paragraph">
+<p>Note that this attribute will be used to identify users in the SWAMP&#8217;s web
+application routes and, as such, will be displayed in URLs for the SWAMP&#8217;s
+web pages with data for a specific user.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>LDAP_FIRSTNAME_ATTR</code></dt>
+<dd>
+<p>The LDAP attribute for users' first names. The SWAMP-in-a-Box installer sets
+this to "givenName". This is applicable only if <code>LDAP_ENABLED</code> is set to
+"true".</p>
+<div class="paragraph">
+<p>If <code>LDAP_READ_ONLY</code> is set to "true" and your LDAP server does not have an
+attribute for users' first names, set this to "ignore". If <code>LDAP_READ_ONLY</code>
+is set to "false", this attribute can be edited through the SWAMP web
+interface.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>LDAP_LASTNAME_ATTR</code></dt>
+<dd>
+<p>The LDAP attribute for users' last names. The SWAMP-in-a-Box installer sets
+this to "sn" (surname). This is applicable only if <code>LDAP_ENABLED</code> is set to
+"true".</p>
+<div class="paragraph">
+<p>If <code>LDAP_READ_ONLY</code> is set to "true" and your LDAP server does not have an
+attribute for users' last names, set this to "ignore". If <code>LDAP_READ_ONLY</code>
+is set to "false", this attribute can be edited through the SWAMP web
+interface.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>LDAP_FULLNAME_ATTR</code></dt>
+<dd>
+<p>The LDAP attribute for users' full names. The SWAMP-in-a-Box installer sets
+this to "cn" (common name). This is applicable only if <code>LDAP_ENABLED</code> is set
+to "true".</p>
+<div class="paragraph">
+<p>If your LDAP server does not have an attribute for users' full names, set
+this to "ignore". If <code>LDAP_READ_ONLY</code> is set to "false", the SWAMP will
+generally set this attribute to either the first and last name of the given
+user or to "none". It is not directly editable in the SWAMP web interface.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>LDAP_PASSWORD_ATTR</code></dt>
+<dd>
+<p>The LDAP attribute for users' passwords. The SWAMP-in-a-Box installer sets
+this to "userPassword". This is applicable only if <code>LDAP_ENABLED</code> is set to
+"true".</p>
+<div class="paragraph">
+<p>If <code>LDAP_READ_ONLY</code> is set to "false", a user will be able to set a password
+on signing up for the SWAMP and later be able to change it through the SWAMP
+web interface.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>LDAP_USERNAME_ATTR</code></dt>
+<dd>
+<p>The LDAP attribute to be mapped to the SWAMP username. The SWAMP-in-a-Box
+installer sets this to "uid". This is applicable only if <code>LDAP_ENABLED</code> is
+set to "true".</p>
+<div class="paragraph">
+<p>This must be set to an attribute that uniquely identifies each user. If
+<code>LDAP_READ_ONLY</code> is set to "false", this attribute can be edited through the
+SWAMP web interface as long as the new value is unique.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>LDAP_EMAIL_ATTR</code></dt>
+<dd>
+<p>The LDAP attribute for users' email addresses. The SWAMP-in-a-Box installer
+sets this to "mail". This is applicable only if <code>LDAP_ENABLED</code> is set to
+"true".</p>
+<div class="paragraph">
+<p>If <code>EMAIL_ENABLED</code> is set to "true" and <code>LDAP_READ_ONLY</code> is set to "false",
+this attribute can be edited through the SWAMP web interface. If
+<code>LDAP_READ_ONLY</code> is set to "false" and <code>EMAIL_ENABLED</code> is also set to
+"false", you can set <code>LDAP_EMAIL_ATTR</code> to "ignore" and the SWAMP will not
+set it. Otherwise, the SWAMP will set the email attribute in LDAP to
+a single space character.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>LDAP_ORG_ATTR</code></dt>
+<dd>
+<p>The LDAP attribute for users' affiliations. The SWAMP-in-a-Box installer
+sets this to "o" (organization). This is applicable only if <code>LDAP_ENABLED</code>
+is set to "true".</p>
+<div class="paragraph">
+<p>This should be an optional attribute in LDAP. If <code>LDAP_READ_ONLY</code> is set to
+"true" and your LDAP server does not have an attribute for users'
+affiliations, set this to "ignore". If <code>LDAP_READ_ONLY</code> is set to "false",
+this attribute can be edited through the SWAMP web interface.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>LDAP_OBJECTCLASS</code></dt>
+<dd>
+<p>A comma-separated list of "objectClass" attributes to be set for each user.
+Set this to a comma-separated list of the "objectClass" attributes required
+by the LDAP server. The SWAMP-in-a-Box installer sets this to
+"top,person,organizationalPerson,inetOrgPerson,eduPerson,swampEntity", which
+defines the following "objectClass" attributes:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>objectClass: top</p>
+</li>
+<li>
+<p>objectClass: person</p>
+</li>
+<li>
+<p>objectClass: organizationalPerson</p>
+</li>
+<li>
+<p>objectClass: inetOrgPerson</p>
+</li>
+<li>
+<p>objectClass: eduPerson</p>
+</li>
+<li>
+<p>objectClass: swampEntity</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This is applicable only if <code>LDAP_ENABLED</code> is set to "true" and
+<code>LDAP_READ_ONLY</code> is set to "false".</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>LDAP_WEB_USER</code></dt>
+<dd>
+<p>The full <code>dn</code> of a credentialed LDAP user with global LDAP read access. The
+SWAMP web server uses this to get information about SWAMP users from LDAP.
+This is applicable only if <code>LDAP_ENABLED</code> is set to "true".</p>
+</dd>
+<dt class="hdlist1"><code>LDAP_WEB_USER_PASSWORD</code></dt>
+<dd>
+<p>The password for <code>LDAP_WEB_USER</code>. This is applicable only if <code>LDAP_ENABLED</code>
+is set to "true".</p>
+</dd>
+<dt class="hdlist1"><code>LDAP_PASSWORD_SET_USER</code></dt>
+<dd>
+<p>The full <code>dn</code> of a credentialed LDAP user with permission to change other
+users' passwords. The SWAMP web server uses this to create and change user
+passwords in LDAP. This is applicable only if <code>LDAP_ENABLED</code> is set to
+"true" and <code>LDAP_READ_ONLY</code> is set to "false".</p>
+</dd>
+<dt class="hdlist1"><code>LDAP_PASSWORD_SET_USER_PASSWORD</code></dt>
+<dd>
+<p>The password for <code>LDAP_SET_USER</code>. This is applicable only if <code>LDAP_ENABLED</code>
+is set to "true" and <code>LDAP_READ_ONLY</code> is set to "false".</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_third_party_login_settings">1.5. Third-Party Login Settings</h3>
+<div class="paragraph">
+<p>These parameters can be set to allow users to sign in using credentials from
+third-party sites. Supported third-party sites are: GitHub, Google, and
+CILogon. Each site has a corresponding set of parameters; in the
+descriptions below, replace <code>[SITE]</code> with either <code>GITHUB</code>, <code>GOOGLE</code>, or
+<code>CILOGON</code>.</p>
+</div>
+<div class="paragraph">
+<p>SWAMP-in-a-Box is installed with third-party logins disabled. Prior to
+enabling third-party logins for a site, you must set up a corresponding
+OAuth Application with the site (instructions can be found in the
+SWAMP-in-a-Box User Manual).</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>[SITE]_ENABLED</code></dt>
+<dd>
+<p>Whether the SWAMP web application allows signing in via the given site. When
+set to "true", the SWAMP provides a means to sign up and sign in via an
+account with the site. The SWAMP-in-a-Box installer sets this to "false".</p>
+</dd>
+<dt class="hdlist1"><code>[SITE]_CLIENT_ID</code></dt>
+<dd>
+<p>The Client ID set in the OAuth Application for the site. This is applicable
+only when <code>[SITE]_ENABLED</code> is set to "true".</p>
+</dd>
+<dt class="hdlist1"><code>[SITE]_CLIENT_SECRET</code></dt>
+<dd>
+<p>The Client Secret set in the OAuth Application for the site. This is
+applicable only when <code>[SITE]_ENABLED</code> is set to "true".</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_api_settings">1.6. API Settings</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>API_EXPLORER_ENABLED</code></dt>
+<dd>
+<p>Whether the API Explorer interface for documenting the SWAMP web
+application&#8217;s routes is made available. The SWAMP-in-a-Box installer sets
+this to "false", because the required database tables are not included with
+SWAMP-in-a-Box.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_session_related_settings">1.7. Session Related Settings</h3>
+<div class="paragraph">
+<p>These parameters determine how session (logon) cookies behave.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>SESSION_DRIVER</code></dt>
+<dd>
+<p>The driver used to manage session data. The SWAMP-in-a-Box installer sets
+this to "cookie". This should not be changed.</p>
+</dd>
+<dt class="hdlist1"><code>SESSION_LIFETIME</code></dt>
+<dd>
+<p>Determines the expiration date for SWAMP session cookies, in minutes, from
+the time they are issued. The SWAMP-in-a-Box installer sets this to "2160"
+(36 hours). Set this to "0" if you are setting <code>SESSION_EXPIRE_ON_CLOSE</code> to
+"true".</p>
+</dd>
+<dt class="hdlist1"><code>SESSION_EXPIRE_ON_CLOSE</code></dt>
+<dd>
+<p>Whether SWAMP session cookies expire when the browser session ends. The
+SWAMP-in-a-Box installer sets this to "false". Before changing this to
+"true", set <code>SESSION_LIFETIME</code> to "0".</p>
+</dd>
+<dt class="hdlist1"><code>SESSION_COOKIE_NAME</code></dt>
+<dd>
+<p>The name of the SWAMP session cookie. The SWAMP-in-a-Box installer sets this
+to "swamp_session".</p>
+</dd>
+<dt class="hdlist1"><code>SESSION_COOKIE_DOMAIN</code></dt>
+<dd>
+<p>The name of the domain for the session cookie. Set this to "null" to use the
+same domain name as <code>APP_URL</code>. The SWAMP-in-a-Box installer sets this to
+"null".</p>
+</dd>
+<dt class="hdlist1"><code>SESSION_COOKIE_SECURE</code></dt>
+<dd>
+<p>Whether SWAMP session cookies are sent for encrypted connections only. The
+SWAMP-in-a-Box installer sets this to "true".</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_database_settings">1.8. Database Settings</h3>
+<div class="paragraph">
+<p>These parameters provide the SWAMP web application with access to the
+SWAMP&#8217;s SQL databases. There is a set of parameters for each of the
+following databases: <code>project</code>, <code>package</code>, <code>tool</code>, <code>platform</code>, <code>assessment</code>,
+and <code>viewer</code>. Each database has a corresponding set of parameters; in the
+descriptions below, replace <code>[DB]</code> with <code>PROJECT</code>, <code>PACKAGE</code>, <code>TOOL</code>,
+<code>PLATFORM</code>, <code>ASSESSMENT</code>, or <code>VIEWER</code>.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>[DB]_HOST</code></dt>
+<dd>
+<p>The hostname of the database server. The SWAMP-in-a-Box installer sets this
+to "localhost".</p>
+</dd>
+<dt class="hdlist1"><code>[DB]_PORT</code></dt>
+<dd>
+<p>The port to connect to on the database server. The SWAMP-in-a-Box installer
+sets this "3306".</p>
+</dd>
+<dt class="hdlist1"><code>[DB]_DATABASE</code></dt>
+<dd>
+<p>The name of the database ("project", "package", "tool", "platform",
+"assessment", or "viewer") for which the set of parameters applies.</p>
+</dd>
+<dt class="hdlist1"><code>[DB]_USERNAME</code></dt>
+<dd>
+<p>The database user whose credentials will be used by the SWAMP web
+application to access the database. The SWAMP-in-a-Box installer sets this
+to "web".</p>
+</dd>
+<dt class="hdlist1"><code>[DB]_PASSWORD</code></dt>
+<dd>
+<p>The password for the database user above for accessing the database. The
+SWAMP-in-a-Box installer sets this to the password entered during the
+install process.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_miscellaneous_settings">1.9. Miscellaneous Settings</h3>
+<div class="paragraph">
+<p>These parameters control various operations of the Laravel framework. Their
+values should not be changed from the ones set by the SWAMP-in-a-Box
+installer.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>CACHE_DRIVER</code></dt>
+<dd>
+<p>The SWAMP-in-a-Box installer sets this to "file".</p>
+</dd>
+<dt class="hdlist1"><code>QUEUE_DRIVER</code></dt>
+<dd>
+<p>The SWAMP-in-a-Box installer sets this to "sync".</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="frontend-configuration">2. SWAMP Web Application Frontend Configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The file <code>/var/www/html/config/config.json</code> contains various parameter names
+and values that are used to configure the SWAMP web application&#8217;s frontend.
+You must have <code>root</code> access to modify this file.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The contents of <code>config.json</code> must be a valid JSON object; the collection of
+values for the parameters described below are stored as nested JSON objects.
+<a href="#config-json-examples">Examples</a> can be found at the end of this section.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The remainder of this section describes the parameters.</p>
+</div>
+<div class="sect2">
+<h3 id="_web_services">2.1. Web Services</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>servers.web</code></dt>
+<dd>
+<p>The root URL used to access the SWAMP web application&#8217;s routes. The
+SWAMP-in-a-Box installer sets this based on the hostname specified during
+the install process (usually, the host&#8217;s detected hostname).</p>
+<div class="paragraph">
+<p>When the hostname changes, use the <code>/opt/swamp/bin/swamp_set_web_host</code>
+utility script to update this parameter, because that script will update not
+only this parameter but also all other configuration locations where the
+hostname is referenced.</p>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_contact_information">2.2. Contact Information</h3>
+<div class="paragraph">
+<p>These parameters affect the display of information on the Contact Us and
+Report Security Incident pages. If this collection of parameters is not
+defined, as is the case when SWAMP-in-a-Box is initially installed, the link
+to the Contact page in the SWAMP web application&#8217;s main menu is hidden.</p>
+</div>
+<div class="sect3">
+<h4 id="_support">2.2.1. Support</h4>
+<div class="paragraph">
+<p>These parameters affect the display of information on the Contact Us page.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>contact.support.email</code></dt>
+<dd>
+<p>The email address displayed for Contact Us messages. This should have the
+same value as the the <code>MAIL_CONTACT_ADDRESS</code> parameter in the
+<a href="#backend-mail-settings">backend configuration file</a>.</p>
+</dd>
+<dt class="hdlist1"><code>contact.support.phoneNumber</code></dt>
+<dd>
+<p>The phone number displayed for Contact Us messages.</p>
+</dd>
+<dt class="hdlist1"><code>contact.support.description</code></dt>
+<dd>
+<p>The description of the person or team receiving messages displayed for
+Contact Us messages.</p>
+</dd>
+<dt class="hdlist1"><code>contact.support.message</code></dt>
+<dd>
+<p>Additional text displayed for Contact Us messages.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_security">2.2.2. Security</h4>
+<div class="paragraph">
+<p>These parameters affect the display of information on the Report Security
+Incident page. If the <code>support</code> section is defined but the <code>security</code>
+section is not, the SWAMP web application does not provide a link from the
+Contact Us page to the Report Security Incident page.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>contact.security.email</code></dt>
+<dd>
+<p>The email address displayed for Report Security Incident messages. This
+should have the same value as the <code>MAIL_SECURITY_ADDRESS</code> parameter in the
+<a href="#backend-mail-settings">backend configuration file</a>.</p>
+</dd>
+<dt class="hdlist1"><code>contact.security.phoneNumber</code></dt>
+<dd>
+<p>The phone number displayed for Report Security Incident messages.</p>
+</dd>
+<dt class="hdlist1"><code>contact.security.description</code></dt>
+<dd>
+<p>The description of the person or team receiving messages displayed for
+Report Security Incident messages.</p>
+</dd>
+<dt class="hdlist1"><code>contact.security.message</code></dt>
+<dd>
+<p>Additional text displayed for Report Security Incident messages.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_cookies">2.3. Cookies</h3>
+<div class="paragraph">
+<p>These parameters affect the SWAMP layout cookie, which is used to persist
+the state of various layout elements: the position of the navigation bar,
+the state of the Show Numbering flag, the state of the Auto Refresh flag,
+and the state of the Show Grouping flag.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>cookie.name</code></dt>
+<dd>
+<p>The name given to the SWAMP layout cookie. The SWAMP-in-a-Box installer sets
+this to "swamp".</p>
+</dd>
+<dt class="hdlist1"><code>cookie.domain</code></dt>
+<dd>
+<p>The name of the domain for the SWAMP layout cookie. Set this to "null" to
+use the same domain name as in the <code>APP_URL</code> parameter in the
+<a href="#backend-web-app">backend configuration file</a>. The SWAMP-in-a-Box installer
+sets this "null".</p>
+</dd>
+<dt class="hdlist1"><code>cookie.path</code></dt>
+<dd>
+<p>The path for SWAMP layout cookie. The SWAMP-in-a-Box installer sets this to
+"/".</p>
+</dd>
+<dt class="hdlist1"><code>cookie.secure</code></dt>
+<dd>
+<p>Whether the SWAMP layout cookie is sent only for encrypted connections. The
+SWAMP-in-a-Box installer sets this to "true".</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_other_configurable_behaviors">2.4. Other Configurable Behaviors</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>options.assessments.allow_multiple_tool_selection</code></dt>
+<dd>
+<p>Whether the "All" option is present when selecting tools on the Add/Run New
+Assessments page. The SWAMP-in-a-Box installer sets this to "true".</p>
+</dd>
+<dt class="hdlist1"><code>options.assessments.allow_viewing_zero_weaknesses</code></dt>
+<dd>
+<p>Whether assessment results with zero weaknesses can be selected and sent to
+the Code Dx results viewer. The SWAMP-in-a-Box installer sets this to
+"true".</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="config-json-examples">2.5. Examples</h3>
+<div class="exampleblock">
+<div class="title">Example 1. Without the <code>contact</code> Section</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre>{
+  "servers": {
+    "web": "&lt;Web application routes root URL&gt;"
+  },
+
+  "cookie": {
+    "name": "swamp",
+    "domain": null,
+    "path": "/",
+    "secure": true
+  },
+
+  "options": {
+    "assessments": {
+      "allow_multiple_tool_selection": true,
+      "allow_viewing_zero_weaknesses": true
+    }
+  }
+}</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 2. With the <code>contact</code> Section</div>
+<div class="content">
+<div class="paragraph">
+<p>Parameters (lines) below whose sample value include "(optional)" may be
+omitted.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>{
+  "servers": {
+    "web": "&lt;Web application routes root URL&gt;"
+  },
+
+  "contact": {
+    "support": {
+      "email": "&lt;Support email address (optional)&gt;",
+      "phoneNumber": "&lt;Support phone number (optional)&gt;",
+      "description": "Support staff",
+      "message": "Feel free to contact us with questions."
+    },
+    "security": {
+      "email": "&lt;Security email address (optional)&gt;",
+      "phoneNumber": "&lt;Security phone number (optional)&gt;",
+      "description": "Security team",
+      "message": "&lt;Security message here (optional)&gt;"
+    }
+  },
+
+  "cookie": {
+    "name": "swamp",
+    "domain": null,
+    "path": "/",
+    "secure": true
+  },
+
+  "options": {
+    "assessments": {
+      "allow_multiple_tool_selection": true,
+      "allow_viewing_zero_weaknesses": true
+    }
+  }
+}</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_swamp_in_a_box_s_filesystem">3. SWAMP-in-a-Box&#8217;s Filesystem</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="configuration-files">3.1. Configuration Files</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>/opt/swamp/etc/swamp.conf</code></dt>
+<dt class="hdlist1"><code>/opt/swamp/etc/log4perl.conf</code></dt>
+<dt class="hdlist1"><code>/opt/swamp/etc/swampmonitor.conf</code></dt>
+<dd>
+<p>SWAMP backend configuration files. Directions for modifying <code>swamp.conf</code> can
+be found in the SWAMP-in-a-Box User Manual. There should be no need to
+modify <code>log4perl.conf</code> and <code>swampmonitor.conf</code>.</p>
+</dd>
+<dt class="hdlist1"><code>/etc/condor/condor_config</code></dt>
+<dt class="hdlist1"><code>/etc/condor/config.d/swampinabox_*.conf</code></dt>
+<dd>
+<p>HTCondor configuration files. The SWAMP-in-a-Box installer preserves the
+version of <code>condor_config</code> installed by the HTCondor RPMs and installs
+several files into the <code>/etc/condor/config.d</code> directory. There should be no
+need to directly modify any of these files.</p>
+</dd>
+<dt class="hdlist1"><code>/etc/httpd/conf/httpd.conf</code></dt>
+<dt class="hdlist1"><code>/etc/httpd/conf.d/ssl.conf</code></dt>
+<dd>
+<p>Apache configuration files. The SWAMP-in-a-Box installer replaces
+<code>httpd.conf</code> with a version that&#8217;s included with the installer and modifies
+<code>ssl.conf</code> to use more secure settings for the SSL protocols and cipher
+suites than the settings installed by the <code>mod_ssl</code> RPM.</p>
+</dd>
+<dt class="hdlist1"><code>/etc/php.ini</code></dt>
+<dd>
+<p>PHP configuration file. The SWAMP-in-a-Box installer modifies this to allow
+uploads up to 800M.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="long-term-storage">3.2. Long-term Storage Files</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>/swamp/platforms/images</code></dt>
+<dd>
+<p>Directory containing the virtual machine images for performing assessments
+and running the optional Code Dx viewer. The SWAMP-in-a-Box installer makes
+<code>/var/lib/libvirt/images</code> a symbolic link to this directory.</p>
+</dd>
+<dt class="hdlist1"><code>/swamp/SCAProjects</code></dt>
+<dd>
+<p>Directory containing assessment results. Each sub-directory contains the
+results for one project.</p>
+</dd>
+<dt class="hdlist1"><code>/swamp/store/SCAPackages</code></dt>
+<dd>
+<p>Directory containing package archives. Each sub-directory contains the
+archive for one package version.</p>
+</dd>
+<dt class="hdlist1"><code>/swamp/store/SCATools</code></dt>
+<dd>
+<p>Directory containing assessment and metric tools. The <code>bundled</code>
+sub-directory contains tools that are included with the SWAMP-in-a-Box
+installer. The <code>add-on</code> sub-directory contains tools that were added to the
+system after the initial SWAMP-in-a-Box install.</p>
+</dd>
+<dt class="hdlist1"><code>/var/lib/mysql</code></dt>
+<dd>
+<p>Directory containing MariaDB&#8217;s storage files for the SWAMP&#8217;s SQL databases.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="log-files">3.3. Log Files</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>/opt/swamp/log</code></dt>
+<dd>
+<p>Directory containing the SWAMP backend&#8217;s log files.</p>
+</dd>
+<dt class="hdlist1"><code>/var/log/condor</code></dt>
+<dt class="hdlist1"><code>/var/lib/condor</code></dt>
+<dd>
+<p>Directories containing HTCondor&#8217;s log files.</p>
+</dd>
+<dt class="hdlist1"><code>/var/log/httpd</code></dt>
+<dd>
+<p>Directory containing Apache&#8217;s log files.</p>
+</dd>
+<dt class="hdlist1"><code>/var/log/libvirt</code></dt>
+<dd>
+<p>Directory containing libvirt&#8217;s log files.</p>
+</dd>
+<dt class="hdlist1"><code>/var/log/mariadb</code></dt>
+<dd>
+<p>Directory containing MariaDB&#8217;s log files.</p>
+</dd>
+<dt class="hdlist1"><code>/var/www/swamp-web-server/storage/logs</code></dt>
+<dd>
+<p>Directory containing the SWAMP web backend&#8217;s log files.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="temporary-files">3.4. Temporary Files</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>/opt/swamp/run</code></dt>
+<dt class="hdlist1"><code>/swamp/working/project</code></dt>
+<dt class="hdlist1"><code>/swamp/working/results</code></dt>
+<dd>
+<p>Directories containing temporary files used by the SWAMP backend.</p>
+</dd>
+<dt class="hdlist1"><code>/slots</code></dt>
+<dd>
+<p>Directory containing working directories of currently executing HTCondor
+jobs.</p>
+</dd>
+<dt class="hdlist1"><code>/swamp/incoming</code></dt>
+<dd>
+<p>Directory containing user-uploaded packages.</p>
+</dd>
+<dt class="hdlist1"><code>/swamp/outgoing</code></dt>
+<dd>
+<p>Directory containing files that SWAMP users view or download.</p>
+</dd>
+<dt class="hdlist1"><code>/var/lib/libvirt</code></dt>
+<dd>
+<p>Directory containing temporary files used by libvirt.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_reclaiming_disk_space">3.5. Reclaiming Disk Space</h3>
+<div class="paragraph">
+<p>Log files can be deleted without impacting the normal functioning of the
+system, although debugging issues will be more difficult if pertinent log
+files are missing. Temporary files can also be deleted so long as they are
+not still in use.</p>
+</div>
+<div class="paragraph">
+<p>Deleting long-term storage files <strong>will</strong> impact the normal functioning of the
+system. Deleting package archives, tool archives, platform images, and
+assessment results will render those objects unavailable to the system, even
+if they continue appear to be available in the SWAMP.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2017-10-09 09:26:27 CDT
+</div>
+</div>
+</body>
+</html>

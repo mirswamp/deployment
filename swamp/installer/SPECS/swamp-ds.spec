@@ -28,7 +28,7 @@ Vendor: The Morgridge Institute for Research
 Packager: Support <support@continuousassurance.org>
 BuildRoot: /tmp/%{name}-buildroot
 BuildArch: noarch
-Requires: swamp-rt-java,swamp-rt-perl,swamp-dataserver-setup
+Requires: swamp-rt-perl,swamp-dataserver-setup
 Conflicts: swamp-exec,swamp-submit, swamp-directory-server
 AutoReqProv: no
 
@@ -98,6 +98,10 @@ then
     echo Metric
     mysql $opt < /opt/swamp/sql/metric_procs.sql
     /bin/rm -f /opt/swamp/sql/sql.cnf
+    echo Platforms
+    /opt/swamp/sbin/rebuild_platforms_db
+    echo Tools
+    /opt/swamp/sbin/rebuild_tools_db -mir-swamp
 else
     echo Unable to infer the password to mysql, unable to run scripts.
 fi
