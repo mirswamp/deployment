@@ -1,89 +1,70 @@
 # Configuration file for SWAMP Singleserver
 
-# HTCondor collector location
+# HTCondor collector location. Set this on data server, submit, and execute node(s).
 htcondor_collector_host = HOSTNAME
 
-# agentMonitor should point to the submit node. Set these values on the data server, and submit and execute node(s).
+# Perl database properties. Set these values on the data server, submit, and execute node(s).
+dbPerlDsnHost = <dataserver hostname>
+dbPerlDsnPort = 3306
+dbPerlUser = <dataserver username>
+dbPerlPass = <dataserver password>
+
+# agentMonitor should point to the submit node. Set these values on the data server, submit, and execute node(s).
+agentMonitorHost = localhost
 agentMonitorPort = 8080
 agentMonitorJobPort = 8085
-agentMonitorHost = localhost
 
-# Normal workflow results root directory
+# Normal workflow results root directory. Set this on the data server, and submit and execute node(s).
 resultsFolder = /swamp/working/results/
 
-# This URL need to be the location on the CSA server that maps to /swamp/outgoing on the data server only.
-reporturl=https://HOSTNAME/results/
+# Failed assessment report location. This URL need to be the location on the web server that maps to /swamp/outgoing. Set this on the dataserver node.
+reporturl = https://HOSTNAME/results/
 
-# Frequency in minutes to execute checktimeout script in a viewer VM via cron
+# Viewer VM timeout parameters. Set these on the execute node(s).
+# Frequency in minutes to execute checktimeout script in a viewer VM via cron. 
 vruntimeout_frequency = 10
 # Number of seconds before an idle viewer VM is permitted to self-terminate
 vruntimeout_duration = 28800
 # Number of seconds of no Tomcat activity
 vruntimeout_lastlog = 3600
-# Default viewer master VM name. Needs to be set on submit.
+
+# Default viewer master VM name. Set this on the submit node.
 master.viewer = universal-centos-6.8-64-viewer
 
-# vmip lookup delay, attempt count, and sleep time
+# vmip lookup delay, attempt count, and sleep time. Set this on the execute node(s).
 vmip_lookup_delay = 10
 vmip_lookup_attempts = 50
 vmip_lookup_sleep = 3
 
-# Email templates
+# Email templates. Set these on the dataserver node.
 email.arun.complete = <USER>,<CR><CR>Your assessment of <PACKAGE> using <TOOL> on <PLATFORM> completed at <COMPLETIONTIME> with a status of <SUCCESS>.<CR><CR>-The Software Assurance Marketplace (SWAMP)
 email.host = 128.104.153.1
 email.arun.subject = Your SWAMP assessment has completed
 email.from = "Software Assurance Marketplace Singleserver: Do Not Reply"<do-not-reply@mir-swamp.org>
 
-# Parasoft license parameters on exec node.
-parasoft_flowprefix = ps-dt-license
-parasoft_port = 2002
-parasoft_server_ip = 128.104.7.8
+# Status. Set this on the dataserver node.
+SWAMPState = ON
 
-# Parasoft Services.conf contents
+# Parasoft Services.conf contents. Set these on the execute node(s).
 tool.ps-ctest.license.host = lic-ps-dt-01.cosalab.org
 tool.ps-ctest.license.port = 2002
 tool.ps-jtest.license.host = lic-ps-dt-01.cosalab.org
 tool.ps-jtest.license.port = 2002
 
-# RedLizard license parameters
-redlizard_flowprefix = rl-dt-license
-redlizard_port = 6200
-redlizard_server_ip = 128.104.7.11
-
-# RedLizard Services.conf contents
+# RedLizard Services.conf contents. Set these on the execute node(s).
 tool.rl-goanna.license.host = lic-rl-dt-01.cosalab.org
 tool.rl-goanna.license.port = 6200
 
-# GrammaTech license parameters
-grammatech_flowprefix = gt-dt-license
-grammatech_port = 7350
-grammatech_server_ip = 128.104.7.9
-
-# GrammaTech services.conf contents
+# GrammaTech services.conf contents. Set these on the execute node(s).
 tool.gt-csonar.license.host = lic-gt-dt-01.cosalab.org
 tool.gt-csonar.license.port = 7350
 
-# Synopsys license parameters
-synopsys_flowprefix = sy-dt-license
-synopsys_port = 27000
-synopsys_aux_port = 54000
-synopsys_server_ip = 128.104.7.15
-
-# Synopsys services.conf contents
+# Synopsys services.conf contents. Set these on the execute node(s).
 tool.sy-coverity.license.host = lic-sy-dt-01.cosalab.org
 tool.sy-coverity.license.port = 27000
 
-# Sonatype ApplicationHealthCheck sonatype-data.conf contents
+# Sonatype ApplicationHealthCheck sonatype-data.conf contents. Set this on the execute node(s).
 sonatype_integrator = SWAMP
-
-# Perl database properties. Set these values on the data server and submit node.
-dbPerlDsnHost = HOSTNAME
-dbPerlDsnPort = 3306
-dbPerlUser = java_agent
-dbPerlPass = password
-
-# Status
-SWAMPState = ON
 
 # SWAMP-in-a-Box settings
 SWAMP-in-a-Box = yes

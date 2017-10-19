@@ -22,8 +22,12 @@ FILES="$CONFIG $PHP"
     echo $output > out
     [ $status -eq 0 ]
 }
-@test  "Checking for build created version string" {
-    run grep "0.A" /var/www/html/scripts/version.js
+@test  "Checking for build created version string (release number)" {
+    run grep 'release.*:.*"0"' /var/www/html/version.json
+    [ $status -eq 0 ]
+}
+@test  "Checking for build created version string (build number)" {
+    run grep 'build.*:.*"A"' /var/www/html/version.json
     [ $status -eq 0 ]
 }
 @test  "Uninstall swamp-web-server" {
@@ -51,8 +55,12 @@ FILES="$CONFIG $PHP"
     run /bin/ls $CONFIG $PHP
     [ $status -eq 0 ]
 }
-@test  "Checking for build created version string again" {
-    run grep "0.B" /var/www/html/scripts/version.js
+@test  "Checking for build created version string again (release number)" {
+    run grep 'release.*:.*"0"' /var/www/html/version.json
+    [ $status -eq 0 ]
+}
+@test  "Checking for build created version string again (build number)" {
+    run grep 'build.*:.*"B"' /var/www/html/version.json
     [ $status -eq 0 ]
 }
 @test  "Uninstall swamp-web-server" {

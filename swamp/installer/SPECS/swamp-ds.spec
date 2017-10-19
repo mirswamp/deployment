@@ -120,8 +120,8 @@ elif [ "$iam" = "swa-csadata-pd-01" ];then
 	reporturl="https://swa-csaweb-pd-01.mir-swamp.org/results/"
 	ldap="ldaps://swa-dir-pd-01.mirsam.org:636"
 fi
-/bin/sed -i "s|^#reporturl=.*$|reporturl=$reporturl|" /opt/swamp/etc/swamp.conf
-/bin/sed -i "s|^ldap.uri=.*$|ldap.uri=$ldap|" /opt/swamp/etc/swamp.conf
+/bin/sed -i "s|^reporturl\ =\ .*$|reporturl = $reporturl|" /opt/swamp/etc/swamp.conf
+/bin/sed -i "s|^ldap.uri\ =\ .*$|ldap.uri = $ldap|" /opt/swamp/etc/swamp.conf
 
 # Arguments to post are {1=>new, 2=>upgrade}
 if [ "$1" = "2" ]
