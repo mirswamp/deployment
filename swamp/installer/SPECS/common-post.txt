@@ -3,15 +3,15 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # Arguments to post are {1=>new, 2=>upgrade}
 #
 if [ "$1" = "1" ]; then
-    echo "Running RPM post script (mode: install)"
+    echo "Running RPM post script for %{name} (mode: install)"
 elif [ "$1" = "2" ]; then
-    echo "Running RPM post script (mode: upgrade)"
+    echo "Running RPM post script for %{name} (mode: upgrade)"
 fi
 
 #
@@ -29,7 +29,7 @@ if [ "$1" = "2" ]; then
         src="/opt/swamp/etc/swamp.conf.rpmsave"
         dest="/opt/swamp/etc/swamp.conf"
 
-        swamp_conf_keys="$(awk -F= '{print $1}' "$dest" | awk '{print $1}' | grep -E '^[^#]' | grep -v -E '^method' | grep -v buildnumber)"
+        swamp_conf_keys="$(awk -F= '{print $1}' "$dest" | awk '{print $1}' | grep -E '^[^#]' | grep -v buildnumber | grep -v master\\.viewer)"
 
         echo "Updating '$dest' from '$src'"
 
@@ -52,16 +52,53 @@ if [ "$1" = "2" ]; then
             /opt/swamp/bin/swamp_config -C "$dest" --propset "dbPerlPass" "$val"
         fi
 
+        echo "Finished updating '$dest'"
+
+        #
+        # CSA-3139: Copy values over to 'services.conf'.
+        #
+        if [ -r /opt/swamp/etc/services.conf ]; then
+            dest="/opt/swamp/etc/services.conf"
+
+            echo "Updating '$dest' from '$src'"
+            /opt/swamp/sbin/swamp_copy_config -i "$src" -o "$dest" --exclude "" --map "/opt/swamp/etc/services.conf.map"
+            echo "Finished updating '$dest'"
+        fi
+
         #
         # CSA-3107: Rename the source file so that future upgrades don't
         # accidentally copy values from it again.
         #
-        now="$(date +"%Y%m%d%H%M%S")"
+        now="$(date +"%%Y%%m%%d%%H%%M%%S")"
         renamed_src="$src.$now"
 
-        echo ".. Renaming '$src' to '$renamed_src'"
+        echo "Renaming '$src' to '$renamed_src'"
         mv "$src" "$renamed_src"
+    fi
+fi
+
+#
+# Preserve services.conf settings on upgrade
+#
+if [ "$1" = "2" ]; then
+    if [ -r /opt/swamp/etc/services.conf.rpmsave ]; then
+        src="/opt/swamp/etc/services.conf.rpmsave"
+        dest="/opt/swamp/etc/services.conf"
+
+        echo "Updating '$dest' from '$src'"
+
+        /opt/swamp/sbin/swamp_copy_config -i "$src" -o "$dest" --include ''
 
         echo "Finished updating '$dest'"
+
+        #
+        # CSA-3107: Rename the source file so that future upgrades don't
+        # accidentally copy values from it again.
+        #
+        now="$(date +"%%Y%%m%%d%%H%%M%%S")"
+        renamed_src="$src.$now"
+
+        echo "Renaming '$src' to '$renamed_src'"
+        mv "$src" "$renamed_src"
     fi
 fi

@@ -504,17 +504,6 @@ The Client Secret set in the OAuth Application for the site. This is
 applicable only when `[SITE]_ENABLED` is set to "true".
 
 
-API Settings
-~~~~~~~~~~~~
-
-`API_EXPLORER_ENABLED`::
-
-Whether the API Explorer interface for documenting the SWAMP web
-application's routes is made available. The SWAMP-in-a-Box installer sets
-this to "false", because the required database tables are not included with
-SWAMP-in-a-Box.
-
-
 Session Related Settings
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

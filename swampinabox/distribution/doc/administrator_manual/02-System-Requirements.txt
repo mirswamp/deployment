@@ -2,9 +2,11 @@ System Requirements
 -------------------
 
 SWAMP-in-a-Box is designed to be installed on a dedicated host, one that is
-not providing other services (including Apache, MySQL/MariaDB, and HTCondor).
+not providing other services -- including Apache HTTP Server, MySQL/MariaDB,
+and HTCondor.
 
 
+[[hardware-requirements]]
 Hardware Requirements
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -13,20 +15,36 @@ Hardware Requirements
   * Memory: 16G
   * Disk:   256G
   * Cores:  4
+  * Support for https://www.linux-kvm.org/page/Main_Page[KVM] virtualization
 
 .Recommended:
 
   * Memory: 64G
   * Disk:   1T
   * Cores:  8
+  * Support for https://www.linux-kvm.org/page/Main_Page[KVM] virtualization
 
 SWAMP-in-a-Box uses virtual machines managed by an HTCondor pool to perform
 assessments of packages and to run the optional Code Dx results viewer from
-Code Dx, Inc. Each virtual machine is provisioned with 6G of RAM and 1 core.
-The minimum requirements above are intended to allow the host machine to run
-two virtual machines simultaneously while leaving resources available to run
-the web server and database that together provide the SWAMP web application
-to users.
+Code Dx, Inc. Each virtual machine is provisioned with 6G of RAM and
+2 cores, and HTCondor will do its best not to over-allocate the host's
+resources. Thus, the host's available memory and cores determines the number
+of simultaneous assessments that may be performed. The minimum requirements
+are intended to allow the host to run two virtual machines simultaneously
+while leaving resources available to run the web server and database that
+together provide the SWAMP web application to users.
+
+If you are installing SWAMP-in-a-Box on physical hardware, modern x86-family
+processors provide support for KVM via Intel's VT-x or AMD's AMD-V
+extensions. On some systems, it might be necessary to enable Intel Virtual
+Technology extensions in the BIOS.
+
+If you are installing SWAMP-in-a-Box in a virtual machine, the hypervisor
+must support and be configured for nested virtualization. For example, when
+using a VMware product as the hypervisor for the SWAMP-in-a-Box virtual
+machine, it might be necessary to enable a setting such as "Expose
+hardware-assisted virtualization to the guest operating system" or
+"Virtualize Intel VT-x/EPT or AMD-V/RVI."
 
 
 Supported Operating Systems
@@ -34,11 +52,6 @@ Supported Operating Systems
 
 CentOS 6 and 7 are both supported. Other similar Linux distributions, such
 as Red Hat Enterprise Linux, might work but are untested.
-
-If you are installing SWAMP-in-a-Box in a virtual machine, the hypervisor
-must support and be configured for nested virtualization, because
-SWAMP-in-a-Box itself uses virtual machines to perform assessments of
-packages and to run the optional Code Dx results viewer from Code Dx, Inc.
 
 
 Supported Disk Partitioning Schemes
@@ -50,25 +63,20 @@ For example, if there is a separate partition for `/home`, delete it, and
 allocate the space to the `/` partition.
 
 
-Disabling SELinux
-~~~~~~~~~~~~~~~~~
+Disable SELinux
+~~~~~~~~~~~~~~~
 
 SWAMP-in-a-Box will not install or function correctly when SELinux is in
 `enforcing` mode, in part because the various software packages that
 SWAMP-in-a-Box relies on do not all support SELinux.
 
-To disable SELinux, add or update `/etc/selinux/config` on the host to
-include the following line (you will need `root` access to edit this file):
-
-----
-SELINUX=disabled
-----
-
-Then reboot the host.
+To disable SELinux, edit the file `/etc/selinux/config` on the host by
+changing the line `SELINUX=enforcing` to `SELINUX=disabled`. (You will need
+`root` access to edit this file.) Then reboot the host.
 
 
-Creating a User Account with Full `sudo` Privileges
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Create a User Account with Full `sudo` Privileges
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We recommend creating a normal user account with full `sudo` privileges so
 that the SWAMP-in-a-Box host can be administered without being logged in as
@@ -117,25 +125,26 @@ sudo vi /opt/swamp/etc/swamp.conf
 ----
 
 
-Configuring Firewalls
-~~~~~~~~~~~~~~~~~~~~~
+Configure Firewalls
+~~~~~~~~~~~~~~~~~~~
 
 With regards to network traffic, the SWAMP-in-a-Box host is expected to:
 
-  * Respond to incoming HTTPS (port 443) network traffic, as it is required
-    to access the SWAMP web application and for the web application to
-    function correctly.
+  * Respond to incoming HTTPS (port 443) network traffic, because it is
+    required to access the SWAMP web application and for the web application
+    to function correctly.
 
   * Potentially generate outgoing traffic while performing an assessment of
     a package, typically using HTTP, HTTPS, FTP, FTPS, SSH, and rsync.
     Traffic can include updating of the platform's currently installed set
-    of packages (this can be disabled, if desired) and downloading of
-    user-specified dependencies for the package being assessed. The
-    package's build system might also require access to the internet.
+    of packages (<<configure-internetless,this can be disabled>>, if
+    desired) and downloading of user-specified dependencies for the package
+    being assessed. The package's build system might also require access to
+    the internet.
 
-Any firewall(s) protecting the SWAMP-in-a-Box host must be configured to
-allow the above network traffic. The SWAMP-in-a-Box installer will not
-modify the host's firewall configuration.
+Any firewalls protecting the SWAMP-in-a-Box host must be configured to allow
+the above network traffic. The SWAMP-in-a-Box installer will not modify the
+host's firewall configuration.
 
 [IMPORTANT]
 ====
@@ -147,19 +156,21 @@ following command:
 service libvirtd restart
 ----
 
-The `libvirtd` service modifies the host's firewall configuration in order
-to allow the virtual machines started by it to access the host's network,
-but it does not make the configuration changes permanent.
+This is necessary because the `libvirtd` service modifies the host's
+firewall configuration in order to allow the virtual machines started by it
+to access the host's network, but it does not make its configuration changes
+permanent.
 ====
 
 [example]
 .Allowing Incoming HTTPS and SSH Traffic with `iptables`
 ====
 For systems that use `iptables`, such as CentOS 6 by default, a sample
-configuration file can be found in the `config_templates` directory of the
-SWAMP-in-a-Box installer. Copy the `iptables` file from that directory to
-`/etc/sysconfig`. Then restart the `iptables` service. For example, as
-`root` (or using `sudo`), run the following commands:
+configuration file can be found in the `config_templates` sub-directory of
+the SWAMP-in-a-Box installer (referred to below as `<installer-dir>`). Copy
+the `iptables` file from that directory to `/etc/sysconfig`. Then restart
+the `iptables` and `libvirtd` services. For example, as `root` (or using
+`sudo`), run the following commands:
 
 ----
 cp <installer-dir>/config_templates/iptables /etc/sysconfig
@@ -173,8 +184,8 @@ service libvirtd restart
 ====
 For systems that use `firewalld`, such as CentOS 7 by default, use
 `firewall-cmd` to permanently allow HTTPS and SSH traffic. Then restart the
-`firewalld` service. For example, as `root` (or using `sudo`), run the
-following commands:
+`firewalld` and `libvirtd` services. For example, as `root` (or using
+`sudo`), run the following commands:
 
 ----
 firewall-cmd --zone=public --permanent --add-service=https
@@ -183,3 +194,15 @@ systemctl restart firewalld
 systemctl restart libvirtd
 ----
 ====
+
+
+Other Considerations
+~~~~~~~~~~~~~~~~~~~~
+
+The SWAMP-in-a-Box install/upgrade process and supporting utilities
+configure only those aspects of the host that are directly involved in
+ensuring that the SWAMP functions correctly. Other aspects are the
+responsibility of the host's system administrator. For example, the
+administrator might consider looking at the Applied Crypto Hardening guide
+at https://bettercrypto.org for suggestions on how to configure the SSH
+server and other cryptographic tools on the host.

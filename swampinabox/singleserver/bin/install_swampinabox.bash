@@ -3,14 +3,14 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # Install or upgrade SWAMP-in-a-Box on the current host.
 #
 
 BINDIR="$(dirname "$0")"
-RELAYHOST="128.104.153.1"
+RELAYHOST="128.104.153.20"
 
 . "$BINDIR/../sbin/swampinabox_install_util.functions"
 . "$BINDIR/../sbin/getargs.function"
@@ -55,6 +55,11 @@ if [ "$(getenforce)" == "Enforcing" ]; then
     echo "Error: SELinux is enforcing. The SWAMP will not function properly." 1>&2
     echo "You can disable SELinux by editing /etc/selinux/config," 1>&2
     echo "setting SELINUX=disabled, and then rebooting this host." 1>&2
+    exit 1
+fi
+
+if ! "$BINDIR/../sbin/yum_install.bash" ; then
+    echo "Error: Failed to install some required packages."
     exit 1
 fi
 
@@ -157,12 +162,15 @@ echo ""
 
 if [ $main_install_exit_code -eq 0 ]; then
     echo "The SWAMP for this installation should be available at:"
+    echo ""
+    echo "    https://$HOSTNAME"
+    echo ""
 else
-    echo "FAILURE! The SWAMP for this installation *might* be available at:"
+    echo "The SWAMP for this installation *might* be available at:"
+    echo ""
+    echo "    https://$HOSTNAME"
+    echo ""
+    echo "WARNING: Errors were encountered during the install process."
 fi
-
-echo ""
-echo "    https://$HOSTNAME"
-echo ""
 
 exit $main_install_exit_code

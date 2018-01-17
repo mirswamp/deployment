@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # Configure sudo and libvirt for SWAMP-in-a-Box.
@@ -17,7 +17,7 @@ BINDIR="$(dirname "$0")"
 
 ############################################################################
 
-install -m 640 -o root -g root "$BINDIR/../config_templates/10_slotusers" /etc/sudoers.d/.
+install -m 640 -o root -g root "$BINDIR/../config_templates/10_swamp_sudo_config" /etc/sudoers.d/.
 install -m 755 -o root -g root "$BINDIR/../config_templates/qemu-kvm-us"  /usr/libexec/qemu-kvm-us
 
 groupadd -f slotusers

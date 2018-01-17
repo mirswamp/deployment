@@ -5,7 +5,6 @@
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 1.5.6.1">
-<meta name="author" content="v1.31">
 <title>SWAMP-in-a-Box Reference Manual</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -431,7 +430,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="header">
 <h1>SWAMP-in-a-Box Reference Manual</h1>
 <div class="details">
-<span id="author" class="author">v1.31</span><br>
+<span id="revnumber">version 1.32,</span>
+<span id="revdate">2018-01-16 09:25:11 -0600</span>
 </div>
 <div id="toc" class="toc">
 <div id="toctitle">Table of Contents</div>
@@ -443,10 +443,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#backend-mail-settings">1.3. Mail Settings</a></li>
 <li><a href="#_ldap_settings">1.4. LDAP Settings</a></li>
 <li><a href="#_third_party_login_settings">1.5. Third-Party Login Settings</a></li>
-<li><a href="#_api_settings">1.6. API Settings</a></li>
-<li><a href="#_session_related_settings">1.7. Session Related Settings</a></li>
-<li><a href="#_database_settings">1.8. Database Settings</a></li>
-<li><a href="#_miscellaneous_settings">1.9. Miscellaneous Settings</a></li>
+<li><a href="#_session_related_settings">1.6. Session Related Settings</a></li>
+<li><a href="#_database_settings">1.7. Database Settings</a></li>
+<li><a href="#_miscellaneous_settings">1.8. Miscellaneous Settings</a></li>
 </ul>
 </li>
 <li><a href="#frontend-configuration">2. SWAMP Web Application Frontend Configuration</a>
@@ -1037,21 +1036,7 @@ applicable only when <code>[SITE]_ENABLED</code> is set to "true".</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_api_settings">1.6. API Settings</h3>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><code>API_EXPLORER_ENABLED</code></dt>
-<dd>
-<p>Whether the API Explorer interface for documenting the SWAMP web
-application&#8217;s routes is made available. The SWAMP-in-a-Box installer sets
-this to "false", because the required database tables are not included with
-SWAMP-in-a-Box.</p>
-</dd>
-</dl>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_session_related_settings">1.7. Session Related Settings</h3>
+<h3 id="_session_related_settings">1.6. Session Related Settings</h3>
 <div class="paragraph">
 <p>These parameters determine how session (logon) cookies behave.</p>
 </div>
@@ -1095,7 +1080,7 @@ SWAMP-in-a-Box installer sets this to "true".</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_database_settings">1.8. Database Settings</h3>
+<h3 id="_database_settings">1.7. Database Settings</h3>
 <div class="paragraph">
 <p>These parameters provide the SWAMP web application with access to the
 SWAMP&#8217;s SQL databases. There is a set of parameters for each of the
@@ -1137,7 +1122,7 @@ install process.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_miscellaneous_settings">1.9. Miscellaneous Settings</h3>
+<h3 id="_miscellaneous_settings">1.8. Miscellaneous Settings</h3>
 <div class="paragraph">
 <p>These parameters control various operations of the Laravel framework. Their
 values should not be changed from the ones set by the SWAMP-in-a-Box
@@ -1414,11 +1399,12 @@ omitted.</p>
 <dl>
 <dt class="hdlist1"><code>/opt/swamp/etc/swamp.conf</code></dt>
 <dt class="hdlist1"><code>/opt/swamp/etc/log4perl.conf</code></dt>
+<dt class="hdlist1"><code>/opt/swamp/etc/services.conf</code></dt>
 <dt class="hdlist1"><code>/opt/swamp/etc/swampmonitor.conf</code></dt>
 <dd>
 <p>SWAMP backend configuration files. Directions for modifying <code>swamp.conf</code> can
 be found in the SWAMP-in-a-Box User Manual. There should be no need to
-modify <code>log4perl.conf</code> and <code>swampmonitor.conf</code>.</p>
+directly modify <code>log4perl.conf</code>, <code>services.conf</code>, and <code>swampmonitor.conf</code>.</p>
 </dd>
 <dt class="hdlist1"><code>/etc/condor/condor_config</code></dt>
 <dt class="hdlist1"><code>/etc/condor/config.d/swampinabox_*.conf</code></dt>
@@ -1560,7 +1546,8 @@ if they continue appear to be available in the SWAMP.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2017-10-09 09:26:27 CDT
+Version 1.32<br>
+Last updated 2018-01-16 09:25:11 CST
 </div>
 </div>
 </body>

@@ -39,3 +39,14 @@ Obtaining SWAMP-in-a-Box
 SWAMP-in-a-Box is currently available as an open beta. Visit
 https://github.com/mirswamp/deployment for instructions on how to download
 SWAMP-in-a-Box as a pre-packaged installer or as source code.
+
+
+Documentation for SWAMP-in-a-Box
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Copies of this SWAMP-in-a-Box Administrator Manual and the SWAMP-in-a-Box
+Reference Manual can be found in `/opt/swamp/doc` on the SWAMP-in-a-Box host
+after SWAMP-in-a-Box has been installed. Each manual is available as
+a single page HTML document and as a PDF. The http://asciidoc.org/[AsciiDoc]
+sources for the manuals are also available in the `administrator_manual` and
+`reference_manual` sub-directories.

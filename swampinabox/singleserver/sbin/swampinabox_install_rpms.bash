@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # Install the SWAMP RPMs and update associated configuration files.
@@ -21,6 +21,8 @@ MODE="$4"
 
 . "$BINDIR/swampinabox_install_util.functions"
 
+old_swamp_web_server_version="$(get_rpm_version swamp-web-server)"
+
 ############################################################################
 
 echo "Workspace: $WORKSPACE"
@@ -32,7 +34,7 @@ echo ""
 echo "Stopping services"
 "$BINDIR/manage_services.bash" stop httpd condor mysql
 
-if [ "$MODE" == "-install" ]; then
+if [ "$MODE" = "-install" ]; then
     echo ""
     echo "Removing currently installed SWAMP RPMs"
     for pkg in \
@@ -121,6 +123,6 @@ chown root:root /var/www/html/config/config.json
 chmod 444       /var/www/html/config/config.json
 
 echo "Patching SWAMP backend web server configuration"
-sed -i -e "s/SED_ENVIRONMENT/SWAMP-in-a-Box/"  /var/www/swamp-web-server/.env
+sed -i -e "s/SED_ENVIRONMENT/SWAMP-in-a-Box/" /var/www/swamp-web-server/.env
 
 exit $encountered_error

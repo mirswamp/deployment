@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # Create the directories needed by the SWAMP's backend.
@@ -29,7 +29,7 @@ mkdir -p /everglades
 chown root:root /everglades
 chmod 755 /everglades
 if ! grep everglades /etc/fstab 1>/dev/null 2>/dev/null ; then
-	echo 'swa-gfs-dt-01:/ev0	/everglades	 glusterfs	defaults,_netdev	0 0' >> /etc/fstab
+	echo 'swa-gfs-dt-01:/ev0	/everglades	 glusterfs	defaults,_netdev,ro	0 0' >> /etc/fstab
 fi
 mount -a
 mount -va -t glusterfs

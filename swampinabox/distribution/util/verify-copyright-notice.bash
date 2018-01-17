@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # Exit with zero if the given file contains the SWAMP
@@ -11,7 +11,7 @@
 #
 
 file_to_check="$1"
-copyright_string="Copyright 2012-2017 Software Assurance Marketplace"
+copyright_string="Copyright 2012-2018 Software Assurance Marketplace"
 
 if [ -z "$file_to_check" ]; then
     echo "Usage: $0 <file to check>" 1>&2

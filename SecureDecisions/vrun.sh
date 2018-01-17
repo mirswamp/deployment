@@ -1,12 +1,12 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 VIEWER="CodeDX"
 viewer="codedx"
 MYSQLPWFILE="/root/.mysql.pw"
-TOMCATVERSION="/opt/apache-tomcat-8.5.6"
+TOMCATVERSION="/opt/apache-tomcat-8.5.23"
 TOMCATSERVICE="tomcat"
 TOMCATDIR="/opt/$TOMCATSERVICE"
 TOMCATLOG="$TOMCATDIR/logs/catalina.out"
@@ -69,7 +69,10 @@ fi
 chown -R mysql:mysql /var/lib/mysql/* >> $RUNOUT 2>&1
 sed -i -e'/\[mysqld\]/c[mysqld]\nlower_case_table_names=2' /etc/my.cnf.d/server.cnf >> $RUNOUT 2>&1
 
-# untar VIEWER viewer database restore script and webapp config bundle if extant
+# untar viewer database restore script and webapp config bundle if extant
+# contains:
+# 	user database
+# 	user source code subdirectory structure
 if [ -r ${viewer}_viewerdb.tar.gz ]
 then
 	record_event VIEWERDB "Unbundle ${viewer}_viewerdb.tar.gz"
@@ -92,7 +95,7 @@ else
 fi
 
 # restore mysql database from scripts if extant 
-if [ ! -r viewerdb.tar.gz ]
+if [ ! -r viewerdb.tar.gz ] # new format, not legacy
 then
 	read -r mysqlpw < $MYSQLPWFILE
 	if [ -r emptydb-mysql-${viewer}.sql ]
@@ -125,7 +128,7 @@ then
 	fi
 	if [ -r ${viewer}.sql ]
 	then
-		record_event USERDB "Restoring $VIEWER viewer database from ${viewer}.sql"
+		record_event USERDB "Restoring $VIEWER user database from ${viewer}.sql"
 		mysql --user='root' --password="$mysqlpw" ${viewer} < ${viewer}.sql >> $RUNOUT 2>&1
 		echo "" >> $RUNOUT 2>&1
 	fi
@@ -172,7 +175,18 @@ echo "" >> $RUNOUT 2>&1
 # start tomcat service
 record_event TOMCATSTART "Starting tomcat service"
 service $TOMCATSERVICE start >> $RUNOUT 2>&1
-if [ $? -ne 0 ] | grep -q 'Tomcat is not running' $RUNOUT
+tomcat_started=0
+for i in {1..10}
+do
+	result=$(service $TOMCATSERVICE status)
+	if [[ $result == *"running with pid:"* ]]
+	then
+		tomcat_started=1
+		break
+	fi
+	sleep 1
+done
+if [ $tomcat_started -eq 0 ]
 then
 	record_event TOMCATFAIL "Service tomcat failed to start"
 	service $TOMCATSERVICE status >> $RUNOUT 2>&1

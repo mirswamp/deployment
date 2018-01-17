@@ -1,0 +1,9 @@
+# Define how keys in 'swamp.conf' map to keys in 'services.conf'.
+
+# GrammaTech services.conf contents.
+tool.gt-csonar.license.host = tool-gt-csonar-license-host
+tool.gt-csonar.license.port = tool-gt-csonar-license-port
+
+# Synopsys services.conf contents.
+tool.sy-coverity.license.host = tool-sy-coverity-license-host
+tool.sy-coverity.license.port = tool-sy-coverity-license-port

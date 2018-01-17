@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # Install or upgrade SWAMP-in-a-Box on the current host.
@@ -87,6 +87,9 @@ for prog in \
         exit 1
     fi
 done
+
+"$BINDIR/../sbin/swamp_check_virtualization_support" \
+    || exit 1
 
 "$BINDIR/../sbin/swampinabox_check_prerequisites.pl" \
     "$MODE" \
@@ -369,7 +372,7 @@ echo "any issues that you might encounter with this install."
 echo ""
 
 if [ $main_install_exit_code -eq 0 ]; then
-    echo "The SWAMP for this installation should now be available at:"
+    echo "The SWAMP for this installation should be available at:"
     echo ""
     echo "    https://$HOSTNAME"
     echo ""

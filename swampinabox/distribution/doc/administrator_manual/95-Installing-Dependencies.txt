@@ -11,11 +11,13 @@ The software packages that SWAMP-in-a-Box depends on include:
   * <<dependencies-other,other assorted utilities>>.
 
 All of these dependencies must be installed in order for SWAMP-in-a-Box to
-function correctly.
+function correctly. If you run into issues with installing these
+dependencies, consult <<troubleshooting-installing-dependencies,the
+troubleshooting appendix>> for possible solutions.
 
 [NOTE]
 In the sections below, `<installer-dir>` refers to the directory containing
-the SWAMP-in-a-Box installer. See <<installing-siab>> and <<upgrading-siab>>.
+the SWAMP-in-a-Box installer. See <<installing-siab>>.
 
 
 [[dependencies-htcondor]]
@@ -23,16 +25,14 @@ the SWAMP-in-a-Box installer. See <<installing-siab>> and <<upgrading-siab>>.
 
 The set-up scripts configure and download HTCondor from the repository
 hosted by the University of Wisconsin-Madison, generally following the
-instructions provided on the project's home page
-(https://research.cs.wisc.edu/htcondor/index.html). The specific packages
+instructions provided on the project's home page at
+https://research.cs.wisc.edu/htcondor/index.html. The specific packages
 installed are `condor-all` and its dependencies.
 
-The following distribution-dependent scripts will install HTCondor using the
-process described above:
+The following script will install HTCondor using the process described above:
 
 ----
-<installer-dir>/repos/CentOS-6/install-htcondor.bash
-<installer-dir>/repos/CentOS-7/install-htcondor.bash
+<installer-dir>/repos/install-htcondor.bash
 ----
 
 
@@ -50,12 +50,10 @@ For CentOS 7, the set-up scripts download MariaDB from CentOS's default
 repositories. The specific packages installed are `mariadb`,
 `mariadb-server`, `mariadb-libs`, and their dependencies.
 
-The following distribution-dependent scripts will install MariaDB using the
-process described above:
+The following script will install MariaDB using the process described above:
 
 ----
-<installer-dir>/repos/CentOS-6/install-mariadb.bash
-<installer-dir>/repos/CentOS-7/install-mariadb.bash
+<installer-dir>/repos/install-mariadb.bash
 ----
 
 
@@ -64,16 +62,22 @@ process described above:
 
 The set-up scripts configure and download PHP from Remi's RPM Repository,
 using the instructions produced by the "configuration wizard" at
-http://rpms.famillecollet.com/. The specific packages installed are `php`,
-`php-ldap`, `php-mbstring`, `php-mcrypt`, `php-mysqlnd`, `php-pecl-zip`,
-`php-xml`, and their dependencies.
+http://rpms.famillecollet.com/. The specific packages installed are:
 
-The following distribution-dependent scripts will install PHP using the
-process described above:
+  * `php`,
+  * `php-ldap`,
+  * `php-mbstring`,
+  * `php-mcrypt`,
+  * `php-mysqlnd`,
+  * `php-pecl-zip`,
+  * `php-xml`,
+
+and their dependencies.
+
+The following script will install PHP using the process described above:
 
 ----
-<installer-dir>/repos/CentOS-6/install-php.bash
-<installer-dir>/repos/CentOS-7/install-php.bash
+<installer-dir>/repos/install-php.bash
 ----
 
 
@@ -82,7 +86,7 @@ process described above:
 
 In addition to HTCondor, MariaDB, and PHP, the set-up scripts download
 assorted software packages from CentOS's default repositories. The specific
-packages installed are
+packages installed are:
 
   * `ant`,
   * `bind-utils`,
@@ -96,14 +100,15 @@ packages installed are
   * `ncompress`,
   * `patch`,
   * `perl`,
+  * `unzip`,
   * `zip`,
 
 and their dependencies.
 
 The following script will install these packages and perform additional,
 necessary configuration of the SWAMP-in-a-Box host. It must be run after
-HTCondor, MariaDB, and PHP are installed, as described above.
+HTCondor, MariaDB, and PHP are installed, as described above:
 
 ----
-<installer-dir>/repos/common/install-and-configure-deps.bash
+<installer-dir>/repos/install-other-deps.bash
 ----

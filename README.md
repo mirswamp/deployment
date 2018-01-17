@@ -1,6 +1,6 @@
 # Welcome to SWAMP-in-a-Box! (Software Assurance Marketplace in a Box)
 
-The release of SWAMP-in-a-Box 1.31 is an open-beta version. We welcome your
+The release of SWAMP-in-a-Box 1.32 is an open-beta version. We welcome your
 feedback and contributions at sib@continuousassurance.org or +1 (317)-274-3942.
 To get updates on SWAMP-in-a-Box and be part of the user community, please join our
 [mailing list](https://lists.cosalab.org/mailman/listinfo/swampinabox "SWAMP Mailing List")!
@@ -12,7 +12,7 @@ Alternatively, download the files directly from <https://platform.swampinabox.or
 
 The documentation for SWAMP-in-a-Box includes:
 
-- [An administrator manual](https://platform.swampinabox.org/siab-latest-release/administrator_manual.html)
+- [An adminstrator manual](https://platform.swampinabox.org/siab-latest-release/administrator_manual.html)
   [(pdf)](https://platform.swampinabox.org/siab-latest-release/administrator_manual.pdf),
   which covers how to set up the SWAMP-in-a-Box host, and installing and configuring SWAMP-in-a-Box.
 - [A reference manual](https://platform.swampinabox.org/siab-latest-release/reference_manual.html)

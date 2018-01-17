@@ -1,12 +1,12 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 VIEWER="ThreadFix"
 viewer="threadfix"
 MYSQLPWFILE="/root/.mysql.pw"
-TOMCATVERSION="/opt/apache-tomcat-7.0.72"
+TOMCATVERSION="/opt/apache-tomcat-7.0.82"
 TOMCATSERVICE="tomcat"
 TOMCATDIR="/opt/$TOMCATSERVICE"
 TOMCATLOG="$TOMCATDIR/logs/catalina.out"
@@ -180,7 +180,18 @@ echo "" >> $RUNOUT 2>&1
 # start tomcat service
 record_event TOMCATSTART "Starting tomcat service"
 service $TOMCATSERVICE start >> $RUNOUT 2>&1
-if [ $? -ne 0 ] | grep -q 'Tomcat is not running' $RUNOUT
+tomcat_started=0
+for i in {1..10}
+do
+    result=$(service $TOMCATSERVICE status)
+    if [[ $result == *"running with pid:"* ]]                                                            
+    then
+        tomcat_started=1
+        break
+    fi
+    sleep 1
+done    
+if [ $tomcat_started -eq 0 ]
 then
 	record_event TOMCATFAIL "Service tomcat failed to start"
 	service $TOMCATSERVICE status >> $RUNOUT 2>&1

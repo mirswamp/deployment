@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # Configure HTCondor for SWAMP-in-a-Box.
@@ -59,19 +59,5 @@ for config_file in "$BINDIR"/../config_templates/config.d/* ; do
         install -m 644 -o root -g root "$config_file" /etc/condor/config.d
     fi
 done
-
-if which systemctl 1>/dev/null 2>/dev/null ; then
-    if ! systemctl enable condor ; then
-        echo "Warning: $0: Failed to enable service: condor" 1>&2
-        echo "It might need to be started manually if the host is rebooted." 1>&2
-        encountered_error=1
-    fi
-else
-    if ! chkconfig condor on ; then
-        echo "Warning: $0: Failed to enable service: condor" 1>&2
-        echo "It might need to be started manually if the host is rebooted." 1>&2
-        encountered_error=1
-    fi
-fi
 
 exit $encountered_error

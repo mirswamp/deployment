@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # Build the swampinabox-{version}-tools.tar.gz bundle for SWAMP-in-a-Box.
@@ -98,8 +98,8 @@ sub do_cleanup {
 #
 # Make sure cleanup tasks happen even on common signals.
 #
-local $SIG{INT}  = sub { do_cleanup(); toggle_terminal_echo(1); exit 1; };
-local $SIG{TERM} = sub { do_cleanup(); toggle_terminal_echo(1); exit 1; };
+local $SIG{INT}  = sub { do_cleanup(); exit 1; };
+local $SIG{TERM} = sub { do_cleanup(); exit 1; };
 
 ############################################################################
 
@@ -181,7 +181,7 @@ sub get_options {
         my @inventory_files = @{$options{'inventory-file'}};
         for my $file (@inventory_files) {
             if (!-r $file) {
-                push @errors, "Not a readable file: $file";
+                push @errors, "No such file (or file is not readable): $file";
             }
         }
     }
@@ -258,7 +258,7 @@ sub check_system_requirements {
             close $fh;
 
             for my $line (@script_lines) {
-                if ($line =~ /^.*tool_path\s*=\s*['"](.*)['"].*$/m) {
+                if ($line =~ /^.*\@tool_path\s*=\s*['"](.*)['"].*$/m) {
                     push @tools, $1;
                 }
             }
@@ -341,7 +341,7 @@ sub create_tools_bundle {
 
     if (-f $tools_bundle) {
         if (!unlink $tools_bundle) {
-            exit_abnormally("Failed to remove existing tools bundle: '$tools_bundle'");
+            exit_abnormally("Failed to remove existing tools bundle: $tools_bundle");
         }
     }
 

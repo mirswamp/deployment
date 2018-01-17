@@ -1,3 +1,56 @@
+Noteworthy Changes in SWAMP-in-a-Box 1.32
+-----------------------------------------
+
+1. Parasoft C/C++test version 10.3, a tool for assessing C/C++ packages, can
+now be added to a SWAMP-in-a-Box installation. You must license Parasoft
+C/C++test and obtain either the 32-bit or 64-bit tool archive files
+separately from Parasoft.
+
+2. Parasoft Jtest version 10.3, a tool for assessing Java Source packages,
+can now be added to a SWAMP-in-a-Box installation. You must license Parasoft
+Jtest and obtain either the 32-bit or 64-bit tool archive files separately
+from Parasoft.
+
+3. OWASP Dependency Check version 2.1.1, a tool for assessing Java Source
+and Java Bytecode packages, can now be added to a SWAMP-in-a-Box
+installation. The tool can be configured to get National Vulnerability
+Database information from a server that you set up to retrieve updates on
+a periodic basis, or, in cases where SWAMP-in-a-Box runs without internet
+access, a version of the tool with static National Vulnerability Database
+information can be created and installed. Versions of OWASP Dependency Check
+bundled with previous installations of SWAMP-in-a-Box will be removed when
+you upgrade.
+
+4. Spotbugs version 3.1.0 is now available for assessing Java Source Code
+and Java Bytecode packages. This tool is a fork of Findbugs. When you choose
+to run assessments for a Java package using "All" tools, a Spotbugs
+assessment will be generated but a Findbugs assessment will not. You can
+still specifically select Findbugs to generate a Findbugs assessment.
+
+5. SWAMP now provides support for C/C++ packages that build using autotools
+to generate their configure files. "Autotools+Configure+Make" is now
+available as a Build System for C/C++ packages.
+
+6. Assessment Completion Notification emails can now be sent from
+SWAMP-in-a-Box installations configured to enable outgoing SWAMP emails.
+
+7. We've made improvements to the Native result viewer. Specifically,
+results are now spread across multiple pages. Controls are available to set
+the number of weaknesses shown on a page and navigate from page to page.
+
+8. CentOS and Scientific Linux 6.9 (32-bit and 64-bit) assessment platforms
+are now available. If a CentOS or Scientific Linux 6.7 platform was
+previously installed as an add on, we recommend you download and install
+these new versions.
+
+9. SWAMP administrators can now stop Condor jobs from the Review Status
+page. Assessment and Metric runs are not completed and assigned a status of
+Terminated. Viewer runs are stopped without saving the viewer database, so
+any changes made in the current viewer session are lost.
+
+10. General enhancements and bug fixes.
+
+
 Noteworthy Changes in SWAMP-in-a-Box 1.31
 -----------------------------------------
 

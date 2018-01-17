@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # Set the hostname of the HTCondor installation in all relevant
@@ -81,7 +81,7 @@ update_config "ALLOW_WRITE"       "$NEW_HOSTNAME" "/etc/condor/config.d/swampina
 htcondor_service_status=$(/opt/swamp/sbin/swamp_manage_service condor status)
 
 if [ "$htcondor_service_status" = "running" ]; then
-    echo "Restarting HTCondor"
+    echo "Restarting service: condor"
     /opt/swamp/sbin/swamp_manage_service condor restart
 fi
 

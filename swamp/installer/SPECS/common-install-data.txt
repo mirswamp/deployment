@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/bin
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/etc
@@ -22,11 +22,8 @@ mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql/upgrades_data
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql/util
 mkdir -p $RPM_BUILD_ROOT/usr/local/bin
 mkdir -p $RPM_BUILD_ROOT/etc/profile.d
-mkdir -p $RPM_BUILD_ROOT/etc/init.d
 mkdir -p $RPM_BUILD_ROOT/etc/my.cnf.d
 mkdir -p $RPM_BUILD_ROOT/usr/lib64/mysql/plugin
-
-install -m 755 swampd-common $RPM_BUILD_ROOT/etc/init.d/swamp
 
 # install path specific
 install -m 444 mysql_global_settings.cnf ${RPM_BUILD_ROOT}/etc/my.cnf.d
@@ -66,41 +63,23 @@ install -m 400 SWAMP_in_a_Box/enable_metric_runs.sql ${RPM_BUILD_ROOT}/opt/swamp
 install -m 644 lib/SWAMP/CodeDX.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/CodeDX.pm
 install -m 644 lib/SWAMP/ThreadFix.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/ThreadFix.pm
 install -m 644 lib/SWAMP/vmu_Locking.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_Locking.pm
-install -m 644 lib/SWAMP/vmu_Notification.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_Notification.pm
 install -m 644 lib/SWAMP/vmu_FrameworkUtils.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_FrameworkUtils.pm
 install -m 644 lib/SWAMP/vmu_PackageTypes.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_PackageTypes.pm
 
 install -m 755 swamp_config ${RPM_BUILD_ROOT}/opt/swamp/bin
-install -m 755 vmu_swamp_monitor ${RPM_BUILD_ROOT}/opt/swamp/bin
 
 install -m 755 execute_execution_record $RPM_BUILD_ROOT/usr/local/bin
 install -m 755 launch_viewer $RPM_BUILD_ROOT/usr/local/bin
-install -m 755 notify_user $RPM_BUILD_ROOT/usr/local/bin
 install -m 755 kill_run $RPM_BUILD_ROOT/usr/local/bin
 
 install -m 755 vmu_calldorun.pl ${RPM_BUILD_ROOT}/opt/swamp/bin
 install -m 755 vmu_launchviewer.pl ${RPM_BUILD_ROOT}/opt/swamp/bin
-install -m 755 vmu_notifyuser.pl ${RPM_BUILD_ROOT}/opt/swamp/bin
+install -m 755 vmu_Scarf_CParsing ${RPM_BUILD_ROOT}/opt/swamp/bin
+install -m 755 libyajl.so.2 ${RPM_BUILD_ROOT}/opt/swamp/lib
+install -m 644 Scarf_ToolList.json ${RPM_BUILD_ROOT}/opt/swamp/etc
 install -m 755 vmu_killrun.pl ${RPM_BUILD_ROOT}/opt/swamp/bin
 
 install -m 400 swamp.conf $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 androidlint_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 archie_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 clang-sa_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 clang-sa.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 codesonar_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 cppcheck_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 cppcheck.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 dawn_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 findbugs_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 findbugs.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 gcc_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 generic_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 no-build.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 pmd_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 pmd.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-install -m 644 reveal_common.xslt $RPM_BUILD_ROOT/opt/swamp/etc
-
 install -m 644 log4perl.conf $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 755 swamp.sh $RPM_BUILD_ROOT/etc/profile.d
 

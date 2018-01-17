@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # Install SWAMP-in-a-Box on the current host.
@@ -34,14 +34,6 @@ echo "Release number: $RELEASE_NUMBER ($SHORT_RELEASE_NUMBER)"
 echo "Build number: $BUILD_NUMBER"
 echo "Hostname: $HOSTNAME"
 echo "Postfix relay host: $RELAYHOST"
-
-if [ -x "$BINDIR/yum_install.bash" ]; then
-    echo ""
-    echo "########################################"
-    echo "##### Installing Required Packages #####"
-    echo "########################################"
-    "$BINDIR/yum_install.bash" || abort_install
-fi
 
 echo ""
 echo "#############################"

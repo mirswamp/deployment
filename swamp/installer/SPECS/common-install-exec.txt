@@ -3,9 +3,10 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/bin
+mkdir -p $RPM_BUILD_ROOT/opt/swamp/sbin
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/etc
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/lib
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/run
@@ -31,7 +32,7 @@ install -m 644 lib/SWAMP/vmu_ViewerSupport.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5
 install -m 644 lib/SWAMP/vmu_Locking.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_Locking.pm
 install -m 644 lib/SWAMP/vmu_PackageTypes.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_PackageTypes.pm
 install -m 644 lib/SWAMP/Libvirt.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Libvirt.pm
-install -m 644 lib/SWAMP/ToolLicense.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/ToolLicense.pm
+install -m 644 lib/SWAMP/FloodlightAccess.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/FloodlightAccess.pm
 
 install -m 755 swamp_config ${RPM_BUILD_ROOT}/opt/swamp/bin
 install -m 755 arun.sh ${RPM_BUILD_ROOT}/opt/swamp/bin
@@ -50,6 +51,8 @@ install -m 755 vmu_MonitorViewer.pl $RPM_BUILD_ROOT/opt/swamp/bin
 
 install -m 744 libvirt_swamp_script.awk $RPM_BUILD_ROOT/opt/swamp/libexec/condor
 install -m 644 log4perl.conf $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 400 services.conf $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 services.conf.map $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 400 swamp.conf $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 644 versions.txt $RPM_BUILD_ROOT/opt/swamp/etc
 

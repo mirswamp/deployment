@@ -1,9 +1,9 @@
-# SWAMP common post-install script section
+# Common post-install script section for mir-swamp.org RPMs
 
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 # Set up the environment to use the SWAMP's Perl installation
 export PATH=/opt/perl5/perls/perl-5.18.1/bin:$PATH

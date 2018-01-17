@@ -630,7 +630,7 @@ AddIcon /icons/dvi.gif .dvi
 AddIcon /icons/uuencoded.gif .uu
 AddIcon /icons/script.gif .conf .sh .shar .csh .ksh .tcl
 AddIcon /icons/tex.gif .tex
-AddIcon /icons/bomb.gif core
+AddIcon /icons/bomb.gif /core
 
 AddIcon /icons/back.gif ..
 AddIcon /icons/hand.right.gif README

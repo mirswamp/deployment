@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 encountered_error=0
 trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR

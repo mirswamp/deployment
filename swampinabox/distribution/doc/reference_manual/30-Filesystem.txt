@@ -8,11 +8,12 @@ Configuration Files
 
 `/opt/swamp/etc/swamp.conf`::
 `/opt/swamp/etc/log4perl.conf`::
+`/opt/swamp/etc/services.conf`::
 `/opt/swamp/etc/swampmonitor.conf`::
 
 SWAMP backend configuration files. Directions for modifying `swamp.conf` can
 be found in the SWAMP-in-a-Box User Manual. There should be no need to
-modify `log4perl.conf` and `swampmonitor.conf`.
+directly modify `log4perl.conf`, `services.conf`, and `swampmonitor.conf`.
 
 `/etc/condor/condor_config`::
 `/etc/condor/config.d/swampinabox_*.conf`::

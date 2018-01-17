@@ -1,0 +1,325 @@
+#!/opt/perl5/perls/perl-5.18.1/bin/perl
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2018 Software Assurance Marketplace
+
+#
+# Copy values from one "key = value" configuration file to another.
+#
+
+#
+# For 'perlcritic'.
+#
+## no critic (MagicNumbers, RequireDotMatchAnything, RequireLineBoundaryMatching, RequireExtendedFormatting)
+
+use utf8;
+use strict;
+use warnings;
+
+use English qw( -no_match_vars );
+use Getopt::Long;
+use POSIX qw(strftime);
+use Socket;
+
+use File::Slurp qw(read_file write_file);
+
+############################################################################
+
+#
+# Execute the given command, and return all its output and its status code.
+#
+sub do_command {
+    my ($cmd)  = @_;
+    my $output = qx($cmd 2>&1);    # capture both standard out and standard error
+    my $status = $CHILD_ERROR;
+    return ($output, $status);
+}
+
+#
+# Return the given string without leading and trailing whitespace.
+#
+sub trim {
+    my ($val) = @_;
+    if ($val) {
+        $val =~ s/^\s+|\s+$//g;
+    }
+    return $val;
+}
+
+#
+# Backslash escape all double quotes in the given string.
+#
+sub escape_dquotes {
+    my ($val) = @_;
+    if ($val) {
+        $val =~ s/"/\\"/g;
+    }
+    return $val;
+}
+
+#
+# Create a backup copy of the given file.
+#
+sub backup_file {
+    my ($filename) = @_;
+    my $current_datetime = strftime('%Y%m%d%H%M%S', localtime);
+    my $old_filename     = escape_dquotes(qq($filename));
+    my $new_filename     = escape_dquotes(qq($filename.$current_datetime));
+    my ($output, $status) = do_command(qq(cp -p "$old_filename" "$new_filename"));
+    if ($status) {
+        exit_abnormally("Failed to create backup copy of: $filename", $output);
+    }
+    return;
+}
+
+#
+# Get the value for a key in the given string of "key = value" pairs.
+#
+sub get_key_val {
+    my ($config, $key) = @_;
+    my $escaped_key = quotemeta $key;
+
+    my @vals = ($config =~ /^\s*$escaped_key\s*=(.*)$/m);
+    return $vals[0];
+}
+
+#
+# Add/update a key-value pair in the given string of "key = value" pairs.
+#
+sub merge_key_val {
+    my ($config, $key, $val, $no_space) = @_;
+    my $escaped_key       = quotemeta $key;
+    my $contains_key      = ($config =~ /^\s*$escaped_key\s*=/m);
+    my $ends_with_newline = ($config =~ /\n$/);
+    my $space             = ($no_space ? q() : q( ));
+    $val                  = ($no_space ? $val : trim($val));
+
+    if ($contains_key) {
+        $config =~ s/^\s*$escaped_key\s*=.*$/$key$space=$space$val/gm;
+    }
+    else {
+        $config .= ($ends_with_newline ? q() : qq(\n)) . "$key$space=$space$val\n";
+    }
+    return $config;
+}
+
+############################################################################
+
+sub exit_normally {
+    exit 0;
+}
+
+sub exit_abnormally {
+    my ($message, $details) = @_;
+    $message = trim($message);
+    $details = trim($details);
+
+    if ($message) {
+        print "Error: $message" . ($details ? " ($details)" : q()) . "\n";
+    }
+    exit 1;
+}
+
+sub show_usage_and_exit {    ## no critic (RequireFinalReturn)
+    my $usage_message = <<"EOF";
+Usage: $PROGRAM_NAME -i <source> -o <destination> [options]
+
+Copy values from one "key = value" configuration file to another.
+
+Required arguments:
+    -i file                 The file to copy values from
+    --input file
+    --source file
+
+    -o file                 The file to copy values to
+    --output file
+    --destination file
+
+Other options:
+    --exclude <pattern>     Prefix of keys in the destination to ignore
+    --include <pattern>     Prefix of keys in the source that to add
+    --no-space              Don't include spaces around the "="
+    --skip-disk             Don't write the updated destination to disk
+    --stdout                Display the updated destination on standard out
+    --help, -?              Display this message
+EOF
+
+    print $usage_message;
+    exit_abnormally();
+}
+
+############################################################################
+
+sub get_options {
+    my @errors  = ();
+    my %options = ();
+
+    my $ok = Getopt::Long::GetOptions(\%options,
+        'help|?',
+        'source|input|i=s', 'destination|output|o=s',
+        'include=s', 'exclude=s', 'map=s',
+        'no-space', 'skip-disk', 'stdout',
+    );
+
+    if (!$ok || $options{'help'}) {
+        print "\n" if !$ok;
+        show_usage_and_exit();
+    }
+
+    my $source_file      = $options{'source'};
+    my $destination_file = $options{'destination'};
+    my $map_file         = $options{'map'};
+
+    if (!$options{'source'}) {
+        push @errors, 'Required argument missing: source';
+    }
+    if (!$options{'destination'}) {
+        push @errors, 'Required argument missing: destination';
+    }
+    if ($source_file && !-r $source_file) {
+        push @errors, "Source/input file does not exist (or is not readable): $source_file";
+    }
+    if ($destination_file && !-r $destination_file) {
+        push @errors, "Destination/output file does not exist (or is not readable): $destination_file";
+    }
+    if ($map_file && !-r $map_file) {
+        push @errors, "Map file does not exist (or is not readable): $map_file";
+    }
+
+    for my $msg (@errors) {
+        print $msg . "\n";
+    }
+
+    if (!$ok || scalar @errors > 0) {
+        print "\n";
+        show_usage_and_exit();
+    }
+
+    return \%options;
+}
+
+############################################################################
+
+sub copy_config {
+    my ($options) = @_;
+
+    my $source_file      = $options->{'source'}      || q();
+    my $destination_file = $options->{'destination'} || q();
+    my $map_file         = $options->{'map'}         || q();
+
+    my $source      = (-r $source_file)      ? read_file($source_file)      : q();
+    my $destination = (-r $destination_file) ? read_file($destination_file) : q();
+    my $map         = (-r $map_file)         ? read_file($map_file)         : q();
+    my $original_destination = $destination;
+
+    my $include_pattern         = $options->{'include'};
+    my $exclude_pattern         = $options->{'exclude'};
+    my $escaped_include_pattern = defined $include_pattern ? quotemeta $include_pattern : q();
+    my $escaped_exclude_pattern = defined $exclude_pattern ? quotemeta $exclude_pattern : q();
+
+    my @lines   = ();
+    my %key_map = ();
+
+    #
+    # Build the map from source keys to destination keys.
+    #
+    @lines = split /^/, trim($map);
+    for my $line (@lines) {
+        $line = trim($line);
+        if ($line =~ /^#/) {
+            next;
+        }
+
+        my @pieces = split /=/, $line;
+        my $key = trim($pieces[0]);
+
+        if (!$key) {
+            next;
+        }
+
+        my $val = get_key_val($map, $key);
+        if ($val) {    # Not allowed to map a source key to nothing
+            $key_map{$key} = trim($val);
+        }
+    }
+
+    #
+    # Update each destination key with its value in the source.
+    #
+    @lines = split /^/, trim($destination);
+    for my $line (@lines) {
+        $line = trim($line);
+        if ($line =~ /^#/) {
+            next;
+        }
+
+        my @pieces = split /=/, $line;
+        my $key = trim($pieces[0]);
+
+        if (!$key) {
+            next;
+        }
+        if (defined $exclude_pattern && $key =~ /^$escaped_exclude_pattern/) {
+            next;
+        }
+
+        my $val = get_key_val($source, $key);
+        if (defined $val) {
+            $destination = merge_key_val($destination, $key, $val, $options->{'no-space'});
+        }
+    }
+
+    #
+    # Find keys in the source that should be added to the destination.
+    #
+    @lines = split /^/, trim($source);
+    for my $line (@lines) {
+        $line = trim($line);
+        if ($line =~ /^#/) {
+            next;
+        }
+
+        my @pieces = split /=/, $line;
+        my $key = trim($pieces[0]);
+
+        if (
+            $key
+            && ($key_map{$key}
+                || (defined $include_pattern && $key =~ /^$escaped_include_pattern/))
+          )
+        {
+            my $val = get_key_val($source, $key);
+            my $dest_key = $key_map{$key} || $key;
+            if (defined $val) {
+                $destination = merge_key_val($destination, $dest_key, $val, $options->{'no-space'});
+            }
+        }
+    }
+
+    #
+    # Write the destination out, as needed.
+    #
+    if ($destination ne $original_destination) {
+        if (!$options->{'skip-disk'}) {
+            backup_file($destination_file);
+            write_file($destination_file, $destination);
+        }
+    }
+    if ($options->{'stdout'}) {
+        print $destination;
+    }
+    return;
+}
+
+############################################################################
+
+sub main {
+    my $options = get_options();
+    copy_config($options);
+    return;
+}
+
+main();
+exit_normally();

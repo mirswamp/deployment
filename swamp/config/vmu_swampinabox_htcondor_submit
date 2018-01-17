@@ -6,6 +6,8 @@ vm_type = kvm
 vm_networking = true
 RequestMemory = 6144
 vm_memory = 6144
+RequestCpus = 2
+vm_vcpus = 2
 RunAsOwner = True
 
 ## Include this in condor config:

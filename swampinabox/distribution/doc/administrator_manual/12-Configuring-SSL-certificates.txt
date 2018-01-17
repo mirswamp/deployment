@@ -1,3 +1,4 @@
+[[configure-ssl-certs]]
 Configuring an SSL Certificate for SWAMP-in-a-Box
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

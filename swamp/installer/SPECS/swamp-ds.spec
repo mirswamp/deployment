@@ -1,7 +1,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # spec file for SWAMP
@@ -124,38 +124,9 @@ fi
 /bin/sed -i "s|^ldap.uri\ =\ .*$|ldap.uri = $ldap|" /opt/swamp/etc/swamp.conf
 
 # Arguments to post are {1=>new, 2=>upgrade}
-if [ "$1" = "2" ]
-then
-    echo Restarting SWAMP services
-    quartermasterpid=$(ps ax | grep quartermaster.jar | grep -v grep | awk "{print \$1}")
-    if [ "$quartermasterpid" != "" ]
-    then
-        echo "Killing leftover quartermaster.jar $quartermasterpid"
-        kill -9 $quartermasterpid
-    fi
-
-    service swamp restart
-else
-    chkconfig --add swamp
-    echo Starting SWAMP services
-    service swamp start
-fi
 
 # set group and file permissions on swamp.conf
 chmod 440 /opt/swamp/etc/swamp.conf
 chgrp mysql /opt/swamp/etc/swamp.conf
 
 %preun
-# Only remove things if this is an uninstall
-if [ "$1" = "0" ]
-then
-    echo Stopping SWAMP services
-    service swamp stop
-    chkconfig --del swamp
-    quartermasterpid=$(ps ax | grep quartermaster.jar | grep -v grep | awk "{print \$1}")
-    if [ "$quartermasterpid" != "" ]
-    then
-        echo "Killing leftover quartermaster.jar $quartermasterpid"
-        kill -9 $quartermasterpid
-    fi
-fi

@@ -6,7 +6,7 @@ htcondor_collector_host = HOSTNAME
 # Perl database properties. Set these values on the data server, submit, and execute node(s).
 dbPerlDsnHost = <dataserver hostname>
 dbPerlDsnPort = 3306
-dbPerlUser = <dataserver username>
+dbPerlUser = java_agent
 dbPerlPass = <dataserver password>
 
 # agentMonitor should point to the submit node. Set these values on the data server, submit, and execute node(s).
@@ -29,42 +29,21 @@ vruntimeout_duration = 28800
 vruntimeout_lastlog = 3600
 
 # Default viewer master VM name. Set this on the submit node.
-master.viewer = universal-centos-6.8-64-viewer
+master.viewer = universal-centos-6.9-64-viewer
 
 # vmip lookup delay, attempt count, and sleep time. Set this on the execute node(s).
 vmip_lookup_delay = 10
 vmip_lookup_attempts = 50
 vmip_lookup_sleep = 3
 
-# Email templates. Set these on the dataserver node.
-email.arun.complete = <USER>,<CR><CR>Your assessment of <PACKAGE> using <TOOL> on <PLATFORM> completed at <COMPLETIONTIME> with a status of <SUCCESS>.<CR><CR>-The Software Assurance Marketplace (SWAMP)
-email.host = 128.104.153.1
-email.arun.subject = Your SWAMP assessment has completed
-email.from = "Software Assurance Marketplace Singleserver: Do Not Reply"<do-not-reply@mir-swamp.org>
-
 # Status. Set this on the dataserver node.
 SWAMPState = ON
 
-# Parasoft Services.conf contents. Set these on the execute node(s).
-tool.ps-ctest.license.host = lic-ps-dt-01.cosalab.org
-tool.ps-ctest.license.port = 2002
-tool.ps-jtest.license.host = lic-ps-dt-01.cosalab.org
-tool.ps-jtest.license.port = 2002
-
-# RedLizard Services.conf contents. Set these on the execute node(s).
-tool.rl-goanna.license.host = lic-rl-dt-01.cosalab.org
-tool.rl-goanna.license.port = 6200
-
-# GrammaTech services.conf contents. Set these on the execute node(s).
-tool.gt-csonar.license.host = lic-gt-dt-01.cosalab.org
-tool.gt-csonar.license.port = 7350
-
-# Synopsys services.conf contents. Set these on the execute node(s).
-tool.sy-coverity.license.host = lic-sy-dt-01.cosalab.org
-tool.sy-coverity.license.port = 27000
-
 # Sonatype ApplicationHealthCheck sonatype-data.conf contents. Set this on the execute node(s).
 sonatype_integrator = SWAMP
+
+# SWAMP api web server. Set this on the execute nodes(s).
+swamp_api_web_server = HOSTNAME
 
 # SWAMP-in-a-Box settings
 SWAMP-in-a-Box = yes

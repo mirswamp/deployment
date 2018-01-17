@@ -1,0 +1,11 @@
+# Persist PERLBREW variables
+Defaults    env_keep += "PERL5LIB"
+
+# Disable requiretty
+Defaults:%slotusers !requiretty
+
+# Allow slot users to run specific commands without a password
+%slotusers ALL=NOPASSWD:/usr/bin/virsh, /usr/bin/virt-edit, /usr/sbin/start_vm, /usr/sbin/vm_output, /usr/sbin/vm_cleanup, /bin/cp, /bin/cat, /bin/mv, /bin/scp, /opt/perl5/perls/perl-5.18.1/bin/perl
+
+# Allow apache user to execute specific commands without a password
+apache ALL=NOPASSWD:/usr/bin/virsh

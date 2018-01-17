@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # Set the hostname of the web server in all relevant configuration locations.
@@ -59,6 +59,7 @@ function update_config() {
 target="/opt/swamp/etc/swamp.conf"
 
 update_config "reporturl" "https://$NEW_HOSTNAME/results/" "$target"
+update_config "swamp_api_web_server" "$NEW_HOSTNAME/swamp-web-server/public" "$target"
 
 #
 # Update .env (web server)
@@ -93,7 +94,7 @@ cat >"$TMP_FILE" <<END_DB_SCRIPT
     INSERT INTO assessment.system_setting (system_setting_code, system_setting_value) VALUES ('CODEDX_BASE_URL', 'https://$NEW_HOSTNAME/');
 END_DB_SCRIPT
 
-echo "Updating database records"
+echo "Updating: Database records"
 /opt/swamp/sbin/execute_sql_script "$TMP_FILE"
 rm -f "$TMP_FILE"
 

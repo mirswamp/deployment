@@ -1,7 +1,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # spec file for SWAMP
@@ -70,94 +70,107 @@ else
     echo Please update the vmnetdomain item in /opt/swamp/etc/swamp.conf with the appropriate VM domain.
 fi
 
-# Floodlight and License Servers
+# API, Floodlight, and License Servers
 iam=`hostname -s`
+swamp_api_web_server=""
 floodlight=""
 
 parasoft_flowprefix=""
 parasoft_server_ip=""
-tool_ps_ctest_license_host=""
-tool_ps_jtest_license_host=""
+parasoft_dtp_server_ip=""
 
 redlizard_flowprefix=""
 redlizard_server_ip=""
-tool_rl_goanna_license_host=""
 
 grammatech_flowprefix=""
 grammatech_server_ip=""
-tool_gt_csonar_license_host=""
 
 synopsys_flowprefix=""
 synopsys_server_ip=""
-tool_sy_coverity_license_host=""
+
+owaspdc_flowprefix=""
+owaspdc_server_ip=""
 
 nameserver=""
 
 if [ $(expr "$iam" : "swa-exec-dd" ) = $(expr length "swa-exec-dd") ];then
+    swamp_api_web_server="swa-csaweb-dd-01.cosalab.org"
     floodlight=http://swa-flood-dd-01.mirsam.org:8080
-	parasoft_flowprefix=ps-dt-license
+	parasoft_flowprefix=ps-dd-license
 	parasoft_server_ip=128.104.7.8
-	tool_ps_ctest_license_host=lic-ps-dt-01.cosalab.org
-	tool_ps_jtest_license_host=lic-ps-dt-01.cosalab.org
-	redlizard_flowprefix=rl-dt-license
+	parasoft_dtp_server_ip=128.104.7.8
+	redlizard_flowprefix=rl-dd-license
 	redlizard_server_ip=128.104.7.11
-	tool_rl_goanna_license_host=lic-rl-dt-01.cosalab.org
-	grammatech_flowprefix=gt-dt-license
+	grammatech_flowprefix=gt-dd-license
 	grammatech_server_ip=128.104.7.9
-	tool_gt_csonar_license_host=lic-gt-dt-01.cosalab.org
-	synopsys_flowprefix=sy-dt-license
+	synopsys_flowprefix=sy-dd-license
 	synopsys_server_ip=128.104.7.15
-	tool_sy_coverity_license_host=lic-sy-dt-01.cosalab.org
+	owaspdc_flowprefix=od-dd-database
+	owaspdc_server_ip=128.104.7.17
 	nameserver=128.104.7.5
+    /bin/sed -i "s/<ENVIRONMENT>/dt/g" /opt/swamp/etc/services.conf
+    /bin/sed -i "s/<DOMAIN>/cosalab/g" /opt/swamp/etc/services.conf
 elif [ $(expr "$iam" : "swa-exec-dt" ) = $(expr length "swa-exec-dt") ];then
+    swamp_api_web_server="swa-csaweb-dt-02.cosalab.org"
     floodlight=http://swa-flood-dt-01.mirsam.org:8080
 	parasoft_flowprefix=ps-dt-license
 	parasoft_server_ip=128.104.7.8
-	tool_ps_ctest_license_host=lic-ps-dt-01.cosalab.org
-	tool_ps_jtest_license_host=lic-ps-dt-01.cosalab.org
+	parasoft_dtp_server_ip=128.104.7.8
 	redlizard_flowprefix=rl-dt-license
 	redlizard_server_ip=128.104.7.11
-	tool_rl_goanna_license_host=lic-rl-dt-01.cosalab.org
 	grammatech_flowprefix=gt-dt-license
 	grammatech_server_ip=128.104.7.9
-	tool_gt_csonar_license_host=lic-gt-dt-01.cosalab.org
 	synopsys_flowprefix=sy-dt-license
 	synopsys_server_ip=128.104.7.15
-	tool_sy_coverity_license_host=lic-sy-dt-01.cosalab.org
+	owaspdc_flowprefix=od-dt-database
+	owaspdc_server_ip=128.104.7.17
 	nameserver=128.104.7.5
+    /bin/sed -i "s/<ENVIRONMENT>/dt/g" /opt/swamp/etc/services.conf
+    /bin/sed -i "s/<DOMAIN>/cosalab/g" /opt/swamp/etc/services.conf
 elif [ $(expr "$iam" : "swa-exec-it" ) = $(expr length "swa-exec-it") ];then
+    swamp_api_web_server="swa-csaweb-it-01.cosalab.org"
     floodlight=http://swa-flood-it-01.mirsam.org:8080
 	parasoft_flowprefix=ps-it-license
 	parasoft_server_ip=128.104.7.7
-	tool_ps_ctest_license_host=lic-ps-it-01.cosalab.org
-	tool_ps_jtest_license_host=lic-ps-it-01.cosalab.org
+	parasoft_dtp_server_ip=128.104.7.7
 	redlizard_flowprefix=rl-it-license
 	redlizard_server_ip=128.104.7.13
-	tool_rl_goanna_license_host=lic-rl-it-01.cosalab.org
 	grammatech_flowprefix=gt-it-license
 	grammatech_server_ip=128.104.7.10
-	tool_gt_csonar_license_host=lic-gt-it-01.cosalab.org
 	synopsys_flowprefix=sy-it-license
 	synopsys_server_ip=128.104.7.16
-	tool_sy_coverity_license_host=lic-sy-it-01.cosalab.org
+	owaspdc_flowprefix=od-it-database
+	owaspdc_server_ip=128.104.7.17
 	nameserver=128.104.7.5
+    /bin/sed -i "s/<ENVIRONMENT>/it/g" /opt/swamp/etc/services.conf
+    /bin/sed -i "s/<DOMAIN>/cosalab/g" /opt/swamp/etc/services.conf
 elif [ $(expr "$iam" : "swa-exec-pd" ) = $(expr length "swa-exec-pd") ];then
+    swamp_api_web_server="swa-csaweb-pd-01.mir-swamp.org"
     floodlight=http://swa-flood-pd-01.mirsam.org:8080
 	parasoft_flowprefix=ps-pd-license
 	parasoft_server_ip=128.105.64.7
-	tool_ps_ctest_license_host=lic-ps-pd-01.mir-swamp.org
-	tool_ps_jtest_license_host=lic-ps-pd-01.mir-swamp.org
+	parasoft_dtp_server_ip=128.105.64.7
 	redlizard_flowprefix=rl-pd-license
 	redlizard_server_ip=128.105.64.9
-	tool_rl_goanna_license_host=lic-rl-pd-01.mir-swamp.org
 	grammatech_flowprefix=gt-pd-license
 	grammatech_server_ip=128.105.64.8
-	tool_gt_csonar_license_host=lic-gt-pd-01.mir-swamp.org
 	synopsys_flowprefix=sy-pd-license
 	synopsys_server_ip=128.105.64.10
-	tool_sy_coverity_license_host=lic-sy-pd-01.mir-swamp.org
+	owaspdc_flowprefix=od-pd-database
+	owaspdc_server_ip=128.105.64.11
 	nameserver=128.105.64.5
+    /bin/sed -i "s/<ENVIRONMENT>/pd/g" /opt/swamp/etc/services.conf
+    /bin/sed -i "s/<DOMAIN>/mir-swamp/g" /opt/swamp/etc/services.conf
 fi
+
+# API Web Server
+if [ "$swamp_api_web_server" != "" ]; then
+    /opt/swamp/bin/swamp_config -C /opt/swamp/etc/swamp.conf --propset "swamp_api_web_server" "$swamp_api_web_server"
+else
+    echo Please update the swamp_api_web_server item in /opt/swamp/etc/swamp.conf with the appropriate hostname
+fi
+
+# Floodlight
 if [ "$floodlight" != "" ];then
     /bin/sed -i "s|^floodlight=.*$|floodlight=$floodlight|" /opt/swamp/etc/swamp.conf
 else
@@ -175,16 +188,6 @@ if [ "$parasoft_server_ip" != "" ];then
 else
     echo Please update the parasoft_server_ip item in /opt/swamp/etc/swamp.conf with the appropriate parasoft license server ip address
 fi
-if [ "$tool_ps_ctest_license_host" != "" ];then
-    /bin/sed -i "s|^tool.ps-ctest.license.host\ =\ .*$|tool.ps-ctest.license.host=$tool_ps_ctest_license_host|" /opt/swamp/etc/swamp.conf
-else
-    echo Please update the tool.ps-ctest.license.host item in /opt/swamp/etc/swamp.conf with the appropriate parasoft ctest license server hostname
-fi
-if [ "$tool_ps_jtest_license_host" != "" ];then
-    /bin/sed -i "s|^tool.ps-jtest.license.host\ =\ .*$|tool.ps-jtest.license.host=$tool_ps_jtest_license_host|" /opt/swamp/etc/swamp.conf
-else
-    echo Please update the tool.ps-jtest.license.host item in /opt/swamp/etc/swamp.conf with the appropriate parasoft jtest license server hostname
-fi
 
 # RedLizard License Server
 if [ "$redlizard_flowprefix" != "" ];then
@@ -196,11 +199,6 @@ if [ "$redlizard_server_ip" != "" ];then
     /bin/sed -i "s|^redlizard_server_ip\ =\ .*$|redlizard_server_ip=$redlizard_server_ip|" /opt/swamp/etc/swamp.conf
 else
     echo Please update the redlizard_server_ip item in /opt/swamp/etc/swamp.conf with the appropriate redlizard license server ip address
-fi
-if [ "$tool_rl_goanna_license_host" != "" ];then
-    /bin/sed -i "s|^tool.rl-goanna.license.host\ =\ .*$|tool.rl-goanna.license.host=$tool_rl_goanna_license_host|" /opt/swamp/etc/swamp.conf
-else
-    echo Please update the tool.rl-goanna.license.host item in /opt/swamp/etc/swamp.conf with the appropriate redlizard goanna license server hostname
 fi
 
 # GrammaTech License Server
@@ -214,11 +212,6 @@ if [ "$grammatech_server_ip" != "" ];then
 else
     echo Please update the grammatech_server_ip item in /opt/swamp/etc/swamp.conf with the appropriate grammatech license server ip address
 fi
-if [ "$tool_gt_csonar_license_host" != "" ];then
-    /bin/sed -i "s|^tool.gt-csonar.license.host\ =\ .*$|tool.gt-csonar.license.host=$tool_gt_csonar_license_host|" /opt/swamp/etc/swamp.conf
-else
-    echo Please update the tool.gt-csonar.license.host item in /opt/swamp/etc/swamp.conf with the appropriate grammatech license server hostname
-fi
 
 # Synopsys License Server
 if [ "$synopsys_flowprefix" != "" ];then
@@ -230,11 +223,6 @@ if [ "$synopsys_server_ip" != "" ];then
     /bin/sed -i "s|^synopsys_server_ip\ =\ .*$|synopsys_server_ip=$synopsys_server_ip|" /opt/swamp/etc/swamp.conf
 else
     echo Please update the synopsys_server_ip item in /opt/swamp/etc/swamp.conf with the appropriate synopsys license server ip address
-fi
-if [ "$tool_sy_coverity_license_host" != "" ];then
-    /bin/sed -i "s|^tool.sy-coverity.license.host\ =\ .*$|tool.sy-coverity.license.host=$tool_sy_coverity_license_host|" /opt/swamp/etc/swamp.conf
-else
-    echo Please update the tool.gt-csonar.license.host item in /opt/swamp/etc/swamp.conf with the appropriate synopsys license server hostname
 fi
 
 if [ "$nameserver" != "" ];then

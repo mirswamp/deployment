@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # Check whether the current host has enough disk space, memory,
@@ -66,6 +66,7 @@ my %platforms_sizes = (
     '1.29'   => 11881,
     '1.30'   => 11881,
     '1.31'   => 11786,
+    '1.32'   => 13389,
 );
 my %tools_sizes = (
     '1.27.1' => 2557,
@@ -74,6 +75,7 @@ my %tools_sizes = (
     '1.29'   => 5111,
     '1.30'   => 5117,
     '1.31'   => 5200,
+    '1.32'   => 5095,
 );
 
 #
@@ -172,12 +174,12 @@ if ($is_install && $current_version) {
 }
 
 if ($is_upgrade && !$current_version) {
-    print "Error: Did not find a SWAMP-in-a-Box installation to upgrade.\n";
+    print "Error: Did not find a SWAMP-in-a-Box installation to upgrade\n";
     exit 1;
 }
 
 if ($is_upgrade && $current_version =~ m/^(1\.27|1\.28)/) {
-    print "Error: Upgrading from $current_version is not supported.\n";
+    print "Error: Upgrading from $current_version is not supported\n";
     exit 1;
 }
 
@@ -208,15 +210,15 @@ sub get_mount_point {
     while (@dirs) {
         my $test_path = File::Spec->catdir(@dirs);
         if (!-e $test_path && -l $test_path) {
-            die "Error: $test_path is a symlink that points to nothing.\n";
+            die "Error: Symbolic link that points to nothing: $test_path\n";
         }
         if (-e $test_path && !-d $test_path) {
-            die "Error: $test_path is not a directory.\n";
+            die "Error: Not a directory: $test_path\n";
         }
         if (-e $test_path) {
             my $mount_point = `df -P $test_path | tail -n 1 | awk '{print \$6}'`;
             if ($CHILD_ERROR) {
-                die "Error: $PROGRAM_NAME: Unexpected failure of subcommand.\n";
+                die "Error: $PROGRAM_NAME: Unexpected failure of subcommand\n";
             }
             chomp $mount_point;
             return $mount_point;
@@ -235,7 +237,7 @@ sub get_free_space {
 
     my $free_space = `df -P -B 1M $path | tail -n 1 | awk '{print \$4}'`;
     if ($CHILD_ERROR) {
-        die "Error: $PROGRAM_NAME: Unexpected failure of subcommand.\n";
+        die "Error: $PROGRAM_NAME: Unexpected failure of subcommand\n";
     }
     chomp $free_space;
     return $free_space;
@@ -251,7 +253,7 @@ sub get_rpm_info {
         $other_flags = q();
     }
     else {
-        $rpm_name    = (glob "$rpms_dir/$package_name*")[0];
+        $rpm_name    = (glob "$rpms_dir/$package_name*")[0] || q();
         $other_flags = '-p';
     }
 

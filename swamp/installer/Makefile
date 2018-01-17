@@ -1,7 +1,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 DIRS=SOURCES RPMS SPECS SRPMS BUILD TEMPSOURCES
 RELEASE_NUMBER ?= 0.10
@@ -35,7 +35,6 @@ AGENTFILES= \
 	vmu_calldorun.pl \
 	vmu_csa_agent_launcher \
 	vmu_killrun.pl \
-	vmu_notifyuser.pl \
 	swamp_config \
 	vmu_swamp_monitor
 
@@ -46,42 +45,26 @@ AGENTPKGS= \
 	lib/SWAMP/vmu_FrameworkUtils.pm \
 	lib/SWAMP/vmu_Locking.pm \
 	lib/SWAMP/vmu_PackageTypes.pm \
-	lib/SWAMP/vmu_Notification.pm \
 	lib/SWAMP/CodeDX.pm \
 	lib/SWAMP/Libvirt.pm \
 	lib/SWAMP/ThreadFix.pm \
-	lib/SWAMP/ToolLicense.pm
+	lib/SWAMP/FloodlightAccess.pm
 
 CONFIG= \
 	libvirt_swamp_script.awk \
 	vmu_swampinabox_htcondor_submit \
 	vmu_swamp_htcondor_submit \
 	log4perl.conf \
+	services.conf.map \
 	submonitor.conf \
 	swampinaboxmonitor.conf \
-	androidlint_common.xslt \
-	archie_common.xslt \
-	clang-sa_common.xslt \
-	clang-sa.xslt \
-	codesonar_common.xslt \
-	cppcheck_common.xslt \
-	cppcheck.xslt \
-	dawn_common.xslt \
-	findbugs_common.xslt \
-	findbugs.xslt \
-	gcc_common.xslt \
-	generic_common.xslt \
-	no-build.xslt \
-	pmd_common.xslt \
-	pmd.xslt \
-	reveal_common.xslt
+	Scarf_ToolList.json
 
-SCRIPTS=swampd-common swamp.sh arun.bash execute_execution_record launch_viewer kill_run notify_user
+SCRIPTS=swampd-common swamp.sh arun.bash execute_execution_record launch_viewer kill_run
 
 MSOURCES=$(AGENTFILES) $(AGENTPKGS) $(CONFIG) $(SCRIPTS)
 
 CP=/bin/cp -p
-TAR=tar
 TOP=../../..
 
 destfiles:=$(AGENTFILES:%=TEMPSOURCES/%) $(AGENTPKGS:%=TEMPSOURCES/%) $(CONFIG:%=TEMPSOURCES/%) $(SCRIPTS:%=TEMPSOURCES/%) $(SQLSCRIPTS:%=TEMPSOURCES/%)
@@ -97,7 +80,8 @@ SWAMPCONF::
 $(SWAMPTARBALL): $(COMMONSOURCES) common resultparser codedx codedx.war threadfix threadfix.war SWAMPCONF
 	cp ../../lib/lib_mysqludf_sys.so TEMPSOURCES/Data_Server
 	cp ../../../db/backup_db TEMPSOURCES
-	$(TAR) -C TEMPSOURCES -czvf $@ .
+	cp ../config/services.conf TEMPSOURCES
+	tar -C TEMPSOURCES -czf $@ .
 
 # tar file for singleserver
 # use swamp.conf.singleserver
@@ -108,7 +92,8 @@ SINGLESERVERCONF::
 $(SINGLESERVERTARBALL): $(COMMONSOURCES) resultparser common codedx codedx.war threadfix threadfix.war SINGLESERVERCONF
 	cp ../../lib/lib_mysqludf_sys.so TEMPSOURCES/Data_Server
 	cp ../../../db/backup_db TEMPSOURCES
-	$(TAR) -C TEMPSOURCES -czvf $@ .
+	cp ../config/services.conf.singleserver TEMPSOURCES/services.conf
+	tar -C TEMPSOURCES -czf $@ .
 
 # tar file for swampinabox
 # use swamp.conf.swampinabox
@@ -120,20 +105,29 @@ SWAMPINABOXCONF::
 $(SWAMPINABOXTARBALL): $(COMMONSOURCES) resultparser common codedx threadfix SWAMPINABOXCONF
 	cp ../../lib/lib_mysqludf_sys.so TEMPSOURCES/Data_Server
 	cp ../../../db/backup_db TEMPSOURCES
-	$(TAR) -C TEMPSOURCES -czvf $@ .
+	cp ../config/services.conf.swampinabox TEMPSOURCES/services.conf
+	tar -C TEMPSOURCES -czf $@ .
 
-swampinabox: dirs $(SWAMPINABOXTARBALL)
+swampinabox: dirs scarfcparsing $(SWAMPINABOXTARBALL)
 	/bin/rm -rf RPMS/noarch
 	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS swampinabox
 
-singleserver: dirs $(SINGLESERVERTARBALL)
+singleserver: dirs scarfcparsing $(SINGLESERVERTARBALL)
 	mv $(SINGLESERVERTARBALL) $(SWAMPINABOXTARBALL)
 	/bin/rm -rf RPMS/noarch
 	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS singleserver
 
-rpm: dirs $(SWAMPTARBALL)
+rpm: dirs scarfcparsing $(SWAMPTARBALL)
 	/bin/rm -rf RPMS/noarch
 	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS
+
+scarfcparsing:	
+	(cd ../../../services/perl/agents/Scarf_Parsing_C; make;)
+	cp ../../../services/perl/agents/Scarf_Parsing_C/yajl/install/lib/libyajl.so.2 TEMPSOURCES
+	strip TEMPSOURCES/libyajl.so.2
+	cp ../../../services/perl/agents/Scarf_Parsing_C/vmu_Scarf_CParsing TEMPSOURCES 
+	strip TEMPSOURCES/vmu_Scarf_CParsing
+	cp ../config/Scarf_ToolList.json TEMPSOURCES
 
 dirserver: dirs $(SWAMPTARBALL)
 	/bin/rm -rf RPMS/noarch
@@ -261,8 +255,8 @@ $(AGENTFILES:%=TEMPSOURCES/%): $(TOP)/services/perl/agents/
 $(SQLSCRIPTS:%=TEMPSOURCES/%): TEMPSOURCES/scripts.tar
 
 TEMPSOURCES/scripts.tar:
-	find $(TOP)/db -name "*.sql" -o -name "*.pl" | tar --xform='s/ /_/g' -cvf TEMPSOURCES/scripts.tar -T -
-	$(TAR) --strip-components=1 -C TEMPSOURCES -xvf TEMPSOURCES/scripts.tar
+	find $(TOP)/db -name "*.sql" -o -name "*.pl" | tar --xform='s/ /_/g' -cf TEMPSOURCES/scripts.tar -T -
+	tar --strip-components=1 -C TEMPSOURCES -xf TEMPSOURCES/scripts.tar
 
 clean:
 	/bin/rm -rf BUILD BUILDROOT RPMS SOURCES SRPMS TEMPSOURCES

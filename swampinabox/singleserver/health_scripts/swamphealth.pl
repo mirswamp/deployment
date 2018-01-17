@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 use strict;
 use warnings;
@@ -21,7 +21,7 @@ use SWAMP::vmu_AssessmentSupport qw(doRun);
 # 	Services	httpd, mysql, swamp, iptables
 # 	Monitors	swamp_monitor, quartermaster.jar
 # 	Scripts		
-# 	BinScripts	execute_execution_record, kill_run, launch_viewer, notify_user
+# 	BinScripts	execute_execution_record, kill_run, launch_viewer
 #
 # Submit Node
 # 	Services	httpd, condor, swamp, iptables
@@ -114,8 +114,6 @@ sub show_swamp_tasks_status {
 	$pid = process_status('killrun.pl', 0);
 	$count += 1 if ($pid);
 	$pid = process_status('launchviewer.pl', 0);
-	$count += 1 if ($pid);
-	$pid = process_status('notifyuser.pl', 0);
 	$count += 1 if ($pid);
 	$pid = process_status('vrunTask.pl', 0);
 	$count += 1 if ($pid);

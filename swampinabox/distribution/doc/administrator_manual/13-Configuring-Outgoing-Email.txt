@@ -78,30 +78,6 @@ service postfix restart
   SWAMP emails.
 
 
-==== Modify `/opt/swamp/etc/swamp.conf` to Configure Outgoing Email ====
-
-These settings enable email notifications that assessments have completed.
-
-[IMPORTANT]
-There is a known bug that prevents these emails from being sent.
-
-* Set `email.host` to your SMTP server.
-
-* Set `email.arun.subject` to the subject line to be used for assessment
-  completion notification emails.
-
-* Set `email.from` to the name and email address you want to use as the
-  sender of assessment completion notification emails.
-
-* Restart the `swamp` service so your changes to `swamp.conf` are in
-  effect by running the following command as `root` (or using `sudo`):
-
-+
-----
-service swamp restart
-----
-
-
 ==== Enable "Contact Us" for SWAMP-in-a-Box ====
 
 Enabling "Contact Us" creates a Contact link in the SWAMP menu bar. This

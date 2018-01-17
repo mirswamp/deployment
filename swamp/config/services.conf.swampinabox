@@ -1,0 +1,25 @@
+# Parasoft services.conf contents. Set these on the execute node(s).
+# Parasoft version 9.x
+tool-ps-ctest-license-host = license-server.example.com
+tool-ps-ctest-license-port = 2002
+tool-ps-jtest-license-host = license-server.example.com
+tool-ps-jtest-license-port = 2002
+# Parasoft version 10.x
+tool-ps-ctest-dtp-server = license-server.example.com
+tool-ps-ctest-dtp-port = 8443
+tool-ps-ctest-dtp-user = build
+tool-ps-ctest-dtp-password = dtp_password_example
+tool-ps-jtest-dtp-server = license-server.example.com
+tool-ps-jtest-dtp-port = 8443
+tool-ps-jtest-dtp-user = build
+tool-ps-jtest-dtp-password = dtp_password_example
+
+# GrammaTech services.conf contents. Set these on the execute node(s).
+tool-gt-csonar-license-host = license-server.example.com
+tool-gt-csonar-license-port = 7350
+
+# Synopsys services.conf contents. Set these on the execute node(s).
+tool-sy-coverity-license-host = license-server.example.com
+tool-sy-coverity-license-port = 27000
+
+# sevices.conf settings for other tools. Set these on the execute node(s).

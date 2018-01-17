@@ -22,8 +22,6 @@ cppcheck-1.75-1.tar
 csslint-1.0.4.tar.gz
 dawnscanner-1.3.5-4.tar
 dawnscanner-1.6.7-2.tar
-dependency-check-1.4.3-3.tar.gz
-dependency-check-1.4.4.tar.gz
 error-prone-1.1.1-5.tar.gz
 error-prone-2.0.15.tar.gz
 error-prone-2.0.21.tar.gz
@@ -66,5 +64,6 @@ rubocop-0.33.0-2.tar.gz
 rubocop-0.47.1.tar
 ruby-lint-2.0.4-2.tar.gz
 ruby-lint-2.3.1.tar
+spotbugs-3.1.0.tar.gz
 tidy-html5-5.2.0-2.tar.gz
 xmllint-2.9.4-3.tar.gz

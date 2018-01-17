@@ -1,47 +1,43 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
-#
-# spec file for the SWAMP-in-a-Box backend
-#
-%define _arch noarch
+%define _target_os  Linux
+%define _arch       noarch
 
-#%define __spec_prep_post	%{___build_post}
-#%define ___build_post	exit 0
-#%define __spec_prep_cmd /bin/sh
-#%define __build_cmd /bin/sh
-#%define __spec_build_cmd %{__build_cmd}
-#%define __spec_build_template	#!%{__spec_build_shell}
-%define _target_os Linux
+Summary:   Backend applications, modules, and database for Software Assurance Marketplace (SWAMP)
+Name:      swampinabox-backend
+Version:   %(perl -e 'print $ENV{RELEASE_NUMBER}')
+Release:   %(perl -e 'print $ENV{BUILD_NUMBER}')
+License:   Apache 2.0
+Group:     Development/Tools
 
-Summary: SWAMP-in-a-Box backend applications, modules and database for Software Assurance Marketplace (SWAMP)
-Name: swampinabox-backend
-Version: %(perl -e 'print $ENV{RELEASE_NUMBER}')
-Release: %(perl -e 'print $ENV{BUILD_NUMBER}')
-License: Apache 2.0
-Group: Development/Tools
-Source: swampinabox-1.tar.gz
-URL: http://www.continuousassurance.org
-Vendor: The Morgridge Institute for Research
-Packager: Support <support@continuousassurance.org>
+Vendor:    The Morgridge Institute for Research
+Packager:  Support <support@continuousassurance.org>
+URL:       http://www.continuousassurance.org
+
+Requires:  libguestfs-tools,swamp-rt-perl
+Obsoletes: swamponabox-backend
+Source:    swampinabox-1.tar.gz
 BuildRoot: /tmp/%{name}-buildroot
 BuildArch: noarch
-Requires: libguestfs-tools, swamp-rt-perl
-Obsoletes: swamponabox-backend
-AutoReqProv: no
+AutoReq:   no
+AutoProv:  no
 
 %description
-A state-of-the-art facility designed to advance our nation's cybersecurity by improving the security and reliability of open source software.
-This RPM contains the Data Server, Submit Server, Exec packages
+This RPM contains SWAMP's backend applications, modules, and database.
+
+SWAMP is a state-of-the-art facility designed to advance our nation's
+cybersecurity by improving the security and reliability of open source
+software.
 
 %prep
 %setup -c
 
 %build
-echo "Here's where I am at build $PWD"
-cd ../BUILD/%{name}-%{version}
+pwd
+ls
 
 %install
 %include swampinabox-install.txt
@@ -53,15 +49,27 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,swa-daemon,swa-daemon)
 %include swampinabox-files.txt
 
+#
+# Arguments to pre are {1=>new, 2=>upgrade}
+#
 %pre
 %include common-pre.txt
 
-# turn off services
-if [ "$1" == "2" ]
-then
-    service swamp stop
+service_script="/opt/swamp/sbin/swamp_manage_service"
+if [ "$1" = "2" ]; then
+    echo "Stopping service: swamp"
+    if [ -x "$service_script" ]; then
+        "$service_script" swamp stop
+    else
+        service swamp stop
+    fi
 fi
 
+echo "Finished running pre script"
+
+#
+# Arguments to post are {1=>new, 2=>upgrade}
+#
 %post
 %include common-post.txt
 %include swampinabox-post-general.txt
@@ -70,25 +78,17 @@ fi
 %include swampinabox-post-submit.txt
 %include swampinabox-post-exec.txt
 
-# chkconfig
-# install
-if [ "$1" == "1" ]
-then
+if [ "$1" = "1" ]; then
     chkconfig --add swamp
-    chkconfig swamp on
-# upgrade
-elif [ "$1" == "2" ]
-then
-    chkconfig swamp on
+fi
+chkconfig swamp on
+
+service_script="/opt/swamp/sbin/swamp_manage_service"
+echo "Starting service: swamp"
+if [ -x "$service_script" ]; then
+    "$service_script" swamp start
+else
+    service swamp start
 fi
 
-# turn on services
-# install
-if [ "$1" == "1" ]
-then
-    service swamp start
-# upgrade
-elif [ "$1" == "2" ]
-then
-    service swamp start
-fi
+echo "Finished running post script"

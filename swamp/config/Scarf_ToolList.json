@@ -1,0 +1,19 @@
+{
+   	"Generic-Toollist" : ["error-prone", "checkstyle", "Pylint"],
+	"ScarfAttributes": {
+    	"Android" : ["bugGroup", "bugCode", "locations", "bugMessage", "resolutionSuggestion"],
+		"Dawn" : ["bugCode", "bugSeverity", "bugMessage", "resolutionSuggestion"],
+		"Archie" : ["bugSeverity", "bugGroup", "bugCode", "locations", "bugMessage"],
+		"Clang" : ["bugGroup", "bugCode", "locations", "bugMessage"],
+		"Findbugs" : ["bugSeverity", "bugGroup", "bugCode", "locations", "bugMessage", "resolutionSuggestion"],
+		"PMD" : ["bugSeverity", "bugGroup", "bugCode", "locations", "bugMessage"],
+		"PHPMD" : ["bugSeverity", "bugGroup", "bugCode", "locations", "bugMessage"],
+		"CodeSonar" : ["bugGroup", "bugCode", "locations", "bugMessage"],
+		"gcc" : ["bugGroup", "bugCode", "locations", "bugMessage"],
+		"cppcheck" : ["bugGroup", "bugCode", "locations", "bugMessage"],
+		"RevealDroid" : ["bugGroup", "bugCode", "locations", "bugMessage"],	
+        "SpotBugs" : ["bugSeverity", "bugGroup", "bugCode", "locations", "bugMessage", "resolutionSuggestion"],
+        "generic" : ["bugGroup", "bugCode", "locations", "bugMessage"],
+		"default":["BugId", "cweIds", "cweIdsCount", "cweIdsSize", "methodsCount","methodsSize", "locationsCount", "locationsSize","className", "bugSeverity", "bugRank", "resolutionSuggestion", "bugMessage", "bugCode", "bugGroup", "assessmentReportFile", "buildId", "instanceLocation", "methods", "locations"]
+	}
+} 

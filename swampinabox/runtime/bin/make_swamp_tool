@@ -30,7 +30,7 @@ use Config;
 my $verbose = 0;
 
 
-my $version = '1.1.0 (Aug 07, 2017)';
+my $version = '1.2.3 (Dec 20, 2017)';
 
 my %toolProps = (
 	'coverity'	=> {
@@ -49,37 +49,72 @@ my %toolProps = (
 	    },
 	'ps-ctest'	=> {
 		bitIndependent		=> 0,
-		revision		=> 1,
-		implemented		=> 0,
-		confFunc		=> \&die,
+		revision		=> 2,
+		implemented		=> 1,
+		confFunc		=> \&MakePsCtestConf,
+		validateInstallers	=> \&ValidatePsCtestInstallers,
 	    },
 	'ps-jtest'	=> {
 		bitIndependent		=> 0,
-		revision		=> 9,
-		implemented		=> 0,
-		confFunc		=> \&die,
+		revision		=> 12,
+		implemented		=> 1,
+		confFunc		=> \&MakePsJtestConf,
+		validateInstallers	=> \&ValidatePsJtestInstallers,
+		extraInFiles		=> {
+			'jtestcli.properties.template' => <<EOF,
+jtest.license.use_network=true
+jtest.license.network.type=ls
+jtest.license.network.edition=server_edition
+dtp.server=<tool-ps-jtest-dtp-server>
+dtp.port=<tool-ps-jtest-dtp-port>
+dtp.user=<tool-ps-jtest-dtp-user>
+dtp.password=<tool-ps-jtest-dtp-password>
+EOF
+			'tool-defaults.conf' => <<EOF,
+tool-license-template=\${VMINPUTDIR}/jtestcli.properties.template
+EOF
+			'tool-invoke.txt' => <<EOF,
+<executable> 
+         <jvm-max-heap>
+         <jvm-min-heap>
+         -localsettings <tool-license>
+         -config <tool-ps-jtest-config>
+         -showdetails
+         -resource <src-file-lst>
+         -data <data-json-file>
+         -report <results-dir>
+         -property "console.verbosity.level=high"
+         -property "report.format=pdf,xml,html,csv"
+EOF
+		    },
 	    },
 	);
 
 my @linux32Plats = qw/
 	centos-5.11-32
-	centos-6.7-32 centos-6.8-32 centos-6.9-32 centos-6.10-32
-	rhel-6.7-32 rhel-6.8-32 rhel-6.9-32 rhel-6.10-32
-	scientific-5.11-32
-	scientific-6.7-32 scientific-6.8-32 scientific-6.9-32 scientific-6.10-32
+	centos-6.7-32 centos-6.8-32 centos-6.9-32 centos-6.10-32 centos-6.11-32
+	rhel-6.4-32 rhel-6.7-32 rhel-6.8-32 rhel-6.9-32 rhel-6.10-32 rhel-6.11-32
+	scientific-5.9-32 scientific-5.11-32
+	scientific-6.7-32 scientific-6.8-32 scientific-6.9-32 scientific-6.10-32 scientific-6.11-32
 	/;
 my @linux64Plats = qw/
 	android-ubuntu-12.04-64
 	centos-5.11-64
-	centos-6.7-64 centos-6.8-64 centos-6.9-64 centos-6.10-64
-	debian-7.0-64 debian-7.11-64 debian-7.12-64 debian-7.13-64 debian-7.14-64
-	debian-8.5-64 debian-8.6-64 debian-8.7-64 debian-8.8-64
+	centos-6.7-64 centos-6.8-64 centos-6.9-64 centos-6.10-64 centos-6.11-64
+	centos-7.2-64 centos-7.3-64 centos-7.4-64 centos-7.5-64 centos-7.6-64 centos-7.7-64
+	debian-7.0-64 debian-7.9-64 debian-7.10-64 debian-7.11-64 debian-7.12-64 debian-7.13-64 debian-7.14-64
+	debian-8.0-64 debian-8.3-64 debian-8.4-64 debian-8.5-64 debian-8.6-64 debian-8.7-64 debian-8.8-64
+	debian-8.9-64 debian-8.10-64 debian-8.11-64
+	debian-9.0-64 debian-9.1-64 debian-9.2-64 debian-9.3-64 debian-9.4-64 debian-9.5-64 debian-9.6-64
+	fedora-18.0-64 fedora-19.0-64
 	fedora-18-64 fedora-19-64 fedora-20-64 fedora-21-64 fedora-22-64
-	fedora-23-64 fedora-24-64 fedora-25-64
-	rhel-6.7-64 rhel-6.8-64 rhel-6.9-64 rhel-6.10-64
-	scientific-5.11-64
-	scientific-6.7-64 scientific-6.8-64 scientific-6.9-64 scientific-6.10-64
-	ubuntu-10.04-64 ubuntu-12.04-64 ubuntu-14.04-64 ubuntu-16.04-64
+	fedora-23-64 fedora-24-64 fedora-25-64 fedora-26-64 fedora-27-64 fedora-28-64
+	rhel-6.4-64 rhel-6.7-64 rhel-6.8-64 rhel-6.9-64 rhel-6.10-64 rhel-6.11-64
+	rhel-7.2-64 rhel-7.3-64 rhel-7.4-64 rhel-7.5-64 rhel-7.6-64 rhel-7.7-64
+	scientific-5.9-64 scientific-5.11-64
+	scientific-6.4-64 scientific-6.7-64 scientific-6.8-64 scientific-6.9-64 scientific-6.10-64 scientific-6.11-64
+	scientific-7.2-64 scientific-7.3-64 scientific-7.4-64 scientific-7.5-64 scientific-7.6-64 scientific-7.7-64
+	ubuntu-10.04-64 ubuntu-12.04-64 ubuntu-14.04-64 ubuntu-16.04-64 ubuntu-18.04-64
 	/;
 my $linuxPlat = 'linux';
 my $linux32Plat = 'linux-32';
@@ -107,14 +142,16 @@ the tool vendor.
 options:
     --tool-name                  -t name of tool
     --tool-version                  version of the tool
+    --tool-config                   configuration string to configure tool
     --installer-linux               path to installer
     --installer_linux32             path to 32-bit installer
     --installer-linux64             path to 64-bit installer
-    --temp-dir                      working directory ($temp)
+    --temp-dir                      temporary directory ($temp)
     --output-dir                 -o directory to place SWAMP packaged tool ($out)
     --help                       -h print this message
     --version                    -v print version
     --verbose                    -V verbose output
+    --no-clean-temp-files           do not clean up intermediate files
     --quiet                      -q no output
     --conf-file=<FILE>           -c configure file to use ($conf)
 
@@ -142,6 +179,13 @@ sub ValidateOptions
 
     my @errors;
 
+    my $tempDir = $options->{temp_dir};
+    if (!-d $tempDir)  {
+	push @errors, "Temp Directory ($tempDir) not found";
+    }  elsif  (!-w $tempDir)  {
+	push @errors, "Temp Directory ($tempDir) not writable";
+    }
+
     my $toolName = $options->{tool_name};
     my $installerLinux = $options->{installer_linux};
     my $installerLinux32 = $options->{installer_linux32};
@@ -155,32 +199,49 @@ sub ValidateOptions
 	my $props = $toolProps{$toolName};
 	if (!$props->{implemented})  {
 	    push @errors, "Support for tool name $toolName is not implemented";
-	}
-	if ($props->{bitIndependent})  {
-	    if (!defined $installerLinux)  {
-		push @errors, "Required option not set:  --installer";
-	    }  elsif (!-f $installerLinux)  {
-		push @errors, "File not found for --install-linux $installerLinux";
-	    }
-	    if (defined $installerLinux32)  {
-		push @errors, "Invalid option --installer-linux32 for tool $toolName";
-	    }
-	    if (defined $installerLinux64)  {
-		push @errors, "Invalid option --installer-linux64 for tool $toolName";
-	    }
 	}  else  {
-	    if (!defined $installerLinux32 && !defined $installerLinux64)  {
-		push @errors, "Required option not set:  --installer-linux32 or --installer-linux64";
+	    if (defined $toolVersion)  {
+		my $toolRev = $props->{revision};
+		my $toolDirName = "$toolName-$toolVersion";
+		$toolDirName .= "-$toolRev" if $toolRev > 0;
+		my $toolDir = "$tempDir/$toolDirName";
+
+		$options->{tool_dirname} = $toolDirName;
+		$options->{tool_temp_dir} = $toolDir;
+
+		if (-e $toolDir)  {
+		    push @errors, "Tool archive ($toolDir) must not exist";
+		}
 	    }  else  {
-		if (defined $installerLinux32 && !-f $installerLinux32)  {
-		    push @errors, "File not found for --install-linux32 $installerLinux32";
-		}
-		if (defined $installerLinux64 && !-f $installerLinux64)  {
-		    push @errors, "File not found for --install-linux64 $installerLinux64";
-		}
+		push @errors, "Required option not set:  --tool-version";
 	    }
-	    if (defined $installerLinux)  {
-		push @errors, "Invalid option --installer for tool $toolName";
+
+	    if ($props->{bitIndependent})  {
+		if (!defined $installerLinux)  {
+		    push @errors, "Required option not set:  --installer";
+		}  elsif (!-f $installerLinux)  {
+		    push @errors, "File not found for --install-linux $installerLinux";
+		}
+		if (defined $installerLinux32)  {
+		    push @errors, "Invalid option --installer-linux32 for tool $toolName";
+		}
+		if (defined $installerLinux64)  {
+		    push @errors, "Invalid option --installer-linux64 for tool $toolName";
+		}
+	    }  else  {
+		if (!defined $installerLinux32 && !defined $installerLinux64)  {
+		    push @errors, "Required option not set:  --installer-linux32 or --installer-linux64";
+		}  else  {
+		    if (defined $installerLinux32 && !-f $installerLinux32)  {
+			push @errors, "File not found for --install-linux32 $installerLinux32";
+		    }
+		    if (defined $installerLinux64 && !-f $installerLinux64)  {
+			push @errors, "File not found for --install-linux64 $installerLinux64";
+		    }
+		}
+		if (defined $installerLinux)  {
+		    push @errors, "Invalid option --installer for tool $toolName";
+		}
 	    }
 	}
 
@@ -191,19 +252,29 @@ sub ValidateOptions
 	    push @errors, @$errs;
 	}
     }
-
-    my $tempDir = $options->{temp_dir};
-    if (!-d $tempDir)  {
-	push @errors, "Directory not found for --temp $tempDir";
-    }
     
     my $outDir = $options->{output_dir};
     if (!-d $outDir)  {
 	push @errors, "Directory not found for --output_dir $outDir";
+    }  elsif (!-w $outDir)  {
+	push @errors, "Directory not writable for --temp $tempDir";
+    }  elsif (exists $options->{tool_dirname})  {
+	my $toolDirName = $options->{tool_dirname};
+	my $toolTarGz = "";
+	$toolTarGz .= "$outDir/" unless $outDir eq '.';
+	$toolTarGz .= "$toolDirName.tar.gz";
+	$options->{tool_tar_path} = $toolTarGz;
+	if (-e $toolTarGz)  {
+	    push @errors, "Tool Archive ($toolTarGz) must not exist";
+	}
     }
 
     if (!defined $toolVersion)  {
 	push @errors, "Required option not set:  --tool-version";
+    }
+
+    if (defined $options->{tool_config} && $toolName !~ /^ps-[cj]test$/)  {
+	push @errors, "--tool-config only valid with --tool-name of ps-ctest or ps-jtest";
     }
 
     return \@errors;
@@ -227,11 +298,13 @@ sub ProcessOptions
 		installer_linux32	=> undef,
 		installer_linux64	=> undef,
 		verbose			=> 0,
+		no_clean_temp_files	=> 0,
 		quiet			=> 0,
 		output_dir		=> '.',
 		temp_dir		=> '.',
 		tool_name		=> undef,
 		tool_version		=> undef,
+		tool_config		=> undef,
 		start_time		=> time(),
 		);
 
@@ -247,11 +320,13 @@ sub ProcessOptions
 		"installer_linux32|installer-linux32=s",
 		"installer_linux64|installer-linux64=s",
 		"verbose|V|debug|d!",
+		"no_clean_temp_files|no-clean-temp-files!",
 		"quiet|q!",
 		"output_dir|output-dir|o=s",
 		"temp_dir|temp-dir=s",
 		"tool_name|tool-name|t=s",
 		"tool_version|tool-version=s",
+		"tool_config|tool-config=s",
 		);
 
     # Configure file options, will be read in this order
@@ -310,9 +385,9 @@ sub ProcessOptions
     # Error checking of options goes here
     my $errors = ValidateOptions(\%options);
     if (@$errors)  {
-	print STDERR "ERROR, invalid options:\n", (map {"  $_\n"} @$errors);
-	$ok = 0;
-	exit !$ok;
+	print STDERR "ERROR, invalid option values:\n", (map {"  $_\n"} @$errors),
+		    "$0 --help for more options help.\n";
+	exit 1;
     }
 
     return \%options
@@ -490,6 +565,16 @@ sub Verbose
 }
 
 
+sub Print
+{
+    my $options = shift;
+
+    return if $options->{quiet};
+
+    print @_;
+}
+
+
 sub Mkdir
 {
     my ($dir, $options) = @_;
@@ -562,6 +647,11 @@ sub DeleteCreatedFiles
 {
     my ($options) = @_;
 
+    if ($options->{no_clean_temp_files})  {
+	Print $options, "Skipping clean up of temp files ($options->{tool_temp_dir})\n";
+	return;
+    }
+
     my @dirs = reverse @{$options->{dirs}};
     my @files = reverse @{$options->{files}};
 
@@ -631,7 +721,8 @@ sub CheckTarGzContainsFiles
     my %files = map { $_ => 0 } @files;
     my $cmd = "tar tzf $tarFn";
 
-    Verbose "$cmd\n";
+    Verbose "Checking $tarFn contains:  ", join(' ', @files), "\n";
+    Verbose "    $cmd\n";
     open TAR, "-|", 'tar', 'tzf', $tarFn or die "open $cmd: $!";
     while (<TAR>)  {
 	chomp;
@@ -713,7 +804,7 @@ sub ValidateCoverityInstallers
 
 sub MakeCoverityConf
 {
-    my ($toolArchive, $toolType, $version, $ts, $bits) = @_;
+    my ($options, $toolArchive, $toolType, $version, $ts, $bits) = @_;
 
     my $creationData = GetCreationData($ts);
     my $plat = "linux";
@@ -776,7 +867,7 @@ sub ValidateGtInstallers
 
 sub MakeGtCsonarConf
 {
-    my ($toolArchive, $toolType, $version, $ts, $bits) = @_;
+    my ($options, $toolArchive, $toolType, $version, $ts, $bits) = @_;
 
     my $creationData = GetCreationData($ts);
 
@@ -803,6 +894,132 @@ EOF
 }
 
 
+sub ValidatePsCtestInstallers
+{
+    my ($version, $installerLinux, $installerLinux32, $installerLinux64) = @_;
+
+    my @errors;
+    my $re32 = "(^|\/)parasoft_cpptest_engine_${version}_linux.tar.gz\$";
+    my $re64 = "(^|\/)parasoft_cpptest_engine_${version}_linux_x86_64.tar.gz\$";
+    my @reqFiles = ("cpptest/cpptestcli", "cpptest/bin/cpptestscan");
+
+    if (defined $installerLinux32 && -f $installerLinux32)  {
+	if ($installerLinux32 !~ /$re32/)  {
+	    push @errors, "32-bit installer, $installerLinux32, does not match $re32";
+	}  else  {
+	    my $e = CheckTarGzContainsFiles($installerLinux32, @reqFiles);
+	    push @errors, @$e;
+	}
+    }
+
+    if (defined $installerLinux64 && -f $installerLinux64)  {
+	if ($installerLinux64 !~ /$re64/)  {
+	    push @errors, "64-bit installer, $installerLinux64, does not match $re32";
+	}  else  {
+	    my $e = CheckTarGzContainsFiles($installerLinux64, @reqFiles);
+	    push @errors, @$e;
+	}
+    }
+
+    return \@errors;
+}
+
+
+sub MakePsCtestConf
+{
+    my ($options, $toolArchive, $toolType, $version, $ts, $bits) = @_;
+
+    my $creationData = GetCreationData($ts);
+
+    my $toolConfig = 'builtin://CWE SANS Top 25 Most Dangerous Software Errors';
+    $toolConfig = $options->{tool_config} if defined $options->{tool_config};
+
+    my $s =<<EOF;
+tool-archive = $toolArchive
+tool-dir = cpptest
+tool-cmd = cpptestcli
+tool-type = $toolType
+tool-version = $version
+
+tool-ps-ctest-cpptestscan = bin/cpptestscan
+tool-ps-ctest-localsettings = ps-ctest.properties
+tool-ps-ctest-workspace = parasoft_workspace
+tool-ps-ctest-config = $toolConfig
+tool-ps-ctest-license-use-network = true
+tool-ps-ctest-license-network-type = ls
+tool-ps-ctest-license-network-edition = server_edition
+tool-ps-ctest-report-format = cvs,html,pdf,xml
+tool-ps-ctest-bdf-file = proj.bdf
+
+$creationData
+EOF
+
+    return $s;
+}
+
+
+sub ValidatePsJtestInstallers
+{
+    my ($version, $installerLinux, $installerLinux32, $installerLinux64) = @_;
+
+    my @errors;
+    my $re32 = "(^|\/)parasoft_jtest_${version}_linux_x86.tar.gz\$";
+    my $re64 = "(^|\/)parasoft_jtest_${version}_linux_x86_64.tar.gz\$";
+    my @reqFiles = ("jtest/jtestcli");
+
+    if (defined $installerLinux32 && -f $installerLinux32)  {
+	if ($installerLinux32 !~ /$re32/)  {
+	    push @errors, "32-bit installer, $installerLinux32, does not match $re32";
+	}  else  {
+	    my $e = CheckTarGzContainsFiles($installerLinux32, @reqFiles);
+	    push @errors, @$e;
+	}
+    }
+
+    if (defined $installerLinux64 && -f $installerLinux64)  {
+	if ($installerLinux64 !~ /$re64/)  {
+	    push @errors, "64-bit installer, $installerLinux64, does not match $re32";
+	}  else  {
+	    my $e = CheckTarGzContainsFiles($installerLinux64, @reqFiles);
+	    push @errors, @$e;
+	}
+    }
+
+    return \@errors;
+}
+
+
+sub MakePsJtestConf
+{
+    my ($options, $toolArchive, $toolType, $version, $ts, $bits) = @_;
+
+    my $creationData = GetCreationData($ts);
+
+    my $toolConfig = 'builtin://CWE-SANS Top 25 2011';
+    $toolConfig = $options->{tool_config} if defined $options->{tool_config};
+
+    my $s =<<EOF;
+tool-archive=$toolArchive
+tool-dir=jtest
+executable=jtestcli
+tool-invoke=tool-invoke.txt
+tool-defaults=tool-defaults.conf
+tool-type=$toolType
+tool-version=$version
+tool-ps-jtest-config='$toolConfig'
+tool-report-exit-code=134
+tool-report-exit-code-msg=Error: Main license feature not found.
+tool-report-exit-code-task-name=assess-acquire-license
+supported-language-version=java-7 java-8
+tool-language-version=java-8
+
+$creationData
+EOF
+
+    return $s;
+}
+
+
 sub MakeSwampPackagedTool
 {
     my ($options) = @_;
@@ -815,13 +1032,11 @@ sub MakeSwampPackagedTool
 			    start_time/};
     
     my $props = $toolProps{$toolName};
-    my $toolRev = $props->{revision};
     my $confFunc = $props->{confFunc};
 
-    my $toolDirName = "$toolName-$toolVersion";
-    $toolDirName .= "-$toolRev" if $toolRev > 0;
-    my $toolDir = "$tempDir/$toolDirName";
-    my $toolTarGz = "$outputDir/$toolDirName.tar.gz";
+    my $toolDirName = $options->{tool_dirname};
+    my $toolDir = $options->{tool_temp_dir};
+    my $toolTarGz = $options->{tool_tar_path};
 
     my $md5sumName = 'md5sum';
     my $md5sum= "$toolDir/$md5sumName";
@@ -850,8 +1065,15 @@ sub MakeSwampPackagedTool
 
 	CpFile $installerLinux32, $inFilesDirInstaller, $options;
 
-	my $confData = $confFunc->($installer, $toolName, $toolVersion, $ts, '32');
+	my $confData = $confFunc->($options, $installer, $toolName, $toolVersion, $ts, '32');
 	WriteFile $confFile, $confData, $options;
+
+	if (exists $props->{extraInFiles})  {
+	    foreach my $fn (keys %{$props->{extraInFiles}})  {
+		my $fnPath = "$inFilesDir/$fn";
+		WriteFile $fnPath, $props->{extraInFiles}{$fn}, $options;
+	    }
+	}
 
 	foreach my $d (@linux32Plats)  {
 	    my $platDir = "$toolDir/$d";
@@ -874,8 +1096,15 @@ sub MakeSwampPackagedTool
 
 	CpFile $installerLinux64, $inFilesDirInstaller, $options;
 
-	my $confData = $confFunc->($installer, $toolName, $toolVersion, $ts, '64');
+	my $confData = $confFunc->($options, $installer, $toolName, $toolVersion, $ts, '64');
 	WriteFile $confFile, $confData, $options;
+
+	if (exists $props->{extraInFiles})  {
+	    foreach my $fn (keys %{$props->{extraInFiles}})  {
+		my $fnPath = "$inFilesDir/$fn";
+		WriteFile $fnPath, $props->{extraInFiles}{$fn}, $options;
+	    }
+	}
 
 	foreach my $d (@linux64Plats)  {
 	    my $platDir = "$toolDir/$d";
@@ -898,8 +1127,15 @@ sub MakeSwampPackagedTool
 
 	CpFile $installerLinux, $inFilesDirInstaller, $options;
 
-	my $confData = $confFunc->($installer, $toolName, $toolVersion, $ts);
+	my $confData = $confFunc->($options, $installer, $toolName, $toolVersion, $ts);
 	WriteFile $confFile, $confData, $options;
+
+	if (exists $props->{extraInFiles})  {
+	    foreach my $fn (keys %{$props->{extraInFiles}})  {
+		my $fnPath = "$inFilesDir/$fn";
+		WriteFile $fnPath, $props->{extraInFiles}{$fn}, $options;
+	    }
+	}
 
 	foreach my $d (@linux64Plats)  {
 	    my $platDir = "$toolDir/$d";
@@ -923,7 +1159,7 @@ sub MakeSwampPackagedTool
 
     DeleteCreatedFiles($options);
 
-    print "SWAMP tool archive: $toolTarGz\nPlatform support:   ", join(' ', @supports), "\n";
+    Print $options, "SWAMP tool archive: $toolTarGz\nPlatform support:   ", join(' ', @supports), "\n";
 }
 
 
@@ -931,7 +1167,14 @@ sub main
 {
     my $options = ProcessOptions();
     
-    MakeSwampPackagedTool($options);
+    eval {
+	MakeSwampPackagedTool($options);
+    };
+    if ($@)  {
+	DeleteCreatedFiles($options);
+	print "ERROR: $@", "\n";
+	exit 1;
+    }
 }
 
 

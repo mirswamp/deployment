@@ -3,10 +3,10 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
-# Install a licensed tool on a SWAMP-in-a-Box.
+# Install an add-on tool on a SWAMP-in-a-Box.
 #
 
 #
@@ -59,7 +59,7 @@ sub do_command {
 sub trim {
     my ($val) = @_;
     if ($val) {
-        $val =~ s/^\s+|\s+$//gm;
+        $val =~ s/^\s+|\s+$//g;
     }
     return $val;
 }
@@ -102,7 +102,18 @@ sub backup_file {
 }
 
 #
-# Add/update a key-value pair in the given string of key-value pairs.
+# Get the value for a key in the given string of "key = value" pairs.
+#
+sub get_key_val {
+    my ($config, $key) = @_;
+    my $escaped_key = quotemeta $key;
+
+    my @vals = ($config =~ /^\s*$escaped_key\s*=(.*)$/m);
+    return $vals[0];
+}
+
+#
+# Add/update a key-value pair in the given string of "key = value" pairs.
 #
 sub merge_key_val {
     my ($config, $key, $val, $no_space) = @_;
@@ -110,6 +121,7 @@ sub merge_key_val {
     my $contains_key      = ($config =~ /^\s*$escaped_key\s*=/m);
     my $ends_with_newline = ($config =~ /\n$/);
     my $space             = ($no_space ? q() : q( ));
+    $val                  = ($no_space ? $val : trim($val));
 
     if ($contains_key) {
         $config =~ s/^\s*$escaped_key\s*=.*$/$key$space=$space$val/gm;
@@ -117,7 +129,6 @@ sub merge_key_val {
     else {
         $config .= ($ends_with_newline ? q() : qq(\n)) . "$key$space=$space$val\n";
     }
-
     return $config;
 }
 
@@ -129,11 +140,10 @@ sub merge_key_val {
 sub toggle_terminal_echo {
     my ($enable) = @_;
     my $echo_option = $enable ? 'echo' : '-echo';
-    my $stty_command = qq(stty $echo_option);
 
-    my ($output, $status) = do_command($stty_command);
+    my ($output, $status) = do_command(qq(stty $echo_option));
     if ($status) {
-        exit_abnormally("Failed to set terminal echo using: $stty_command", $output);
+        exit_abnormally(q(Failed to set terminal 'echo' property), $output);
     }
     return;
 }
@@ -184,29 +194,30 @@ sub exit_normally {
 
 sub exit_abnormally {
     my ($message, $details) = @_;
-
     $message = trim($message);
     $details = trim($details);
 
     if ($message) {
         print "Error: $message" . ($details ? " ($details)" : q()) . "\n";
     }
-
     do_cleanup();
     exit 1;
 }
 
 sub show_usage_and_exit {    ## no critic (RequireFinalReturn)
     my $usage_message = <<"EOF";
-Usage: $PROGRAM_NAME [--codesonar|--coverity] [--add|--remove|--replace|--configure] [options]
+Usage: $PROGRAM_NAME --tool <id> <--add|--remove|--replace|--configure> [options]
 
 Manage the SWAMP's add-on tools on this host.
 
-Arguments for selecting the tool update [choose one]:
-  --codesonar         GrammaTech CodeSonar
-  --coverity          Synopsys Coverity
+Values for the --tool option, to select the tool to update (choose one):
+  coverity            Synopsys Static Analysis (Coverity)
+  dependency-check    OWASP Dependency Check
+  gt-csonar           GrammaTech CodeSonar
+  ps-ctest            Parasoft C/C++test
+  ps-jtest            Parasoft Jtest
 
-Arguments for selecting how to update the tool [choose one]:
+Arguments for selecting how to update the tool (choose one):
   --add, --install    Install a new version of the tool
   --remove            Remove an existing version of the tool
   --replace           Replace an existing version of the tool
@@ -218,6 +229,7 @@ Other options:
   --license-server-host, -h    The tool's license server's hostname
   --license-server-port, -p    The port to connect to on the license server
   --limit                      The max number of concurrent assessments to allow
+  --tool-conf <file>           File with entries to add to 'services.conf'
   --help, -?                   Display this message
 EOF
 
@@ -235,38 +247,45 @@ sub get_options {
 
         # Where to find various configuration files
         'condor-limits-file' => '/etc/condor/config.d/swampinabox_90_concurrency_limits.conf',
-        'swamp-conf-file'    => '/opt/swamp/etc/swamp.conf',
+        'swamp-conf-file'    => '/opt/swamp/etc/services.conf',
 
         # Where to find supporting SQL scripts
-        'tool-install-sql'   => '/opt/swamp/sql/util/tool_install.sql',
-        'tool-uninstall-sql' => '/opt/swamp/sql/util/tool_uninstall.sql',
-        'tool-scripts-dir'   => '/opt/swamp/sql/tools_add_on',
+        'tool-install-file'   => '/opt/swamp/sql/util/tool_install.sql',
+        'tool-uninstall-file' => '/opt/swamp/sql/util/tool_uninstall.sql',
+        'tool-scripts-dir'    => '/opt/swamp/sql/tools_add_on',
 
-        # Where to put or find the installed tool archive
+        # Where to put or find installed tool archives
         'tool-install-dir' => '/swamp/store/SCATools/add_on',
 
         # Other assorted constants
-        'gt-csonar-tool-uuid'    => '5540d2be-72b2-11e5-865f-001a4a81450b',
-        'gt-csonar-sql'          => '/opt/swamp/sql/tools_add_on/gt-csonar.sql',
-        'gt-csonar-condor-key'   => 'GRAMMATECHCS_LIMIT',
-        'gt-csonar-host-key'     => 'tool.gt-csonar.license.host',
-        'gt-csonar-port-key'     => 'tool.gt-csonar.license.port',
-        'sy-coverity-tool-uuid'  => 'e7a00759-82a4-11e7-9baa-001a4a81450b',
-        'sy-coverity-sql'        => '/opt/swamp/sql/tools_add_on/coverity.sql',
-        'sy-coverity-condor-key' => 'SYNOPSYSC_LIMIT',
-        'sy-coverity-host-key'   => 'tool.sy-coverity.license.host',
-        'sy-coverity-port-key'   => 'tool.sy-coverity.license.port',
+        'coverity-condor-key'   => 'SYNOPSYSC_LIMIT',
+        'coverity-host-key'     => 'tool-sy-coverity-license-host',
+        'coverity-port-key'     => 'tool-sy-coverity-license-port',
+        'gt-csonar-condor-key'  => 'GRAMMATECHCS_LIMIT',
+        'gt-csonar-host-key'    => 'tool-gt-csonar-license-host',
+        'gt-csonar-port-key'    => 'tool-gt-csonar-license-port',
+        'ps-ctest-condor-key'   => 'PARASOFTC_LIMIT',
+        'ps-ctest-host-key'     => 'tool-ps-ctest-dtp-server',
+        'ps-ctest-port-key'     => 'tool-ps-ctest-dtp-port',
+        'ps-ctest-user-key'     => 'tool-ps-ctest-dtp-user',
+        'ps-ctest-password-key' => 'tool-ps-ctest-dtp-password',
+        'ps-jtest-condor-key'   => 'PARASOFTJAVA_LIMIT',
+        'ps-jtest-host-key'     => 'tool-ps-jtest-dtp-server',
+        'ps-jtest-port-key'     => 'tool-ps-jtest-dtp-port',
+        'ps-jtest-user-key'     => 'tool-ps-jtest-dtp-user',
+        'ps-jtest-password-key' => 'tool-ps-jtest-dtp-password',
     );
 
     my $ok = Getopt::Long::GetOptions(\%options,
         'help|?',
-        'codesonar', 'coverity',
+        'tool-id|tool=s',
         'add|install', 'remove', 'replace', 'configure',
         'tool-version|v=s',
-        'tool-archive|f=s',
+        'tool-archive-file|tool-archive|f=s',
         'license-server-host|h=s',
         'license-server-port|p=i',
         'limit=i',
+        'tool-conf-file|tool-conf=s'
     );
 
     while (my ($key, $value) = each %defaults) {
@@ -275,57 +294,46 @@ sub get_options {
         }
     }
 
-    #
-    # Make sure a tool was selected, so that we can set the constants
-    # that get used everywhere else in this script.
-    #
     if (!$ok || $options{'help'}) {
         print "\n" if !$ok;
         show_usage_and_exit();
     }
 
-    my $tool_count = 0;
-    $tool_count += ($options{'codesonar'} ? 1 : 0);
-    $tool_count += ($options{'coverity'}  ? 1 : 0);
+    my $tool_id               = $options{'tool-id'}          || q();
+    my $tool_version          = $options{'tool-version'}     || q();
+    my $tool_scripts_dir      = $options{'tool-scripts-dir'} || q();
+    my $tool_parameter_file   = "${tool_scripts_dir}/${tool_id}.sql";
+    my $tool_meta_file        = "${tool_scripts_dir}/${tool_id}.meta.sql";
+    my $tool_archive_basename = "${tool_id}-${tool_version}.tar.gz";
 
-    if ($tool_count != 1) {
-        print "Must specify exactly one of the following options: codesonar coverity\n";
+    $options{'tool-parameter-file'}         = $tool_parameter_file;
+    $options{'tool-meta-file'}              = $tool_meta_file;
+    $options{'tool-archive-basename'}       = $tool_archive_basename;
+    $options{'license-server-host-key'}     = $options{"${tool_id}-host-key"};
+    $options{'license-server-port-key'}     = $options{"${tool_id}-port-key"};
+    $options{'license-server-user-key'}     = $options{"${tool_id}-user-key"};
+    $options{'license-server-password-key'} = $options{"${tool_id}-password-key"};
+    $options{'condor-limits-key'}           = $options{"${tool_id}-condor-key"};
+
+    #
+    # Make sure a tool was selected, so that we can set the constants
+    # that get used everywhere else in this script.
+    #
+    if (!$tool_id) {
+        print "Required argument missing: tool\n";
+        print "\n";
+        show_usage_and_exit();
+    }
+    if (!-f $tool_parameter_file) {
+        print "Not a recognized tool: $tool_id\n";
         print "\n";
         show_usage_and_exit();
     }
 
-    my $tool_version = $options{'tool-version'};
-
-    if ($options{'codesonar'}) {
-        $options{'tool-name'}               = 'GrammaTech CodeSonar';
-        $options{'tool-uuid'}               = $options{'gt-csonar-tool-uuid'};
-        $options{'tool-params-sql'}         = $options{'gt-csonar-sql'};
-        $options{'license-server-host-key'} = $options{'gt-csonar-host-key'};
-        $options{'license-server-port-key'} = $options{'gt-csonar-port-key'};
-        $options{'condor-limits-key'}       = $options{'gt-csonar-condor-key'};
-        if ($tool_version) {
-            $options{'tool-archive-basename'} = "gt-csonar-${tool_version}.tar.gz";
-        }
-    }
-    elsif ($options{'coverity'}) {
-        $options{'tool-name'}               = 'Synopsys Coverity';
-        $options{'tool-uuid'}               = $options{'sy-coverity-tool-uuid'};
-        $options{'tool-params-sql'}         = $options{'sy-coverity-sql'};
-        $options{'license-server-host-key'} = $options{'sy-coverity-host-key'};
-        $options{'license-server-port-key'} = $options{'sy-coverity-port-key'};
-        $options{'condor-limits-key'}       = $options{'sy-coverity-condor-key'};
-        if ($tool_version) {
-            $options{'tool-archive-basename'} = "coverity-${tool_version}.tar.gz";
-        }
-    }
-    else {
-        die "Internal error: Failed to determine the necessary constants for the selected tool\n";
-    }
-
     #
-    # Check that the options provided meet various requirements.
+    # Make sure a single mode was selected, so that we can determine
+    # which other options are required.
     #
-
     my $mode_count = 0;
     $mode_count += ($options{'add'}       ? 1 : 0);
     $mode_count += ($options{'remove'}    ? 1 : 0);
@@ -333,35 +341,39 @@ sub get_options {
     $mode_count += ($options{'configure'} ? 1 : 0);
 
     if ($mode_count != 1) {
-        push @errors, 'Must specify exactly one of the following options: add remove replace configure';
+        print "Must specify exactly one of the following options: add remove replace configure\n";
+        print "\n";
+        show_usage_and_exit();
     }
-    if (!$options{'tool-version'} && $mode_count == 1 && !$options{'configure'}) {
-        push @errors, 'Required option missing: tool-version';
-    }
-    if (!$options{'tool-archive'} && ($options{'add'} || $options{'replace'})) {
+
+    #
+    # Check that the options provided meet various requirements.
+    #
+    if (!$options{'tool-archive-file'} && ($options{'add'} || $options{'replace'})) {
         push @errors, 'Required option missing: tool-archive';
     }
-    if (!$options{'license-server-host'} && $options{'configure'}) {
-        push @errors, 'Required option missing: license-server-host';
-    }
-    if (!$options{'license-server-port'} && $options{'configure'}) {
-        push @errors, 'Required option missing: license-server-port';
-    }
-    if (!$options{'limit'} && $options{'configure'}) {
-        push @errors, 'Required option missing: limit';
+    if (!$options{'tool-version'} && ($options{'add'} || $options{'remove'} || $options{'replace'})) {
+        push @errors, 'Required option missing: tool-version';
     }
 
-    my $tool_archive = $options{'tool-archive'};
-    if ($tool_archive && $tool_version) {    # No need for these warnings if the options were not provided
-        my $tool_archive_file     = basename($tool_archive);
-        my $tool_archive_basename = $options{'tool-archive-basename'};
+    my $tool_archive_file = $options{'tool-archive-file'};
+    if ($tool_archive_file && $tool_version) {    # No need for these warnings if the options were not provided
+        my $tool_archive_file_basename = basename($tool_archive_file);
 
-        if (!-f $tool_archive) {
-            push @errors, "Tool archive file not found: $tool_archive";
+        if (!-f $tool_archive_file) {
+            push @errors, "Tool archive file not found: $tool_archive_file";
         }
-        elsif (!($tool_archive_file =~ m/^\Q$tool_archive_basename\E$/)) {
+        elsif (!($tool_archive_file_basename =~ /^\Q$tool_archive_basename\E$/)) {
             push @errors, "Tool archive file does not look like: $tool_archive_basename";
         }
+    }
+
+    my $license_count = 0;
+    $license_count += ($options{'license-server-host'} ? 1 : 0);
+    $license_count += ($options{'license-server-port'} ? 1 : 0);
+
+    if ($options{'configure'} && !($license_count == 0 || $license_count == 2)) {
+        push @errors, 'Options must be specified together: license-server-host license-server-port';
     }
 
     my $license_server_host = $options{'license-server-host'} || q();
@@ -370,16 +382,23 @@ sub get_options {
         push @errors, "Unable to determine IP address of license server host: $license_server_host";
     }
 
-    for my $key (qw(condor-limits-file swamp-conf-file tool-install-sql tool-uninstall-sql tool-params-sql)) {
+    my $tool_conf_file = $options{'tool-conf-file'};
+    if ($options{'configure'} && $tool_conf_file) {
+        if (!-f $tool_conf_file) {
+            push @errors, "Tool configuration file not found: $tool_conf_file";
+        }
+    }
+
+    for my $key (qw(condor-limits-file swamp-conf-file tool-install-file tool-uninstall-file)) {
         my $val = $options{$key};
-        if (!defined $val || !-f $val) {
+        if (!-f $val) {
             push @errors, "Missing file from SWAMP installation: $val";
         }
     }
 
     for my $key (qw(tool-scripts-dir tool-install-dir)) {
         my $val = $options{$key};
-        if (!defined $val || !-d $val) {
+        if (!-d $val) {
             push @errors, "Missing directory from SWAMP installation: $val";
         }
     }
@@ -413,21 +432,18 @@ sub check_running_as_root {
 sub check_system_requirements {
     my ($options) = @_;
 
-    return if !($options->{'add'} || $options->{'replace'});
+    return if !($options->{'add'} || $options->{'replace'} || $options->{'remove'});
 
-    my $tool_name         = $options->{'tool-name'};
-    my $tool_uuid         = $options->{'tool-uuid'};
     my $tool_version      = $options->{'tool-version'};
-    my $tool_version_uuid = get_tool_version_uuid($options, $tool_uuid, $tool_version);
+    my $tool_version_uuid = get_tool_version_uuid($options);
+    my $tool_name         = get_tool_name($options);
 
     if ($options->{'add'} && $tool_version_uuid) {
         exit_abnormally("$tool_name $tool_version already appears to be installed");
     }
-
     if ($options->{'replace'} && !$tool_version_uuid) {
         exit_abnormally("$tool_name $tool_version does not appear to be installed");
     }
-
     return;
 }
 
@@ -453,7 +469,7 @@ sub get_db_credentials {
         $options->{'db-username'} = 'root';
         $options->{'db-password'} = $password;
 
-        create_sql_options_file($options);
+        create_sql_options_file($options, 1);
 
         my ($output, $status) = do_command(qq(echo "\\q" | $mysql_command));
         if ($status) {
@@ -470,8 +486,11 @@ sub get_db_credentials {
 # Create the password file for accessing the DB.
 #
 sub create_sql_options_file {
-    my ($options) = @_;
+    my ($options, $force_create) = @_;
 
+    if (!$force_create && -f $sql_options_file) {
+        return;
+    }
     if (!$options->{'db-username'} || !$options->{'db-password'}) {
         get_db_credentials($options);
     }
@@ -503,26 +522,25 @@ EOF
       || exit_abnormally("Failed to set permissions on: $sql_options_file");
 
     write_file($sql_options_file, $sql_options);
-    chmod 0400, $sql_options_file;
+    chmod 0400, $sql_options_file
+      || exit_abnormally("Failed to set permissions on: $sql_options_file");
 
     return;
 }
 
 #
-# Return the result of executing the given SQL query/statement.
+# Return the result of executing the given SQL query/statement(s).
 #
 sub get_sql_query_results {
     my ($options, $query) = @_;
+    my $escaped_query = escape_dquotes($query);
 
     create_sql_options_file($options);
 
-    my $escaped_query = escape_dquotes($query);
     my ($output, $status) = do_command(qq(echo "$escaped_query" | $mysql_command));
-
     if ($status) {
         exit_abnormally("Failed to execute SQL query ($query)", $output);
     }
-
     return trim($output);
 }
 
@@ -541,41 +559,137 @@ sub generate_uuid {
 #
 sub generate_sha512_checksum {
     my ($file) = @_;
-
     my $escaped_file = escape_dquotes($file);
-    my ($output, $status) = do_command(qq(sha512sum "$escaped_file"));
 
+    my ($output, $status) = do_command(qq(sha512sum "$escaped_file"));
     if ($status) {
         exit_abnormally("Failed to compute SHA512 checksum for: $file", $output);
     }
 
     my @pieces = split /\s+/, trim($output);
-
     return $pieces[0];
 }
 
 #
-# Return the tool version UUID, if any, for the given tool and version string.
+# Return the name for the currently selected tool.
+#
+sub get_tool_name {
+    my ($options) = @_;
+
+    if (defined $options->{'tool-name'}) {
+        return $options->{'tool-name'};
+    }
+
+    my $tool_params_file = $options->{'tool-parameter-file'} || q();
+    my $tool_params_sql = (-r $tool_params_file) ? read_file($tool_params_file) : q();
+
+    my $query = qq(${tool_params_sql}; select \@name);
+    my $results = get_sql_query_results($options, $query);
+
+    my ($tool_name) = split /^/, $results;
+    $options->{'tool-name'} = $tool_name;
+    return $tool_name;
+}
+
+#
+# Return the tool version UUID for the currently selected tool.
 #
 sub get_tool_version_uuid {
-    my ($options, $tool_uuid, $version_string) = @_;
+    my ($options) = @_;
 
     if (defined $options->{'tool-version-uuid'}) {
         return $options->{'tool-version-uuid'};
     }
 
-    $tool_uuid      ||= $options->{'tool-uuid'}    || q();
-    $version_string ||= $options->{'tool-version'} || q();
-
-    my $escaped_tool_uuid      = escape_squotes($tool_uuid);
+    my $version_string = $options->{'tool-version'} || q();
     my $escaped_version_string = escape_squotes($version_string);
 
-    my $query = qq(select tool_version_uuid from tool_shed.tool_version where tool_uuid = '$escaped_tool_uuid' and version_string = '$escaped_version_string');
+    my $tool_params_file = $options->{'tool-parameter-file'} || q();
+    my $tool_params_sql = (-r $tool_params_file) ? read_file($tool_params_file) : q();
+
+    my $query = qq(${tool_params_sql}; select tool_version_uuid from tool_shed.tool_version where tool_uuid = \@tool_uuid and version_string = '$escaped_version_string');
     my $results = get_sql_query_results($options, $query);
 
     my ($tool_version_uuid) = split /^/, $results;
     $options->{'tool-version-uuid'} = $tool_version_uuid;
     return $tool_version_uuid;
+}
+
+############################################################################
+
+sub update_license_server_config {
+    my ($options, $swamp_conf) = @_;
+    my $license_server_host_key = $options->{'license-server-host-key'};
+    my $host                    = $options->{'license-server-host'};
+    my $license_server_port_key = $options->{'license-server-port-key'};
+    my $port                    = $options->{'license-server-port'};
+
+    if ($license_server_host_key && $host && $license_server_port_key && $port) {
+        print "Processing updates to license server configuration ($host, port $port)\n";
+
+        $swamp_conf = merge_key_val($swamp_conf, $license_server_host_key, $host);
+        $swamp_conf = merge_key_val($swamp_conf, $license_server_port_key, $port);
+    }
+    return $swamp_conf;
+}
+
+sub update_tool_config {
+    my ($options, $swamp_conf) = @_;
+    my $tool_conf_file = $options->{'tool-conf-file'} || q();
+
+    if (-r $tool_conf_file) {
+        print "Processing updates from '$tool_conf_file'\n";
+
+        my $tool_conf = read_file($tool_conf_file);
+        my @lines = split /^/, trim($tool_conf);
+        for my $line (@lines) {
+            $line = trim($line);
+            if ($line =~ /^#/) {
+                next;
+            }
+
+            my @pieces = split /=/, $line;
+            my $key = trim($pieces[0]);
+            if ($key) {
+                my $val = get_key_val($tool_conf, $key);
+                if (defined $val) {
+                    $swamp_conf = merge_key_val($swamp_conf, $key, $val);
+                }
+            }
+        }
+    }
+    return $swamp_conf;
+}
+
+sub update_user_password_config {
+    my ($options, $swamp_conf) = @_;
+    my $user_key     = $options->{'license-server-user-key'};
+    my $password_key = $options->{'license-server-password-key'};
+
+    if ($user_key && $password_key) {
+        print 'Configure license server user/password? [N/y] ';
+        my $response = <>;
+
+        if (!($response =~ /^y(es)?$/i)) {
+            print "Not configuring license user/password\n";
+            return $swamp_conf;
+        }
+
+        print 'Enter license server user: ';
+        my $user = <>;
+        chomp $user;
+
+        toggle_terminal_echo(0);
+        print 'Enter license server password: ';
+        my $password = <>;
+        toggle_terminal_echo(1);
+        print "\n";
+        chomp $password;
+
+        $swamp_conf = merge_key_val($swamp_conf, $user_key, $user);
+        $swamp_conf = merge_key_val($swamp_conf, $password_key, $password);
+    }
+    return $swamp_conf;
 }
 
 ############################################################################
@@ -587,34 +701,34 @@ sub update_tool_archive {
     my ($options) = @_;
 
     if ($options->{'add'} || $options->{'replace'}) {
-        my $tool_archive     = $options->{'tool-archive'};
-        my $tool_install_dir = $options->{'tool-install-dir'};
+        my $tool_archive_file = $options->{'tool-archive-file'};
+        my $tool_install_dir  = $options->{'tool-install-dir'};
 
-        print "Installing '$tool_archive' in '$tool_install_dir'\n";
+        print "Installing '$tool_archive_file' in '$tool_install_dir'\n";
 
-        my $escaped_tool_archive     = escape_dquotes($tool_archive);
-        my $escaped_tool_install_dir = escape_dquotes($tool_install_dir);
-        my ($output, $status) = do_command(qq(install -m 644 -o root -g root "$escaped_tool_archive" "$escaped_tool_install_dir"));
+        my $escaped_tool_archive_file = escape_dquotes($tool_archive_file);
+        my $escaped_tool_install_dir  = escape_dquotes($tool_install_dir);
 
+        my ($output, $status) = do_command(qq(install -m 644 -o root -g root "$escaped_tool_archive_file" "$escaped_tool_install_dir"));
         if ($status) {
-            exit_abnormally("Failed to install '$tool_archive' in '$tool_install_dir'", $output);
+            exit_abnormally("Failed to install '$tool_archive_file' in '$tool_install_dir'", $output);
         }
     }
 
     if ($options->{'remove'}) {
-        my $tool_install_dir = $options->{'tool-install-dir'};
-        my $tool_version     = $options->{'tool-version'};
-        my $tool_archive     = $options->{'tool-archive-basename'};
-        my $file_to_remove   = "$tool_install_dir/$tool_archive";
+        my $tool_install_dir      = $options->{'tool-install-dir'};
+        my $tool_version          = $options->{'tool-version'};
+        my $tool_archive_basename = $options->{'tool-archive-basename'};
+        my $file_to_remove        = "$tool_install_dir/$tool_archive_basename";
 
         #
         # It's not an error if the tool archive file is already not present.
         #
         if (-f $file_to_remove) {
-            print "Removing '$tool_archive' from '$tool_install_dir'\n";
+            print "Removing '$tool_archive_basename' from '$tool_install_dir'\n";
 
             if (!unlink $file_to_remove) {
-                print "Warning: Failed to remove: $file_to_remove\n";
+                print "Warning: Failed to remove file: $file_to_remove\n";
             }
         }
     }
@@ -622,7 +736,7 @@ sub update_tool_archive {
 }
 
 #
-# Update the license server configuration.
+# Update configuration files.
 #
 sub update_swamp_config {
     my ($options) = @_;
@@ -632,35 +746,39 @@ sub update_swamp_config {
     #
     # Update the SWAMP's configuration.
     #
-    if ($options->{'license-server-host-key'} && $options->{'license-server-port-key'}) {
-        my $swamp_conf_file         = $options->{'swamp-conf-file'};
-        my $license_server_host_key = $options->{'license-server-host-key'};
-        my $host                    = $options->{'license-server-host'};
-        my $license_server_port_key = $options->{'license-server-port-key'};
-        my $port                    = $options->{'license-server-port'};
+    my $swamp_conf_file     = $options->{'swamp-conf-file'};
+    my $swamp_conf          = (-r $swamp_conf_file) ? read_file($swamp_conf_file) : q();
+    my $original_swamp_conf = $swamp_conf;
 
-        print "Updating license server configuration in '$swamp_conf_file' ($host, port $port)\n";
+    $swamp_conf = update_license_server_config($options, $swamp_conf);
+    $swamp_conf = update_tool_config($options, $swamp_conf);
+    $swamp_conf = update_user_password_config($options, $swamp_conf);
+
+    if ($swamp_conf ne $original_swamp_conf) {
+        print "Writing new version of '$swamp_conf_file'\n";
 
         backup_file($swamp_conf_file);
-
-        my $swamp_config = read_file($swamp_conf_file);
-        $swamp_config = merge_key_val($swamp_config, $license_server_host_key, $host);
-        $swamp_config = merge_key_val($swamp_config, $license_server_port_key, $port);
-        write_file($swamp_conf_file, $swamp_config);
+        write_file($swamp_conf_file, $swamp_conf);
     }
 
     #
     # Update HTCondor's configuration.
     #
-    if ($options->{'condor-limits-key'}) {
-        my $condor_limits_file = $options->{'condor-limits-file'};
-        my $condor_limits_key  = $options->{'condor-limits-key'};
-        my $limit              = $options->{'limit'};
+    my $condor_limits_file = $options->{'condor-limits-file'};
+    my $condor_limits_key  = $options->{'condor-limits-key'};
+    my $limit              = $options->{'limit'};
 
+    if ($condor_limits_key && $limit) {
         print "Updating HTCondor concurrency limits in '$condor_limits_file' (new limit: $limit)\n";
 
-        my $condor_limits = read_file($condor_limits_file);
+        my $condor_limits = (-r $condor_limits_file) ? read_file($condor_limits_file) : q();
         $condor_limits = merge_key_val($condor_limits, $condor_limits_key, $limit);
+
+        #
+        # CSA-3189: Don't backup the HTCondor configuration file.
+        # HTCondor reads *all* files in the directory, including the
+        # backups. Also, the file can be recreated easily.
+        #
         write_file($condor_limits_file, $condor_limits);
 
         print "Instructing HTCondor daemons to reconfigure themselves\n";
@@ -678,21 +796,23 @@ sub update_swamp_config {
 #
 sub update_database {
     my ($options) = @_;
-    my $tool_version_uuid = get_tool_version_uuid($options);
 
     return if !($options->{'add'} || $options->{'remove'} || $options->{'replace'});
+
+    my $tool_version_uuid = get_tool_version_uuid($options);
     return if ($options->{'remove'}  && !$tool_version_uuid);    # It's not an error if the database entries have already been removed.
     return if ($options->{'replace'} && !$tool_version_uuid);
 
     print "Updating database entries\n";
 
     my $tool_install_dir  = $options->{'tool-install-dir'};
-    my $tool_archive      = $options->{'tool-archive'};
+    my $tool_archive      = $options->{'tool-archive-file'};
     my $tool_archive_file = $tool_archive ? basename($tool_archive) : q();
     my $tool_version      = $options->{'tool-version'};
-    my $tool_params_sql   = $options->{'tool-params-sql'};
+    my $tool_params_file  = $options->{'tool-parameter-file'};
+    my $tool_meta_file    = $options->{'tool-meta-file'};
     my $checksum          = q();
-    my $tool_script_sql   = q();
+    my $tool_script_file  = q();
 
     if ($tool_archive) {
         $checksum = generate_sha512_checksum($tool_archive);
@@ -701,10 +821,10 @@ sub update_database {
         $tool_version_uuid = generate_uuid($options);
     }
     if ($options->{'add'} || $options->{'replace'}) {
-        $tool_script_sql = $options->{'tool-install-sql'};
+        $tool_script_file = $options->{'tool-install-file'};
     }
     if ($options->{'remove'}) {
-        $tool_script_sql = $options->{'tool-uninstall-sql'};
+        $tool_script_file = $options->{'tool-uninstall-file'};
     }
 
     my $escaped_tool_version      = escape_squotes($tool_version);
@@ -728,10 +848,11 @@ EOF
         $tool_params .= "\nset \@version_no = (select version_no from tool_shed.tool_version where tool_version_uuid = '$escaped_tool_version_uuid');\n";
     }
 
-    my $static_tool_params  = read_file($tool_params_sql);
-    my $tool_script         = read_file($tool_script_sql);
-    my $complete_sql_script = $tool_params . $static_tool_params . $tool_script;
-    my $ignore_results      = get_sql_query_results($options, $complete_sql_script);
+    my $tool_params_sql = (-r $tool_params_file) ? read_file($tool_params_file) : q();
+    my $tool_meta_sql   = (-r $tool_meta_file)   ? read_file($tool_meta_file)   : q();
+    my $tool_script_sql = (-r $tool_script_file) ? read_file($tool_script_file) : q();
+    my $complete_sql_script = $tool_params . $tool_params_sql . $tool_meta_sql . $tool_script_sql;
+    my $ignore_results = get_sql_query_results($options, $complete_sql_script);
     return;
 }
 
@@ -767,20 +888,20 @@ sub main {
     #
     # Indicate that the script has completed normally.
     #
-    my $tool_name    = $options->{'tool-name'};
-    my $tool_version = $options->{'tool-version'};
+    my $tool_name    = $options->{'tool-name'}    || 'tool';
+    my $tool_version = $options->{'tool-version'} || 'version';
 
     if ($options->{'add'}) {
-        print "$tool_name $tool_version has been added\n";
+        print "Finished adding $tool_name $tool_version\n";
     }
     if ($options->{'remove'}) {
-        print "$tool_name $tool_version has been removed\n";
+        print "Finished removing $tool_name $tool_version\n";
     }
     if ($options->{'replace'}) {
-        print "$tool_name $tool_version has been updated\n";
+        print "Finished replacing $tool_name $tool_version\n";
     }
     if ($options->{'configure'}) {
-        print "$tool_name has been configured\n";
+        print "Finished configuring $tool_name\n";
     }
     return;
 }

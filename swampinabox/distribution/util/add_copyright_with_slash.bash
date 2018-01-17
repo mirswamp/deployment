@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # Add the SWAMP copyright notice to a file.
@@ -59,7 +59,7 @@ fi
 echo "// This file is subject to the terms and conditions defined in" >> "$TMP_FILE"
 echo "// 'LICENSE.txt', which is part of this source code distribution." >> "$TMP_FILE"
 echo "//" >> "$TMP_FILE"
-echo "// Copyright 2012-2017 Software Assurance Marketplace" >> "$TMP_FILE"
+echo "// Copyright 2012-2018 Software Assurance Marketplace" >> "$TMP_FILE"
 echo "" >> "$TMP_FILE"
 
 tail -n +"$((skip_lines + 1))" "$SOURCE_FILE" >> "$TMP_FILE"

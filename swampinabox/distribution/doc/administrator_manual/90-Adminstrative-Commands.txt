@@ -19,19 +19,16 @@ following command (it does not require `root` access):
 /opt/swamp/bin/swamp_check_platform_images
 ----
 
-[NOTE]
-Assessment platforms are currently the only component of SWAMP-in-a-Box that
-are not necessarily updated by the SWAMP-in-a-Box upgrade script.
-
 
 Updating the Host's Hostname
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 During the SWAMP-in-a-Box install process, the hostname specified for the
-host (usually, the host's detected hostname) is set in various configuration
-locations. When the host's hostname changes, those configuration locations
-need to be updated in order for the system to continue functioning
-correctly. To do so, as `root` (or using `sudo`), run the following command:
+host (usually, the host's detected hostname) is set in the SWAMP's various
+configuration files and its database. When the host's hostname changes,
+those configuration locations need to be updated in order for the system to
+continue functioning correctly. To do so, as `root` (or using `sudo`), run
+the following command:
 
 ----
 /opt/swamp/bin/swamp_set_web_host <new hostname>
@@ -41,10 +38,10 @@ correctly. To do so, as `root` (or using `sudo`), run the following command:
 Managing the `swamp` System Service
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-SWAMP-in-a-Box installs a collection of daemons that run on the host, all
+SWAMP-in-a-Box includes a collection of daemons that run on the host, all
 managed by the `swamp` system service. These daemons must be running in
-order to perform assessments. The `swamp` service, and by extension all of
-the daemons, may be stopped and started using the standard commands for
+order to submit and perform assessments. The `swamp` service and the daemons
+managed by it can be stopped and started using the standard commands for
 interacting with system services (the commands must be run as `root` or
 using `sudo`). For example:
 
@@ -58,9 +55,9 @@ service swamp restart
 Other Components
 ~~~~~~~~~~~~~~~~
 
-SWAMP-in-a-Box also makes use of the Apache HTTP Server, HTCondor, and
-MariaDB. For instructions on how to interact with or administer Apache HTTP
-Server, HTCondor, and MariaDB, refer to the specific documentation
-associated with each product. Be aware that the install and upgrade process
-for SWAMP-in-a-Box makes changes to their default configurations; see the
-SWAMP-in-a-Box reference manual for further details.
+SWAMP-in-a-Box makes use of Apache HTTP Server, HTCondor, and MariaDB. For
+instructions on how to interact with or administer Apache HTTP Server,
+HTCondor, and MariaDB, refer to the documentation associated with each
+product. Be aware that the install and upgrade process for SWAMP-in-a-Box
+makes changes to their default configurations; see the SWAMP-in-a-Box
+Reference Manual for further details.

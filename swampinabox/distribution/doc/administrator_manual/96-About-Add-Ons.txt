@@ -1,0 +1,98 @@
+[[about-add-ons]]
+[appendix]
+About SWAMP-in-a-Box Add Ons
+----------------------------
+
+
+[[about-code-dx]]
+Code Dx
+~~~~~~~
+
+Through SWAMP's partnership with Code Dx, Inc., a SWAMP-specific version of
+Code Dx software has been created to be solely used with SWAMP software.
+Code Dx software shall not be redistributed with SWAMP software without
+written consent of Code Dx, Inc.
+
+To obtain a SWAMP version of Code Dx, contact Code Dx, Inc. at:
+
+  * sales@codedx.com,
+  * +1-631-759-3993, or
+  * https://codedx.com/support/?v=7516fd43adaa.
+
+After contacting Code Dx, Inc., you will be asked to agree to an End User's
+License Agreement (EULA) with Code Dx, Inc. Once you have agreed to the
+EULA, you will receive a download kit from Code Dx, Inc.
+
+Code Dx is third-party software created and maintained by Code Dx, Inc.
+Copyright 2010-2018 Code Dx, Inc. All rights reserved.
+
+
+[[about-codesonar]]
+CodeSonar
+~~~~~~~~~
+
+SWAMP-in-a-Box can be used with CodeSonar, a deep-path static analysis tool
+provided by GrammaTech, Inc. CodeSonar finds cases of undefined behavior
+(such as buffer overruns, null pointer dereferences, ...), API Misuse (use
+after free, socket API, ...), as well as suspicious behavior (dead code,
+unused variables, concurrency violations, taint, ...), and works on source
+code and binaries.
+
+Contact information for obtaining CodeSonar and licensing information for
+CodeSonar can be found at:
+
+  * sales@grammatech.com,
+  * +1-888-695-2668, or
+  * https://www.grammatech.com/products/codesonar.
+
+CodeSonar is third-party software created and maintained by GrammaTech, Inc.
+Copyright 2018 GrammaTech, Inc. CodeSonar is a registered trademark of
+GrammaTech, Inc. All rights reserved.
+
+
+[[about-parasoft]]
+Parasoft C/C++test and Parasoft Jtest
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+SWAMP-in-a-Box can be used with C/C+\+test and Jtest, static analysis and
+unit testing tools for C/C\++, and Java development provided by Parasoft.
+Part of Parasoft’s suite of automated software testing tools, these
+solutions facilitate software development best practices, rigorous bug
+detection, and security vulnerability remediation. Parasoft C/C++test and
+Jtest’s static analysis and unit testing technologies bring efficiency to
+quality and compliance initiatives. The latest releases improve developer
+workflows, with a focus on enhanced environment and embedded support, and
+provide enriched dashboards and tracking, to aid users in addressing
+vulnerabilities in standards like OWASP, CWE, or achieving MISRA compliance.
+
+Contact information for obtaining C/C+\+test or Jtest and licensing
+information for C/C++test or Jtest can be found at:
+
+  * swamp@parasoft.com, and
+  * +1-719-424-7907.
+
+
+[[about-coverity]]
+Synopsys Static Analysis (Coverity)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+SWAMP-in-a-Box can be used with Synopsys Static Analysis (Coverity).
+Synopsys Static Analysis is an accurate and comprehensive static analysis
+solution for finding critical quality defects and security violations. Its
+high-fidelity analysis delivers business relevant findings for developers
+and security audit teams alike. Synopsys' SAST solutions are uniquely
+designed to scale from safety-critical IoT software to global enterprise
+systems.
+
+Contact information for obtaining Synopsys Static Analysis (Coverity) and
+licensing information for Synopsys Static Analysis (Coverity) can be found at:
+
+  * software-integrity-sales@synopsys.com,
+  * U.S. Sales +1-800-873-8193,
+  * International Sales +1-415-321-5237, or
+  * https://www.synopsys.com/software-integrity/security-testing/static-analysis-sast.html.
+
+Synopsys Static Analysis (Coverity) is third-party software maintained by
+Synopsys, Inc. Copyright 2018 Synopsys, Inc. Synopsys Static Analysis
+(Coverity) is a registered trademark of Synopsys, Inc. All rights reserved
+worldwide.

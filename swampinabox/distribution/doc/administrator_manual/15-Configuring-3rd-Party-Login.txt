@@ -1,5 +1,5 @@
-Configuring 3rd-party Sign-in via OAuth2 Providers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Configuring Third-party Sign-in via OAuth2 Providers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The SWAMP can be configured to use external OAuth2 identity providers.
 Currently, the following identity providers are supported:
@@ -126,15 +126,15 @@ GITHUB_CLIENT_SECRET=<Your Client Secret>
 
       ** Product logo URL: The URL to a logo for your SWAMP-in-a-Box.
          For example, mir-swamp.org uses:
-         https://www.mir-swamp.org/images/logos/swamp-icon-small.png
+         https://www.mir-swamp.org/images/logos/swamp-icon-small.png.
 
       ** Privacy policy URL: The URL to your privacy policy.
          For example, mir-swamp.org uses:
-         https://www.swampinabox.org/doc/SWAMP-Privacy-Policy.pdf
+         https://www.swampinabox.org/doc/SWAMP-Privacy-Policy.pdf.
 
       ** Terms of service URL: The URL to your terms of service.
          For example, mir-swamp.org uses:
-         https://www.mir-swamp.org/#policies/acceptable-use-policy
+         https://www.mir-swamp.org/#policies/acceptable-use-policy.
 
    * Click "Save".
 

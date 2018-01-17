@@ -1,7 +1,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 %define _target_os  Linux
 %define _arch       noarch
@@ -47,7 +47,7 @@ pwd
 ls
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/opt
-tar -C $RPM_BUILD_ROOT/opt -xzvf perlbin.tgz
+tar -C $RPM_BUILD_ROOT/opt -xzf perlbin.tgz
 chmod -R g-s $RPM_BUILD_ROOT/opt
 
 %clean

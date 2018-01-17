@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # Install the bundled platforms for the current SWAMP-in-a-Box release.
@@ -39,6 +39,8 @@ function remove_deprecated_distribution_files() {
             /swamp/platforms/images/condor-scientific-5.11-64-master-2016080901.qcow2 \
             /swamp/platforms/images/condor-scientific-6.4-64-master-2015071401.qcow2 \
             /swamp/platforms/images/condor-ubuntu-12.04-64-master-2015012801.qcow2 \
+            /swamp/platforms/images/condor-ubuntu-16.04-64-master-2016102702.qcow2 \
+            /swamp/platforms/images/condor-universal-centos-6.8-64-viewer-master-2016110801.qcow2 \
             ; do
         if [ -f "$file_to_remove" ]; then
             echo ".. Removing: $file_to_remove"

@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2017 Software Assurance Marketplace
+# Copyright 2012-2018 Software Assurance Marketplace
 
 #
 # Build a SWAMP-in-a-Box release for distribution.
@@ -17,8 +17,16 @@ BINDIR="$(dirname "$0")"
 RELEASE_NUMBER="$1"
 BRANCH="$2"
 BUILD_NUMBER="$3"
-SKIP_RPMS="$4"
-SKIP_TARBALL="$5"
+SKIP_RPMS=""
+SKIP_TARBALL=""
+
+for option in "$4" "$5"; do
+    if [[ "$option" =~ skip-rpm ]]; then
+        SKIP_RPMS="--skip-rpms"
+    elif [[ "$option" =~ skip-tarball ]]; then
+        SKIP_TARBALL="--skip-tarball"
+    fi
+done
 
 WORKSPACE="$BINDIR/../../.."
 IFS='.' read RELEASE MAJOR MINOR <<< "$RELEASE_NUMBER"
@@ -155,8 +163,9 @@ function build_src_tar() {
     cp -d "$BINDIR"/bin/*                  "$BUILD_RESULT/bin/."
 
     # copy runtime files that we need before the RPMs are installed
-    cp    "$BINDIR/../runtime/bin/swamp_get_potential_web_hosts"  "$BUILD_RESULT/sbin/."
-    cp    "$BINDIR/../runtime/sbin/swamp_manage_service"          "$BUILD_RESULT/sbin/."
+    cp    "$BINDIR/../runtime/bin/swamp_check_virtualization_support"  "$BUILD_RESULT/sbin/."
+    cp    "$BINDIR/../runtime/bin/swamp_get_potential_web_hosts"       "$BUILD_RESULT/sbin/."
+    cp    "$BINDIR/../runtime/sbin/swamp_manage_service"               "$BUILD_RESULT/sbin/."
 
     # copy other files
     cp    "$BINDIR/../singleserver/bin/set_passwords.bash"  "$BUILD_RESULT/bin/."
@@ -168,7 +177,6 @@ function build_src_tar() {
     echo "$RELEASE_NUMBER $BUILD_NUMBER $SHORT_RELEASE_NUMBER" > "$BUILD_RESULT/bin/version.txt"
 
     # remove extraneous files
-    rm "$BUILD_RESULT/repos/set-up-swampcs.bash"
     rm "$BUILD_RESULT/sbin/find_release_number.pl"
     rm "$BUILD_RESULT/sbin/getargs.function"
     rm "$BUILD_RESULT/sbin/initialize_swamp_database_driver.bash"
