@@ -10,17 +10,26 @@
 #
 
 encountered_error=0
-trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
 
-BINDIR="$(dirname "$0")"
-RELAYHOST="$1"
+BINDIR=$(dirname "$0")
+swamp_context=$1
+relayhost=$2
 
 ############################################################################
 
-echo "Patching postfix"
-postqueue -f
-diff -wu /etc/postfix/main.cf "$BINDIR/../config_templates/main.cf" | sed -e "s/SED_HOSTNAME/$HOSTNAME/" | sed -e "s/RELAYHOST/$RELAYHOST/" | patch /etc/postfix/main.cf
-"$BINDIR/manage_services.bash" restart postfix
+if [ "$swamp_context" = "-singleserver" ]; then
+    echo "Flushing Postfix's queue"
+    postqueue -f
+
+    echo "Patching /etc/postfix/main.cf"
+    diff -wu /etc/postfix/main.cf "$BINDIR/../config_templates/main.cf" | \
+        sed -e "s/SED_HOSTNAME/$HOSTNAME/" | \
+        sed -e "s/RELAYHOST/$relayhost/" | \
+        patch -s /etc/postfix/main.cf
+
+    "$BINDIR/manage_services.bash" restart postfix
+fi
 
 exit $encountered_error

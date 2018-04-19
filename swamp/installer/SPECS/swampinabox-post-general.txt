@@ -1,4 +1,4 @@
-# SWAMP-in-a-Box general post-install script section
+# SWAMP-in-a-Box non-backend specific post-install script section
 
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.

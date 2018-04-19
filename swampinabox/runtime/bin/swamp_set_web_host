@@ -10,41 +10,89 @@
 #
 
 encountered_error=0
-trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
+
+function show_usage_and_exit() {
+    echo "Usage: $0 --hostname=<new hostname> [options]" 1>&2
+    echo "" 1>&2
+    echo "Options:" 1>&2
+    echo "  --force  Do not configure relative URLs anywhere" 1>&2
+    exit 1
+}
+
+BINDIR=$(dirname "$0")
+config_json="/var/www/html/config/config.json"
+dot_env="/var/www/swamp-web-server/.env"
+swamp_conf="/opt/swamp/etc/swamp.conf"
 
 ############################################################################
 
-NEW_HOSTNAME="$1"
+new_hostname=""
+set_hostname_everywhere=""
 
-if [ -z "$NEW_HOSTNAME" ]; then
-    echo "Usage: $0 <new hostname>" 1>&2
+for option in "$@" ; do
+    case "$option" in
+        --force) set_hostname_everywhere="yes" ;;
+        --hostname=*) new_hostname=${option#--hostname=} ;;
+        --help)
+            show_usage_and_exit
+            ;;
+        *)
+            echo "Error: Unrecognized option: $option" 1>&2
+            echo "" 1>&2
+            show_usage_and_exit
+            ;;
+    esac
+done
+
+if [ -z "$new_hostname" ]; then
+    show_usage_and_exit
+fi
+if ! perl -e 'use Socket; print inet_ntoa(inet_aton($ARGV[0]))' "$new_hostname" 1>/dev/null 2>/dev/null ; then
+    echo "Error: Unable to determine an IP address for: $new_hostname" 1>&2
     exit 1
 fi
-
-if ! perl -e 'use Socket; print inet_ntoa(inet_aton($ARGV[0]))' "$NEW_HOSTNAME" 1>/dev/null 2>/dev/null ; then
-    echo "Error: Unable to determine an IP address for: $NEW_HOSTNAME" 1>&2
+if [ ! -f "$config_json" ]; then
+    echo "Error: No such file: $config_json" 1>&2
     exit 1
 fi
-
+if [ ! -f "$dot_env" ]; then
+    echo "Error: No such file: $dot_env" 1>&2
+    exit 1
+fi
+if [ ! -f "$swamp_conf" ]; then
+    echo "Error: No such file: $swamp_conf" 1>&2
+    exit 1
+fi
 if [ "$(whoami)" != "root" ]; then
     echo "Error: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
     exit 1
 fi
 
-#
-# Simple function for abstracting out the invocation of 'sed'.
-#
+############################################################################
+
+default_web_server=""
+laravel_app_url="https://$new_hostname"
+swamp_api_web_server="https://localhost"
+
+if [ "$set_hostname_everywhere" = "yes" ]; then
+    default_web_server="https://$new_hostname"
+    swamp_api_web_server="https://$new_hostname"
+fi
+
 function update_config() {
     key="$1"
     val="$2"
     target="$3"
     nospace="$4"
 
-    val=${val//\//\\\/}
+    # Escape special characters for sed's 's//'
+    val=${val//\\/\\\\}  # escape back slash
+    val=${val//\//\\\/}  # escape forward slash
+    val=${val//&/\\&}    # escape ampersands
 
-    if [ -r "$target" ]; then
-        echo "Updating: $target: $key"
+    if [ -f "$target" ]; then
         if [ "$nospace" = "-nospace" ]; then
             sed -i "s/^\s*$key\s*=.*$/$key=$val/" "$target"
         else
@@ -54,48 +102,50 @@ function update_config() {
 }
 
 #
-# Update swamp.conf (backend)
+# SWAMP API web server (i.e., the backend web server).
 #
-target="/opt/swamp/etc/swamp.conf"
+"$BINDIR/../sbin/swamp_set_config_json_host" "$default_web_server"
 
-update_config "reporturl" "https://$NEW_HOSTNAME/results/" "$target"
-update_config "swamp_api_web_server" "$NEW_HOSTNAME/swamp-web-server/public" "$target"
-
-#
-# Update .env (web server)
-#
-target="/var/www/swamp-web-server/.env"
-
-for key in APP_URL APP_CORS_URL; do
-    update_config "$key" "https://$NEW_HOSTNAME" "$target" -nospace
-done
+echo "Setting SWAMP API web server in $(basename "$swamp_conf") to $swamp_api_web_server"
+update_config "swamp_api_web_server" "$swamp_api_web_server/swamp-web-server/public" "$swamp_conf"
 
 #
-# Update config.json (web server)
+# Laravel APP URLs.
 #
-target="/var/www/html/config/config.json"
+echo "Setting Laravel APP URLs to $laravel_app_url"
+update_config "APP_URL"      "$laravel_app_url" "$dot_env" -nospace
+update_config "APP_CORS_URL" "$laravel_app_url" "$dot_env" -nospace
 
-if [ -f "$target" ]; then
-    echo "Updating: $target"
-    /opt/swamp/sbin/swamp_set_config_json_host "$NEW_HOSTNAME"
+#
+# Other places that affect how URLs are constructed for the web application.
+#
+if [ -z "$default_web_server" ]; then
+    echo "Setting web server in other URLs"
+else
+    echo "Setting web server in other URLs to $default_web_server"
 fi
+update_config "reporturl" "$default_web_server/results" "$swamp_conf"
 
 #
-# Update database
+# Updating the database entries requires a one-off script.
 #
 TMP_FILE=$(mktemp /tmp/swamp_set_web_host.XXXXXX.sql)
 
-trap 'rm -f $TMP_FILE; exit 1' INT TERM
+source "$BINDIR/../sbin/db_support.functions"
+trap 'rm -f "$TMP_FILE" ; stty echo ; reset_db_support' EXIT
+trap 'rm -f "$TMP_FILE" ; stty echo ; reset_db_support ; exit 1' INT TERM
+
+setup_db_support
 
 cat >"$TMP_FILE" <<END_DB_SCRIPT
     DELETE FROM assessment.system_setting WHERE system_setting_code='OUTGOING_BASE_URL';
     DELETE FROM assessment.system_setting WHERE system_setting_code='CODEDX_BASE_URL';
-    INSERT INTO assessment.system_setting (system_setting_code, system_setting_value) VALUES ('OUTGOING_BASE_URL', 'https://$NEW_HOSTNAME/results/');
-    INSERT INTO assessment.system_setting (system_setting_code, system_setting_value) VALUES ('CODEDX_BASE_URL', 'https://$NEW_HOSTNAME/');
+    INSERT INTO assessment.system_setting (system_setting_code, system_setting_value) VALUES ('OUTGOING_BASE_URL', '$default_web_server/results/');
+    INSERT INTO assessment.system_setting (system_setting_code, system_setting_value) VALUES ('CODEDX_BASE_URL', '$default_web_server/');
 END_DB_SCRIPT
 
-echo "Updating: Database records"
-/opt/swamp/sbin/execute_sql_script "$TMP_FILE"
+do_mysql_command "$TMP_FILE"
+reset_db_support
 rm -f "$TMP_FILE"
 
 exit $encountered_error

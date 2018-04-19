@@ -114,6 +114,7 @@ if [ "$1" = "2" ]; then
     fi
 fi
 echo "Finished running pre script"
+echo "Installing the files for %{name} (this will take some time)"
 
 #
 # Arguments to post are {1=>new, 2=>upgrade}

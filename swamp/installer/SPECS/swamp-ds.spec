@@ -59,6 +59,8 @@ rm -rf $RPM_BUILD_ROOT
 %pre
 %include common-pre.txt
 
+echo "Finished running pre script"
+
 %post
 %include common-post.txt
 %include swamp-post-common.txt
@@ -108,16 +110,16 @@ fi
 # Set the reporturl name based on which environment we are installing to
 iam=`hostname -s`
 if [ "$iam" = "swa-csadata-dd-01" ];then
-	reporturl="https://swa-csaweb-dd-01.cosalab.org/results/"
+	reporturl="https://swa-csaweb-dd-01.cosalab.org/results"
 	ldap="ldaps://swa-dir-dd-01.mirsam.org:636"
 elif [ "$iam" = "swa-csaper-dt-01" -o "$iam" = "dbrhel6test" -o "$iam" = "swa-build-1" ];then
-	reporturl="https://swa-csaweb-dt-02.cosalab.org/results/"
+	reporturl="https://swa-csaweb-dt-02.cosalab.org/results"
 	ldap="ldaps://swa-dir-dt-02.mirsam.org:636"
 elif [ "$iam" = "swa-csadata-it-01" ];then
-	reporturl="https://swa-csaweb-it-01.cosalab.org/results/"
+	reporturl="https://swa-csaweb-it-01.cosalab.org/results"
 	ldap="ldaps://swa-dir-it-01.mirsam.org:636"
 elif [ "$iam" = "swa-csadata-pd-01" ];then
-	reporturl="https://swa-csaweb-pd-01.mir-swamp.org/results/"
+	reporturl="https://swa-csaweb-pd-01.mir-swamp.org/results"
 	ldap="ldaps://swa-dir-pd-01.mirsam.org:636"
 fi
 /bin/sed -i "s|^reporturl\ =\ .*$|reporturl = $reporturl|" /opt/swamp/etc/swamp.conf

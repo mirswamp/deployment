@@ -6,34 +6,33 @@
 # Copyright 2012-2018 Software Assurance Marketplace
 
 #
-# Install the bundled tools for the current SWAMP-in-a-Box release.
+# Install the tool files for the current SWAMP-in-a-Box release.
 #
 
 encountered_error=0
-trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
 
-BINDIR="$(dirname "$0")"
-SWAMP_CONTEXT="$1"
-RELEASE_NUMBER="$2"
+BINDIR=$(dirname "$0")
+swamp_context=$1
+release_number=$2
 
 #
 # For the 'distribution' version of SWAMP-in-a-Box.
 #
-OLD_INSTALL_DIR="/swamp/store/SCATools"
-CURRENT_INSTALL_DIR="/swamp/store/SCATools/bundled"
-SOURCE_TARBALL="$BINDIR/../../swampinabox-${RELEASE_NUMBER}-tools.tar.gz"
+old_install_dir="/swamp/store/SCATools"
+new_install_dir="/swamp/store/SCATools/bundled"
+source_tarball="$BINDIR/../../swampinabox-${release_number}-tools.tar.gz"
 
 ############################################################################
 
-function remove_distribution_tools_bundle() {
-    echo "Removing any existing bundled tool files"
-    if [ -d "$CURRENT_INSTALL_DIR" ]; then
-        rm -rf "$CURRENT_INSTALL_DIR"/*
+function remove_deprecated_distribution_files() {
+    echo "Checking for and removing deprecated bundled tool files"
+    if [ -d "$new_install_dir" ]; then
+        echo "Removing: ${new_install_dir:?}/*"
+        rm -rf "${new_install_dir:?}"/*
     fi
-
-    echo "Removing any existing bundled tool files from previous releases"
-    for tool_archive in \
+    for old_file in \
             bandit/bandit-8ba3536-3.tar.gz \
             bandit/bandit-py2-0.14.0-2.tar.gz \
             bandit/bandit-py2-0.14.0-4.tar.gz \
@@ -125,14 +124,13 @@ function remove_distribution_tools_bundle() {
             tidy-html5-5.2.0-2.tar.gz \
             xmllint-2.9.4-2.tar.gz \
             ; do
-        file_to_remove="${OLD_INSTALL_DIR}/${tool_archive}"
+        file_to_remove="${old_install_dir}/${old_file}"
         if [ -f "$file_to_remove" ]; then
-            echo ".. Removing: $file_to_remove"
+            echo "Removing: $file_to_remove"
             rm -f "$file_to_remove"
         fi
     done
-
-    for tool_dir in \
+    for old_dir in \
             bandit \
             brakeman \
             checkstyle \
@@ -152,66 +150,45 @@ function remove_distribution_tools_bundle() {
             rubocop \
             ruby-lint \
             ; do
-        dir_to_remove="${OLD_INSTALL_DIR}/${tool_dir}"
+        dir_to_remove="${old_install_dir}/${old_dir}"
         if [ -d "$dir_to_remove" ]; then
-            echo ".. Removing: $dir_to_remove"
+            echo "Removing: $dir_to_remove"
             rmdir "$dir_to_remove"
         fi
     done
-}
-
-function extract_distribution_tools_bundle() {
-    if [ ! -r "$SOURCE_TARBALL" ]; then
-        echo "Error: $0: No such file (or file is not readable): $SOURCE_TARBALL" 1>&2
-        return 1
-    fi
-
-    echo "Creating: $CURRENT_INSTALL_DIR"
-    mkdir -p "$CURRENT_INSTALL_DIR"
-
-    echo "Extracting bundled tool files into: $CURRENT_INSTALL_DIR"
-    tar -C "$CURRENT_INSTALL_DIR" --strip-components 1 -zxvf "$SOURCE_TARBALL"
-
-    cat > "$CURRENT_INSTALL_DIR"/_DO_NOT_MAKE_CHANGES_HERE.txt <<EOF
-The SWAMP-in-a-Box installer/upgrader script is not guaranteed
-to preserve any changes made to the contents of this directory.
-
-In particular, do not create additional files in this directory.
-Future runs of the SWAMP-in-a-Box installer/upgrader script may
-delete such files without warning.
-EOF
-
-    echo "Setting filesystem permissions on the tool files"
-    chown -R mysql:mysql "$CURRENT_INSTALL_DIR"
-    find "$CURRENT_INSTALL_DIR" -type d -exec chmod u=rwx,og=rx,ugo-s '{}' ';'
-    find "$CURRENT_INSTALL_DIR" -type f -exec chmod u=rw,og=r,ugo-s   '{}' ';'
+    echo "Finished checking for and removing deprecated files"
 }
 
 ############################################################################
 
-#
-# The database is to be the authoritative list of tools on the system.
-#
-/opt/swamp/sbin/rebuild_tools_db "$SWAMP_CONTEXT"
+function extract_distribution_bundle() {
+    echo "Extracting bundled tool files into: $new_install_dir"
+    echo "(this will take some time)"
+    tar -C "$new_install_dir" --strip-components 1 -zxvf "$source_tarball"
+    echo "Finished extracting files"
 
-#
-# Bring the tool archives on the filesystem into sync with the database.
-#
-if [ "$SWAMP_CONTEXT" = "-distribution" ]; then
-    remove_distribution_tools_bundle
-    extract_distribution_tools_bundle
+    cat > "$new_install_dir"/00_DO_NOT_MODIFY_THIS_DIR.txt <<EOF
+The SWAMP-in-a-Box installer/upgrader script will not preserve any
+changes made to the contents of this directory. Files may be deleted
+without warning.
+EOF
 
-elif [ "$SWAMP_CONTEXT" = "-singleserver" -o "$SWAMP_CONTEXT" = "-mir-swamp" ]; then
-    #
-    # By default, don't modify the filesystem. If someone hasn't pulled the
-    # most recent version of the 'db' repository, it's possible all the file
-    # paths in the database will be out-of-date.
-    #
-    echo "Skipping installation of tool archives: Context is: $SWAMP_CONTEXT"
+    echo "Setting file system permissions"
+    chown -R mysql:mysql "$new_install_dir"
+    find "$new_install_dir" -type d -exec chmod u=rwx,og=rx,ugo-s '{}' ';'
+    find "$new_install_dir" -type f -exec chmod u=rw,og=r,ugo-s   '{}' ';'
+}
 
-else
-    echo "Error: $0: Unknown SWAMP context: $SWAMP_CONTEXT" 1>&2
-    exit 1
+############################################################################
+
+if [ "$swamp_context" = "-distribution" ]; then
+    remove_deprecated_distribution_files
+    extract_distribution_bundle
+
+    if [ $encountered_error -eq 0 ]; then
+        echo "Finished installing tool files"
+    else
+        echo "Error: Finished installing tool files, but with errors" 1>&2
+    fi
 fi
-
 exit $encountered_error

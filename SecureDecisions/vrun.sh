@@ -6,13 +6,14 @@
 VIEWER="CodeDX"
 viewer="codedx"
 MYSQLPWFILE="/root/.mysql.pw"
-TOMCATVERSION="/opt/apache-tomcat-8.5.23"
+TOMCATVERSION="/opt/apache-tomcat-8.5.28"
 TOMCATSERVICE="tomcat"
 TOMCATDIR="/opt/$TOMCATSERVICE"
 TOMCATLOG="$TOMCATDIR/logs/catalina.out"
 RUNOUT="/mnt/out/run.out"
 RUNEPOCH="/mnt/out/run.epoch"
 EVENTOUT="/dev/ttyS1"
+shutdown_on_error=1
 
 # function to echo events to RUNOUT and EVENTOUT
 sequence=10
@@ -37,9 +38,12 @@ ping -c 3 `hostname`
 if [ $? != 0 ]
 then
     	record_event NOIP "ERROR: NO IP ADDRESS"
-		record_event NOIPSHUTDOWN "Shutting down $VIEWER viewer via run.sh"
-    	shutdown -h now
-		exit
+		if [ $shutdown_on_error -eq 1 ]
+		then
+			record_event NOIPSHUTDOWN "Shutting down $VIEWER viewer via run.sh"
+			shutdown -h now
+			exit
+		fi
 fi
 
 # set viewer database backup as shutdown service
@@ -86,9 +90,12 @@ if [ $? -ne 0 ]
 then
 	record_event MYSQLFAIL "Service mysql failed to start"
 	service mysql status >> $RUNOUT 2>&1
-	record_event MYSQLSHUTDOWN "Shutting down $VIEWER viewer via run.sh"
-	shutdown -h now
-	exit
+	if [ $shutdown_on_error -eq 1 ]
+	then
+		record_event MYSQLSHUTDOWN "Shutting down $VIEWER viewer via run.sh"
+		shutdown -h now
+		exit
+	fi
 else
 	record_event MYSQLRUN "Service mysql running"
 	echo "" >> $RUNOUT 2>&1
@@ -98,6 +105,7 @@ fi
 if [ ! -r viewerdb.tar.gz ] # new format, not legacy
 then
 	read -r mysqlpw < $MYSQLPWFILE
+	# initialize mysql database
 	if [ -r emptydb-mysql-${viewer}.sql ]
 	then
 		record_event MYSQLEMPTY "Restoring $VIEWER viewer database from emptydb-mysql-${viewer}.sql"
@@ -108,28 +116,31 @@ then
 		mysqladmin --user='root' --password="$mysqlpw" flush-privileges
 		echo "" >> $RUNOUT 2>&1
 	fi
+	# flush priveleges
 	if [ -r flushprivs.sql ]
 	then
 		record_event MYSQLGRANT "Granting privileges for $VIEWER viewer database from flushprivs.sql"
 		mysql --user='root' --password="$mysqlpw" mysql < flushprivs.sql >> $RUNOUT 2>&1
 		echo "" >> $RUNOUT 2>&1
 	fi
+	# drop and create viewer database
 	if [ -r resetdb-${viewer}.sql ]
 	then
 		record_event MYSQLDROP "Dropping $VIEWER viewer database from resetdb-${viewer}.sql"
 		mysql --user='root' --password="$mysqlpw" < resetdb-${viewer}.sql >> $RUNOUT 2>&1
 		echo "" >> $RUNOUT 2>&1
 	fi
-	if [ -r emptydb-${viewer}.sql ]
-	then
-		record_event EMPTYDB "Restoring $VIEWER viewer database from emptydb-${viewer}.sql"
-		mysql --user='root' --password="$mysqlpw" ${viewer} < emptydb-${viewer}.sql >> $RUNOUT 2>&1
-		echo "" >> $RUNOUT 2>&1
-	fi
+	# if a previously saved user database exists load it, 
 	if [ -r ${viewer}.sql ]
 	then
 		record_event USERDB "Restoring $VIEWER user database from ${viewer}.sql"
 		mysql --user='root' --password="$mysqlpw" ${viewer} < ${viewer}.sql >> $RUNOUT 2>&1
+		echo "" >> $RUNOUT 2>&1
+	# otherwise load empty database for this version of viewer
+	elif [ -r emptydb-${viewer}.sql ]
+	then
+		record_event EMPTYDB "Restoring $VIEWER viewer database from emptydb-${viewer}.sql"
+		mysql --user='root' --password="$mysqlpw" ${viewer} < emptydb-${viewer}.sql >> $RUNOUT 2>&1
 		echo "" >> $RUNOUT 2>&1
 	fi
 fi
@@ -190,9 +201,12 @@ if [ $tomcat_started -eq 0 ]
 then
 	record_event TOMCATFAIL "Service tomcat failed to start"
 	service $TOMCATSERVICE status >> $RUNOUT 2>&1
-	record_event TOMCATSHUTDOWN "Shutting down $VIEWER viewer via run.sh"
-	shutdown -h now
-	exit
+	if [ $shutdown_on_error -eq 1 ]
+	then
+		record_event TOMCATSHUTDOWN "Shutting down $VIEWER viewer via run.sh"
+		shutdown -h now
+		exit
+	fi
 else
 	record_event TOMCATRUN "Service tomcat running"
 	echo "" >> $RUNOUT 2>&1

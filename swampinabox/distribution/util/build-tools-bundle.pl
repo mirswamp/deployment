@@ -46,7 +46,7 @@ sub do_command {
 sub trim {
     my ($val) = @_;
     if ($val) {
-        $val =~ s/^\s+|\s+$//gm;
+        $val =~ s/^\s+|\s+$//g;
     }
     return $val;
 }
@@ -129,14 +129,13 @@ Usage: $PROGRAM_NAME [options]
 Build the swampinabox-{version}-tools.tar.gz bundle for SWAMP-in-a-Box.
 
 Options:
-
   --inventory   Inventory file containing a list of tool archive files
   --scripts     Directory containing the database scripts for each listed tool
   --version     The SWAMP-in-a-Box release for which to name the bundle
   --build       The build number to use for the bundle
   --output-dir  The directory to place the final output in
 
-  --help, -?  Display this message
+  --help, -?    Display this message
 EOF
 
     print $usage_message;
@@ -181,7 +180,7 @@ sub get_options {
         my @inventory_files = @{$options{'inventory-file'}};
         for my $file (@inventory_files) {
             if (!-r $file) {
-                push @errors, "No such file (or file is not readable): $file";
+                push @errors, "File is not readable: $file";
             }
         }
     }
@@ -267,7 +266,7 @@ sub check_system_requirements {
 
     for my $tool_path (@tools) {
         if (!-r $tool_path) {
-            push @errors, "No such tool archive file (or file is not readable): $tool_path";
+            push @errors, "File is not readable: $tool_path";
         }
     }
 
@@ -309,7 +308,7 @@ sub populate_working_dir {
 
     push @temp_objects, $version_file;
     open my $fh, '>', $version_file
-      || exit_abnormally("Error: Unable to open: $version_file");
+      || exit_abnormally("Unable to open: $version_file");
     print {$fh} "release = $version\n";
     print {$fh} "buildnumber = $build\n";
     close $fh;

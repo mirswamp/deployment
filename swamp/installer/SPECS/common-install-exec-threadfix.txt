@@ -1,0 +1,18 @@
+# SWAMP and SWAMP-in-a-Box common exec node install section - ThreadFix
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2018 Software Assurance Marketplace
+
+mkdir -p "$RPM_BUILD_ROOT"/opt/swamp/thirdparty/threadfix/swamp
+mkdir -p "$RPM_BUILD_ROOT"/opt/swamp/thirdparty/threadfix/vendor
+
+[ -e threadfix/threadfix.war ] && install -m 444 threadfix/threadfix.war "$RPM_BUILD_ROOT"/opt/swamp/thirdparty/threadfix/vendor
+
+install -m 444 threadfix/emptydb-mysql-threadfix.sql "$RPM_BUILD_ROOT"/opt/swamp/thirdparty/threadfix/swamp
+install -m 444 threadfix/emptydb-threadfix.sql       "$RPM_BUILD_ROOT"/opt/swamp/thirdparty/threadfix/swamp
+install -m 444 threadfix/resetdb-threadfix.sql       "$RPM_BUILD_ROOT"/opt/swamp/thirdparty/threadfix/swamp
+install -m 444 threadfix/threadfix.jdbc.properties   "$RPM_BUILD_ROOT"/opt/swamp/thirdparty/threadfix/swamp
+install -m 755 threadfix/threadfix_viewerdb.sh       "$RPM_BUILD_ROOT"/opt/swamp/thirdparty/threadfix/swamp
+install -m 755 threadfix/vrun.sh                     "$RPM_BUILD_ROOT"/opt/swamp/thirdparty/threadfix/swamp

@@ -8,7 +8,7 @@
 %config /opt/swamp/etc/log4perl.conf
 %config /opt/swamp/etc/swamp.conf
 
+/opt/swamp
+
 /etc/init.d/swamp
 /etc/profile.d/swamp.sh
-
-/opt/swamp

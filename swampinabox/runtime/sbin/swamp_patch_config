@@ -1,0 +1,264 @@
+#!/opt/perl5/perls/perl-5.18.1/bin/perl
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2018 Software Assurance Marketplace
+
+#
+# Patch keys in a "key = val" configuration file.
+#
+
+#
+# For 'perlcritic'.
+#
+## no critic (RequireDotMatchAnything, RequireLineBoundaryMatching, RequireExtendedFormatting)
+
+use utf8;
+use strict;
+use warnings;
+
+use English qw( -no_match_vars );
+use Getopt::Long;
+use POSIX qw(strftime);
+
+use File::Slurp qw(read_file write_file);
+
+############################################################################
+
+#
+# Execute the given command, and return all its output and its status code.
+#
+sub do_command {
+    my ($cmd)  = @_;
+    my $output = qx($cmd 2>&1);    # capture both standard out and standard error
+    my $status = $CHILD_ERROR;
+    return ($output, $status);
+}
+
+#
+# Return the given string without leading and trailing whitespace.
+#
+sub trim {
+    my ($val) = @_;
+    if ($val) {
+        $val =~ s/^\s+|\s+$//g;
+    }
+    return $val;
+}
+
+#
+# Backslash escape all double quotes in the given string.
+#
+sub escape_dquotes {
+    my ($val) = @_;
+    if ($val) {
+        $val =~ s/"/\\"/g;
+    }
+    return $val;
+}
+
+#
+# Create a backup copy of the given file.
+#
+sub backup_file {
+    my ($filename) = @_;
+    my $current_datetime = strftime('%Y%m%d%H%M%S', localtime);
+    my $old_filename     = escape_dquotes(qq($filename));
+    my $new_filename     = escape_dquotes(qq($filename.$current_datetime));
+    my ($output, $status) = do_command(qq(cp -p "$old_filename" "$new_filename"));
+    if ($status) {
+        exit_abnormally("Failed to create backup copy of: $filename", $output);
+    }
+    return;
+}
+
+#
+# Get the value for a key in the given string of "key = value" pairs.
+#
+sub get_key_val {
+    my ($config, $key) = @_;
+    my $escaped_key = quotemeta $key;
+
+    my @vals = ($config =~ /^[ \t]*$escaped_key[ \t]*=(.*)$/m);
+    return $vals[0];
+}
+
+#
+# Add/update a key-value pair in the given string of "key = value" pairs.
+#
+sub merge_key_val {
+    my ($config, $key, $val, $options) = @_;
+    my $escaped_key       = quotemeta $key;
+    my $contains_key      = ($config =~ /^[ \t]*$escaped_key[ \t]*=/m);
+    my $ends_with_newline = ($config =~ /\n$/);
+    my $space             = ($options->{'no-space'} ? q() : q( ));
+
+    if (!$options->{'no-space'}) {
+        $val = trim($val);
+    }
+
+    if ($contains_key) {
+        $config =~ s/^[ \t]*$escaped_key[ \t]*=.*$/$key$space=$space$val/gm;
+    }
+    else {
+        $config .= ($ends_with_newline ? q() : qq(\n)) . "$key$space=$space$val\n";
+    }
+    return $config;
+}
+
+############################################################################
+
+sub exit_normally {
+    exit 0;
+}
+
+sub exit_abnormally {
+    my ($message, $details) = @_;
+    $message = trim($message);
+    $details = trim($details);
+
+    if ($message) {
+        print "Error: $message" . ($details ? " ($details)" : q()) . "\n";
+    }
+    exit 1;
+}
+
+sub show_usage_and_exit {    ## no critic (RequireFinalReturn)
+    my $usage_message = <<"EOF";
+Usage: $PROGRAM_NAME [required arguments] [options]
+
+Patch keys in a "key = val" configuration file.
+
+Required arguments:
+    -i file                 The configuration file to modify
+    --input file
+    --source file
+    --output file
+    --destination file
+
+Options (specify these in pairs, multiple times, as needed):
+    --key string            The key to add or modify
+    --val string            The value to set
+
+Other options:
+    --no-space              Don't include spaces around the "="
+    --skip-disk             Don't write the updated destination to disk
+    --stdout                Display the updated destination on standard out
+    --help, -?              Display this message
+EOF
+
+    print $usage_message;
+    exit_abnormally();
+}
+
+############################################################################
+
+sub get_options {
+    my @errors  = ();
+    my %options = ();
+
+    my $ok = Getopt::Long::GetOptions(\%options,
+        'help|?',
+        'source|input|destination|output|i=s',
+        'keys|key=s@', 'vals|val=s@',
+        'no-space', 'skip-disk', 'stdout',
+    );
+
+    if (!$ok || $options{'help'}) {
+        print "\n" if !$ok;
+        show_usage_and_exit();
+    }
+
+    my $source_file = $options{'source'};
+    my $keys        = $options{'keys'} || [];
+    my $vals        = $options{'vals'} || [];
+
+    if (!$source_file) {
+        push @errors, 'Required argument missing: source';
+    }
+    elsif (!-f $source_file) {
+        push @errors, "Source/input file does not exist: $source_file";
+    }
+    elsif (!-r $source_file) {
+        push @errors, "Source/input file is not readable: $source_file";
+    }
+    elsif (!-w $source_file) {
+        push @errors, "Source/input file is not writable: $source_file";
+    }
+
+    if (!$options{'keys'}) {
+        push @errors, 'Must specify --key at least once';
+    }
+    if (!$options{'vals'}) {
+        push @errors, 'Must specify --val at least once';
+    }
+    if (scalar @{$keys} != scalar @{$vals}) {
+        push @errors, 'Must specify --key and --val in pairs';
+    }
+    for my $i (0 .. scalar @{$keys} - 1) {
+        if (!$keys->[$i]) {
+            push @errors, 'Must specify a non-empty string for --key';
+            last;
+        }
+    }
+    for my $i (0 .. scalar @{$vals} - 1) {
+        if (!$vals->[$i]) {
+            push @errors, 'Must specify a non-empty string for --val';
+            last;
+        }
+    }
+
+    for my $msg (@errors) {
+        print $msg . "\n";
+    }
+
+    if (!$ok || scalar @errors > 0) {
+        print "\n";
+        show_usage_and_exit();
+    }
+
+    return \%options;
+}
+
+############################################################################
+
+sub modify_config {
+    my ($options) = @_;
+
+    my $destination_file = $options->{'source'} || q();
+    my $destination = (-r $destination_file) ? read_file($destination_file) : q();
+    my $original_destination = $destination;
+
+    my $keys = $options->{'keys'} || [];
+    my $vals = $options->{'vals'} || [];
+
+    for my $i (0 .. scalar @{$keys} - 1) {
+        $destination = merge_key_val($destination, $keys->[$i], $vals->[$i], $options);
+    }
+
+    #
+    # Write the destination out, as needed.
+    #
+    if ($options->{'stdout'}) {
+        print $destination;
+    }
+    if ($destination ne $original_destination) {
+        if (!$options->{'skip-disk'}) {
+            backup_file($destination_file);
+            write_file($destination_file, $destination);
+        }
+    }
+    return;
+}
+
+############################################################################
+
+sub main {
+    my $options = get_options();
+    modify_config($options);
+    return;
+}
+
+main();
+exit_normally();

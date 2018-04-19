@@ -2,7 +2,7 @@
 
 #  findbadruns.pl   http://www.cs.wisc.edu/~kupsch
 # 
-#  Copyright 2013-2017 James A. Kupsch
+#  Copyright 2013-2018 James A. Kupsch
 # 
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -30,19 +30,19 @@ use Config;
 my $verbose = 0;
 
 
-my $version = '1.2.3 (Dec 20, 2017)';
+my $version = '1.2.4 (Mar 09, 2018)';
 
 my %toolProps = (
 	'coverity'	=> {
 		bitIndependent		=> 0,
-		revision		=> 0,
+		revision		=> 2,
 		implemented		=> 1,
 		confFunc		=> \&MakeCoverityConf,
 		validateInstallers	=> \&ValidateCoverityInstallers,
 	    },
 	'gt-csonar'	=> {
 		bitIndependent		=> 0,
-		revision		=> 0,
+		revision		=> 2,
 		implemented		=> 1,
 		confFunc		=> \&MakeGtCsonarConf,
 		validateInstallers	=> \&ValidateGtInstallers,

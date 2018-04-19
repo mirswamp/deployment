@@ -87,7 +87,7 @@ if [ "$1" = "2" ]; then
 
         echo "Updating '$dest' from '$src'"
 
-        /opt/swamp/sbin/swamp_copy_config -i "$src" -o "$dest" --include ''
+        /opt/swamp/sbin/swamp_copy_config -i "$src" -o "$dest" --include ""
 
         echo "Finished updating '$dest'"
 

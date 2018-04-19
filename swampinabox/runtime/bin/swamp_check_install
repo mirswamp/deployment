@@ -1,0 +1,914 @@
+#!/opt/perl5/perls/perl-5.18.1/bin/perl
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2018 Software Assurance Marketplace
+
+#
+# Display diagnostic information about the SWAMP current installation.
+#
+
+#
+# For 'perlcritic'.
+#
+## no critic (MagicNumbers, RequireDotMatchAnything, RequireLineBoundaryMatching, RequireExtendedFormatting)
+
+use utf8;
+use strict;
+use warnings;
+
+use FindBin qw($Bin);
+use lib ("$Bin/../perl5", '/opt/swamp/perl5');
+use English qw( -no_match_vars );
+use File::Spec::Functions qw(catfile);
+use Getopt::Long;
+use POSIX qw(strftime);
+
+use JSON qw(from_json);
+use Log::Log4perl;
+use Log::Log4perl::Level;
+use Try::Tiny qw(try);
+
+use SWAMP::vmu_Support qw(
+  database_connect
+  database_disconnect
+  getLoggingConfigString
+  getSwampConfig
+  getSwampDir
+  rpccall
+);
+use SWAMP::vmu_AssessmentSupport qw(
+  getLaunchExecrunuids
+);
+
+#
+# Initialize Log4perl. We want to log as much raw data as possible.
+#
+sub logfilename {
+    return catfile(getSwampDir(), 'log', 'swamp_check_install.log');
+}
+Log::Log4perl->init(getLoggingConfigString());
+my $log = Log::Log4perl->get_logger(q());
+$log->level($TRACE);
+
+#
+# Accumulate and log summary messages.
+# Standardize short strings for when a check fails.
+#
+my @all_info     = ();
+my @all_warnings = ();
+my @all_errors   = ();
+my $oops         = '<error>';
+my $lesser_oops  = 'failed';
+
+sub add_info_line {
+    my ($msg) = @_;
+    $log->info("INFO: $msg");
+    push @all_info, $msg;
+    return;
+}
+
+sub add_warning_line {
+    my ($msg) = @_;
+    $log->warn("WARNING: $msg");
+    push @all_warnings, $msg;
+    return;
+}
+
+sub add_error_line {
+    my ($msg) = @_;
+    $log->error("ERROR: $msg");
+    push @all_errors, $msg;
+    return;
+}
+
+############################################################################
+
+#
+# Execute the given command, and return all its output and its status code.
+#
+sub do_command {
+    my ($cmd, $options) = @_;
+
+    $log->info("Running command: $cmd");
+    my $output    = qx($cmd 2>&1);    # capture both standard out and standard error
+    my $status    = $CHILD_ERROR;
+    my $exit_code = $status >> 8;
+    $log->info("Exit code: $exit_code (perl: $status)");
+
+    if (defined $output) {
+        $output = trim($output);
+        if ($output =~ m/\n/) {
+            $log->info("Output:\n\n$output");
+        }
+        else {
+            $log->info("Output: $output");
+        }
+    }
+    else {
+        $log->info('Output:');
+    }
+
+    if ($status && !$options->{'no-warn'}) {
+        add_warning_line("'$cmd' exited with $exit_code (perl: $status)");
+    }
+    return ($output, $status);
+}
+
+#
+# The common context for executing a command is following a prompt
+#
+#     Checking foo bar baz ...
+#
+# where the intent is to include the command's output if its successful
+# and some short error message otherwise.
+#
+sub do_basic_command {
+    my ($cmd, $options) = @_;
+    my ($output, $status) = do_command($cmd, $options);
+
+    if ($status || !defined $output) {
+        print "$oops\n";
+        return;
+    }
+    if ($output =~ m/\n/) {
+        print "\n\n$output\n\n";
+        return $output;
+    }
+    print "$output\n";
+    return $output;
+}
+
+sub do_line_count_command {
+    my ($cmd, $options) = @_;
+    my ($output, $status) = do_command($cmd, $options);
+
+    if ($status || !defined $output) {
+        print "$oops\n";
+        return;
+    }
+    return scalar split /^/, $output;
+}
+
+#
+# Return the given string without leading and trailing whitespace.
+#
+sub trim {
+    my ($val) = @_;
+    if ($val) {
+        $val =~ s/^\s+|\s+$//g;
+    }
+    return $val;
+}
+
+#
+# Backslash escape all double quotes in the given string.
+#
+sub escape_dquotes {
+    my ($val) = @_;
+    if ($val) {
+        $val =~ s/"/\\"/g;
+    }
+    return $val;
+}
+
+############################################################################
+
+sub exit_abnormally {
+    my ($message, $details) = @_;
+    $message = trim($message);
+    $details = trim($details);
+
+    if ($message) {
+        print "Error: $message" . ($details ? " ($details)" : q()) . "\n";
+    }
+    exit 1;
+}
+
+sub show_usage_and_exit {    ## no critic (RequireFinalReturn)
+    my $usage_message = <<"EOF";
+Usage: $PROGRAM_NAME [options]
+
+Display diagnostic information about the current SWAMP installation.
+
+Options:
+  --hostname <host>   Web application server to query (default: localhost)
+
+Specialized options:
+  --skip-slow-checks  Skip checks that often take more than a few seconds
+  --wait-for-condor   Give the HTCondor daemons time to start up
+EOF
+
+    print $usage_message;
+    exit_abnormally();
+}
+
+############################################################################
+
+sub get_options {
+    my %options = ();
+
+    #
+    # Be careful before making any of these defaults configurable.
+    # They might not all be sanitized appropriately when running commands.
+    #
+    my %defaults = (
+        'condor-q-fields'      => 'GlobalJobId JobStatus HoldReason HoldReasonCode HoldReasonSubCode SWAMP_projectid SWAMP_userid SWAMP_arun_execrunuid SWAMP_mrun_execrunuid SWAMP_vrun_execrunuid SWAMP_viewerinstanceid',
+        'condor-status-fields' => 'Name Memory HasVM',
+        'curl-cmd'             => 'curl --silent --header "Content-Length: 0"',
+        'hostname'             => 'localhost',
+    );
+
+    my $ok = Getopt::Long::GetOptions(\%options,
+        'hostname|h=s',
+        'skip-slow-checks',
+        'wait-for-condor',
+        'help|?',
+    );
+
+    while (my ($key, $value) = each %defaults) {
+        if (!exists $options{$key}) {
+            $options{$key} = $value;
+        }
+    }
+
+    if (!$ok || $options{'help'}) {
+        print "\n" if !$ok;
+        show_usage_and_exit();
+    }
+
+    return \%options;
+}
+
+############################################################################
+
+#
+# Record diagnostic information about the host's Linux distribution.
+#
+sub record_os_release {
+    print 'Looking for OS release ... ';
+    my @release_files = grep { -f } qw(/etc/centos-release /etc/redhat-release /etc/system-release);
+
+    if (scalar @release_files > 0) {
+        do_basic_command(qq(cat "$release_files[0]"));
+    }
+    else {
+        print "$lesser_oops\n";
+        add_warning_line('Failed to find a recognized /etc/*-release file');
+    }
+    return;
+}
+
+#
+# Record diagnostic information about installed packages.
+#
+sub record_yum_install {
+    my ($options) = @_;
+    return if $options->{'skip-slow-checks'};
+
+    print 'Looking for installed packages ... ';
+    do_basic_command(q(yum --cacheonly list installed | grep -iE 'condor|httpd|mariadb|mod_ssl|php|swamp'));
+    return;
+}
+
+#
+# Record diagnostic information about yum's repositories.
+#
+sub record_yum_repositories {
+    my ($options) = @_;
+    return if $options->{'skip-slow-checks'};
+
+    print 'Looking for yum repository configuration ... ';
+    do_basic_command(q(yum -v --cacheonly repolist));
+    return;
+}
+
+#
+# Requirement: SELinux must be disabled.
+#
+sub check_selinux_mode {
+    print 'Checking SELinux mode ... ';
+    my $output = do_basic_command(q(getenforce));
+
+    if (defined $output && $output eq 'Enforcing') {
+        add_error_line('SELinux mode is Enforcing');
+    }
+    return;
+}
+
+#
+# Requirement: System service <foo> must be running.
+#
+sub check_system_service {
+    my ($service) = @_;
+    my $passed_checks = 1;
+
+    print "Checking the status of the $service system service ... ";
+    my $output = do_basic_command(qq("$Bin/../sbin/swamp_manage_service" "$service" status));
+
+    if (!defined $output) {
+        $passed_checks = 0;
+        add_error_line("Failed to determine the status of the $service system service");
+    }
+    elsif ($output ne 'running') {
+        $passed_checks = 0;
+        add_error_line("The $service system service is not running (status: $output)");
+    }
+    return $passed_checks;
+}
+
+############################################################################
+
+#
+# Requirement: The 'mysql' system service must be running.
+# Requirement: The SWAMP backend should be able to execute basic queries.
+#
+sub check_database {
+    #
+    # If the 'mysql' system service isn't running, there's no hope for any
+    # of the other checks succeeding.
+    #
+    if (!check_system_service('mysql')) {
+        return;
+    }
+
+    print 'Connecting to the SQL database ... ';
+    my $db_handle = database_connect();
+    if ($db_handle) {
+        print "ok\n";
+    }
+    else {
+        #
+        # Quit out of this function early because at this point, there's no
+        # hope for any of the other checks succeeding.
+        #
+        print "$oops\n";
+        add_error_line('Failed to connect to the SQL database');
+        return;
+    }
+
+    print 'Querying for the SWAMP database version ... ';
+    my $query = q(SELECT database_version_no, description FROM assessment.database_version ORDER BY create_date DESC LIMIT 1);
+    my @version_rows = $db_handle->selectrow_array($query);
+
+    if (!$db_handle->err) {
+        my $version_no  = $version_rows[0] || q();
+        my $description = $version_rows[1] || q();
+        print "$version_no ($description)\n";
+    }
+    else {
+        print "$oops\n";
+        add_error_line('Failed to query the SQL database for the SWAMP database version');
+    }
+    database_disconnect($db_handle);
+
+    #
+    # This query is as likely to fail as the previous one.
+    # It is, however, nice to record for diagnostic purposes.
+    #
+    print 'Querying for pending execution runs ... ';
+    my $exec_run_uuids = getLaunchExecrunuids();
+    if ($exec_run_uuids) {
+        my $count = scalar @{$exec_run_uuids};
+        print "$count runs\n";
+        add_info_line("The SQL database has $count pending execution runs");
+    }
+    else {
+        print "$oops\n";
+        add_error_line('Failed to query the SQL database for pending execution runs');
+    }
+    return;
+}
+
+############################################################################
+
+#
+# Requirement: The 'condor' system service must be running.
+# Requirement: There must be VM-capable execute slots.
+#
+sub check_htcondor {
+    my ($options)     = @_;
+    my $q_fields      = $options->{'condor-q-fields'};
+    my $status_fields = $options->{'condor-status-fields'};
+    my $output;
+    my $status;
+
+    #
+    # Continue with the other checks, even if the 'condor' system service
+    # isn't running. It's possible for HTCondor to be running outside of the
+    # system service.
+    #
+    check_system_service('condor');
+
+    if ($options->{'wait-for-condor'}) {
+        print 'Waiting for HTCondor daemons to start ...';
+
+        my $limit              = 15;
+        my $poll_time          = 2;
+        my $poll_condor_q      = q(condor_q);
+        my $poll_condor_status = q(condor_status -vm -af:, Name);
+        my $poll_opts          = {'no-warn' => 1};
+        my $tries;
+
+        #
+        # The main thing we need to wait for is the 'startd's to register
+        # themselves with the collector. We expect to find at least one slot.
+        #
+        $tries = 0;
+        ($output, $status) = do_command($poll_condor_status, $poll_opts);
+        while ($tries < $limit && ($status || !defined $output || $output eq q())) {
+            $tries += 1;
+            sleep $poll_time;
+            print q(.);
+            ($output, $status) = do_command($poll_condor_status, $poll_opts);
+        }
+
+        #
+        # 'condor_q' just needs to be able to contact the 'schedd'.
+        #
+        $tries = 0;
+        ($output, $status) = do_command($poll_condor_q, $poll_opts);
+        while ($tries < $limit && ($status || !defined $output)) {
+            $tries += 1;
+            sleep $poll_time;
+            print q(.);
+            ($output, $status) = do_command($poll_condor_q, $poll_opts);
+        }
+
+        print " done\n";
+    }
+
+    print 'Looking for HTCondor version ... ';
+    do_basic_command(q(condor_status -version));
+
+    print 'Checking for HTCondor execute slots ... ';
+    $output = do_line_count_command(qq(condor_status -af:, $status_fields));
+    print "$output slots\n" if defined $output;
+
+    if (!defined $output || $output == 0) {
+        add_error_line('The HTCondor pool has no resources for running jobs');
+    }
+
+    print 'Checking for HTCondor execute slots with VM support ... ';
+    $output = do_line_count_command(qq(condor_status -vm -af:, $status_fields));
+    print "$output slots\n" if defined $output;
+
+    if (!defined $output || $output == 0) {
+        add_error_line('The HTCondor pool has no resources for running VM jobs');
+    }
+    else {
+        add_info_line("The HTCondor pool has $output slots for running VM jobs");
+    }
+
+    print 'Looking for jobs in the HTCondor queue ... ';
+    $output = do_line_count_command(qq(condor_q -af:, $q_fields));
+    print "$output jobs\n" if defined $output;
+
+    if (defined $output) {
+        add_info_line("The HTCondor queue has $output jobs");
+    }
+
+    print 'Looking for idle jobs in the HTCondor queue ... ';
+    $output = do_line_count_command(qq(condor_q -constraint "JobStatus == 1" -af:, $q_fields));
+    print "$output jobs\n" if defined $output;
+
+    print 'Looking for running jobs in the HTCondor queue ... ';
+    $output = do_line_count_command(qq(condor_q -constraint "JobStatus == 2" -af:, $q_fields));
+    print "$output jobs\n" if defined $output;
+
+    print 'Looking for held jobs in the HTCondor queue ... ';
+    $output = do_line_count_command(qq(condor_q -constraint "JobStatus == 5" -af:, $q_fields));
+    print "$output jobs\n" if defined $output;
+
+    if (defined $output && $output > 0) {
+        add_warning_line("The HTCondor queue has $output held jobs");
+    }
+    return;
+}
+
+############################################################################
+
+#
+# Requirement: The 'libvirtd' system service must be running.
+# Requirement: The 'iptables' rules for the 'virswamp0' bridge must be present.
+#
+sub check_libvirt {
+    #
+    # Continue on to the check for the 'iptables' rules, even if the
+    # 'libvirtd' system service isn't running. The checks are independent
+    # from each other.
+    #
+    check_system_service('libvirtd');
+
+    print 'Checking iptables rules ... ';
+    my ($output, $status) = do_command(q(iptables --list-rules));
+
+    if ($status || !defined $output) {
+        print "$oops\n";
+        add_error_line('Failed to get the current iptables rules');
+    }
+    elsif ($output =~ m/\s(virswamp0)\s/) {
+        print "ok\n";
+    }
+    else {
+        print "missing\n";
+        add_error_line(q(Failed to find SWAMP's libvirt iptables rules));
+    }
+    return;
+}
+
+############################################################################
+
+#
+# Requirement: PHP 7 must be present.
+#
+sub check_php {
+    print 'Looking for PHP version ... ';
+    my $output = do_basic_command(q(php -v));
+
+    if (defined $output) {
+        my @matches = ($output =~ m/^PHP ([.\d]+)/);
+        if (scalar @matches > 0) {
+            my $version = $matches[0];
+            if (!($version =~ m/7[.]/)) {
+                add_error_line("Found PHP $version, not 7.*");
+            }
+        }
+        else {
+            add_error_line('Failed to determine PHP version');
+        }
+    }
+    else {
+        add_error_line('Failed to determine PHP version');
+    }
+    return;
+}
+
+############################################################################
+
+#
+# Requirement: 'swa-daemon' must be able to use 'sudo' without a password.
+#
+sub check_sudo {
+    print 'Checking whether swa-daemon can run sudo without a password ... ';
+    my ($output, $status) = do_command(q(sudo -u swa-daemon sudo -n /opt/perl5/perls/perl-5.18.1/bin/perl -V));
+
+    if ($status || !defined $output) {
+        print "no\n";
+        add_error_line(q(swa-daemon cannot run SWAMP's perl without a password));
+    }
+    else {
+        print "ok\n";
+    }
+    return;
+}
+
+############################################################################
+
+#
+# Requirement: The 'swamp' system service must be running.
+# Requirement: The SWAMP backend daemons must be running.
+#
+sub check_swamp_daemons {
+    #
+    # If the 'swamp' system service isn't running, there's no hope for any
+    # of the other checks succeeding. There is no documented way to manage
+    # the daemons outside of the system service.
+    #
+    if (!check_system_service('swamp')) {
+        return;
+    }
+    check_daemon_status('AgentMonitor', RPC::XML::Client->new(SWAMP::vmu_Support::_configureAgentClient()));
+    check_daemon_status('LaunchPad',    RPC::XML::Client->new(SWAMP::vmu_Support::_configureLaunchPadClient()));
+    return;
+}
+
+sub check_daemon_status {
+    my ($daemon_name, $uri) = @_;
+
+    print "Checking the status of the $daemon_name daemon ... ";
+    my $req = RPC::XML::request->new('system.status');
+    my $status = rpccall($uri, $req);
+
+    if (!$status) {
+        print "$oops\n";
+        add_error_line("RPC to $daemon_name failed");
+    }
+    elsif ($status->{'error'}) {
+        print "$oops\n";
+        add_error_line("RPC to $daemon_name failed with: $status->{'error'}");
+    }
+    elsif ($status->{'value'}) {
+        print "\n\n";
+
+        my $host = $status->{'value'}->{'host'};
+        my $port = $status->{'value'}->{'port'};
+        print "Available at $host, port $port\n";
+        add_info_line("The $daemon_name daemon is running at $host, port $port");
+
+        my $start_time = $status->{'value'}->{'started_int'};
+        $start_time = strftime('%Y-%m-%d %H:%M:%S', localtime $start_time);
+        print "Started at $start_time\n";
+
+        my $request_count = $status->{'value'}->{'total_requests'};
+        print "$request_count requests processed\n";
+        print "\n";
+    }
+    else {
+        print "$oops\n";
+        add_error_line("RPC to $daemon_name returned something unexpected");
+    }
+    return;
+}
+
+############################################################################
+
+#
+# Requirement: The 'httpd' system service must be running.
+#
+# Requirement: We must be able to retrieve the configuration that the web
+# application uses to find the API. Similarly for the assessment backend.
+#
+# Requirement: We must be able to call API routes successfully, including
+# routes which require database connectivity.
+#
+sub check_web_server {
+    my ($options) = @_;
+    my $hostname = $options->{'hostname'};
+    my $web_host;
+
+    #
+    # Continue on to the other checks, even if the 'httpd' system service
+    # isn't running. It's possible that we've been asked to check the web
+    # application on some other host.
+    #
+    check_system_service('httpd');
+
+    #
+    # Determine whether to use http or https for the web application.
+    #
+    if (check_http_host($options, "https://$hostname")) {
+        $web_host = "https://$hostname";
+    }
+    elsif (check_http_host($options, "http://$hostname")) {
+        $web_host = "http://$hostname";
+        add_warning_line("'$hostname' does not appear to support https");
+    }
+    else {
+        add_error_line("Failed to connect to 'http(s)://$hostname'");
+    }
+
+    #
+    # Check the API endpoint used by the web application.
+    #
+    if ($web_host) {
+        my $curl_cmd = $options->{$web_host};
+        my $resource = "$web_host/config/config.json";
+        my $json_ref = get_web_resource($curl_cmd, $resource);
+
+        if (defined $json_ref) {
+            if (!$json_ref->{'servers'}->{'web'}) {
+                add_error_line("'$resource' does not define 'servers.web'");
+            }
+            else {
+                my $api_host = $json_ref->{'servers'}->{'web'};
+                add_info_line("The API used by the web application is '$api_host'");
+
+                if ($api_host =~ m/^\//) {
+                    $api_host = "$web_host$api_host";
+                }
+
+                check_api_host($options, $api_host);
+            }
+        }
+    }
+
+    #
+    # Check the API endpoint used by the assessment backend.
+    #
+    my $swamp_config = getSwampConfig();
+    if (!$swamp_config) {
+        add_error_line(q(Failed to load the SWAMP backend's configuration));
+    }
+    else {
+        my $api_host = $swamp_config->get('swamp_api_web_server');
+        if (!$api_host) {
+            add_error_line(q(The SWAMP backend's configuration does not define 'swamp_api_web_server'));
+        }
+        else {
+            add_info_line("The API used by the SWAMP's backend is '$api_host'");
+            check_api_host($options, $api_host);
+        }
+    }
+    return;
+}
+
+#
+# Check the specified API endpoint.
+# Try to avoid checking the same endpoint multiple times.
+#
+sub check_api_host {
+    my ($options, $api_host) = @_;
+
+    if (exists $options->{"check_api_host $api_host"}) {
+        return $options->{"check_api_host $api_host"};
+    }
+
+    if (!check_http_host($options, $api_host)) {
+        add_error_line("Failed to connect to the API at '$api_host'");
+    }
+    else {
+        my $curl_cmd = $options->{$api_host};
+        get_web_resource($curl_cmd, "$api_host/environment", 1);
+        get_web_resource($curl_cmd, "$api_host/platforms/public");
+    }
+    $options->{"check_api_host $api_host"} = 'done';
+    return;
+}
+
+#
+# Check whether the given host can be contacted.
+# Record the 'curl' command used, if successful.
+# Try to avoid reporting issues for the same host multiple times.
+#
+sub check_http_host {
+    my ($options, $web_host) = @_;
+    my $curl_cmd      = $options->{'curl-cmd'};
+    my $passed_checks = 1;
+    my $report_host   = q();
+
+    if (exists $options->{"check_http_host $web_host"}) {
+        return $options->{"check_http_host $web_host"};
+    }
+
+    #
+    # Isolate the hostname portion of the host being tested.
+    #
+    my @matches = ($web_host =~ m{ https?:// ([^/]+) }x);
+    if (scalar @matches > 0) {
+        $report_host = $matches[0];
+    }
+    else {
+        add_error_line("Failed to isolate the hostname part of '$web_host'");
+    }
+
+    #
+    # Test the host.
+    #
+    print "Contacting $web_host ... ";
+    my $output = do_curl_command($curl_cmd, $web_host);
+
+    if (defined $output) {
+        print "ok\n";
+    }
+    else {
+        $curl_cmd = qq($curl_cmd --insecure);
+        $output = do_curl_command($curl_cmd, $web_host);
+
+        if (defined $output) {
+            print "SSL cert?\n";
+
+            #
+            # Warn about the SSL certificate, but ignore 'localhost',
+            # because that'll never have a valid SSL certificate.
+            #
+            if (   !exists $options->{"check_http_host $report_host"}
+                && $report_host ne 'localhost'
+                && $report_host ne 'localhost.localdomain')
+            {
+                $options->{"check_http_host $report_host"} = 'done';
+                add_warning_line("'$report_host' might not have a valid SSL certificate");
+            }
+        }
+        else {
+            print "failed\n";
+            $passed_checks = 0;
+        }
+    }
+
+    $options->{$web_host} = $curl_cmd;
+    $options->{"check_http_host $web_host"} = $passed_checks;
+    return $passed_checks;
+}
+
+#
+# Assume that the 'curl' command to invoke is safe as-is.
+# Assume that the resource to retrieve needs quoting.
+# Expect that 'curl' will not-infrequently exit with non-zero.
+#
+sub do_curl_command {
+    my ($curl_cmd, $resource) = @_;
+    my $escaped_resource = escape_dquotes($resource);
+    my ($output, $status) = do_command(qq($curl_cmd "$escaped_resource"), {'no-warn' => 1});
+
+    if ($status || !defined $output) {
+        return;
+    }
+    return $output;
+}
+
+#
+# HTTP GET the contents at a given URL.
+# Assume the contents are JSON by default.
+# Return the contents if the HTTP status is 200.
+#
+sub get_web_resource {
+    my ($curl_cmd, $resource, $not_json) = @_;
+    my $json_cmd = qq($curl_cmd --header "Accept: application/json");
+    my $code_cmd = qq($json_cmd -o /dev/null -w '%{http_code}');
+
+    print "Fetching $resource ... ";
+    my $output    = do_curl_command(qq($json_cmd), $resource);
+    my $http_code = do_curl_command(qq($code_cmd), $resource);
+
+    if (defined $output && !$not_json) {
+        $output = try { from_json($output, {'utf8' => 1}) } || undef;
+    }
+
+    if (!defined $http_code || $http_code != 200) {
+        print "$oops\n";
+        add_error_line("Failed to fetch '$resource'");
+    }
+    elsif (defined $output) {
+        print "ok\n";
+    }
+    elsif (!$not_json) {
+        print "invalid JSON\n";
+        add_error_line("'$resource' is not valid JSON");
+    }
+    else {
+        print "$oops\n";
+        add_error_line("Failed to fetch '$resource'");
+    }
+    return $output;
+}
+
+############################################################################
+
+sub main() {
+    my $options   = get_options();
+    my $exit_code = 100;    # default to something unusual
+    my $whoami    = trim(qx(whoami));
+    my $hostname  = $options->{'hostname'};
+
+    if ($whoami ne 'root') {
+        exit_abnormally(q(This utility must be run as 'root'. Perhaps use 'sudo'.));
+    }
+
+    record_os_release();
+    record_yum_repositories($options);
+    record_yum_install($options);
+    check_selinux_mode();
+    check_database();
+    check_htcondor($options);
+    check_libvirt();
+    check_php();
+    check_sudo();
+    check_swamp_daemons();
+    check_web_server($options);
+    add_info_line("Tested the SWAMP web application at '$hostname'");
+
+    if (scalar @all_info > 0) {
+        print "\n### Information\n\n";
+        for my $msg (@all_info) {
+            print "  - $msg\n";
+        }
+    }
+
+    if (scalar @all_warnings > 0) {
+        print "\n### Warnings\n\n";
+        for my $msg (@all_warnings) {
+            print "  - $msg\n";
+        }
+    }
+
+    if (scalar @all_errors > 0) {
+        print "\n### Errors\n\n";
+        for my $msg (@all_errors) {
+            print "  - $msg\n";
+        }
+    }
+
+    if (scalar @all_errors > 0) {
+        $exit_code = 1;
+        print "\n";
+        print "Summary: ERRORS were found with the SWAMP installation\n";
+        print "Review the list of warnings and errors above for details.\n";
+    }
+    elsif (scalar @all_warnings > 0) {
+        $exit_code = 2;
+        print "\n";
+        print "Summary: Potential issues were found with the SWAMP installation\n";
+        print "Review the list of warnings above for details.\n";
+    }
+    else {
+        $exit_code = 0;
+        print "\n";
+        print "Summary: The SWAMP installation looks ok\n";
+    }
+    return $exit_code;
+}
+
+my $exit_code = main();
+exit $exit_code;

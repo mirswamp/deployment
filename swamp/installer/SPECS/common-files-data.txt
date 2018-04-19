@@ -8,16 +8,13 @@
 %config /opt/swamp/etc/log4perl.conf
 %config /opt/swamp/etc/swamp.conf
 
-/usr/lib64/mysql/plugin/lib_mysqludf_sys.so
-/opt/swamp/bin/vmu_Scarf_CParsing
-/opt/swamp/etc/Scarf_ToolList.json
-/opt/swamp/lib/libyajl.so.2
+/opt/swamp
 
+/usr/lib64/mysql/plugin/lib_mysqludf_sys.so
 /usr/local/bin/execute_execution_record
 /usr/local/bin/launch_viewer
 /usr/local/bin/kill_run
 
 /etc/my.cnf.d/mysql_global_settings.cnf
+/etc/my.cnf.d/mysql_timezone.cnf
 /etc/profile.d/swamp.sh
-
-/opt/swamp

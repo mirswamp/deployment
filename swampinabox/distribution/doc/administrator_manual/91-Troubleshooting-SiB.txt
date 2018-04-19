@@ -1,0 +1,416 @@
+Troubleshooting SWAMP-in-a-Box
+------------------------------
+
+
+[[checking-sib-health]]
+Checking the Host's Health
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+SWAMP-in-a-Box includes a script, `swamp_check_install`, for checking that
+its components are functioning as expected. Run this script as the first
+step in troubleshooting issues with the SWAMP web application or
+assessments, because it checks for and warns about many common problems.
+
+To run the script, run the following command as `root` (or using `sudo`),
+replacing `<hostname>` with the hostname for your SWAMP-in-a-Box's web
+application (for example, `swamp.example.com`):
+
+----
+/opt/swamp/bin/swamp_check_install --hostname "<hostname>"
+----
+
+The script will display information about the checks it is performing and
+summarize its findings. The meanings of any warnings and errors, and
+potential remedies for them, are described below.
+
+[TIP]
+====
+If you are unable to resolve your issue, <<support-and-contact-info,contact
+SWAMP staff>>. Include the full output from the script and SWAMP-in-a-Box's
+log files. Refer to the section below on <<collecting-log-files,collecting
+log files>> for instructions on how to bundle SWAMP-in-a-Box's logs into
+a single archive.
+====
+
+
+==== Messages About the SQL Database ====
+
+The mysql system service is not running::
+
+Indicates that the database server is not running, which will prevent the
+web application and assessments from functioning correctly. Start the
+service by running the following command as `root` (or using `sudo`):
+
++
+----
+service mysql restart
+----
+
+Failed to connect to the SQL database::
+
+Indicates that the libraries used by the SWAMP's backend are unable to
+establish a connection to the database. If you have recently changed the
+password for the database's `java_agent` user, update the `dbPerlPass`
+setting in `/opt/swamp/etc/swamp.conf` with the new password (you will need
+`root` access to edit this file).
+
+
+[[checking-sib-health-htcondor]]
+==== Messages About HTCondor ====
+
+Any HTCondor-related warnings and errors indicate an issue that is likely
+preventing the SWAMP from performing assessments and running the
+<<add-on-viewers,optional Code Dx viewer>>.
+
+The condor system service is not running::
+
+Indicates that HTCondor is not running. This is likely the cause of any
+other HTCondor-related warnings and errors found by `swamp_check_install`.
+Start the service by running the following command as `root` (or using
+`sudo`):
+
++
+----
+service condor restart
+----
+
++
+Note that it normally takes a few minutes for HTCondor's daemons to start up.
+
+'condor_q ...' exited with ...::
+'condor_status ...' exited with ...::
+
+Indicates that HTCondor is misconfigured.
+<<support-and-contact-info,Contact SWAMP staff>>.
+
+The HTCondor pool has no resources for running jobs::
+
+Indicates that HTCondor is misconfigured.
+<<support-and-contact-info,Contact SWAMP staff>>.
+
+The HTCondor pool has no resources for running VM jobs::
+
+Indicates that HTCondor is unable to run jobs which require a virtual
+machine, which will prevent the SWAMP from performing assessments and
+running the <<add-on-viewers,optional Code Dx viewer>>.
+
++
+If `swamp_check_install` also indicated issues with `libvirtd` (see the list
+of <<checking-sib-health-libvirtd,messages about libvirtd>> below), resolve
+those first.
+
++
+Otherwise, run the following script to determine whether the SWAMP-in-a-Box
+host supports KVM virtualization, as described in the
+<<hardware-requirements,hardware requirements>> for SWAMP-in-a-Box:
+
++
+----
+/opt/swamp/bin/swamp_check_virtualization_support
+----
+
++
+If the script does _not_ find the necessary support for KVM virtualization,
+it will display an error message and a suggestion on how to resolve the
+issue.
+
++
+If the script _does_ find the necessary support for KVM virtualization, then
+what likely happened is that some job failed to start its virtual machine
+successfully. The immediate cause of the failure might be listed in
+`/var/log/condor/VMGahpLog` (look around the times an assessment was
+submitted or failed).
+
++
+In any event, restart the `condor` service by running the following command
+as `root` (or using `sudo`):
+
++
+----
+service condor restart
+----
+
++
+Note that it normally takes a few minutes for HTCondor's daemons to start up.
+
++
+If this error from `swamp_check_install` persists, then there is likely
+a systemic issue that requires further investigation.
+<<support-and-contact-info,Contact SWAMP staff>>.
+
+The HTCondor queue has ... held jobs::
+
+Indicates that one or more HTCondor jobs encountered an unexpected error.
+Use the `condor_q` command, as described in the section on
+<<managing-htcondor,managing HTCondor>>, to determine why HTCondor put the
+job on-hold. Then <<support-and-contact-info,contact SWAMP staff>>.
+
+
+[[checking-sib-health-libvirtd]]
+==== Messages About libvirtd ====
+
+The libvirtd system service is not running::
+
+Indicates that the `libvirtd` service is not running, which will prevent the
+SWAMP from performing assessments and running the <<add-on-viewers,optional
+Code Dx viewer>>. Start the service by running the following command as
+`root` (or using `sudo`):
+
++
+----
+service libvirtd restart
+----
+
++
+If `swamp_check_install` also indicated issues with HTCondor (see the list
+of <<checking-sib-health-htcondor,messages about HTCondor>> above), also
+restart the `condor` system service by running the following command as
+`root` (or using `sudo`):
+
++
+----
+service condor restart
+----
+
++
+Note that it normally takes a few minutes for HTCondor's daemons to start up.
+
+Failed to find SWAMP's libvirt iptables rules::
+
++
+Indicates that the firewall rules that allow assessment virtual machines to
+access the host's network are absent, which will prevent assessments from
+doing anything that requires network access, such as contacting license
+servers. Restart the `libvirtd` service by running the following command as
+`root` (or using `sudo`):
+
++
+----
+service libvirtd restart
+----
+
+
+==== Messages About SWAMP Daemons ====
+
+The swamp system service is not running::
+
+Indicates that the `swamp` system service is not running, which will prevent
+the SWAMP from performing assessments and running the
+<<add-on-viewers,optional Code Dx viewer>>. Start the service by running the
+following command as `root` (or using `sudo`):
+
++
+----
+service swamp restart
+----
+
+RPC to AgentMonitor failed::
+RPC to LaunchPad failed::
+RPC to AgentMonitor returned something unexpected::
+RPC to LaunchPad returned something unexpected::
+
+Indicates that one or both of the SWAMP daemons necessary for running
+assessments is not running correctly. <<support-and-contact-info,Contact
+SWAMP staff>>.
+
+
+==== Messages About the Web Application ====
+
+The httpd system service is not running::
+
+Indicates that the web server is not running, which will prevent everyone
+from accessing the SWAMP web application. Start the web server by running
+the following command as `root` (or using `sudo`):
+
++
+----
+service httpd restart
+----
+
+Failed to connect to 'http(s)://<hostname>'::
+
+Indicates that the web server for the SWAMP web application is not
+reachable. If the web server is not running on the host (see the message
+directly above), resolve that issue first. Otherwise, refer to the section
+on <<configure-firewalls,configuring the host's firewall>>.
+
+'<hostname>' does not appear to support https::
+
+Indicates that the web server does not support encrypted connections, which
+means that any information, including usernames and passwords, sent between
+the SWAMP web application and the web server will *not* be encrypted.
+
++
+By default, SWAMP-in-a-Box configures the web server to support only
+encrypted connections (HTTPS). If you intentionally disabled this support,
+then you can ignore this message. Otherwise,
+<<support-and-contact-info,contact SWAMP staff>>.
+
+'<hostname>' might not have a valid SSL certificate::
+
+Indicates that the web server does not have a properly signed SSL
+certificate that matches `<hostname>`. Refer to the section on
+<<configure-ssl-certs,configuring an SSL certificate for SWAMP-in-a-Box>>.
+
+'http(s)://<hostname>/config/config.json' is not valid JSON::
+
+Indicates that `/var/www/html/config/config.json` on the SWAMP-in-a-Box host
+does not contain valid JSON, which will cause the SWAMP web application to
+appear stuck on a "loading" screen. Check this file for typos.
+
+'http(s)://<hostname>/config/config.json' does not define 'servers.web'::
+
+Indicates that `/var/www/html/config/config.json` on the SWAMP-in-a-Box host
+does not contain the configuration key that specifies the location of the
+SWAMP API (i.e., SWAMP backend). Follow the directions in the section on
+<<updating-the-hostname,updating the host's hostname>>, which will, as
+a side effect, set the required configuration key.
+
+Failed to fetch '<api-location>/environment'::
+Failed to fetch '<api-location>/platforms/public'::
+'<api-location>/platforms/public' is not valid JSON::
+
+Indicates that SWAMP API is not functioning correctly. First, resolve the
+other errors reported by `swamp_check_install`, if any. If these errors
+persist, then <<support-and-contact-info,contact SWAMP staff>>.
+
+==== Other Messages ====
+
+Failed to determine PHP version::
+
+Indicates that the script was unable to determine the version of the PHP
+command line interpreter that is installed on the host.
+
++
+If the SWAMP web application is _not_ functioning as expected, it is likely
+that the wrong version of PHP is installed. Refer to the appendix on
+<<dependencies-php,installing PHP>> for instructions on installing the
+required version of PHP.
+
++
+If the SWAMP web application _is_ functioning as expected, then this message
+can be ignored. However, feel free to <<support-and-contact-info,contact
+SWAMP staff>> and provide the full output from `swamp_check_install` so that
+they can work on removing this false positive from future versions of the
+script.
+
+Found PHP ..., not 7.*::
+
+Indicates that the script found an unsupported version of PHP installed on
+the host. Refer to the appendix on <<dependencies-php,installing PHP>> for
+instructions on installing the required version of PHP.
+
+swa-daemon cannot run SWAMP's perl without a password::
+
+Indicates that the SWAMP's configuration for `sudo` either is not present or
+is being overridden, which will prevent the SWAMP from performing
+assessments. <<support-and-contact-info,Contact SWAMP staff>>.
+
+
+[[collecting-log-files]]
+Collecting Log Files
+~~~~~~~~~~~~~~~~~~~~
+
+When investigating an issue with SWAMP-in-a-Box, SWAMP staff often find it
+helpful to review:
+
+* The SWAMP's log files (located in `/opt/swamp/log`)
+* HTCondor's log files (located in `/var/log/condor`)
+* HTCondor's configuration files (located in `/etc/condor`)
+
+To bundle all of these files into a single archive, run the following command:
+
+----
+tar -cvz -f swampinabox-logs.tar.gz --exclude="*.old" \
+    /opt/swamp/log/*.log \
+    /var/log/condor/*Log \
+    /var/log/condor/*Log.slot* \
+    /etc/condor
+----
+
+This will create a file `swampinabox-logs.tar.gz` in the current working
+directory. Errors from `tar` about `No such file or directory` may safely be
+ignored (some of the files that the command looks for might not exist on all
+systems).
+
+
+Debugging Failed Assessments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If an assessment reaches a status of "Finished with Errors," the SWAMP is
+functioning normally, but the assessment failed to yield any results. Click
+the "Error" button to view a detailed report about the failure. The
+following sections in the report summarize the major steps in performing the
+assessment and the output they produced:
+
+* Contents of status.out
+* Contents of stderr
+* Contents of stdout
+
+Details about the messages in `status.out` can be found in the document
+https://www.swampinabox.org/doc/statusout.pdf[Status.out and Debugging SWAMP Failures],
+a link to which can be found near the beginning of the error report.
+
+If an assessment reaches some other error state, the assessment's log file
+might indicate why:
+
+1. On the Assessment Results page of the SWAMP web application, click on the
+assessment's status. Locate the execution record UUID.
+
+2. The assessment's log file will be located at
+`/opt/swamp/log/<execution-record-UUID>.log` on the SWAMP-in-a-Box host.
+
+
+Debugging Stuck Assessments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If an assessment appears stuck at a status of "Waiting in HTCondor Queue" or
+is unable to be submitted to HTCondor, refer back to the section on
+<<checking-sib-health,checking the host's health>>.
+
+If an assessment appears stuck at a status of "Shutting down the VM," it is
+likely that the assessment's virtual machine has encountered an issue. At
+this point, the assessment has completed its work; all that remains is to
+extract its output from the virtual machine, which requires that the virtual
+machine be shut down.
+
+To force the virtual machine to shut down:
+
+1. On the Assessment Results page of the SWAMP web application, click on the
+assessment's status. Locate the execution record UUID.
+
+2. As a SWAMP administrator, go to the System Overview page, and from there,
+to the Review Status page.
+
+3. Under the Condor Queue tab, locate the row for the assessment's execution
+run UUID. Note the virtual machine's name in the VM column.
+
+4. On the SWAMP-in-a-Box host, as `root` (or using `sudo`), run `virsh`.
+This will start a shell that can be used to interact with the virtual
+machines currently running on the host. Available commands include:
+
++
+--
+`list`::
+
+Displays a list of all the virtual machines currently being managed by `libvirt`.
+
+`console <id>`::
+`console <virtual-machine-name>`::
+
+Connects to a virtual machine's console.
+Type control-] to detach from the console.
+
+`destroy <id>`::
+`destroy <virtual-machine-name>`::
+
+Immediately shuts down and stops a virtual machine.
+
+`exit`::
+
+Exits the `virsh` shell.
+--
+
+5. Use the `destroy` command, as described above, to shut down the virtual
+machine. The SWAMP should finish processing the assessment and make its
+results available in the SWAMP web application.

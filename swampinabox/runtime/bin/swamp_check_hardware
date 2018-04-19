@@ -1,0 +1,325 @@
+#!/usr/bin/env perl
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2018 Software Assurance Marketplace
+
+#
+# Check whether the current host has enough disk space, memory,
+# and cores for SWAMP-in-a-Box to perform acceptably.
+#
+
+#
+# For 'perlcritic': The "magic" numbers are being assigned to what are
+# effectively constants. Not using the 'constant' pragma because the
+# constants defined with it don't use sigils. Not following the other
+# recommendations because they involve non-core modules.
+#
+## no critic (MagicNumbers, NumberSeparators, RequireDotMatchAnything, RequireLineBoundaryMatching, RequireExtendedFormatting)
+#
+
+use utf8;
+use strict;
+use warnings;
+
+use Cwd qw(realpath);
+use English qw( -no_match_vars );
+use File::Spec;
+use Getopt::Long;
+use IO::Handle;
+use List::Util qw(sum);
+use Scalar::Util qw(looks_like_number);
+
+#
+# By default, all of the checks performed by this script must pass.
+# However, some of them can be bypassed by setting the following to 0.
+#
+my $CORES_MUST_PASS = 1;
+my $MEM_MUST_PASS   = 1;
+my $DISK_MUST_PASS  = 1;
+
+#
+# Each VM requires 2 cores and 6 GB of RAM.
+# We want the system to support 2 VMs running simultaneously.
+#
+my $CORES_PER_VM       = 2;
+my $MEM_PER_VM         = 6144;
+my $NUM_CONCURRENT_VMS = 2;
+
+#
+# We also need to have memory available to run everything else.
+# For the moment, we'll arbitrarily pick 1 GB.
+#
+my $ADDITIONAL_MEM_NEEDS = 1024;
+
+#
+# tar and gzip don't allow us to accurately compute uncompressed, extracted
+# file sizes without actually expanding the archives. Thus, we'll hard code
+# the amount of space that we expect to be taken by the platforms and tools.
+#
+# These values are in MB. They were computed with `du -sm` and rounded up.
+#
+my $platforms_size = 16000;
+my $tools_size = 5500;
+
+#
+# For each mount point where we need to install files, we'll leave a 1 GB
+# margin for error for how much free space we think is required.
+#
+my $DISK_SPACE_PADDING = 1024;
+
+my $PLATFORMS_DIR     = '/swamp/platforms/images';
+my $TOOLS_DIR         = '/swamp/store/SCATools';
+my $PERL_RT_DIR       = '/opt';
+my $SWAMP_BACKEND_DIR = '/opt';
+my $SWAMP_WEB_DIR     = '/var/www';
+
+my $PERL_RT_RPM       = 'swamp-rt-perl';
+my $SWAMP_BACKEND_RPM = 'swampinabox-backend';
+my $SWAMP_WEB_RPM     = 'swamp-web-server';
+
+#
+# Track how much space is required on each mount point.
+#
+my %required_space;
+
+############################################################################
+#
+# Define and process command-line options.
+#
+my $is_install      = 0;
+my $is_upgrade      = 0;
+my $is_distribution = 0;
+my $is_singleserver = 0;
+my $rpms_dir        = q();
+
+Getopt::Long::Configure('bundling_override');
+Getopt::Long::GetOptions(
+    'install'      => \$is_install,
+    'upgrade'      => \$is_upgrade,
+    'distribution' => \$is_distribution,
+    'singleserver' => \$is_singleserver,
+    'rpms=s'       => \$rpms_dir,
+);
+
+if ((!$is_install && !$is_upgrade) || ($is_install && $is_upgrade)) {
+    die "Error: Exactly one of -install and -upgrade must be specified\n";
+}
+if ((!$is_distribution && !$is_singleserver) || ($is_distribution && $is_singleserver)) {
+    die "Error: Exactly one of -distribution and -singleserver must be specified\n";
+}
+if ($is_distribution) {
+    if (!-d $rpms_dir) {
+        die "Error: With -distribution, -rpms must be specified and point to a directory\n";
+    }
+}
+
+############################################################################
+#
+# Go through the checklist.
+#
+determine_required_disk_space();
+check_for_cores();
+check_for_physical_mem();
+
+if ($is_distribution) {
+    check_for_static_disk_space();
+}
+
+exit 0;
+
+############################################################################
+
+sub get_num_cores {
+    open(my $fh, '<', '/proc/cpuinfo')
+      || die "Error: Unable to open /proc/cpuinfo\n";
+    my $num_processors = grep { /^(processor)\s*:/ixms } (<$fh>);
+    close $fh;
+    return $num_processors;
+}
+
+sub get_free_mem {
+    return sum_of_meminfo('MemFree|Buffers|Cached');
+}
+
+sub get_physical_mem {
+    return sum_of_meminfo('MemTotal');
+}
+
+sub get_mount_point {
+    my ($path) = @_;
+    my @dirs = File::Spec->splitdir(File::Spec->canonpath($path));
+
+    while (@dirs) {
+        my $test_path = File::Spec->catdir(@dirs);
+        if (!-e $test_path && -l $test_path) {
+            die "Error: Symbolic link that points to nothing: $test_path\n";
+        }
+        if (-e $test_path && !-d $test_path) {
+            die "Error: Not a directory: $test_path\n";
+        }
+        if (-e $test_path) {
+            my $mount_point = qx(df -P $test_path | tail -n 1 | awk '{print \$6}');
+            if ($CHILD_ERROR) {
+                die "Error: Unexpected failure of subcommand\n";
+            }
+            chomp $mount_point;
+            return $mount_point;
+        }
+        pop @dirs;
+    }
+    return q();
+}
+
+sub get_free_space {
+    my ($path) = @_;
+
+    if (!-e $path) {
+        return 0;
+    }
+
+    my $free_space = qx(df -P -B 1M $path | tail -n 1 | awk '{print \$4}');
+    if ($CHILD_ERROR) {
+        die "Error: Unexpected failure of subcommand\n";
+    }
+    chomp $free_space;
+    return $free_space;
+}
+
+sub get_rpm_info {
+    my ($package_name, $field, $assume_installed) = @_;
+    my $rpm_name    = q();
+    my $other_flags = q();
+
+    if ($assume_installed) {
+        $rpm_name    = $package_name;
+        $other_flags = q();
+    }
+    else {
+        $rpm_name    = (glob "$rpms_dir/$package_name*")[0] || q();
+        $other_flags = '-p';
+    }
+
+    my $info = qx(rpm -q --queryformat '%{$field}' $other_flags $rpm_name 2>/dev/null);
+    return ($info, $CHILD_ERROR);
+}
+
+sub get_rpm_size {
+    my ($package_name, $assume_installed) = @_;
+    my ($size_in_bytes, $error) = get_rpm_info($package_name, 'SIZE', $assume_installed);
+
+    if ($error) {
+        $size_in_bytes = 0;
+    }
+    chomp $size_in_bytes;
+    return $size_in_bytes / 1024 / 1024;
+}
+
+sub sum_of_meminfo {
+    my ($labels) = @_;
+    my @meminfo;
+
+    open(my $fh, '<', '/proc/meminfo')
+      || die "Error: Unable to open /proc/meminfo\n";
+    @meminfo = grep { /^($labels)\s*:/i } (<$fh>);
+    close $fh;
+
+    @meminfo = map  { split /\s+/ } @meminfo;
+    @meminfo = grep { looks_like_number($_) } @meminfo;
+
+    my $total_in_kB = sum(@meminfo);
+    return int($total_in_kB / 1024);
+}
+
+sub determine_required_disk_space {
+    #
+    # For the moment, assume that the installation needs to fit on disk
+    # alongside whatever is currently installed.
+    #
+    $required_space{get_mount_point($PLATFORMS_DIR)}     += $platforms_size;
+    $required_space{get_mount_point($TOOLS_DIR)}         += $tools_size;
+    $required_space{get_mount_point($PERL_RT_DIR)}       += get_rpm_size($PERL_RT_RPM, 0);
+    $required_space{get_mount_point($SWAMP_BACKEND_DIR)} += get_rpm_size($SWAMP_BACKEND_RPM, 0);
+    $required_space{get_mount_point($SWAMP_WEB_DIR)}     += get_rpm_size($SWAMP_WEB_RPM, 0);
+    return;
+}
+
+############################################################################
+
+sub check_for_cores {
+    my $available = get_num_cores();
+    my $required  = $CORES_PER_VM * $NUM_CONCURRENT_VMS;
+
+    if ($available < $required) {
+        print "\n";
+        print "Error: Looking for $required cores ... found only $available\n";
+        exit 1 if $CORES_MUST_PASS;
+    }
+    else {
+        print "Looking for $required cores ... found $available\n";
+    }
+    return;
+}
+
+sub check_for_free_mem {
+    my $available = get_free_mem();
+    my $required  = $MEM_PER_VM * $NUM_CONCURRENT_VMS;
+
+    if ($available < $required) {
+        print "\n";
+        print "Error: Looking for $required MB free RAM ... found only $available MB\n";
+        exit 1 if $MEM_MUST_PASS;
+    }
+    else {
+        print "Looking for $required MB free RAM ... found $available MB\n";
+    }
+    return;
+}
+
+sub check_for_physical_mem {
+    my $available = get_physical_mem();
+    my $required  = $MEM_PER_VM * $NUM_CONCURRENT_VMS + $ADDITIONAL_MEM_NEEDS;
+
+    if ($available < $required) {
+        print "\n";
+        print "Error: Looking for $required MB physical RAM ... found only $available MB\n";
+        exit 1 if $MEM_MUST_PASS;
+    }
+    else {
+        print "Looking for $required MB physical RAM ... found $available MB\n";
+    }
+    return;
+}
+
+sub check_for_static_disk_space {
+    my $check_failed;
+
+    #
+    # Print out the mount points that have sufficient space available
+    # before printing out the ones that do not.
+    #
+    for my $mount_point (keys %required_space) {
+        my $required  = int($required_space{$mount_point} + $DISK_SPACE_PADDING);
+        my $available = int(get_free_space($mount_point));
+
+        if ($available >= $required) {
+            print "Looking for $required MB space free on '$mount_point' ... found $available MB\n";
+        }
+    }
+    for my $mount_point (keys %required_space) {
+        my $required  = int($required_space{$mount_point} + $DISK_SPACE_PADDING);
+        my $available = int(get_free_space($mount_point));
+
+        if ($available < $required) {
+            print "\n";
+            print "Error: Looking for $required MB space free on '$mount_point' ... found only $available MB\n";
+            $check_failed = 1;
+        }
+    }
+
+    if ($check_failed) {
+        exit 1 if $DISK_MUST_PASS;
+    }
+    return;
+}

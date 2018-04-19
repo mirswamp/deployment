@@ -6,44 +6,39 @@
 # Copyright 2012-2018 Software Assurance Marketplace
 
 #
-# Rebuild the "platforms" tables in the database based on the
-# platform install SQL files available on the filesystem.
+# Rebuild the 'platforms' database.
 #
 
 encountered_error=0
-trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
 
 if [ "$(whoami)" != "root" ]; then
-    echo "Error: $0: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
+    echo "Error: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
     exit 1
 fi
 
 ############################################################################
 
+BINDIR=$(dirname "$0")
 platforms_image_store="/swamp/platforms/images"
 platforms_script_store="/opt/swamp/sql/platforms"
 platforms_delete_script="/opt/swamp/sql/util/delete_platforms.sql"
 
-. /opt/swamp/sbin/db_support.functions
-trap 'remove_mysql_options_file; stop_mysql_service; exit 1' INT TERM
+source "$BINDIR/db_support.functions"
+trap 'stty echo ; reset_db_support' EXIT
+trap 'stty echo ; reset_db_support ; exit 1' INT TERM
 
-start_mysql_service
-create_mysql_options_file
-
-############################################################################
-
-echo "Resetting database by removing existing platforms"
-
-if ! $mysql_command < "$platforms_delete_script" ; then
-    echo "Error: $0: Failed to remove existing platforms from the database" 1>&2
-    encountered_error=1
-fi
+setup_db_support
 
 ############################################################################
 
-echo "Searching for platforms to add to the database"
+echo "Resetting the platforms database by removing existing platforms"
+do_mysql_command "$platforms_delete_script"
 
+############################################################################
+
+echo "Adding platforms for the current release to the database"
 for platform_sql in "$platforms_script_store"/*.sql ; do
     platform=$(basename "$platform_sql" .sql)
     platform=${platform/\.minorversion/}
@@ -54,23 +49,25 @@ for platform_sql in "$platforms_script_store"/*.sql ; do
 
         for qcow_file in $platforms_image_store/condor-$distribution*$bits-master*.qcow2 ; do
             if [ -f "$qcow_file" ]; then
-
-                echo ".. Adding: $platform"
-
-                if ! $mysql_command < "$platform_sql" ; then
-                    echo "Error: $0: Failed to add: $platform (from: $platform_sql)" 1>&2
-                    encountered_error=1
-                fi
+                echo "Adding: $platform"
+                do_mysql_command "$platform_sql"
                 break
             fi
         done
     else
-        echo "Error: $0: Unable to identify platform: $platform_sql" 1>&2
+        echo "Error: Unable to identify platform: $platform_sql" 1>&2
         encountered_error=1
     fi
 done
+echo "Finished adding platforms to the database"
 
-remove_mysql_options_file
-stop_mysql_service
+############################################################################
 
+if [ $encountered_error -eq 0 ]; then
+    echo "Finished rebuilding the platforms database"
+else
+    echo "Error: Finished rebuilding the platforms database, but with errors" 1>&2
+fi
+
+reset_db_support
 exit $encountered_error

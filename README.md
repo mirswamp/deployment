@@ -1,6 +1,6 @@
 # Welcome to SWAMP-in-a-Box! (Software Assurance Marketplace in a Box)
 
-The release of SWAMP-in-a-Box 1.32 is an open-beta version. We welcome your
+The release of SWAMP-in-a-Box 1.33 is an open-beta version. We welcome your
 feedback and contributions at sib@continuousassurance.org or +1 (317)-274-3942.
 To get updates on SWAMP-in-a-Box and be part of the user community, please join our
 [mailing list](https://lists.cosalab.org/mailman/listinfo/swampinabox "SWAMP Mailing List")!

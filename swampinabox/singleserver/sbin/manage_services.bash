@@ -5,8 +5,12 @@
 #
 # Copyright 2012-2018 Software Assurance Marketplace
 
+#
+# Start, stop, and otherwise manage the system services for SWAMP-in-a-Box.
+#
+
 encountered_error=0
-trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
 
 BINDIR="$(dirname "$0")"
@@ -52,8 +56,6 @@ restartServices=${startServices[@]}
 
 if [ -x "$BINDIR/swamp_manage_service" ]; then
     service_cmd="$BINDIR/swamp_manage_service"
-elif [ -x "$BINDIR/../../runtime/sbin/swamp_manage_service" ]; then
-    service_cmd="$BINDIR/../../runtime/sbin/swamp_manage_service"
 else
     service_cmd="service"
 fi
@@ -100,28 +102,28 @@ case $command in
     start)
         for service in ${services[@]}
         do
-            echo "Starting service: $service"
+            echo "Starting the $service service"
             $service_cmd $service start || ignore_error
         done
         ;;
     stop)
         for service in ${services[@]}
         do
-            echo "Stopping service: $service"
+            echo "Stopping the $service service"
             $service_cmd $service stop || ignore_error
         done
         ;;
     restart)
         for service in ${services[@]}
         do
-            echo "Restarting service: $service"
+            echo "Restarting the $service service"
             $service_cmd $service restart || ignore_error
         done
         ;;
     status)
         for service in ${services[@]}
         do
-            echo -n "Status of service '$service': "
+            echo -n "Status of the $service service: "
             $service_cmd $service status || ignore_error
         done
         ;;

@@ -10,12 +10,11 @@
 #
 
 encountered_error=0
-trap 'encountered_error=1' ERR
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
 
-BINDIR="$(dirname "$0")"
-
-. "$BINDIR/../../distribution/repos/resources/common-helper.functions"
+BINDIR=$(dirname "$0")
+source "$BINDIR/swampinabox_install_util.functions"
 
 ############################################################################
 
@@ -40,27 +39,37 @@ yum_confirm              xfsprogs
 yum_install gcc cmake libxml2-devel
 yum_confirm gcc cmake libxml2-devel
 
-yum_install rpm-build rubygems python-pip
-yum_confirm rpm-build rubygems python-pip
+yum_install rpm-build python-pip
+yum_confirm rpm-build python-pip
 
 pip install wheel
 
 echo ""
-echo "################################"
-echo "##### Configuring /swampcs #####"
-echo "################################"
+echo "################################################"
+echo "##### Configuring /everglades and /swampcs #####"
+echo "################################################"
 
-if ! grep /swampcs /etc/fstab 1>/dev/null 2>/dev/null ; then
-    echo "Adding '/swampcs' glusterfs mount point"
-    echo "swa-gfs-dt-03:/cs0	/swampcs	 glusterfs	defaults,_netdev,ro	0 0" >> /etc/fstab
-
-    echo "Mounting '/swampcs'"
-    mkdir -p /swampcs
-    mount /swampcs
-else
-    echo "Found '/swampcs' in '/etc/fstab'"
+if ! grep /everglades /etc/fstab 1>/dev/null 2>/dev/null ; then
+    echo "Adding /everglades glusterfs mount point"
+    echo "swa-gfs-dt-01:/ev0	/everglades	 glusterfs	defaults,_netdev,ro	0 0" >> /etc/fstab
+    if [ ! -d /everglades ]; then
+        mkdir -p        /everglades
+        chown root:root /everglades
+        chmod 0755      /everglades
+    fi
 fi
 
-echo ""
-echo "Finished."
+if ! grep /swampcs /etc/fstab 1>/dev/null 2>/dev/null ; then
+    echo "Adding /swampcs glusterfs mount point"
+    echo "swa-gfs-dt-03:/cs0	/swampcs	 glusterfs	defaults,_netdev,ro	0 0" >> /etc/fstab
+    if [ ! -d /swampcs ]; then
+        mkdir -p        /swampcs
+        chown root:root /swampcs
+        chmod 0755      /swampcs
+    fi
+fi
+
+echo "Mounting glusterfs file systems"
+mount -a -t glusterfs
+
 exit $encountered_error

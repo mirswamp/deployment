@@ -11,21 +11,23 @@ The software packages that SWAMP-in-a-Box depends on include:
   * <<dependencies-other,other assorted utilities>>.
 
 All of these dependencies must be installed in order for SWAMP-in-a-Box to
-function correctly. If you run into issues with installing these
-dependencies, consult <<troubleshooting-installing-dependencies,the
-troubleshooting appendix>> for possible solutions.
+function correctly. If you run into issues installing these dependencies,
+refer to the <<troubleshooting-installing-dependencies,troubleshooting
+section>> at the end of this appendix for possible solutions.
 
 [NOTE]
 In the sections below, `<installer-dir>` refers to the directory containing
-the SWAMP-in-a-Box installer. See <<installing-siab>>.
+the SWAMP-in-a-Box installer. Refer back to the section on
+<<installing-sib,installing and upgrading SWAMP-in-a-Box>> for instructions
+on obtaining and extracting the installer.
 
 
 [[dependencies-htcondor]]
 === HTCondor 8.6 ===
 
-The set-up scripts configure and download HTCondor from the repository
-hosted by the University of Wisconsin-Madison, generally following the
-instructions provided on the project's home page at
+The set-up scripts for SWAMP-in-a-Box configure and download HTCondor from
+the repository hosted by the University of Wisconsin-Madison, generally
+following the instructions provided on the project's home page at
 https://research.cs.wisc.edu/htcondor/index.html. The specific packages
 installed are `condor-all` and its dependencies.
 
@@ -39,16 +41,16 @@ The following script will install HTCondor using the process described above:
 [[dependencies-mariadb]]
 === MariaDB 5.5 ===
 
-For CentOS 6, the set-up scripts configure and download MariaDB from the
-repository hosted by the MariaDB Foundation, using the configuration file
-produced by the "repository configuration" tool at
+For CentOS 6, the set-up scripts for SWAMP-in-a-Box configure and download
+MariaDB from the repository hosted by the MariaDB Foundation, using the
+configuration file produced by the "repository configuration" tool at
 https://downloads.mariadb.org/mariadb/repositories/. The specific packages
 installed are `MariaDB-client`, `MariaDB-server`, `MariaDB-shared`, and
 their dependencies.
 
-For CentOS 7, the set-up scripts download MariaDB from CentOS's default
-repositories. The specific packages installed are `mariadb`,
-`mariadb-server`, `mariadb-libs`, and their dependencies.
+For CentOS 7, the set-up scripts for SWAMP-in-a-Box download MariaDB from
+CentOS's default repositories. The specific packages installed are
+`mariadb`, `mariadb-server`, `mariadb-libs`, and their dependencies.
 
 The following script will install MariaDB using the process described above:
 
@@ -60,9 +62,10 @@ The following script will install MariaDB using the process described above:
 [[dependencies-php]]
 === PHP 7.0 ===
 
-The set-up scripts configure and download PHP from Remi's RPM Repository,
-using the instructions produced by the "configuration wizard" at
-http://rpms.famillecollet.com/. The specific packages installed are:
+The set-up scripts for SWAMP-in-a-Box configure and download PHP from Remi's
+RPM Repository, using the instructions produced by the "configuration
+wizard" at http://rpms.famillecollet.com/. The specific packages installed
+are:
 
   * `php`,
   * `php-ldap`,
@@ -82,14 +85,15 @@ The following script will install PHP using the process described above:
 
 
 [[dependencies-other]]
-=== Other Assorted Utilities ===
+=== Other Assorted Utilities and Setup ===
 
-In addition to HTCondor, MariaDB, and PHP, the set-up scripts download
-assorted software packages from CentOS's default repositories. The specific
-packages installed are:
+In addition to HTCondor, MariaDB, and PHP, the set-up scripts for
+SWAMP-in-a-Box download assorted software packages from CentOS's default
+repositories. The specific packages installed are:
 
   * `ant`,
   * `bind-utils`,
+  * `curl`,
   * `git`,
   * `httpd`,
   * `libguestfs`,
@@ -100,6 +104,7 @@ packages installed are:
   * `ncompress`,
   * `patch`,
   * `perl`,
+  * `rubygems`,
   * `unzip`,
   * `zip`,
 
@@ -111,4 +116,29 @@ HTCondor, MariaDB, and PHP are installed, as described above:
 
 ----
 <installer-dir>/repos/install-other-deps.bash
+----
+
+
+[[troubleshooting-installing-dependencies]]
+Troubleshooting Issues with Installing Dependencies
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The SWAMP-in-a-Box setup and install process requires downloading and
+installing packages from multiple package repositories. On systems
+configured to check for GPG signatures on the repositories' metadata, this
+process might fail because not all of the repositories provide GPG
+signatures for their metadata. This is indicated by HTTP 404 errors when
+attempting to download `repomd.xml.asc` from the repository:
+
+----
+http://example.com/.../repomd.xml.asc: [Errno 14] HTTP Error 404 - Not Found
+----
+
+These GPG signature checks can be disabled by changing `repo_gpgcheck=1` to
+`repo_gpgcheck=0` in the configuration files used by `yum` (you will need
+`root` access to modify these files). To locate the configuration files that
+contain `repo_gpgcheck=1`, run the following command:
+
+----
+grep -lr "repo_gpgcheck=1" /etc/yum.conf /etc/yum.repos.d/
 ----

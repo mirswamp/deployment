@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
@@ -6,6 +8,7 @@
 #
 # The functions below are meant to be called in pairs:
 #
+#   - {create,remove}_mysql_password_file
 #   - {create,remove}_mysql_options_file
 #   - {start,stop}_mysql_service
 #
@@ -13,33 +16,58 @@
 # the pair was called.
 #
 
+mysql_password_file="/etc/.mysql_root"
 mysql_options_file="/opt/swamp/sql/sql.cnf"
-mysql_command="mysql --defaults-file=$mysql_options_file"
+mysql_command="mysql --defaults-file=$mysql_options_file -B -N"
+
+function mysql_password_file_is_readable() {
+    #
+    # Accommodate scripts that use '/etc/.mysql'.
+    #
+    [ -r "$mysql_password_file" ] || [ -r "/etc/.mysql" ]
+}
+
+############################################################################
+#
+# Manage the file that stores the encrypted password.
+#
+mysql_password_file_needs_rm="no"
+
+function create_mysql_password_file() {
+    if ! mysql_password_file_is_readable ; then
+        mysql_password_file_needs_rm="yes"
+        /opt/swamp/sbin/create_mysql_root "$mysql_password_file" --test
+    fi
+}
+
+function remove_mysql_password_file() {
+    if [ "$mysql_password_file_needs_rm" != "no" ]; then
+        rm -f "$mysql_password_file"
+    fi
+}
 
 ############################################################################
 #
 # Manage the options file for the 'mysql' client.
 #
-cnf_file_needs_removal="no"
+mysql_options_file_needs_rm="no"
 
 function create_mysql_options_file() {
-    if [ ! -e "$mysql_options_file" ]; then
-        if [ -r /etc/.mysql_root -o -r /etc/.mysql ]; then
-            cnf_file_needs_removal="yes"
-            /opt/swamp/sbin/create_mysql_root_cnf "$mysql_options_file"
-        fi
+    if [ ! -e "$mysql_options_file" ] && mysql_password_file_is_readable ; then
+        mysql_options_file_needs_rm="yes"
+        /opt/swamp/sbin/create_mysql_root_cnf "$mysql_options_file"
     fi
 }
 
 function remove_mysql_options_file() {
-    if [ "$cnf_file_needs_removal" != "no" ]; then
+    if [ "$mysql_options_file_needs_rm" != "no" ]; then
         rm -f "$mysql_options_file"
     fi
 }
 
 ############################################################################
 #
-# Manage the MySQL service. Start/stop it only if it isn't already running.
+# Manage the MySQL service.
 #
 started_mysql_service="no"
 
@@ -56,4 +84,31 @@ function stop_mysql_service() {
     if [ "$started_mysql_service" != "no" ]; then
         /opt/swamp/sbin/swamp_manage_service mysql stop
     fi
+}
+
+############################################################################
+#
+# Other utility functions.
+#
+
+function do_mysql_command() {
+    for arg in "$@" ; do
+        if [ ! -r "$arg" ]; then
+            echo "Error: File is not readable: $arg" 1>&2
+            return 1
+        fi
+    done
+    cat "$@" | $mysql_command
+}
+
+function setup_db_support() {
+    start_mysql_service
+    create_mysql_password_file
+    create_mysql_options_file
+}
+
+function reset_db_support() {
+    remove_mysql_options_file
+    remove_mysql_password_file
+    stop_mysql_service
 }

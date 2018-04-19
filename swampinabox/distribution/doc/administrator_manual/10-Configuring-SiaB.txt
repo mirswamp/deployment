@@ -1,5 +1,0 @@
-Configuring SWAMP-in-a-Box
---------------------------
-
-For additional information on the configuration options discussed below, see
-the SWAMP-in-a-Box Reference Manual.

@@ -5,10 +5,16 @@
 #
 # Copyright 2012-2018 Software Assurance Marketplace
 
-install -m 400 Data_Server/Project/project_procs.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
+mkdir -p "$RPM_BUILD_ROOT"/opt/swamp/bin
+mkdir -p "$RPM_BUILD_ROOT"/opt/swamp/sbin
+mkdir -p "$RPM_BUILD_ROOT"/opt/swamp/sql
 
-install -m 700 swampinabox/sbin/create_mysql_root_cnf  ${RPM_BUILD_ROOT}/opt/swamp/sbin
-install -m 700 swampinabox/sbin/db_support.functions   ${RPM_BUILD_ROOT}/opt/swamp/sbin
-install -m 700 swampinabox/sbin/rebuild_platforms_db   ${RPM_BUILD_ROOT}/opt/swamp/sbin
-install -m 700 swampinabox/sbin/rebuild_tools_db       ${RPM_BUILD_ROOT}/opt/swamp/sbin
-install -m 700 swampinabox/sbin/swamp_manage_service   ${RPM_BUILD_ROOT}/opt/swamp/sbin
+install -m 400 Data_Server/Project/project_procs.sql     "$RPM_BUILD_ROOT"/opt/swamp/sql
+
+install -m 755 swampinabox/bin/swamp_check_db_file_paths "$RPM_BUILD_ROOT"/opt/swamp/bin
+install -m 700 swampinabox/sbin/create_mysql_root        "$RPM_BUILD_ROOT"/opt/swamp/sbin
+install -m 700 swampinabox/sbin/create_mysql_root_cnf    "$RPM_BUILD_ROOT"/opt/swamp/sbin
+install -m 700 swampinabox/sbin/db_support.functions     "$RPM_BUILD_ROOT"/opt/swamp/sbin
+install -m 700 swampinabox/sbin/rebuild_platforms_db     "$RPM_BUILD_ROOT"/opt/swamp/sbin
+install -m 700 swampinabox/sbin/rebuild_tools_db         "$RPM_BUILD_ROOT"/opt/swamp/sbin
+install -m 700 swampinabox/sbin/swamp_manage_service     "$RPM_BUILD_ROOT"/opt/swamp/sbin

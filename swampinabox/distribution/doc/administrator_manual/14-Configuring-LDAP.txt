@@ -252,11 +252,11 @@ LDAP_PASSWORD_ATTR=userPassword
 LDAP_USERNAME_ATTR=uid
 LDAP_EMAIL_ATTR=mail
 LDAP_ORG_ATTR=ignore
-LDAP_OBJECTCLASS=<not applicable, ldap is read-only>
+LDAP_OBJECTCLASS="<not applicable, ldap is read-only>"
 LDAP_WEB_USER=<user here>
 LDAP_WEB_USER_PASSWORD=<password here>
-LDAP_PASSWORD_SET_USER=<not applicable, ldap is read-only>
-LDAP_PASSWORD_SET_USER_PASSWORD=<not applicable, ldap is read-only>
+LDAP_PASSWORD_SET_USER="<not applicable, ldap is read-only>"
+LDAP_PASSWORD_SET_USER_PASSWORD="<not applicable, ldap is read-only>"
 ----
 
 .Notes
@@ -355,11 +355,11 @@ LDAP_PASSWORD_ATTR=userPassword
 LDAP_USERNAME_ATTR=sAMAccountName
 LDAP_EMAIL_ATTR=mail
 LDAP_ORG_ATTR=ignore
-LDAP_OBJECTCLASS=<not applicable, ldap is read-only>
+LDAP_OBJECTCLASS="<not applicable, ldap is read-only>"
 LDAP_WEB_USER=ldapquery@swamp.ad
 LDAP_WEB_USER_PASSWORD=<password here>
-LDAP_PASSWORD_SET_USER=<not applicable, ldap is read-only>
-LDAP_PASSWORD_SET_USER_PASSWORD=<not applicable, ldap is read-only>
+LDAP_PASSWORD_SET_USER="<not applicable, ldap is read-only>"
+LDAP_PASSWORD_SET_USER_PASSWORD="<not applicable, ldap is read-only>"
 ----
 
 .Notes

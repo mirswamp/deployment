@@ -1,5 +1,5 @@
-SWAMP-in-a-Box's Filesystem
----------------------------
+SWAMP-in-a-Box's File System
+----------------------------
 
 
 [[configuration-files]]

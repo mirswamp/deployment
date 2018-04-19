@@ -1,8 +1,8 @@
 The sample packages in this directory can be used to test and explore the
-functionality of your SWAMP-in-a-Box host. The table below provides some
-basic information about each package. You should be able to upload each
-package by accepting all of the defaults presented, and each package should
-be able to be successfully assessed by all of the applicable tools.
+functionality of your SWAMP-in-a-Box. The table below provides basic
+information about each package. You should be able to upload each package to
+your SWAMP by accepting all of the defaults presented, and each package
+should be able to be successfully assessed by all of the applicable tools.
 
 
 Archive                    Language  Build System   Notes

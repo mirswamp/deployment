@@ -6,41 +6,48 @@
 # Copyright 2012-2018 Software Assurance Marketplace
 
 #
-# Set the URL for the web backend in the web frontend configuration file.
+# Set the location of the SWAMP API web server (i.e., backend web server)
+# in the frontend configuration file.
 #
 
 use utf8;
 use strict;
 use warnings;
 
-use English qw( -no_match_vars );
+use File::Basename qw(basename);
+
 use File::Slurp qw(read_file write_file);
 use JSON qw(from_json to_json);
+use Try::Tiny qw(try);
 
-my $new_hostname = $ARGV[0];
-my $config_file  = '/var/www/html/config/config.json';
+my $new_web_server = $ARGV[0] || q();
+my $config_file    = '/var/www/html/config/config.json';
+my $config_json    = basename($config_file);
 
 ############################################################################
 
 my $whoami = qx(whoami);
 chomp $whoami;
 
-if (!$new_hostname) {
-    die "Usage: $PROGRAM_NAME <new hostname>\n";
-}
-
-if (!-e $config_file) {
-    die "Error: $PROGRAM_NAME: No such file: $config_file\n";
+if (!-f $config_file) {
+    die "Error: No such file: $config_file\n";
 }
 
 if ($whoami ne 'root') {
-    die "Error: $PROGRAM_NAME: This script must be run as 'root'\n";
+    die "Error: This utility must be run as 'root'. Perhaps use 'sudo'.\n";
+}
+
+if ($new_web_server eq q()) {
+    print "Setting SWAMP API web server in $config_json\n";
+}
+else {
+    print "Setting SWAMP API web server in $config_json to $new_web_server\n";
 }
 
 my $config_file_contents = read_file($config_file);
-my $config_ref = from_json($config_file_contents, {'utf8' => 1});
+my $config_ref = try { from_json($config_file_contents, {'utf8' => 1}) } || {};
 
-$config_ref->{'servers'}->{'web'} = "https://$new_hostname/swamp-web-server/public";
+$config_ref->{'servers'}->{'web'} = "$new_web_server/swamp-web-server/public";
 $config_file_contents = to_json($config_ref, {'utf8' => 1, 'pretty' => 1, 'canonical' => 1});
 
 write_file($config_file, $config_file_contents);

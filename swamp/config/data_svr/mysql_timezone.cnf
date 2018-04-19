@@ -1,0 +1,5 @@
+[mysqld]
+#
+# Time Zone Variables
+#
+default-time-zone='+00:00'

@@ -77,6 +77,8 @@ then
     fi
 fi
 
+echo "Finished running pre script"
+
 %post
 %include common-post.txt
 %include swamp-post-common.txt

@@ -57,7 +57,7 @@ sub guestfish_check_status { my ($vmname) = @_ ;
 }
 
 sub usage {
-	print "usage: $0 [-help -debug -verbose -statusout|-runout|-catalina|-mysql|-file <string> -preserve] <vmname>\n"; 
+	print "usage: $0 [-help -debug -verbose -statusout|-runout|-catalina|-mysql|-codedx <project_uuid>|-file <string> -preserve] <vmname>\n"; 
 	exit;
 }
 
@@ -70,6 +70,7 @@ my $preserve = 0;
 my $runout = 0;
 my $catalina = 0;
 my $mysql = 0;
+my $codedx = 0;
 my $statusout = 0;
 my $checkstatus = 0;
 my $result = GetOptions(
@@ -82,16 +83,18 @@ my $result = GetOptions(
 	'statusout'		=> \$statusout,
 	'catalina'		=> \$catalina,
 	'mysql'			=> \$mysql,
+	'codedx=s'		=> \$codedx,
 	'checkstatus'	=> \$checkstatus,
 );
 usage() if ($help || ! $result);
 $vmname = $ARGV[0] if (defined($ARGV[0]));
 usage() if (! $vmname);
-$checkstatus = 1 if (! $file && ! $runout && ! $statusout && ! $catalina && ! $mysql);
+$checkstatus = 1 if (! $file && ! $runout && ! $statusout && ! $catalina && ! $mysql && ! $codedx);
 
 guestfish_display_file($vmname, $file, $preserve) if ($file);
 guestfish_display_file($vmname, '/mnt/out/run.out', $preserve) if ($runout);
 guestfish_display_file($vmname, '/mnt/out/status.out', $preserve) if ($statusout);
 guestfish_display_file($vmname, '/var/log/tomcat6/catalina.out', $preserve) if ($catalina);
 guestfish_display_file($vmname, "/var/lib/mysql/$vmname.err", $preserve) if ($mysql);
+guestfish_display_file($vmname, "/var/lib/codedx/proxy-${codedx}/config/log-files/codedx.log", $preserve) if ($codedx);
 guestfish_check_status($vmname) if ($checkstatus);

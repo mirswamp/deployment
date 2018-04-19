@@ -10,6 +10,11 @@
 # Abstracts out 'service' vs. 'systemctl', for example.
 #
 
+#
+# For 'perlcritic'.
+#
+## no critic (MagicNumbers, RequireDotMatchAnything, RequireLineBoundaryMatching, RequireExtendedFormatting)
+
 use utf8;
 use strict;
 use warnings;
@@ -19,10 +24,10 @@ use English qw( -no_match_vars );
 my $debug = 0;
 
 #
-# Test for whether `systemctl` is available.
+# Test for whether 'systemctl' is available.
 #
 if ($debug) {
-    print "Testing for 'systemctl' ... ";
+    print q(Testing for 'systemctl' ... );
     print `which systemctl 2>&1`;
 }
 else {
@@ -39,7 +44,7 @@ else {
 }
 
 #
-# Query or control a service using `service` or `systemctl`.
+# Query or control a service using 'service' or 'systemctl'.
 #
 sub tell_service {
     my ($service, $command) = @_;
@@ -53,7 +58,7 @@ sub tell_service {
     }
 
     print "Calling: $system_command\n" if $debug;
-    return (`$system_command` || q());
+    return (`$system_command` || q());    # baydemir TODO: capture stderr?
 }
 
 #
@@ -65,10 +70,10 @@ sub get_status {
     my $command = $is_systemctl_avail ? 'show --property ActiveState' : 'status';
     my $status = tell_service($service, $command);
 
-    if ($status =~ /MySQL running|is running|=active/sm) {
+    if ($status =~ /MySQL running|is running|=active/) {
         $status = 'running';
     }
-    elsif ($status =~ /not running|stopped|=inactive|=failed/sm) {
+    elsif ($status =~ /not running|stopped|=inactive|=failed/) {
         $status = 'stopped';
     }
     else {
@@ -143,7 +148,7 @@ sub restart_service {
 # Show a basic usage message.
 #
 sub show_usage_and_exit {
-    die "Usage: $PROGRAM_NAME <service> (status|start|stop|restart)\n";
+    die "Usage: $PROGRAM_NAME <service> <status|start|stop|restart>\n";
 }
 
 #

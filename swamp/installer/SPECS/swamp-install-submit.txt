@@ -5,5 +5,7 @@
 #
 # Copyright 2012-2018 Software Assurance Marketplace
 
-install -m 644 submonitor.conf $RPM_BUILD_ROOT/opt/swamp/etc/swampmonitor.conf
-install -m 400 vmu_swamp_htcondor_submit $RPM_BUILD_ROOT/opt/swamp/etc/vmu_htcondor_submit
+mkdir -p "$RPM_BUILD_ROOT"/opt/swamp/etc
+
+install -m 444 submonitor.conf "$RPM_BUILD_ROOT"/opt/swamp/etc/swampmonitor.conf
+install -m 444 vmu_swamp_htcondor_submit "$RPM_BUILD_ROOT"/opt/swamp/etc/vmu_htcondor_submit

@@ -14,7 +14,7 @@ cnf_file="/opt/swamp/sql/sql.cnf"
 cnf_file_needs_removal="no"
 started_mysql_service="no"
 
-function do_clean_up {
+function do_clean_up() {
     stty echo
     if [ "$cnf_file_needs_removal" != "no" ]; then
         rm -f "$cnf_file"
@@ -24,12 +24,12 @@ function do_clean_up {
     fi
 }
 
-function exit_normally {
+function exit_normally() {
     do_clean_up
     exit 0
 }
 
-function exit_with_error {
+function exit_with_error() {
     do_clean_up
     echo "Error: $0: Error while attempting to execute: $script_file" 1>&2
     exit 1

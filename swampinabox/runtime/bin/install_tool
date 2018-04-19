@@ -108,7 +108,7 @@ sub get_key_val {
     my ($config, $key) = @_;
     my $escaped_key = quotemeta $key;
 
-    my @vals = ($config =~ /^\s*$escaped_key\s*=(.*)$/m);
+    my @vals = ($config =~ /^[ \t]*$escaped_key[ \t]*=(.*)$/m);
     return $vals[0];
 }
 
@@ -118,13 +118,13 @@ sub get_key_val {
 sub merge_key_val {
     my ($config, $key, $val, $no_space) = @_;
     my $escaped_key       = quotemeta $key;
-    my $contains_key      = ($config =~ /^\s*$escaped_key\s*=/m);
+    my $contains_key      = ($config =~ /^[ \t]*$escaped_key[ \t]*=/m);
     my $ends_with_newline = ($config =~ /\n$/);
     my $space             = ($no_space ? q() : q( ));
     $val                  = ($no_space ? $val : trim($val));
 
     if ($contains_key) {
-        $config =~ s/^\s*$escaped_key\s*=.*$/$key$space=$space$val/gm;
+        $config =~ s/^[ \t]*$escaped_key[ \t]*=.*$/$key$space=$space$val/gm;
     }
     else {
         $config .= ($ends_with_newline ? q() : qq(\n)) . "$key$space=$space$val\n";
@@ -216,6 +216,7 @@ Values for the --tool option, to select the tool to update (choose one):
   gt-csonar           GrammaTech CodeSonar
   ps-ctest            Parasoft C/C++test
   ps-jtest            Parasoft Jtest
+  retire-js           Retire.js
 
 Arguments for selecting how to update the tool (choose one):
   --add, --install    Install a new version of the tool
@@ -246,6 +247,7 @@ sub get_options {
     my %defaults = (
 
         # Where to find various configuration files
+        'bundled-tools-inventory-file' => '/opt/swamp/etc/tools-bundled.txt',
         'condor-limits-file' => '/etc/condor/config.d/swampinabox_90_concurrency_limits.conf',
         'swamp-conf-file'    => '/opt/swamp/etc/services.conf',
 
@@ -389,7 +391,7 @@ sub get_options {
         }
     }
 
-    for my $key (qw(condor-limits-file swamp-conf-file tool-install-file tool-uninstall-file)) {
+    for my $key (qw(bundled-tools-inventory-file condor-limits-file swamp-conf-file tool-install-file tool-uninstall-file)) {
         my $val = $options{$key};
         if (!-f $val) {
             push @errors, "Missing file from SWAMP installation: $val";
@@ -421,6 +423,18 @@ sub get_options {
 
 ############################################################################
 
+sub is_bundled_tool {
+    my ($options)      = @_;
+    my $inventory_file = $options->{'bundled-tools-inventory-file'};
+    my $tool_id        = $options->{'tool-id'};
+    my $tool_version   = $options->{'tool-version'};
+
+    my $inventory = (-r $inventory_file) ? read_file($inventory_file) : q();
+    my @inventory_lines = split /^/, $inventory;
+
+    return grep { /^${tool_id}-${tool_version}(.tar)?(.gz)?$/ } @inventory_lines;
+}
+
 sub check_running_as_root {
     my $whoami = trim(qx(whoami));
     if ($whoami ne 'root') {
@@ -438,6 +452,9 @@ sub check_system_requirements {
     my $tool_version_uuid = get_tool_version_uuid($options);
     my $tool_name         = get_tool_name($options);
 
+    if (is_bundled_tool($options)) {
+        exit_abnormally("Cannot modify a bundled version of $tool_name");
+    }
     if ($options->{'add'} && $tool_version_uuid) {
         exit_abnormally("$tool_name $tool_version already appears to be installed");
     }
@@ -473,7 +490,7 @@ sub get_db_credentials {
 
         my ($output, $status) = do_command(qq(echo "\\q" | $mysql_command));
         if ($status) {
-            print "$output\n";
+            print $output;
         }
         else {
             $valid_password = 1;
@@ -671,7 +688,7 @@ sub update_user_password_config {
         my $response = <>;
 
         if (!($response =~ /^y(es)?$/i)) {
-            print "Not configuring license user/password\n";
+            print "Not updating configuration for license server user/password\n";
             return $swamp_conf;
         }
 

@@ -5,42 +5,100 @@
 #
 # Copyright 2012-2018 Software Assurance Marketplace
 
-codedx_src_file="$1"
-codedx_dest_file="/opt/swamp/thirdparty/codedx/vendor/codedx.war"
-codedx_install_sql="/opt/swamp/sql/install_codedx.sql"
+#
+# Install Code Dx.
+#
 
-function exit_with_error {
-    echo ""
-    echo "Failed to completely install Code Dx "
-    exit 1
+encountered_error=0
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
+set -o errtrace
+
+codedx_root="/opt/swamp/thirdparty/codedx"
+codedx_swamp="$codedx_root/swamp"
+codedx_vendor="$codedx_root/vendor"
+
+BINDIR="$(dirname "$0")"
+codedx_src="$1"
+codedx_dest="$codedx_vendor/codedx.war"
+codedx_install_sql="/opt/swamp/sql/install_codedx.sql"
+codedx_emptydb=""
+codedx_version=""
+codedx_properties="WEB-INF/classes/version.properties"
+
+############################################################################
+
+function set_codedx_version() {
+    war_file="$1"
+
+    if [ ! -r "$war_file" ]; then
+        echo "Error: Unable to read: $war_file" 1>&2
+        exit 1
+    fi
+    if ! unzip -l "$war_file" "$codedx_properties" 1>/dev/null 2>/dev/null ; then
+        echo "Error: Not a recognized Code Dx .war file: $war_file" 1>&2
+        exit 1
+    fi
+
+    codedx_version=$(unzip -p "$war_file" "$codedx_properties" | \
+                     grep -E '^\s*version\s*=' | \
+                     head -n 1 | \
+                     sed -E -e 's/^\s*version\s*=\s*//')
+    codedx_emptydb="emptydb-codedx-${codedx_version}.sql"
+
+    if [ ! -f "$codedx_swamp/$codedx_emptydb" ]; then
+        echo "Error: Not a supported version of Code Dx: $codedx_version" 1>&2
+        exit 1
+    fi
 }
 
-if [ ! -e "$codedx_dest_file" -a -z "$codedx_src_file" ]; then
-    echo "Usage: $0 <Code Dx .war file>"
+############################################################################
+
+#
+# The source file is optional if the destination already exists.
+# However, when provided, the source file takes priority.
+#
+if [ -e "$codedx_dest" ] && [ ! -f "$codedx_dest" ]; then
+    echo "Error: Already exists, but is not a regular file: $codedx_dest" 1>&2
+    exit 1
+fi
+if [ ! -f "$codedx_dest" ] && [ -z "$codedx_src" ]; then
+    echo "Usage: $0 <Code Dx .war file>" 1>&2
+    exit 1
+fi
+if [ ! -z "$codedx_src" ] && [ ! -f "$codedx_src" ]; then
+    echo "Error: No such file: $codedx_src" 1>&2
     exit 1
 fi
 
-if [ ! -z "$codedx_src_file" -a ! -e "$codedx_src_file" ]; then
-    echo "Error: $codedx_src_file does not exist"
-    exit 1
+if [ -f "$codedx_src" ]; then
+    set_codedx_version "$codedx_src"
+elif [ -f "$codedx_dest" ]; then
+    set_codedx_version "$codedx_dest"
 fi
 
 if [ "$(whoami)" != "root" ]; then
-    echo "Error: The install must be performed as root."
+    echo "Error: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
     exit 1
 fi
 
-if [ -e "$codedx_src_file" ]; then
-    echo ""
-    echo "Installing $codedx_src_file into /opt/swamp ..."
+############################################################################
 
-    install -m 444 "$codedx_src_file" "$codedx_dest_file" || exit_with_error
+if [ -f "$codedx_src" ] && [ ! \( "$codedx_src" -ef "$codedx_dest" \) ]; then
+    echo "Copying '$codedx_src' to '$(dirname "$codedx_dest")'"
+    install -m 0444 "$codedx_src" "$codedx_dest"
 fi
 
-echo ""
-echo "Adding database entries for Code Dx ..."
+echo "Setting up empty Code Dx database for version $codedx_version"
+ln -sf "$codedx_emptydb" "$codedx_swamp/emptydb-codedx.sql"
 
-/opt/swamp/sbin/execute_sql_script "$codedx_install_sql" || exit_with_error
+echo "Adding SWAMP database entries for Code Dx"
+"$BINDIR/../sbin/execute_sql_script" "$codedx_install_sql"
 
-echo ""
-echo "Code Dx should now be available for viewing assessment results."
+############################################################################
+
+if [ $encountered_error -eq 0 ]; then
+    echo "Finished installing Code Dx"
+else
+    echo "Error: Finished installing Code Dx, but with errors" 1>&2
+fi
+exit $encountered_error

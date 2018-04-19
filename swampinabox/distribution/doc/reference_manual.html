@@ -430,8 +430,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="header">
 <h1>SWAMP-in-a-Box Reference Manual</h1>
 <div class="details">
-<span id="revnumber">version 1.32,</span>
-<span id="revdate">2018-01-16 09:25:11 -0600</span>
+<span id="revnumber">version 1.33,</span>
+<span id="revdate">2018-04-18 16:07:48 -0500</span>
 </div>
 <div id="toc" class="toc">
 <div id="toctitle">Table of Contents</div>
@@ -457,7 +457,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#config-json-examples">2.5. Examples</a></li>
 </ul>
 </li>
-<li><a href="#_swamp_in_a_box_s_filesystem">3. SWAMP-in-a-Box&#8217;s Filesystem</a>
+<li><a href="#_swamp_in_a_box_s_file_system">3. SWAMP-in-a-Box&#8217;s File System</a>
 <ul class="sectlevel2">
 <li><a href="#configuration-files">3.1. Configuration Files</a></li>
 <li><a href="#long-term-storage">3.2. Long-term Storage Files</a></li>
@@ -488,6 +488,19 @@ You must have <code>root</code> access to modify this file.</p>
 This file should be readable only by the <code>apache</code> system user. It should
 <strong>never</strong> be world readable, because it contains usernames and passwords for
 accessing various resources.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Any values that include spaces must be enclosed in double-quotes. Any values
+that do <em>not</em> include spaces must <em>not</em> be enclosed in double-quotes.
 </td>
 </tr>
 </table>
@@ -550,9 +563,20 @@ packages. This should always be set to "/swamp/incoming/".</p>
 </dd>
 <dt class="hdlist1"><code>APP_KEY</code></dt>
 <dd>
-<p>An encryption key used by the Laravel framework. Allowed values are any 16
-or 32 character string. The SWAMP-in-a-Box installer sets this to a random
-32 character string.</p>
+<p>An encryption key used by the Laravel framework. Allowed values are any 32
+character string or a Base 64 encoded value. The SWAMP-in-a-Box installer
+sets this to a Base 64 encoded value. SWAMP-in-a-Box installations
+originally deployed using versions of SWAMP-in-a-Box prior to 1.33 will have
+had this set to a random 32 character string.</p>
+<div class="paragraph">
+<p>To generate a new Base 64 encoded value, run the following command as <code>root</code>
+(or using <code>sudo</code>):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>php /var/www/swamp-web-server/artisan key:generate</pre>
+</div>
+</div>
 </dd>
 <dt class="hdlist1"><code>APP_PASSWORD_ENCRYPTION_METHOD</code></dt>
 <dd>
@@ -573,6 +597,28 @@ when given a new or changed user password. This is not applicable when
 an integer greater than zero to allow creation of one or more Application
 Passwords. Set this to zero to disallow creation of Application Passwords.
 The SWAMP-in-a-Box installer sets this to 10.</p>
+</dd>
+<dt class="hdlist1"><code>APP_LOG</code></dt>
+<dd>
+<p>How Laravel log entries are stored. Set this to "daily" or "syslog".
+When set to "daily", Laravel writes log entries to a new file each day at
+<code>/var/www/swamp-web-server/storage/logs/</code>. When  set to "syslog",
+Laravel writes log entries to the OS syslog. The SWAMP-in-a-Box installer
+sets this to "daily".</p>
+</dd>
+<dt class="hdlist1"><code>APP_LOG_LEVEL</code></dt>
+<dd>
+<p>What type of notices are logged by Laravel. The SWAMP-in-a-Box installer
+sets this to "debug", which we recommend. Other allowed values are
+"emergency", "alert", "critical", "error", "warning", "notice", and "info".</p>
+</dd>
+<dt class="hdlist1"><code>APP_STATS</code></dt>
+<dd>
+<p>Whether a banner showing usage statistics is displayed on the the SWAMP home
+page. Set this to "true" or "false". The SWAMP-in-a-Box installer sets this
+to "false". Note that in order to show lines-of-code, metric analysis must
+be enabled, and by default, SWAMP-in-a-Box installations do not have metric
+analysis enabled.</p>
 </dd>
 </dl>
 </div>
@@ -1044,8 +1090,17 @@ applicable only when <code>[SITE]_ENABLED</code> is set to "true".</p>
 <dl>
 <dt class="hdlist1"><code>SESSION_DRIVER</code></dt>
 <dd>
-<p>The driver used to manage session data. The SWAMP-in-a-Box installer sets
-this to "cookie". This should not be changed.</p>
+<p>The driver used to manage session data. Set this to "file" or "cookie".
+When this is set to "file", data for each user session is stored in the
+SWAMP-in-a-Box file system. When it is set to "cookie", data for each
+user session is stored as a cookie on the client. The SWAMP-in-a-Box
+installer sets this to "file". SWAMP-in-a-Box installations originally
+deployed using versions of SWAMP-in-a-Box prior to 1.33 will have this
+set to "cookie".</p>
+<div class="paragraph">
+<p>When <code>SESSION_DRIVER</code> is set to "file", session data is stored in
+<code>/var/www/swamp-web-server/storage/framework/sessions/</code>.</p>
+</div>
 </dd>
 <dt class="hdlist1"><code>SESSION_LIFETIME</code></dt>
 <dd>
@@ -1060,20 +1115,20 @@ the time they are issued. The SWAMP-in-a-Box installer sets this to "2160"
 SWAMP-in-a-Box installer sets this to "false". Before changing this to
 "true", set <code>SESSION_LIFETIME</code> to "0".</p>
 </dd>
-<dt class="hdlist1"><code>SESSION_COOKIE_NAME</code></dt>
+<dt class="hdlist1"><code>SESSION_COOKIE</code></dt>
 <dd>
-<p>The name of the SWAMP session cookie. The SWAMP-in-a-Box installer sets this
-to "swamp_session".</p>
+<p>The name of the SWAMP cookie that references a user&#8217;s session data. The
+SWAMP-in-a-Box installer sets this to "swamp_session".</p>
 </dd>
-<dt class="hdlist1"><code>SESSION_COOKIE_DOMAIN</code></dt>
+<dt class="hdlist1"><code>SESSION_DOMAIN</code></dt>
 <dd>
 <p>The name of the domain for the session cookie. Set this to "null" to use the
 same domain name as <code>APP_URL</code>. The SWAMP-in-a-Box installer sets this to
 "null".</p>
 </dd>
-<dt class="hdlist1"><code>SESSION_COOKIE_SECURE</code></dt>
+<dt class="hdlist1"><code>SESSION_SECURE_COOKIE</code></dt>
 <dd>
-<p>Whether SWAMP session cookies are sent for encrypted connections only. The
+<p>Whether SWAMP session cookies are sent for secure connections only. The
 SWAMP-in-a-Box installer sets this to "true".</p>
 </dd>
 </dl>
@@ -1391,7 +1446,7 @@ omitted.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_swamp_in_a_box_s_filesystem">3. SWAMP-in-a-Box&#8217;s Filesystem</h2>
+<h2 id="_swamp_in_a_box_s_file_system">3. SWAMP-in-a-Box&#8217;s File System</h2>
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="configuration-files">3.1. Configuration Files</h3>
@@ -1546,8 +1601,8 @@ if they continue appear to be available in the SWAMP.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 1.32<br>
-Last updated 2018-01-16 09:25:11 CST
+Version 1.33<br>
+Last updated 2018-04-18 16:07:48 CDT
 </div>
 </div>
 </body>

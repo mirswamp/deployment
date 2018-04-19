@@ -15,13 +15,13 @@ PLATFORM_HOST="platform.swampinabox.org"
 PLATFORM_RELEASE_DIR="siab-latest-release"
 PLATFORM_BASE_URL="https://$PLATFORM_HOST/$PLATFORM_RELEASE_DIR"
 
-function exit_with_incomplete {
+function exit_with_incomplete() {
     echo ""
     echo "Downloads are not complete." 1>&2
     exit 1
 }
 
-function exit_with_error {
+function exit_with_error() {
     echo ""
     echo "Error encountered. Downloads are not complete." 1>&2
     exit 1

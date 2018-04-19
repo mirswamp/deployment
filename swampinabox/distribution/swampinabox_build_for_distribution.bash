@@ -10,31 +10,31 @@
 #
 
 encountered_error=0
-trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
 
-BINDIR="$(dirname "$0")"
-RELEASE_NUMBER="$1"
-BRANCH="$2"
-BUILD_NUMBER="$3"
+BINDIR=$(dirname "$0")
+RELEASE_NUMBER=$1
+BRANCH=$2
+BUILD_NUMBER=$3
 SKIP_RPMS=""
 SKIP_TARBALL=""
 
-for option in "$4" "$5"; do
+for option in "${@:4}" ; do
     if [[ "$option" =~ skip-rpm ]]; then
-        SKIP_RPMS="--skip-rpms"
+        SKIP_RPMS="yes"
     elif [[ "$option" =~ skip-tarball ]]; then
-        SKIP_TARBALL="--skip-tarball"
+        SKIP_TARBALL="yes"
     fi
 done
 
 WORKSPACE="$BINDIR/../../.."
-IFS='.' read RELEASE MAJOR MINOR <<< "$RELEASE_NUMBER"
+IFS='.' read -r RELEASE MAJOR MINOR <<< "$RELEASE_NUMBER"
 
 ############################################################################
 
 function show_usage_and_exit() {
-    echo "Usage: $0 <release number=release.major[.minor]> master|release|<name> <build number>" 1>&2
+    echo "Usage: $0 <release number> master|release|<name> <build number> [options]" 1>&2
     exit 1
 }
 
@@ -42,16 +42,12 @@ if [ "$(whoami)" = "root" ]; then
     echo "Error: Refusing to run as root" 1>&2
     show_usage_and_exit
 fi
-if [ -z "$RELEASE" -o -z "$MAJOR" ]; then
-    echo "Error: Release number: $RELEASE_NUMBER (expecting RELEASE.MAJOR[.MINOR])" 1>&2
+if [ -z "$RELEASE" ] || [ -z "$MAJOR" ]; then
+    echo "Error: Release number is required" 1>&2
     show_usage_and_exit
 fi
 if [ -z "$BUILD_NUMBER" ]; then
-    echo "Error: Build number: $BUILD_NUMBER (expecting an integer or 'now')" 1>&2
-    show_usage_and_exit
-fi
-if [ -z "$WORKSPACE" -o ! -d "$WORKSPACE/deployment" ]; then
-    echo "Error: Workspace: $WORKSPACE (expecting directory with source code)" 1>&2
+    echo "Error: Build number is required" 1>&2
     show_usage_and_exit
 fi
 
@@ -71,38 +67,33 @@ echo "BUILD_NUMBER:       $BUILD_NUMBER"
 ############################################################################
 
 if [[ "$0" =~ jenkins_build ]]; then
-    QUIET_FLAG=""
     RELEASE_ROOT="$WORKSPACE/export/swampinabox/distribution"
 elif [[ "$0" =~ swampinabox_build ]]; then
-    QUIET_FLAG="-quiet"
     RELEASE_ROOT="/export/swamponabox/distribution"
 fi
 
 if [ "$BUILD_NUMBER" = "now" ]; then
-    BUILD_NUMBER="$(date +"%Y%m%d%H%M%S").siab"
+    BUILD_NUMBER="$(date +"%Y%m%d%H%M%S").sib"
 fi
 
-if [ "$SKIP_RPMS" = "--skip-rpms" ]; then
-    random_rpm="$(find "$WORKSPACE/deployment/swamp/RPMS" -name 'swamp-web-server*.rpm')"
-    random_rpm="$(basename "$random_rpm")"
-    BUILD_NUMBER="$(echo "$random_rpm" | sed 's/^.*-\([[:digit:]]\+.*\)\.noarch\.rpm$/\1/')"
+if [ "$SKIP_RPMS" = "yes" ]; then
+    random_rpm=$(find "$WORKSPACE/deployment/swamp/RPMS" -name "swamp-web-server-*.rpm")
+    random_rpm=$(basename "$random_rpm")
+    BUILD_NUMBER=$(echo "$random_rpm" | sed 's/^.*-\([[:digit:]]\+.*\)\.noarch\.rpm$/\1/')
 fi
 
-# short version number
-SHORT_RELEASE_NUMBER="${RELEASE}.${MAJOR}"
-if [ -n "$MINOR" ]; then
-    SHORT_RELEASE_NUMBER="${RELEASE}.${MAJOR}.${MINOR}"
+# rpm release number
+RELEASE_NUMBER="${RELEASE}.${MAJOR}"
+if [ ! -z "$MINOR" ]; then
+    RELEASE_NUMBER="${RELEASE}.${MAJOR}.${MINOR}"
 fi
 
 # installer staging area and tarball
-BUILD_RESULT="$BINDIR/swampinabox-${SHORT_RELEASE_NUMBER}-installer"
+BUILD_RESULT="$BINDIR/swampinabox-${RELEASE_NUMBER}-installer"
 BUILD_RESULT_TARBALL="${BUILD_RESULT}.tar.gz"
 
-# rpm release number
-RELEASE_NUMBER="${SHORT_RELEASE_NUMBER}"
-
 # distribution release directory
-RELEASE_DIRECTORY="${RELEASE_ROOT}/swampinabox-${SHORT_RELEASE_NUMBER}-${BRANCH}"
+RELEASE_DIRECTORY="${RELEASE_ROOT}/swampinabox-${RELEASE_NUMBER}-${BRANCH}"
 
 echo ""
 echo "#########################################"
@@ -110,7 +101,7 @@ echo "##### Distribution Build Parameters #####"
 echo "#########################################"
 echo ""
 
-echo "WORKSPACE:          $WORKSPACE ($(cd "$(dirname "$WORKSPACE")" && pwd)/$(basename "$WORKSPACE"))"
+echo "WORKSPACE:          $WORKSPACE ($(cd "$WORKSPACE" ; pwd))"
 echo "BUILD_RESULT:       $BUILD_RESULT"
 echo "RELEASE_NUMBER:     $RELEASE_NUMBER"
 echo "BUILD_NUMBER:       $BUILD_NUMBER"
@@ -127,12 +118,16 @@ function build_rpms() {
     echo "#########################"
     echo ""
 
-    if [ "$SKIP_RPMS" = "--skip-rpms" ]; then
+    if [ "$SKIP_RPMS" = "yes" ]; then
         echo "Skipping."
         return 0
     fi
 
-    "$BINDIR/../singleserver/sbin/swampinabox_build_rpms.bash" "swampinabox" "$WORKSPACE" "$RELEASE_NUMBER" "$BUILD_NUMBER" "$QUIET_FLAG"
+    "$BINDIR/../singleserver/sbin/swampinabox_build_rpms.bash" \
+        "swampinabox" \
+        "$WORKSPACE" \
+        "$RELEASE_NUMBER" \
+        "$BUILD_NUMBER"
 }
 
 ############################################################################
@@ -158,23 +153,26 @@ function build_src_tar() {
     cp -r "$WORKSPACE/deployment/swamp/RPMS" "$BUILD_RESULT/."
 
     # copy install scripts
-    cp    "$BINDIR"/../singleserver/sbin/* "$BUILD_RESULT/sbin/."
+    cp -H "$BINDIR"/../singleserver/sbin/* "$BUILD_RESULT/sbin/."
     cp    "$BINDIR"/sbin/*                 "$BUILD_RESULT/sbin/."
     cp -d "$BINDIR"/bin/*                  "$BUILD_RESULT/bin/."
 
     # copy runtime files that we need before the RPMs are installed
-    cp    "$BINDIR/../runtime/bin/swamp_check_virtualization_support"  "$BUILD_RESULT/sbin/."
-    cp    "$BINDIR/../runtime/bin/swamp_get_potential_web_hosts"       "$BUILD_RESULT/sbin/."
-    cp    "$BINDIR/../runtime/sbin/swamp_manage_service"               "$BUILD_RESULT/sbin/."
+    cp    "$BINDIR"/../runtime/sbin/create_mysql_root      "$BUILD_RESULT/sbin/."
+    cp    "$BINDIR"/../runtime/sbin/create_mysql_root_cnf  "$BUILD_RESULT/sbin/."
 
     # copy other files
-    cp    "$BINDIR/../singleserver/bin/set_passwords.bash"  "$BUILD_RESULT/bin/."
-    cp -r "$BINDIR/../singleserver/config_templates"        "$BUILD_RESULT/."
-    cp -r "$BINDIR/sample_packages"                         "$BUILD_RESULT/."
-    cp -r "$BINDIR/repos"                                   "$BUILD_RESULT/."
+    cp    "$BINDIR/../singleserver/bin/set_passwords.bash" "$BUILD_RESULT/bin/."
+    cp -r "$BINDIR/../singleserver/config_templates"       "$BUILD_RESULT/."
+    cp -r "$BINDIR/sample_packages"                        "$BUILD_RESULT/."
+    cp -r "$BINDIR/repos"                                  "$BUILD_RESULT/."
+
+    # make sure executables are actually executable
+    chmod 0755 "$BUILD_RESULT"/bin/*
+    chmod 0755 "$BUILD_RESULT"/sbin/*
 
     # write version.txt
-    echo "$RELEASE_NUMBER $BUILD_NUMBER $SHORT_RELEASE_NUMBER" > "$BUILD_RESULT/bin/version.txt"
+    echo "$RELEASE_NUMBER $BUILD_NUMBER" > "$BUILD_RESULT/bin/version.txt"
 
     # remove extraneous files
     rm "$BUILD_RESULT/sbin/find_release_number.pl"
@@ -186,9 +184,9 @@ function build_src_tar() {
 
     set +x
 
-    if [ "$SKIP_TARBALL" = "--skip-tarball" ]; then
+    if [ "$SKIP_TARBALL" = "yes" ]; then
         echo ""
-        echo "Built: $BUILD_RESULT (directory)"
+        echo "Built directory: $BUILD_RESULT"
         return 0
     fi
 
@@ -204,13 +202,12 @@ function build_src_tar() {
     set +x
 
     echo ""
-    echo "Built: $BUILD_RESULT_TARBALL (tarball)"
+    echo "Built tarball: $BUILD_RESULT_TARBALL"
 }
 
 ############################################################################
 # RELEASE TAR FILES
 # -----------------
-# tar.gz files are copied/moved to $RELEASE_DIRECTORY
 function release_tar_files() {
     echo ""
     echo "###############################"
@@ -226,8 +223,8 @@ function release_tar_files() {
     mv "$BUILD_RESULT_TARBALL"                       "$RELEASE_DIRECTORY/."
     cp "$BINDIR"/doc/administrator_manual.{html,pdf} "$RELEASE_DIRECTORY/."
     cp "$BINDIR"/doc/reference_manual.{html,pdf}     "$RELEASE_DIRECTORY/."
-    cp "$BINDIR/util/extract-installer.bash"         "$RELEASE_DIRECTORY/."
-    sed -i "s/SED_VERSION/$SHORT_RELEASE_NUMBER/"    "$RELEASE_DIRECTORY/extract-installer.bash"
+    cp "$BINDIR"/util/extract-installer.bash         "$RELEASE_DIRECTORY/."
+    sed -i "s/SED_VERSION/$RELEASE_NUMBER/"          "$RELEASE_DIRECTORY/extract-installer.bash"
 
     set +x
 
@@ -239,28 +236,29 @@ function release_tar_files() {
 ############################################################################
 
 if ! build_rpms ; then
-    echo "Error: Failed to build RPMs. Run the build by hand to determine the cause." 1>&2
+    echo "" 1>&2
+    echo "Error: Failed to build RPMs" 1>&2
     exit 1
 fi
 
 build_src_tar
 
-if [ "$SKIP_TARBALL" = "--skip-tarball" ]; then
+if [ "$SKIP_TARBALL" = "yes" ]; then
     echo ""
     echo "Skipping release step: Didn't make tarball"
-elif [ -d "$RELEASE_ROOT" ]; then
-    release_tar_files
-else
+elif [ ! -d "$RELEASE_ROOT" ]; then
     echo ""
     echo "Skipping release step: No such directory: $RELEASE_ROOT"
+else
+    release_tar_files
 fi
 
 if [ $encountered_error -eq 0 ]; then
     echo ""
-    echo "Build process completed."
+    echo "Build process completed"
 else
-    echo ""
-    echo "FAILURE! Build process completed, but with errors."
+    echo "" 1>&2
+    echo "Error: Build process completed, but with errors" 1>&2
 fi
 
 exit $encountered_error

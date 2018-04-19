@@ -10,13 +10,17 @@ use warnings;
 use Log::Log4perl qw(:easy);
 use Data::Dumper;
 use lib '/opt/swamp/perl5';
-use SWAMP::vmu_Support qw(getSwampConfig systemcall);
+use SWAMP::vmu_Support qw(getSwampConfig systemcall isSwampInABox);
 
 Log::Log4perl->easy_init($INFO);
 
 my $config = getSwampConfig();
 my $HTCONDOR_COLLECTOR_HOST = $config->get('htcondor_collector_host');
-my ($output, $status) = systemcall("condor_advertise -pool $HTCONDOR_COLLECTOR_HOST INVALIDATE_ADS_GENERIC - <<'EOF'
+my $poolarg = '';
+if (! isSwampInABox($config)) {
+	$poolarg = qq(-pool $HTCONDOR_COLLECTOR_HOST);
+}
+my ($output, $status) = systemcall("condor_advertise $poolarg INVALIDATE_ADS_GENERIC - <<'EOF'
 MyType=\"Query\"
 TargetType=\"Generic\"
 Requirements = MyType == \"Generic\"

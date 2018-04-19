@@ -8,31 +8,6 @@
 # Control flow.
 #
 
-function abort_install() {
-    remove_db_password_files
-    echo "FAILURE! Aborting installation. Installation is not complete." 1>&2
-    exit 1
-}
-
-function exit_with_error() {
-    echo "Error encountered." 1>&2
-    exit 1
-}
-
-function confirm_continue() {
-    echo -n "Continue with the install? [N/y] "
-    if [ "$ASSUME_RESPONSE" == "yes" ]; then
-        echo "<assuming 'y'>"
-        return 0
-    fi
-    read answer
-    if [ "$answer" != "y" ]; then
-        echo "Stopping. Installation is not complete." 1>&2
-        return 1
-    fi
-    return 0
-}
-
 function remove_db_password_files() {
     for file in \
             /opt/swamp/sql/sql.cnf \
@@ -54,24 +29,19 @@ function remove_db_password_files() {
 
 function yum_erase() {
     echo "Erasing: $*"
-    yum -y erase $*
+    yum -y erase "$@"
 }
 
 function yum_install() {
     echo "Installing: $*"
-    yum -y install $*
+    yum -y install "$@"
 }
 
 function yum_confirm() {
     encountered_not_installed=0
-    installed_pkgs_list="$(yum list installed)"
-
-    for pkg in $*; do
-        echo -n "Checking for RPM $pkg ... "
-        if grep ^$pkg\\. 1>/dev/null 2>/dev/null <<< "$installed_pkgs_list" ; then
-            echo "installed"
-        else
-            echo "not installed"
+    for pkg in "$@" ; do
+        echo -n "Checking for $pkg ... "
+        if ! rpm -q --whatprovides "$pkg" ; then
             encountered_not_installed=1
         fi
     done
@@ -87,39 +57,11 @@ function get_rpm_version() {
     fi
 }
 
-function check_os_dist_upgrade() {
-    if yum_confirm centos-release 1>/dev/null 2>/dev/null ; then
-        echo "Running 'yum makecache' ..."
-        yum makecache
-
-        echo "Running 'yum check-update centos-release' ..."
-        yum check-update centos-release 1>/dev/null 2>/dev/null
-        ok=$?
-
-        if [ $ok -eq 100 ]; then
-            echo ""
-            echo "Warning: The 'centos-release' package is out of date."
-            echo "This probably means that a significant update is available."
-            echo ""
-            echo "Consider running 'yum update' first, before continuing with"
-            echo "the installation."
-            echo ""
-            confirm_continue || return 1
-        elif [ $ok -ne 0 ]; then
-            echo ""
-            echo "Error: Failed to run 'yum check-update centos-release'."
-            echo "Perhaps check that repositories are configured correctly."
-            return 1
-        fi
-    fi
-    return 0
-}
-
 function check_rpm_versions() {
     version="$1"
     rpms_with_wrong_version=()
 
-    for pkg in ${*:2} ; do
+    for pkg in "${@:2}" ; do
         if [ "$(get_rpm_version "$pkg")" != "$version" ]; then
             rpms_with_wrong_version+=($pkg)
         fi

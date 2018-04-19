@@ -56,3 +56,15 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,swa-daemon,swa-daemon)
 /opt/perl5
+
+#
+# Arguments to pre are {1=>new, 2=>upgrade}
+#
+%pre
+if [ "$1" = "1" ]; then
+    echo "Running RPM pre script for %{name} (mode: install)"
+elif [ "$1" = "2" ]; then
+    echo "Running RPM pre script for %{name} (mode: upgrade)"
+fi
+echo "Finished running pre script"
+echo "Installing the files for %{name} (this will take some time)"

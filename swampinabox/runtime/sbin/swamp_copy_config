@@ -12,7 +12,7 @@
 #
 # For 'perlcritic'.
 #
-## no critic (MagicNumbers, RequireDotMatchAnything, RequireLineBoundaryMatching, RequireExtendedFormatting)
+## no critic (RequireDotMatchAnything, RequireLineBoundaryMatching, RequireExtendedFormatting)
 
 use utf8;
 use strict;
@@ -21,7 +21,6 @@ use warnings;
 use English qw( -no_match_vars );
 use Getopt::Long;
 use POSIX qw(strftime);
-use Socket;
 
 use File::Slurp qw(read_file write_file);
 
@@ -75,13 +74,29 @@ sub backup_file {
 }
 
 #
+# Mangle a '.env' value for Laravel 5.5.
+#
+sub quote_for_laravel_55 {
+    my ($val) = @_;
+    if (   $val
+        && ($val =~ /\s/)
+        && !($val =~ /^["] .* ["]$/x))    # best effort at not double quoting a value
+    {
+        $val =~ s/\\/\\\\/g;
+        $val =~ s/"/\\"/g;
+        $val = qq("$val");
+    }
+    return $val;
+}
+
+#
 # Get the value for a key in the given string of "key = value" pairs.
 #
 sub get_key_val {
     my ($config, $key) = @_;
     my $escaped_key = quotemeta $key;
 
-    my @vals = ($config =~ /^\s*$escaped_key\s*=(.*)$/m);
+    my @vals = ($config =~ /^[ \t]*$escaped_key[ \t]*=(.*)$/m);
     return $vals[0];
 }
 
@@ -89,15 +104,21 @@ sub get_key_val {
 # Add/update a key-value pair in the given string of "key = value" pairs.
 #
 sub merge_key_val {
-    my ($config, $key, $val, $no_space) = @_;
+    my ($config, $key, $val, $options) = @_;
     my $escaped_key       = quotemeta $key;
-    my $contains_key      = ($config =~ /^\s*$escaped_key\s*=/m);
+    my $contains_key      = ($config =~ /^[ \t]*$escaped_key[ \t]*=/m);
     my $ends_with_newline = ($config =~ /\n$/);
-    my $space             = ($no_space ? q() : q( ));
-    $val                  = ($no_space ? $val : trim($val));
+    my $space             = ($options->{'no-space'} ? q() : q( ));
+
+    if ($options->{'quote-for-laravel-55'}) {
+        $val = quote_for_laravel_55($val);
+    }
+    if (!$options->{'no-space'}) {
+        $val = trim($val);
+    }
 
     if ($contains_key) {
-        $config =~ s/^\s*$escaped_key\s*=.*$/$key$space=$space$val/gm;
+        $config =~ s/^[ \t]*$escaped_key[ \t]*=.*$/$key$space=$space$val/gm;
     }
     else {
         $config .= ($ends_with_newline ? q() : qq(\n)) . "$key$space=$space$val\n";
@@ -144,6 +165,9 @@ Other options:
     --skip-disk             Don't write the updated destination to disk
     --stdout                Display the updated destination on standard out
     --help, -?              Display this message
+
+Specialized options:
+    --quote-for-laravel-55  Quote values for Laravel 5.5
 EOF
 
     print $usage_message;
@@ -159,8 +183,9 @@ sub get_options {
     my $ok = Getopt::Long::GetOptions(\%options,
         'help|?',
         'source|input|i=s', 'destination|output|o=s',
-        'include=s', 'exclude=s', 'map=s',
+        'exclude=s', 'include=s', 'map=s',
         'no-space', 'skip-disk', 'stdout',
+        'quote-for-laravel-55',
     );
 
     if (!$ok || $options{'help'}) {
@@ -172,20 +197,34 @@ sub get_options {
     my $destination_file = $options{'destination'};
     my $map_file         = $options{'map'};
 
-    if (!$options{'source'}) {
+    if (!$source_file) {
         push @errors, 'Required argument missing: source';
     }
-    if (!$options{'destination'}) {
+    elsif (!-f $source_file) {
+        push @errors, "Source/input file does not exist: $source_file";
+    }
+    elsif (!-r $source_file) {
+        push @errors, "Source/input file is not readable: $source_file";
+    }
+
+    if (!$destination_file) {
         push @errors, 'Required argument missing: destination';
     }
-    if ($source_file && !-r $source_file) {
-        push @errors, "Source/input file does not exist (or is not readable): $source_file";
+    elsif (!-f $destination_file) {
+        push @errors, "Destination/output file does not exist: $destination_file";
     }
-    if ($destination_file && !-r $destination_file) {
-        push @errors, "Destination/output file does not exist (or is not readable): $destination_file";
+    elsif (!-r $destination_file) {
+        push @errors, "Destination/output file is not readable: $destination_file";
     }
-    if ($map_file && !-r $map_file) {
-        push @errors, "Map file does not exist (or is not readable): $map_file";
+    elsif (!-w $destination_file) {
+        push @errors, "Destination/output file is not writeable: $destination_file";
+    }
+
+    if ($map_file && !-f $map_file) {
+        push @errors, "Map file does not exist: $map_file";
+    }
+    elsif ($map_file && !-r $map_file) {
+        push @errors, "Map file is not readable: $map_file";
     }
 
     for my $msg (@errors) {
@@ -239,9 +278,9 @@ sub copy_config {
             next;
         }
 
-        my $val = get_key_val($map, $key);
+        my $val = trim(get_key_val($map, $key));
         if ($val) {    # Not allowed to map a source key to nothing
-            $key_map{$key} = trim($val);
+            $key_map{$key} = $val;
         }
     }
 
@@ -267,7 +306,7 @@ sub copy_config {
 
         my $val = get_key_val($source, $key);
         if (defined $val) {
-            $destination = merge_key_val($destination, $key, $val, $options->{'no-space'});
+            $destination = merge_key_val($destination, $key, $val, $options);
         }
     }
 
@@ -293,7 +332,7 @@ sub copy_config {
             my $val = get_key_val($source, $key);
             my $dest_key = $key_map{$key} || $key;
             if (defined $val) {
-                $destination = merge_key_val($destination, $dest_key, $val, $options->{'no-space'});
+                $destination = merge_key_val($destination, $dest_key, $val, $options);
             }
         }
     }
@@ -301,14 +340,14 @@ sub copy_config {
     #
     # Write the destination out, as needed.
     #
+    if ($options->{'stdout'}) {
+        print $destination;
+    }
     if ($destination ne $original_destination) {
         if (!$options->{'skip-disk'}) {
             backup_file($destination_file);
             write_file($destination_file, $destination);
         }
-    }
-    if ($options->{'stdout'}) {
-        print $destination;
     }
     return;
 }

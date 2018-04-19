@@ -10,14 +10,13 @@
 #
 
 encountered_error=0
-trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
 
-BACKEND_TARGET="$1"
-WORKSPACE="$2"
-RELEASE_NUMBER="$3"
-BUILD_NUMBER="$4"
-BUILD_QUIETLY="$5"
+BACKEND_TARGET=$1
+WORKSPACE=$2
+RELEASE_NUMBER=$3
+BUILD_NUMBER=$4
 
 echo "Target:             $BACKEND_TARGET"
 echo "Workspace:          $WORKSPACE"
@@ -41,19 +40,17 @@ export RELEASE_NUMBER
 export BUILD_NUMBER
 export PATH="/opt/perl5/perls/perl-5.18.1/bin:$PATH"
 
-startupdir="$(pwd)"
+startupdir=$(pwd)
+
+############################################################################
 
 function do_make() {
-    if [ "$BUILD_QUIETLY" = "-quiet" ]; then
-        make $* 1>/dev/null 2>/dev/null || exit_with_error
-    else
-        make $* || exit_with_error
-    fi
+    make "$@" || exit_with_error
 }
 
 function exit_with_error() {
-    echo ""
-    echo "Error encountered."
+    echo "" 1>&2
+    echo "Error encountered." 1>&2
     exit 1
 }
 

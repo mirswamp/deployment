@@ -10,7 +10,7 @@
 #
 
 encountered_error=0
-trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
 
 ############################################################################
@@ -24,15 +24,6 @@ function make_dir() {
     chmod  "$mode"   "$target"
     chown  "$owner"  "$target"
 }
-
-mkdir -p /everglades
-chown root:root /everglades
-chmod 755 /everglades
-if ! grep everglades /etc/fstab 1>/dev/null 2>/dev/null ; then
-	echo 'swa-gfs-dt-01:/ev0	/everglades	 glusterfs	defaults,_netdev,ro	0 0' >> /etc/fstab
-fi
-mount -a
-mount -va -t glusterfs
 
 make_dir  0755  root:root      /swamp
 make_dir  0775  apache:apache  /swamp/incoming

@@ -10,12 +10,12 @@
 # Assumes the standard SWAMP developer repository checkouts.
 #
 
-BINDIR="$(dirname "$0")"
+BINDIR=$(dirname "$0")
 universal_skips="-name .git -prune"
-copyright_check="$universal_skips , -type f -exec $(pwd)/$BINDIR/verify-copyright-notice.bash {} ;"
+copyright_check="-type f -exec $(pwd)/$BINDIR/verify-copyright-notice.bash {} ;"
 
 cd ~/swamp
 
-find db         $copyright_check
-find services   $copyright_check
-find deployment $copyright_check
+find db         $universal_skips , $copyright_check
+find services   $universal_skips , $copyright_check
+find deployment $universal_skips , $copyright_check

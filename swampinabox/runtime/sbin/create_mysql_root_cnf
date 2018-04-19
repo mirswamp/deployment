@@ -10,46 +10,54 @@
 # for logging into the database as the given user ('root' by default).
 #
 
-dest_file="$1"
-src_file="$2"
-db_user="$3"
+dest_file=$1
 
+allow_overwrite=""
+db_user=""
+src_file=""
+
+for option in "${@:2}" ; do
+    case "$option" in
+        --allow-overwrite) allow_overwrite="yes" ;;
+        --password-file=*) src_file=${option#--password-file=} ;;
+        --user=*)          db_user=${option#--user=} ;;
+    esac
+done
+
+if [ "$(whoami)" != "root" ]; then
+    echo "Error: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
+    exit 1
+fi
 if [ -z "$dest_file" ]; then
-    echo "Usage: $0 <destination file> [password file] [database user]" 1>&2
+    echo "Usage: $0 <destination file> [options]" 1>&2
     exit 1
 fi
-
-if [ -e "$dest_file" ]; then
-    echo "Error: $0: Already exists: $dest_file" 1>&2
+if [ -e "$dest_file" ] && [ "$allow_overwrite" != "yes" ]; then
+    echo "Error: Already exists: $dest_file" 1>&2
     exit 1
 fi
-
-if [ ! -z "$src_file" -a ! -r "$src_file" ]; then
-    echo "Error: $0: Unable to read password file: $src_file" 1>&2
+if [ ! -z "$src_file" ] && [ ! -r "$src_file" ]; then
+    echo "Error: Unable to read password file: $src_file" 1>&2
     exit 1
 fi
 
 #
 # For the password file, try a couple of defaults.
 #
-
 if [ -z "$src_file" ]; then
     src_file="/etc/.mysql_root"
 fi
-
 if [ ! -r "$src_file" ]; then
     src_file="/etc/.mysql"
 fi
-
 if [ ! -r "$src_file" ]; then
-    echo "Error: $0: Unable to read password file" 1>&2
+    echo "Error: Unable to read default password files" 1>&2
     exit 1
 fi
 
 #
 # For the database user, default to 'root'.
 #
-
 if [ -z "$db_user" ]; then
     db_user="root"
 fi
@@ -65,11 +73,11 @@ db_user=${db_user//\\/\\\\}
 db_password=$(openssl enc -d -aes-256-cbc -in "$src_file" -pass pass:swamp)
 db_password=${db_password//\\/\\\\}
 
-umask 077
+umask 0077
 touch "$dest_file"
-chmod 600 "$dest_file"
+chmod 0600 "$dest_file"
 
 echo "[client]" > "$dest_file"
-echo "password='$db_password'" >> "$dest_file"
 echo "user='$db_user'" >> "$dest_file"
-chmod 400 "$dest_file"
+echo "password='$db_password'" >> "$dest_file"
+chmod 0400 "$dest_file"

@@ -10,41 +10,69 @@
 #
 
 encountered_error=0
-trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
+
+function show_usage_and_exit() {
+    echo "Usage: $0 --hostname=<new hostname>" 1>&2
+    exit 1
+}
+
+dot_env="/var/www/swamp-web-server/.env"
+swamp_conf="/opt/swamp/etc/swamp.conf"
 
 ############################################################################
 
-NEW_HOSTNAME="$1"
+new_hostname=""
 
-if [ -z "$NEW_HOSTNAME" ]; then
-    echo "Usage: $0 <new hostname>" 1>&2
+for option in "$@" ; do
+    case "$option" in
+        --hostname=*) new_hostname=${option#--hostname=} ;;
+        --help)
+            show_usage_and_exit
+            ;;
+        *)
+            echo "Error: Unrecognized option: $option" 1>&2
+            echo "" 1>&2
+            show_usage_and_exit
+            ;;
+    esac
+done
+
+if [ -z "$new_hostname" ]; then
+    show_usage_and_exit
+fi
+if ! perl -e 'use Socket; print inet_ntoa(inet_aton($ARGV[0]))' "$new_hostname" 1>/dev/null 2>/dev/null ; then
+    echo "Error: Unable to determine an IP address for: $new_hostname" 1>&2
     exit 1
 fi
-
-if ! perl -e 'use Socket; print inet_ntoa(inet_aton($ARGV[0]))' "$NEW_HOSTNAME" 1>/dev/null 2>/dev/null ; then
-    echo "Error: Unable to determine an IP address for: $NEW_HOSTNAME" 1>&2
+if [ ! -f "$dot_env" ]; then
+    echo "Error: No such file: $dot_env" 1>&2
     exit 1
 fi
-
+if [ ! -f "$swamp_conf" ]; then
+    echo "Error: No such file: $swamp_conf" 1>&2
+    exit 1
+fi
 if [ "$(whoami)" != "root" ]; then
-    echo "Error: This utility must be run as root. Perhaps use 'sudo'." 1>&2
+    echo "Error: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
     exit 1
 fi
 
-#
-# Simple function for abstracting out the invocation of 'sed'.
-#
+############################################################################
+
 function update_config() {
     key="$1"
     val="$2"
     target="$3"
     nospace="$4"
 
-    val=${val//\//\\\/}
+    # Escape special characters for sed's 's//'
+    val=${val//\\/\\\\}  # escape back slash
+    val=${val//\//\\\/}  # escape forward slash
+    val=${val//&/\\&}    # escape ampersands
 
-    if [ -r "$target" ]; then
-        echo "Updating: $target: $key"
+    if [ -f "$target" ]; then
         if [ "$nospace" = "-nospace" ]; then
             sed -i "s/^\s*$key\s*=.*$/$key=$val/" "$target"
         else
@@ -53,20 +81,14 @@ function update_config() {
     fi
 }
 
-#
-# Update swamp.conf (backend)
-#
-target="/opt/swamp/etc/swamp.conf"
+echo "Setting database host to $new_hostname"
 
-update_config "dbPerlDsnHost" "$NEW_HOSTNAME" "$target"
-
-#
-# Update .env (web server)
-#
-target="/var/www/swamp-web-server/.env"
-
-for key in ASSESSMENT_DB_HOST PACKAGE_DB_HOST PLATFORM_DB_HOST PROJECT_DB_HOST TOOL_DB_HOST VIEWER_DB_HOST; do
-    update_config "$key" "$NEW_HOSTNAME" "$target" -nospace
-done
+update_config dbPerlDsnHost      "$new_hostname" "$swamp_conf"
+update_config ASSESSMENT_DB_HOST "$new_hostname" "$dot_env" -nospace
+update_config PACKAGE_DB_HOST    "$new_hostname" "$dot_env" -nospace
+update_config PLATFORM_DB_HOST   "$new_hostname" "$dot_env" -nospace
+update_config PROJECT_DB_HOST    "$new_hostname" "$dot_env" -nospace
+update_config TOOL_DB_HOST       "$new_hostname" "$dot_env" -nospace
+update_config VIEWER_DB_HOST     "$new_hostname" "$dot_env" -nospace
 
 exit $encountered_error

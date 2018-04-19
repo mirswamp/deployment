@@ -12,38 +12,41 @@ Hardware Requirements
 
 .Minimum:
 
+  * Cores:  4
   * Memory: 16G
   * Disk:   256G
-  * Cores:  4
   * Support for https://www.linux-kvm.org/page/Main_Page[KVM] virtualization
 
 .Recommended:
 
+  * Cores:  8
   * Memory: 64G
   * Disk:   1T
-  * Cores:  8
   * Support for https://www.linux-kvm.org/page/Main_Page[KVM] virtualization
 
-SWAMP-in-a-Box uses virtual machines managed by an HTCondor pool to perform
-assessments of packages and to run the optional Code Dx results viewer from
-Code Dx, Inc. Each virtual machine is provisioned with 6G of RAM and
-2 cores, and HTCondor will do its best not to over-allocate the host's
-resources. Thus, the host's available memory and cores determines the number
-of simultaneous assessments that may be performed. The minimum requirements
-are intended to allow the host to run two virtual machines simultaneously
-while leaving resources available to run the web server and database that
-together provide the SWAMP web application to users.
+The hardware requirements for SWAMP-in-a-Box are driven primarily by the
+number of simultaneous assessments and instances of the
+<<add-on-viewers,optional Code Dx results viewer>> you wish to be able to
+run at any given time. Each assessment and viewer instance is run in
+a virtual machine that requires:
 
-If you are installing SWAMP-in-a-Box on physical hardware, modern x86-family
-processors provide support for KVM via Intel's VT-x or AMD's AMD-V
-extensions. On some systems, it might be necessary to enable Intel Virtual
-Technology extensions in the BIOS.
+* 2 cores
+* 6G of memory.
+
+The minimum requirements allow the host to run two virtual machines
+simultaneously while leaving resources available to run the web server and
+database that together provide the SWAMP web application to users.
+
+Because SWAMP-in-a-Box uses virtual machines to run assessments, the host
+must support https://www.linux-kvm.org/page/Main_Page[KVM] virtualization.
+Modern x86-family processors provide support for KVM via Intel's VT-x or
+AMD's AMD-V extensions. On some systems, it might be necessary to enable
+Intel Virtual Technology extensions in the BIOS.
 
 If you are installing SWAMP-in-a-Box in a virtual machine, the hypervisor
 must support and be configured for nested virtualization. For example, when
-using a VMware product as the hypervisor for the SWAMP-in-a-Box virtual
-machine, it might be necessary to enable a setting such as "Expose
-hardware-assisted virtualization to the guest operating system" or
+using a VMware product as the hypervisor, enable settings such as "Expose
+hardware-assisted virtualization to the guest operating system" and
 "Virtualize Intel VT-x/EPT or AMD-V/RVI."
 
 
@@ -61,18 +64,6 @@ As much space as possible should be allocated to the `/` partition without
 deleting or shrinking required system partitions, e.g., `/boot` and `swap`.
 For example, if there is a separate partition for `/home`, delete it, and
 allocate the space to the `/` partition.
-
-
-Disable SELinux
-~~~~~~~~~~~~~~~
-
-SWAMP-in-a-Box will not install or function correctly when SELinux is in
-`enforcing` mode, in part because the various software packages that
-SWAMP-in-a-Box relies on do not all support SELinux.
-
-To disable SELinux, edit the file `/etc/selinux/config` on the host by
-changing the line `SELINUX=enforcing` to `SELINUX=disabled`. (You will need
-`root` access to edit this file.) Then reboot the host.
 
 
 Create a User Account with Full `sudo` Privileges
@@ -115,32 +106,55 @@ Add below it
 <username> ALL=(ALL) ALL
 ----
 
-Whenever a task requires `root` access to the SWAMP-in-a-Box host, it can be
-run while logged in as the user created above by prefixing the relevant
+Whenever a task requires `root` access to the SWAMP-in-a-Box host, it can
+be run while logged in as the user created above by prefixing the relevant
 commands with `sudo`. For example, to use the `vi` text editor to edit
-`/opt/swamp/etc/swamp.conf` as `root`:
+`/opt/swamp/etc/swamp.conf` as `root`, run the following command:
 
 ----
 sudo vi /opt/swamp/etc/swamp.conf
 ----
 
 
+Disable SELinux
+~~~~~~~~~~~~~~~
+
+SWAMP-in-a-Box will not install or function correctly when SELinux is
+in `enforcing` mode, in part because the various software packages that
+SWAMP-in-a-Box relies on do not all support SELinux.
+
+To disable SELinux, as `root` (or using `sudo`), edit `/etc/selinux/config`
+by changing the line `SELINUX=enforcing` to `SELINUX=disabled`. Then reboot
+the host.
+
+
+[[configure-firewalls]]
 Configure Firewalls
 ~~~~~~~~~~~~~~~~~~~
 
 With regards to network traffic, the SWAMP-in-a-Box host is expected to:
 
-  * Respond to incoming HTTPS (port 443) network traffic, because it is
-    required to access the SWAMP web application and for the web application
-    to function correctly.
+* Respond to incoming HTTPS (port 443) network traffic, because it is
+required to access the SWAMP web application and for the web application to
+function correctly.
 
-  * Potentially generate outgoing traffic while performing an assessment of
-    a package, typically using HTTP, HTTPS, FTP, FTPS, SSH, and rsync.
-    Traffic can include updating of the platform's currently installed set
-    of packages (<<configure-internetless,this can be disabled>>, if
-    desired) and downloading of user-specified dependencies for the package
-    being assessed. The package's build system might also require access to
-    the internet.
+* Potentially generate outgoing traffic while performing an assessment of
+a package, typically using HTTP, HTTPS, FTP, FTPS, SSH, and rsync. Traffic
+can include:
+
+** Updating of the assessment platform's currently installed set of packages
+
+** Downloading of user-specified dependencies for the package being assessed
+
+** Contacting license servers
+
+** Other traffic generated by the package's build system.
+
++
+Each assessment is run in a virtual machine that is managed by `libvirtd`.
+By default, SWAMP-in-a-Box configures `libvirtd` to assign each virtual
+machine an IP address in the range 192.168.123.2 through 192.168.123.254,
+and to use network address translation (NAT) to contact external hosts.
 
 Any firewalls protecting the SWAMP-in-a-Box host must be configured to allow
 the above network traffic. The SWAMP-in-a-Box installer will not modify the
@@ -199,10 +213,9 @@ systemctl restart libvirtd
 Other Considerations
 ~~~~~~~~~~~~~~~~~~~~
 
-The SWAMP-in-a-Box install/upgrade process and supporting utilities
-configure only those aspects of the host that are directly involved in
-ensuring that the SWAMP functions correctly. Other aspects are the
-responsibility of the host's system administrator. For example, the
-administrator might consider looking at the Applied Crypto Hardening guide
-at https://bettercrypto.org for suggestions on how to configure the SSH
-server and other cryptographic tools on the host.
+The <<installing-sib,SWAMP-in-a-Box install and upgrade process>> configures
+only those aspects of the host that are directly involved in ensuring that
+the SWAMP functions correctly. Other aspects are the responsibility of the
+host's system administrator. For example, consider looking at the Applied
+Crypto Hardening guide at https://bettercrypto.org for suggestions on how to
+configure the SSH server and other cryptographic tools on the host.

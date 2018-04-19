@@ -6,47 +6,75 @@
 # Copyright 2012-2018 Software Assurance Marketplace
 
 #
-# Set the hostname of the HTCondor installation in all relevant
-# configuration locations. There's an implicit assumption here that the
-# entire installation is running on one host.
+# Set the hostname of the HTCondor collector in all relevant configuration
+# locations. This script assumes that the pool is running on a single host.
 #
 
 encountered_error=0
-trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
+
+function show_usage_and_exit() {
+    echo "Usage: $0 --hostname=<new hostname>" 1>&2
+    exit 1
+}
+
+BINDIR=$(dirname "$0")
+dot_env="/var/www/swamp-web-server/.env"
+swamp_conf="/opt/swamp/etc/swamp.conf"
 
 ############################################################################
 
-NEW_HOSTNAME="$1"
+new_hostname=""
 
-if [ -z "$NEW_HOSTNAME" ]; then
-    echo "Usage: $0 <new hostname>" 1>&2
+for option in "$@" ; do
+    case "$option" in
+        --hostname=*) new_hostname=${option#--hostname=} ;;
+        --help)
+            show_usage_and_exit
+            ;;
+        *)
+            echo "Error: Unrecognized option: $option" 1>&2
+            echo "" 1>&2
+            show_usage_and_exit
+            ;;
+    esac
+done
+
+if [ -z "$new_hostname" ]; then
+    show_usage_and_exit
+fi
+if ! perl -e 'use Socket; print inet_ntoa(inet_aton($ARGV[0]))' "$new_hostname" 1>/dev/null 2>/dev/null ; then
+    echo "Error: Unable to determine an IP address for: $new_hostname" 1>&2
     exit 1
 fi
-
-if ! IP_ADDRESS=$(perl -e 'use Socket; print inet_ntoa(inet_aton($ARGV[0]))' "$NEW_HOSTNAME" 2>/dev/null) ; then
-    echo "Error: Unable to determine an IP address for: $NEW_HOSTNAME" 1>&2
+if [ ! -f "$dot_env" ]; then
+    echo "Error: No such file: $dot_env" 1>&2
     exit 1
 fi
-
+if [ ! -f "$swamp_conf" ]; then
+    echo "Error: No such file: $swamp_conf" 1>&2
+    exit 1
+fi
 if [ "$(whoami)" != "root" ]; then
     echo "Error: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
     exit 1
 fi
 
-#
-# Simple function for abstracting out the invocation of 'sed'.
-#
+############################################################################
+
 function update_config() {
     key="$1"
     val="$2"
     target="$3"
     nospace="$4"
 
-    val=${val//\//\\\/}
+    # Escape special characters for sed's 's//'
+    val=${val//\\/\\\\}  # escape back slash
+    val=${val//\//\\\/}  # escape forward slash
+    val=${val//&/\\&}    # escape ampersands
 
-    if [ -r "$target" ]; then
-        echo "Updating: $target: $key"
+    if [ -f "$target" ]; then
         if [ "$nospace" = "-nospace" ]; then
             sed -i "s/^\s*$key\s*=.*$/$key=$val/" "$target"
         else
@@ -55,34 +83,15 @@ function update_config() {
     fi
 }
 
-#
-# Update swamp.conf (backend)
-#
-target="/opt/swamp/etc/swamp.conf"
+echo "Setting HTCondor host to $new_hostname"
 
-update_config "htcondor_collector_host" "$NEW_HOSTNAME" "$target"
+update_config "htcondor_collector_host" "$new_hostname" "$swamp_conf"
+update_config "HTCONDOR_COLLECTOR_HOST" "$new_hostname" "$dot_env" -nospace
 
-#
-# Update .env (web server)
-#
-target="/var/www/swamp-web-server/.env"
-
-update_config "HTCONDOR_COLLECTOR_HOST" "$NEW_HOSTNAME" "$target" -nospace
-
-#
-# Update /etc/condor/config.d (HTCondor itself)
-#
-update_config "NETWORK_INTERFACE" "$IP_ADDRESS"   "/etc/condor/config.d/swampinabox_10_network.conf"
-update_config "NETWORK_HOSTNAME"  "$NEW_HOSTNAME" "/etc/condor/config.d/swampinabox_10_network.conf"
-update_config "CONDOR_HOST"       "$NEW_HOSTNAME" "/etc/condor/config.d/swampinabox_20_main.conf"
-update_config "UID_DOMAIN"        "$NEW_HOSTNAME" "/etc/condor/config.d/swampinabox_30_jobcontrol.conf"
-update_config "ALLOW_WRITE"       "$NEW_HOSTNAME" "/etc/condor/config.d/swampinabox_30_jobcontrol.conf"
-
-htcondor_service_status=$(/opt/swamp/sbin/swamp_manage_service condor status)
-
+htcondor_service_status=$("$BINDIR/../sbin/swamp_manage_service" condor status)
 if [ "$htcondor_service_status" = "running" ]; then
-    echo "Restarting service: condor"
-    /opt/swamp/sbin/swamp_manage_service condor restart
+    echo "Restarting HTCondor daemons"
+    condor_restart
 fi
 
 exit $encountered_error

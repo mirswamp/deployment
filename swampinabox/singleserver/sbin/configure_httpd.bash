@@ -10,40 +10,47 @@
 #
 
 encountered_error=0
-trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
 
 ############################################################################
 
-BINDIR="$(dirname "$0")"
+BINDIR=$(dirname "$0")
 
-httpd_ver="$(httpd -v | grep -i 'Server version' | head -n 1 | awk '{ print substr($0, match($0, /[[:digit:]]+.[[:digit:]]+/), RLENGTH); }')"
-httpd_conf_target="/etc/httpd/conf/httpd.conf"
-httpd_conf_template="$BINDIR/../config_templates/httpd-${httpd_ver}.conf"
-ssl_conf_target="/etc/httpd/conf.d/ssl.conf"
-php_ini_target="/etc/php.ini"
+httpd_version="$(httpd -v | grep -i 'Server version' | head -n 1 | awk '{ print substr($0, match($0, /[[:digit:]]+.[[:digit:]]+/), RLENGTH); }')"
+httpd_conf_template="$BINDIR/../config_templates/httpd-${httpd_version}.conf"
+
+httpd_conf="/etc/httpd/conf/httpd.conf"
+php_ini="/etc/php.ini"
+ssl_conf="/etc/httpd/conf.d/ssl.conf"
 
 ############################################################################
 
-echo "Detected 'httpd' version: $httpd_ver"
+echo "Found httpd version $httpd_version"
 
-if [ -r "$httpd_conf_template" ]; then
-    echo "Patching: $httpd_conf_target (from: $httpd_conf_template)"
-    diff -wu "$httpd_conf_target" "$httpd_conf_template" | patch "$httpd_conf_target"
+if [ -f "$httpd_conf_template" ]; then
+    echo "Patching $httpd_conf"
+    diff -wu "$httpd_conf" "$httpd_conf_template" | patch "$httpd_conf"
 else
-    echo "Error: $0: No such file (or file is not readable): $httpd_conf_template" 1>&2
+    echo "" 1>&2
+    echo "Error: No such file: $httpd_conf_template" 1>&2
     encountered_error=1
 fi
 
-############################################################################
+echo ""
+"$BINDIR/swampinabox_patch_ssl_conf.pl" "$ssl_conf"
 
-"$BINDIR/swampinabox_patch_ssl_conf.pl" "$ssl_conf_target"
+echo ""
+echo "Patching $php_ini"
 
-############################################################################
-
-echo "Patching: $php_ini_target"
-if ! "$BINDIR/swampinabox_patch_php_ini.pl" "$php_ini_target" ; then
-    echo "Warning: Failed to patch: $php_ini_target" 1>&2
+if ! /opt/swamp/sbin/swamp_patch_config -i "$php_ini" \
+            --key post_max_size \
+            --val 800M \
+            --key upload_max_filesize \
+            --val 800M
+then
+    echo "" 1>&2
+    echo "Warning: Failed to patch: $php_ini" 1>&2
     echo "Warning: Uploading large packages to the SWAMP might fail" 1>&2
     encountered_error=1
 fi

@@ -1,10 +1,11 @@
 android-lint-0.1.4-2.tar.gz
 android-lint-0.1.5.tar.gz
-coverity-2017.07.tar
+coverity-2017.07-2.tar
 dependency-check-2.1.1-2.tar.gz
-gt-csonar-4.4p0.tar
+gt-csonar-4.4p0-2.tar
 ps-ctest-9.6.1.91-2.tar
-ps-ctest-10.3.2-2.tar
+ps-ctest-10.3.3-2.tar
 ps-jtest-9.6.0-12.tar
-ps-jtest-10.3.2-12.tar
+ps-jtest-10.3.3-12.tar
 revealdroid-2015.11.05-1.tar
+sonatype-ahc-2.3.0.tar.gz

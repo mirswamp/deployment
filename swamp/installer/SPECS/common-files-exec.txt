@@ -12,6 +12,6 @@
 %dir /usr/local/empty
 %dir /usr/project
 
-/etc/profile.d/swamp.sh
-
 /opt/swamp
+
+/etc/profile.d/swamp.sh

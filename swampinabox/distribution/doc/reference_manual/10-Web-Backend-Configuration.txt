@@ -11,6 +11,10 @@ This file should be readable only by the `apache` system user. It should
 *never* be world readable, because it contains usernames and passwords for
 accessing various resources.
 
+[NOTE]
+Any values that include spaces must be enclosed in double-quotes. Any values
+that do _not_ include spaces must _not_ be enclosed in double-quotes.
+
 The remainder of this section describes the parameters. Some descriptions
 refer to https://laravel.com/[Laravel], which is the framework that the
 backend is built upon.
@@ -69,9 +73,20 @@ packages. This should always be set to "/swamp/incoming/".
 
 `APP_KEY`::
 
-An encryption key used by the Laravel framework. Allowed values are any 16
-or 32 character string. The SWAMP-in-a-Box installer sets this to a random
-32 character string.
+An encryption key used by the Laravel framework. Allowed values are any 32
+character string or a Base 64 encoded value. The SWAMP-in-a-Box installer
+sets this to a Base 64 encoded value. SWAMP-in-a-Box installations
+originally deployed using versions of SWAMP-in-a-Box prior to 1.33 will have
+had this set to a random 32 character string.
+
++
+To generate a new Base 64 encoded value, run the following command as `root`
+(or using `sudo`):
+
++
+----
+php /var/www/swamp-web-server/artisan key:generate
+----
 
 `APP_PASSWORD_ENCRYPTION_METHOD`::
 
@@ -92,6 +107,28 @@ The maximum number of Application Passwords a user can create. Set this to
 an integer greater than zero to allow creation of one or more Application
 Passwords. Set this to zero to disallow creation of Application Passwords.
 The SWAMP-in-a-Box installer sets this to 10.
+
+`APP_LOG`::
+
+How Laravel log entries are stored. Set this to "daily" or "syslog".
+When set to "daily", Laravel writes log entries to a new file each day at
+`/var/www/swamp-web-server/storage/logs/`. When  set to "syslog",
+Laravel writes log entries to the OS syslog. The SWAMP-in-a-Box installer
+sets this to "daily".
+
+`APP_LOG_LEVEL`::
+
+What type of notices are logged by Laravel. The SWAMP-in-a-Box installer
+sets this to "debug", which we recommend. Other allowed values are
+"emergency", "alert", "critical", "error", "warning", "notice", and "info".
+
+`APP_STATS`::
+
+Whether a banner showing usage statistics is displayed on the the SWAMP home
+page. Set this to "true" or "false". The SWAMP-in-a-Box installer sets this
+to "false". Note that in order to show lines-of-code, metric analysis must
+be enabled, and by default, SWAMP-in-a-Box installations do not have metric
+analysis enabled.
 
 
 HTCondor Settings
@@ -511,8 +548,17 @@ These parameters determine how session (logon) cookies behave.
 
 `SESSION_DRIVER`::
 
-The driver used to manage session data. The SWAMP-in-a-Box installer sets
-this to "cookie". This should not be changed.
+The driver used to manage session data. Set this to "file" or "cookie".
+When this is set to "file", data for each user session is stored in the
+SWAMP-in-a-Box file system. When it is set to "cookie", data for each
+user session is stored as a cookie on the client. The SWAMP-in-a-Box
+installer sets this to "file". SWAMP-in-a-Box installations originally
+deployed using versions of SWAMP-in-a-Box prior to 1.33 will have this
+set to "cookie".
+
++
+When `SESSION_DRIVER` is set to "file", session data is stored in
+`/var/www/swamp-web-server/storage/framework/sessions/`.
 
 `SESSION_LIFETIME`::
 
@@ -527,20 +573,20 @@ Whether SWAMP session cookies expire when the browser session ends. The
 SWAMP-in-a-Box installer sets this to "false". Before changing this to
 "true", set `SESSION_LIFETIME` to "0".
 
-`SESSION_COOKIE_NAME`::
+`SESSION_COOKIE`::
 
-The name of the SWAMP session cookie. The SWAMP-in-a-Box installer sets this
-to "swamp_session".
+The name of the SWAMP cookie that references a user's session data. The
+SWAMP-in-a-Box installer sets this to "swamp_session".
 
-`SESSION_COOKIE_DOMAIN`::
+`SESSION_DOMAIN`::
 
 The name of the domain for the session cookie. Set this to "null" to use the
 same domain name as `APP_URL`. The SWAMP-in-a-Box installer sets this to
 "null".
 
-`SESSION_COOKIE_SECURE`::
+`SESSION_SECURE_COOKIE`::
 
-Whether SWAMP session cookies are sent for encrypted connections only. The
+Whether SWAMP session cookies are sent for secure connections only. The
 SWAMP-in-a-Box installer sets this to "true".
 
 

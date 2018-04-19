@@ -33,7 +33,6 @@ AGENTFILES= \
 	vmu_PostViewer_launcher \
 	vmu_LaunchPad.pl \
 	vmu_calldorun.pl \
-	vmu_csa_agent_launcher \
 	vmu_killrun.pl \
 	swamp_config \
 	vmu_swamp_monitor
@@ -42,13 +41,14 @@ AGENTPKGS= \
 	lib/SWAMP/vmu_AssessmentSupport.pm \
 	lib/SWAMP/vmu_ViewerSupport.pm \
 	lib/SWAMP/vmu_Support.pm \
-	lib/SWAMP/vmu_FrameworkUtils.pm \
-	lib/SWAMP/vmu_Locking.pm \
-	lib/SWAMP/vmu_PackageTypes.pm \
+	lib/SWAMP/FrameworkUtils.pm \
+	lib/SWAMP/Locking.pm \
+	lib/SWAMP/PackageTypes.pm \
 	lib/SWAMP/CodeDX.pm \
 	lib/SWAMP/Libvirt.pm \
 	lib/SWAMP/ThreadFix.pm \
-	lib/SWAMP/FloodlightAccess.pm
+	lib/SWAMP/FloodlightAccess.pm \
+	lib/SWAMP/ScarfXmlReader.pm
 
 CONFIG= \
 	libvirt_swamp_script.awk \
@@ -58,6 +58,7 @@ CONFIG= \
 	services.conf.map \
 	submonitor.conf \
 	swampinaboxmonitor.conf \
+	no-build.xslt \
 	Scarf_ToolList.json
 
 SCRIPTS=swampd-common swamp.sh arun.bash execute_execution_record launch_viewer kill_run
@@ -69,15 +70,15 @@ TOP=../../..
 
 destfiles:=$(AGENTFILES:%=TEMPSOURCES/%) $(AGENTPKGS:%=TEMPSOURCES/%) $(CONFIG:%=TEMPSOURCES/%) $(SCRIPTS:%=TEMPSOURCES/%) $(SQLSCRIPTS:%=TEMPSOURCES/%)
 
-COMMONSOURCES=SOURCES TEMPSOURCES $(destfiles) TEMPSOURCES/mysql_global_settings.cnf versioninfo toolchain TEMPSOURCES/scripts.tar inventory swampinabox-runtime
+COMMONSOURCES=SOURCES TEMPSOURCES $(destfiles) TEMPSOURCES/mysql_timezone.cnf TEMPSOURCES/mysql_global_settings.cnf versioninfo toolchain TEMPSOURCES/scripts.tar inventory swampinabox-runtime
 
 # tar file for swamp (rpm)
 # use swamp.conf
-# include common codedx codedx.war threadfix threadfix.war
+# include common codedx codedx.war
 SWAMPTARBALL=SOURCES/swamp-1.tar.gz
 SWAMPCONF::
 	(cat ../config/swamp.conf; echo "buildnumber=$(BUILD_NUMBER)") > TEMPSOURCES/swamp.conf
-$(SWAMPTARBALL): $(COMMONSOURCES) common resultparser codedx codedx.war threadfix threadfix.war SWAMPCONF
+$(SWAMPTARBALL): $(COMMONSOURCES) common resultparser codedx codedx.war SWAMPCONF
 	cp ../../lib/lib_mysqludf_sys.so TEMPSOURCES/Data_Server
 	cp ../../../db/backup_db TEMPSOURCES
 	cp ../config/services.conf TEMPSOURCES
@@ -85,11 +86,11 @@ $(SWAMPTARBALL): $(COMMONSOURCES) common resultparser codedx codedx.war threadfi
 
 # tar file for singleserver
 # use swamp.conf.singleserver
-# include common codedx codedx.war threadfix threadfix.war
+# include common codedx codedx.war
 SINGLESERVERTARBALL=SOURCES/singleserver-1.tar.gz
 SINGLESERVERCONF::
 	(cat ../config/swamp.conf.singleserver; echo "buildnumber=$(BUILD_NUMBER)") > TEMPSOURCES/swamp.conf
-$(SINGLESERVERTARBALL): $(COMMONSOURCES) resultparser common codedx codedx.war threadfix threadfix.war SINGLESERVERCONF
+$(SINGLESERVERTARBALL): $(COMMONSOURCES) resultparser common codedx codedx.war SINGLESERVERCONF
 	cp ../../lib/lib_mysqludf_sys.so TEMPSOURCES/Data_Server
 	cp ../../../db/backup_db TEMPSOURCES
 	cp ../config/services.conf.singleserver TEMPSOURCES/services.conf
@@ -97,12 +98,12 @@ $(SINGLESERVERTARBALL): $(COMMONSOURCES) resultparser common codedx codedx.war t
 
 # tar file for swampinabox
 # use swamp.conf.swampinabox
-# include common codedx threadfix
-# exclude codedx.war threadfix.war
+# include common codedx
+# exclude codedx.war
 SWAMPINABOXTARBALL=SOURCES/swampinabox-1.tar.gz
 SWAMPINABOXCONF::
 	(cat ../config/swamp.conf.swampinabox; echo "buildnumber=$(BUILD_NUMBER)") > TEMPSOURCES/swamp.conf
-$(SWAMPINABOXTARBALL): $(COMMONSOURCES) resultparser common codedx threadfix SWAMPINABOXCONF
+$(SWAMPINABOXTARBALL): $(COMMONSOURCES) resultparser common codedx SWAMPINABOXCONF
 	cp ../../lib/lib_mysqludf_sys.so TEMPSOURCES/Data_Server
 	cp ../../../db/backup_db TEMPSOURCES
 	cp ../config/services.conf.swampinabox TEMPSOURCES/services.conf
@@ -122,7 +123,7 @@ rpm: dirs scarfcparsing $(SWAMPTARBALL)
 	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS
 
 scarfcparsing:	
-	(cd ../../../services/perl/agents/Scarf_Parsing_C; make;)
+	(cd ../../../services/perl/agents/Scarf_Parsing_C ; make)
 	cp ../../../services/perl/agents/Scarf_Parsing_C/yajl/install/lib/libyajl.so.2 TEMPSOURCES
 	strip TEMPSOURCES/libyajl.so.2
 	cp ../../../services/perl/agents/Scarf_Parsing_C/vmu_Scarf_CParsing TEMPSOURCES 
@@ -156,6 +157,9 @@ list:
 
 dirs: $(DIRS)
 
+TEMPSOURCES/mysql_timezone.cnf:
+	cp ../config/data_svr/mysql_timezone.cnf TEMPSOURCES
+
 TEMPSOURCES/mysql_global_settings.cnf:
 	cp ../config/permissions_svr/mysql_global_settings.cnf TEMPSOURCES
 
@@ -188,14 +192,16 @@ common:
 codedx:
 	cp ../../SecureDecisions/codedx.props TEMPSOURCES/codedx/codedx.props
 	cp ../../SecureDecisions/codedx_viewerdb.sh TEMPSOURCES/codedx/codedx_viewerdb.sh
-	cp ../../SecureDecisions/emptydb-codedx-$(CODEDX_WAR_VERSION).sql TEMPSOURCES/codedx/emptydb-codedx.sql
+	cp ../../SecureDecisions/emptydb-codedx-*.sql TEMPSOURCES/codedx/.
 	cp ../../SecureDecisions/emptydb-mysql-codedx.sql TEMPSOURCES/codedx/emptydb-mysql-codedx.sql
 	cp ../../SecureDecisions/logback.xml TEMPSOURCES/codedx/logback.xml
 	cp ../../SecureDecisions/resetdb-codedx.sql TEMPSOURCES/codedx/resetdb-codedx.sql
 	cp ../../SecureDecisions/vrun.sh TEMPSOURCES/codedx/vrun.sh
 
 codedx.war:
-	cp ../../../proprietary/SecureDecisions/codedx-$(CODEDX_WAR_VERSION).war TEMPSOURCES/codedx/codedx.war
+	cp ../../../proprietary/SecureDecisions/codedx-*.war TEMPSOURCES/codedx/.
+	ln -s codedx-$(CODEDX_WAR_VERSION).war TEMPSOURCES/codedx/codedx.war
+	ln -s emptydb-codedx-$(CODEDX_WAR_VERSION).sql TEMPSOURCES/codedx/emptydb-codedx.sql
 
 threadfix:
 	cp ../../DenimGroup/emptydb-mysql-threadfix.sql TEMPSOURCES/threadfix/emptydb-mysql-threadfix.sql
@@ -259,6 +265,7 @@ TEMPSOURCES/scripts.tar:
 	tar --strip-components=1 -C TEMPSOURCES -xf TEMPSOURCES/scripts.tar
 
 clean:
+	(cd ../../../services/perl/agents/Scarf_Parsing_C ; make clean)
 	/bin/rm -rf BUILD BUILDROOT RPMS SOURCES SRPMS TEMPSOURCES
 	/bin/rm -rf SPECS/swampinabox-files.txt SPECS/swampinabox-install.txt
 

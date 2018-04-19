@@ -1,0 +1,185 @@
+Maintaining SWAMP-in-a-Box
+--------------------------
+
+
+[[checking-for-updates]]
+Checking for Updates
+~~~~~~~~~~~~~~~~~~~~
+
+The SWAMP-in-a-Box upgrade script does not necessarily update all components
+of SWAMP-in-a-Box for which a newer version might be available. Components
+that require additional steps to upgrade are listed below, along with
+instructions on how to upgrade them.
+
+Assessment Platforms::
+
+If you have previously installed additional assessment platforms, run the
+following command to determine whether there are updated versions available
+(the command does not require `root` access):
+
++
+----
+/opt/swamp/bin/swamp_check_platform_images
+----
+
++
+For any out-of-date platform images, follow the instructions on
+<<add-on-platforms,installing additional assessment platforms>> for
+downloading and installing the updated images. Once that is done, the
+out-of-date images may be deleted.
+
+
+[[updating-the-hostname]]
+Updating the Host's Hostname
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+During the SWAMP-in-a-Box install process, the hostname specified for the
+host is set in the SWAMP's various configuration files and its database.
+When that hostname changes, those configuration locations must be updated
+in order for the system to continue functioning correctly. To set the new
+hostname, as `root` (or using `sudo`), run the following command:
+
+----
+/opt/swamp/bin/swamp_set_web_host --force --hostname="<new hostname>"
+----
+
+
+Managing Disk Space
+~~~~~~~~~~~~~~~~~~~
+
+SWAMP-in-a-Box will use increasing amounts of disk space as SWAMP users
+upload packages and assess them. However, disk space from temporary files
+and (older) log files can be reclaimed by removing those files.
+
+`/var/log/httpd`::
+
+This directory contains the web server's log files. By default, when the web
+server (i.e., `httpd` package) is installed, the `logrotate` utility is
+configured, via `/etc/logrotate.d/httpd`, to rotate these log files and
+ensure that log entries do not persist indefinitely.
+
+`/var/www/swamp-web-server/storage/logs`::
+
+This directory contains the SWAMP web application's backend's log files, one
+per day, when it is _not_ configured to make log entries in the system log.
+
+`/var/www/swamp-web-server/storage/framework/sessions`::
+
+This directory contains data about SWAMP users' login sessions when the
+SWAMP web application's backend is configured to store session data on the
+file system (as opposed to in a cookie in the user's web browser).
+
+`/swamp/outgoing`::
+
+This directory contains temporary copies of SWAMP artifacts, such as the
+SCARF XML for the results from an assessment, so that SWAMP users can
+download them. Older files may safely be deleted from this directory. The
+following `find` command, when run as `root` (or using `sudo`), will remove
+any files older than 4 hours (240 minutes):
+
++
+----
+find /swamp/outgoing -mindepth 1 -mmin +240 -delete
+----
+
+`/swamp/working/results`::
+
+This directory contains temporary copies of the artifacts produced by
+assessments, before they have been fully processed and saved by the SWAMP's
+backend. Each assessment gets its own subdirectory, named after its
+execution record UUID. Older subdirectories may safely be deleted from this
+directory, at the expense of possibly losing some debugging information for
+assessments that failed. The following `find` command, when run as `root`
+(or using `sudo`), will remove any subdirectories that have not changed in
+14 days:
+
++
+----
+find /swamp/working/results -mindepth 1 -maxdepth 1 -ctime +14 -delete
+----
+
+
+Managing Firewalls
+~~~~~~~~~~~~~~~~~~
+
+Refer back to the section on <<configure-firewalls,configuring firewalls>>
+for information on the network traffic that the SWAMP-in-a-Box host is
+expected to respond to and generate. The SWAMP-in-a-Box install/upgrade
+process and supporting utility scripts do not modify the host's firewall
+configuration.
+
+
+[[managing-htcondor]]
+Managing HTCondor
+~~~~~~~~~~~~~~~~~
+
+SWAMP-in-a-Box uses an HTCondor pool to run assessments and the
+<<add-on-viewers,optional Code Dx viewer>>. Each SWAMP assessment and viewer
+instance is submitted to the HTCondor pool as a single job. The `condor_q`
+and `condor_status` commands can be used to examine HTCondor's queue of jobs
+and the resources it has for running those jobs.
+
+[TIP]
+The listings from `condor_q` and `condor_status -vm`, described below, can
+also be found in the SWAMP web application. As a SWAMP administrator, go to
+the System Overview page, and from there, to the Review Status page.
+
+`condor_q`::
+
+Lists the jobs currently in the queue. HTCondor's ID for each job is shown
+in the "ID" column. The status of each job is shown in the "ST" column: "I"
+for idle; "R" for running; and "H" for on-hold, indicating that the job
+encountered an error.
+
+`condor_q -better-analyze <job ID>`::
+
+Displays detailed information about why an idle job is not currently
+running. On a normally functioning system, it is normal for a job to be idle
+because there are not enough CPU or memory resources available (they should
+become available as other running assessments finish).
+
+`condor_q -hold <job ID>`::
+
+Displays detailed information about why a job is on-hold. On a normally
+functioning system, no job should be on-hold.
+
+`condor_status`::
+
+Lists all of the available resources that HTCondor can use to run jobs. On
+a normally functioning system, there should be at least one "machine" in
+this list.
+
+`condor_status -vm`::
+
+Lists all of the available resources that HTCondor can use to run jobs that
+require a virtual machine. All SWAMP jobs require a virtual machine. On
+a normally functioning system, there should be at least one "machine" in
+this list.
+
+
+Managing SWAMP Daemons
+~~~~~~~~~~~~~~~~~~~~~~
+
+SWAMP-in-a-Box includes a collection of daemons that run on the host, all
+managed by the `swamp` system service. These daemons must be running in
+order to submit and perform assessments. The `swamp` service and the daemons
+managed by it can be stopped and started using the standard commands for
+interacting with system services (the commands must be run as `root` or
+using `sudo`). For example:
+
+----
+service swamp start
+service swamp stop
+service swamp restart
+----
+
+
+Other Considerations
+~~~~~~~~~~~~~~~~~~~~
+
+SWAMP-in-a-Box uses Apache HTTP Server, HTCondor, and MariaDB. For
+instructions on how to interact with or administer Apache HTTP Server,
+HTCondor, and MariaDB, refer to the documentation associated with each
+product. Be aware that the install and upgrade process for SWAMP-in-a-Box
+makes changes to their default configurations; see the SWAMP-in-a-Box
+Reference Manual for further details.

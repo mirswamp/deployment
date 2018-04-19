@@ -1,6 +1,7 @@
 condor-android-ubuntu-12.04-64-master-2017022301.qcow2
-condor-centos-6.9-32-master-2017101101.qcow2
-condor-centos-6.9-64-master-2017101101.qcow2
+condor-centos-6.9-32-master-2018020501.qcow2
+condor-centos-6.9-64-master-2018020501.qcow2
+condor-centos-7.4-64-master-2018020201.qcow2
 condor-debian-7.11-64-master-2016100501.qcow2
 condor-debian-8.6-64-master-2016100501.qcow2
 condor-fedora-18-64-master-2016080801.qcow2
@@ -10,9 +11,10 @@ condor-fedora-21-64-master-2016080801.qcow2
 condor-fedora-22-64-master-2016080801.qcow2
 condor-fedora-23-64-master-2016080801.qcow2
 condor-fedora-24-64-master-2016080801.qcow2
-condor-scientific-6.9-32-master-2017101101.qcow2
-condor-scientific-6.9-64-master-2017101101.qcow2
+condor-scientific-6.9-32-master-2018020501.qcow2
+condor-scientific-6.9-64-master-2018020501.qcow2
+condor-scientific-7.4-64-master-2018020201.qcow2
 condor-ubuntu-10.04-64-master-2016102702.qcow2
 condor-ubuntu-12.04-64-master-2016102702.qcow2
 condor-ubuntu-14.04-64-master-2016102702.qcow2
-condor-ubuntu-16.04-64-master-2017092701.qcow2
+condor-ubuntu-16.04-64-master-2018012401.qcow2

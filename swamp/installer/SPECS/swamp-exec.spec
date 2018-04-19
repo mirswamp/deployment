@@ -52,6 +52,8 @@ rm -rf $RPM_BUILD_ROOT
 %pre
 %include common-pre.txt
 
+echo "Finished running pre script"
+
 %post
 %include common-post.txt
 %include swamp-post-common.txt
@@ -94,7 +96,7 @@ owaspdc_server_ip=""
 nameserver=""
 
 if [ $(expr "$iam" : "swa-exec-dd" ) = $(expr length "swa-exec-dd") ];then
-    swamp_api_web_server="swa-csaweb-dd-01.cosalab.org"
+    swamp_api_web_server="https://swa-csaweb-dd-01.cosalab.org"
     floodlight=http://swa-flood-dd-01.mirsam.org:8080
 	parasoft_flowprefix=ps-dd-license
 	parasoft_server_ip=128.104.7.8
@@ -111,7 +113,7 @@ if [ $(expr "$iam" : "swa-exec-dd" ) = $(expr length "swa-exec-dd") ];then
     /bin/sed -i "s/<ENVIRONMENT>/dt/g" /opt/swamp/etc/services.conf
     /bin/sed -i "s/<DOMAIN>/cosalab/g" /opt/swamp/etc/services.conf
 elif [ $(expr "$iam" : "swa-exec-dt" ) = $(expr length "swa-exec-dt") ];then
-    swamp_api_web_server="swa-csaweb-dt-02.cosalab.org"
+    swamp_api_web_server="https://swa-csaweb-dt-02.cosalab.org"
     floodlight=http://swa-flood-dt-01.mirsam.org:8080
 	parasoft_flowprefix=ps-dt-license
 	parasoft_server_ip=128.104.7.8
@@ -128,7 +130,7 @@ elif [ $(expr "$iam" : "swa-exec-dt" ) = $(expr length "swa-exec-dt") ];then
     /bin/sed -i "s/<ENVIRONMENT>/dt/g" /opt/swamp/etc/services.conf
     /bin/sed -i "s/<DOMAIN>/cosalab/g" /opt/swamp/etc/services.conf
 elif [ $(expr "$iam" : "swa-exec-it" ) = $(expr length "swa-exec-it") ];then
-    swamp_api_web_server="swa-csaweb-it-01.cosalab.org"
+    swamp_api_web_server="https://swa-csaweb-it-01.cosalab.org"
     floodlight=http://swa-flood-it-01.mirsam.org:8080
 	parasoft_flowprefix=ps-it-license
 	parasoft_server_ip=128.104.7.7
@@ -145,7 +147,7 @@ elif [ $(expr "$iam" : "swa-exec-it" ) = $(expr length "swa-exec-it") ];then
     /bin/sed -i "s/<ENVIRONMENT>/it/g" /opt/swamp/etc/services.conf
     /bin/sed -i "s/<DOMAIN>/cosalab/g" /opt/swamp/etc/services.conf
 elif [ $(expr "$iam" : "swa-exec-pd" ) = $(expr length "swa-exec-pd") ];then
-    swamp_api_web_server="swa-csaweb-pd-01.mir-swamp.org"
+    swamp_api_web_server="https://swa-csaweb-pd-01.mir-swamp.org"
     floodlight=http://swa-flood-pd-01.mirsam.org:8080
 	parasoft_flowprefix=ps-pd-license
 	parasoft_server_ip=128.105.64.7

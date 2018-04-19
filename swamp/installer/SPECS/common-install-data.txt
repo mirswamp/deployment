@@ -17,7 +17,6 @@ mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql/platforms
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql/tools
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql/tools_add_on
-mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql/tools_other
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql/upgrades_data
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/sql/util
 mkdir -p $RPM_BUILD_ROOT/usr/local/bin
@@ -26,6 +25,7 @@ mkdir -p $RPM_BUILD_ROOT/etc/my.cnf.d
 mkdir -p $RPM_BUILD_ROOT/usr/lib64/mysql/plugin
 
 # install path specific
+install -m 444 mysql_timezone.cnf ${RPM_BUILD_ROOT}/etc/my.cnf.d
 install -m 444 mysql_global_settings.cnf ${RPM_BUILD_ROOT}/etc/my.cnf.d
 install -m 755 Data_Server/lib_mysqludf_sys.so ${RPM_BUILD_ROOT}/usr/lib64/mysql/plugin
 install -m 400 Data_Server/sys_exec.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
@@ -62,9 +62,9 @@ install -m 400 SWAMP_in_a_Box/enable_metric_runs.sql ${RPM_BUILD_ROOT}/opt/swamp
 
 install -m 644 lib/SWAMP/CodeDX.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/CodeDX.pm
 install -m 644 lib/SWAMP/ThreadFix.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/ThreadFix.pm
-install -m 644 lib/SWAMP/vmu_Locking.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_Locking.pm
-install -m 644 lib/SWAMP/vmu_FrameworkUtils.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_FrameworkUtils.pm
-install -m 644 lib/SWAMP/vmu_PackageTypes.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_PackageTypes.pm
+install -m 644 lib/SWAMP/Locking.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Locking.pm
+install -m 644 lib/SWAMP/FrameworkUtils.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/FrameworkUtils.pm
+install -m 644 lib/SWAMP/PackageTypes.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/PackageTypes.pm
 
 install -m 755 swamp_config ${RPM_BUILD_ROOT}/opt/swamp/bin
 
@@ -80,6 +80,7 @@ install -m 644 Scarf_ToolList.json ${RPM_BUILD_ROOT}/opt/swamp/etc
 install -m 755 vmu_killrun.pl ${RPM_BUILD_ROOT}/opt/swamp/bin
 
 install -m 400 swamp.conf $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 no-build.xslt $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 644 log4perl.conf $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 755 swamp.sh $RPM_BUILD_ROOT/etc/profile.d
 
@@ -88,9 +89,12 @@ install -m 400 Data_Server/Platform_Store/delete_platforms.sql $RPM_BUILD_ROOT/o
 
 install -m 400 Data_Server/Metric/metric_tools/*               $RPM_BUILD_ROOT/opt/swamp/sql/tools
 install -m 400 Data_Server/Tool_Shed/tools_MIR_and_SiaB/*      $RPM_BUILD_ROOT/opt/swamp/sql/tools
+install -m 400 Data_Server/Tool_Shed/tools_MIR_only/*          $RPM_BUILD_ROOT/opt/swamp/sql/tools
 install -m 400 Data_Server/Tool_Shed/tools_Siab_add_on/*       $RPM_BUILD_ROOT/opt/swamp/sql/tools_add_on
-install -m 400 Data_Server/Tool_Shed/tools_MIR_only/*          $RPM_BUILD_ROOT/opt/swamp/sql/tools_other
 install -m 400 Data_Server/Tool_Shed/tool_install.sql          $RPM_BUILD_ROOT/opt/swamp/sql/util
 install -m 400 Data_Server/Tool_Shed/tool_uninstall.sql        $RPM_BUILD_ROOT/opt/swamp/sql/util
 install -m 400 Data_Server/Tool_Shed/delete_all_tools.sql      $RPM_BUILD_ROOT/opt/swamp/sql/util
 install -m 400 Data_Server/Tool_Shed/delete_non_user_tools.sql $RPM_BUILD_ROOT/opt/swamp/sql/util
+
+install -m 444 inventory/platforms*.txt "$RPM_BUILD_ROOT"/opt/swamp/etc
+install -m 444 inventory/tools*.txt "$RPM_BUILD_ROOT"/opt/swamp/etc

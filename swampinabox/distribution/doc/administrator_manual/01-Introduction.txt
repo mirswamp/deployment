@@ -17,7 +17,7 @@ software assurance capabilities to developers and researchers.
 
 The SWAMP is funded by the Department of Homeland Security (DHS) Science and
 Technology Directorate, Homeland Security Advanced Research Projects Agency,
-Cyber Security Division (DHS S&T/HSARPA/CSD); BAA 11-02; and Air Force
+Cyber Security Division (DHS S&T/HSARPA/CSD); BAA 11-02; and the Air Force
 Research Laboratory, Information Directorate under agreement number
 FA8750-12-2-0289.
 
@@ -47,6 +47,7 @@ Documentation for SWAMP-in-a-Box
 Copies of this SWAMP-in-a-Box Administrator Manual and the SWAMP-in-a-Box
 Reference Manual can be found in `/opt/swamp/doc` on the SWAMP-in-a-Box host
 after SWAMP-in-a-Box has been installed. Each manual is available as
-a single page HTML document and as a PDF. The http://asciidoc.org/[AsciiDoc]
-sources for the manuals are also available in the `administrator_manual` and
-`reference_manual` sub-directories.
+a single page HTML document and as a PDF.
+
+Documentation for users of the SWAMP is available on the Help page of the
+SWAMP web application after SWAMP-in-a-Box has been installed.

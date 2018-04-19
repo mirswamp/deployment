@@ -18,8 +18,6 @@ mkdir -p $RPM_BUILD_ROOT/opt/swamp/thirdparty
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/thirdparty/common
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/vendor
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/swamp
-mkdir -p $RPM_BUILD_ROOT/opt/swamp/thirdparty/threadfix/vendor
-mkdir -p $RPM_BUILD_ROOT/opt/swamp/thirdparty/threadfix/swamp
 mkdir -p $RPM_BUILD_ROOT/usr/local/etc/swamp
 mkdir -p $RPM_BUILD_ROOT/etc/profile.d
 mkdir -p $RPM_BUILD_ROOT/usr/local/empty
@@ -29,10 +27,11 @@ install -m 644 lib/SWAMP/vmu_Support.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP
 install -m 644 lib/SWAMP/vmu_AssessmentSupport.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_AssessmentSupport.pm
 install -m 644 lib/SWAMP/vmu_ViewerSupport.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_ViewerSupport.pm
 
-install -m 644 lib/SWAMP/vmu_Locking.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_Locking.pm
-install -m 644 lib/SWAMP/vmu_PackageTypes.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_PackageTypes.pm
+install -m 644 lib/SWAMP/Locking.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Locking.pm
+install -m 644 lib/SWAMP/PackageTypes.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/PackageTypes.pm
 install -m 644 lib/SWAMP/Libvirt.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Libvirt.pm
 install -m 644 lib/SWAMP/FloodlightAccess.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/FloodlightAccess.pm
+install -m 644 lib/SWAMP/ScarfXmlReader.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/ScarfXmlReader.pm
 
 install -m 755 swamp_config ${RPM_BUILD_ROOT}/opt/swamp/bin
 install -m 755 arun.sh ${RPM_BUILD_ROOT}/opt/swamp/bin
@@ -68,21 +67,15 @@ install -m 755 common/checktimeout.pl $RPM_BUILD_ROOT/opt/swamp/thirdparty/commo
 install -m 755 common/swamp-shutdown-service $RPM_BUILD_ROOT/opt/swamp/thirdparty/common
 install -m 444 common/flushprivs.sql $RPM_BUILD_ROOT/opt/swamp/thirdparty/common
 
-[ -e codedx/codedx.war ] && install -m 444 codedx/codedx.war $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/vendor
+for war_file in codedx/codedx-*.war ; do if [ -f "$war_file" ]; then install -m 444 "$war_file" "$RPM_BUILD_ROOT"/opt/swamp/thirdparty/codedx/vendor ; fi ; done
+if [ -h codedx/codedx.war ]; then cp -P codedx/codedx.war "$RPM_BUILD_ROOT"/opt/swamp/thirdparty/codedx/vendor ; fi
+if [ -h codedx/emptydb-codedx.sql ]; then cp -P codedx/emptydb-codedx.sql "$RPM_BUILD_ROOT"/opt/swamp/thirdparty/codedx/swamp ; fi
 install -m 444 codedx/codedx.props $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/swamp
 install -m 444 codedx/logback.xml $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/swamp
 install -m 444 codedx/emptydb-mysql-codedx.sql $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/swamp
-install -m 444 codedx/emptydb-codedx.sql $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/swamp
+install -m 444 codedx/emptydb-codedx-*.sql $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/swamp
 install -m 755 codedx/vrun.sh $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/swamp
 install -m 755 codedx/codedx_viewerdb.sh $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/swamp
 install -m 444 codedx/resetdb-codedx.sql $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/swamp
-
-[ -e threadfix/threadfix.war ] && install -m 444 threadfix/threadfix.war $RPM_BUILD_ROOT/opt/swamp/thirdparty/threadfix/vendor
-install -m 444 threadfix/threadfix.jdbc.properties $RPM_BUILD_ROOT/opt/swamp/thirdparty/threadfix/swamp
-install -m 444 threadfix/emptydb-mysql-threadfix.sql $RPM_BUILD_ROOT/opt/swamp/thirdparty/threadfix/swamp
-install -m 444 threadfix/emptydb-threadfix.sql $RPM_BUILD_ROOT/opt/swamp/thirdparty/threadfix/swamp
-install -m 755 threadfix/vrun.sh $RPM_BUILD_ROOT/opt/swamp/thirdparty/threadfix/swamp
-install -m 755 threadfix/threadfix_viewerdb.sh $RPM_BUILD_ROOT/opt/swamp/thirdparty/threadfix/swamp
-install -m 444 threadfix/resetdb-threadfix.sql $RPM_BUILD_ROOT/opt/swamp/thirdparty/threadfix/swamp
 
 install -m 755 swamp.sh $RPM_BUILD_ROOT/etc/profile.d

@@ -10,33 +10,65 @@
 #
 
 encountered_error=0
-trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
 
-##########################################################################
+############################################################################
 
+function has_amd_svm_flag() {
+    grep -i -E '\<svm\>' /proc/cpuinfo 1>/dev/null 2>/dev/null
+}
+
+function has_intel_vmx_flag() {
+    grep -i -E '\<vmx\>' /proc/cpuinfo 1>/dev/null 2>/dev/null
+}
+
+#
+# If running as 'root', display information that might be helpful in
+# determining whether the host is running on bare metal versus in a virtual
+# machine.
+#
 if which dmidecode 1>/dev/null 2>/dev/null ; then
     if [ "$(whoami)" = "root" ]; then
         echo "Looking for system manufacturer ... $(dmidecode -s system-manufacturer)"
         echo "Looking for system product name ... $(dmidecode -s system-product-name)"
+        echo ""
     fi
 fi
 
-##########################################################################
-
-if grep -E '(vmx|svm)' /proc/cpuinfo 1>/dev/null 2>/dev/null ; then
-    echo "Looking for Intel Virtual Technology CPU extensions ... found"
+#
+# Check that the necessary CPU extensions (flags) are present.
+#
+if has_amd_svm_flag ; then
+    echo "Checking for CPU virtualization extensions ... found svm"
+elif has_intel_vmx_flag ; then
+    echo "Checking for CPU virtualization extensions ... found vmx"
 else
-    echo "Error: Looking for Intel Virtual Technology CPU extensions ... not found"
-    echo "Try enabling Intel Virtual Technology extensions in the BIOS."
+    echo "Error: Checking for CPU virtualization extensions ... not found" 1>&2
+    echo "Perhaps try enabling Intel Virtual Technology extensions in the BIOS." 1>&2
     exit 1
 fi
 
-if lsmod | grep kvm 1>/dev/null 2>/dev/null ; then
-    echo "Looking for 'kvm' kernel modules ... loaded"
+#
+# Check that the 'kvm' kernel modules are loaded.
+#
+if lsmod | grep -E '\<kvm\>' 1>/dev/null 2>/dev/null ; then
+    echo "Checking for the kvm kernel module ... loaded"
 else
-    echo "Error: Looking for 'kvm' kernel modules ... not loaded"
-    echo "Try loading the 'kvm' kernel module."
+    echo "" 1>&2
+    echo "Error: Checking for the kvm kernel module ... not loaded" 1>&2
+    echo "Perhaps try loading the 'kvm' kernel module." 1>&2
+    exit 1
+fi
+if lsmod | grep -E '\<kvm_amd\>' 1>/dev/null 2>/dev/null ; then
+    echo "Checking for the kvm_amd or kvm_intel kernel module ... kvm_amd loaded"
+elif lsmod | grep -E '\<kvm_intel\>' 1>/dev/null 2>/dev/null ; then
+    echo "Checking for the kvm_amd or kvm_intel kernel module ... kvm_intel loaded"
+else
+    echo "" 1>&2
+    echo "Error: Checking for the kvm_amd or kvm_intel kernel module ... not loaded" 1>&2
+    if has_amd_svm_flag ; then echo "Perhaps try loading the 'kvm_amd' kernel module." 1>&2 ; fi
+    if has_intel_vmx_flag ; then echo "Perhaps try loading the 'kvm_intel' kernel module." 1>&2 ; fi
     exit 1
 fi
 

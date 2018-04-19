@@ -1,0 +1,148 @@
+#!/bin/bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2018 Software Assurance Marketplace
+
+#
+# Prompt for a password, encrypt it, and save the result into a file.
+#
+
+BINDIR=$(dirname "$0")
+dest_file=$1
+
+confirm_entry=""
+db_user=""
+php_bcrypt_entry=""
+prompt=""
+test_entry=""
+
+for option in "${@:2}" ; do
+    case "$option" in
+        --confirm)    confirm_entry="yes" ;;
+        --php-bcrypt) php_bcrypt_entry="yes" ;;
+        --test)       test_entry="yes" ;;
+        --prompt=*)   prompt=${option#--prompt=} ;;
+        --user=*)     db_user=${option#--user=} ;;
+    esac
+done
+
+############################################################################
+
+cnf_temp=""
+password_temp=""
+
+function do_cleanup() {
+    rm -f "$cnf_temp" "$password_temp"
+}
+
+trap 'stty echo ; do_cleanup' EXIT
+trap 'stty echo ; do_cleanup ; exit 1' INT TERM
+
+############################################################################
+
+if [ "$(whoami)" != "root" ]; then
+    echo "Error: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
+    exit 1
+fi
+if [ -z "$dest_file" ]; then
+    echo "Usage: $0 <destination file> [options]" 1>&2
+    exit 1
+fi
+if [ -e "$dest_file" ]; then
+    echo "Error: Already exists: $dest_file" 1>&2
+    exit 1
+fi
+if [ -z "$db_user" ]; then
+    db_user="root"
+fi
+if [ -z "$prompt" ]; then
+    prompt="Enter the password for the database's 'root' user: "
+fi
+
+############################################################################
+
+function ask_pass() {
+    need_password=1
+    while [ $need_password -eq 1 ]; do
+        read -r -s -p "$prompt" ANSWER
+        echo 1>&2
+
+        if [ -z "$ANSWER" ]; then
+            echo "*** Password cannot be empty. ***" 1>&2
+        else
+            if [ "$confirm_entry" = "yes" ]; then
+                read -r -s -p "Retype password: " CONFIRMATION
+                echo 1>&2
+
+                if [ "$ANSWER" != "$CONFIRMATION" ]; then
+                    echo "*** Passwords do not match. ***" 1>&2
+                else
+                    need_password=0
+                fi
+            else
+                need_password=0
+            fi
+        fi
+    done
+}
+
+function save_pass() {
+    password=$1
+    destination=$2
+
+    if [ "$php_bcrypt_entry" = "yes" ]; then
+        password=${password//\\/\\\\}
+        password=${password//\'/\\\'}
+        password="{BCRYPT}$(php -r "echo password_hash('$password', PASSWORD_BCRYPT);")"
+    fi
+
+    umask 0077
+    touch "$destination"
+    chmod 0600 "$destination"
+    echo "$password" | sudo openssl enc -aes-256-cbc -salt -out "$destination" -pass pass:swamp
+    chmod 0400 "$destination"
+}
+
+function test_db_password() {
+    db_user=$1
+    db_password=$2
+
+    cnf_temp=$(mktemp /tmp/create_mysql_root.XXXXXXXX)
+    password_temp=$(mktemp /tmp/create_mysql_root.XXXXXXXX)
+
+    save_pass "$db_password" "$password_temp"
+    "$BINDIR/create_mysql_root_cnf" "$cnf_temp" \
+        --user="$db_user" \
+        --password-file="$password_temp" \
+        --allow-overwrite
+
+    mysql --defaults-file="$cnf_temp" <<< ';'
+    success=$?
+
+    rm -f "$cnf_temp" "$password_temp"
+
+    if [ $success -ne 0 ]; then
+        echo "Error: Failed to log into the database as '$db_user'" 1>&2
+        return 1
+    fi
+    return 0
+}
+
+############################################################################
+
+success=1
+while [ $success -ne 0 ]; do
+    ask_pass
+    DB_PASSWORD=$ANSWER
+
+    if [ "$test_entry" = "yes" ]; then
+        test_db_password "$db_user" "$DB_PASSWORD"
+        success=$?
+    else
+        success=0
+    fi
+done
+
+save_pass "$DB_PASSWORD" "$dest_file"

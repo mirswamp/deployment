@@ -7,8 +7,6 @@ function showargs() {
 	echo "getargs"
 	echo "-------"
 	echo "MODE $MODE"
-	echo "DEVELOPER: $DEVELOPER"
-	echo "WORKSPACE: $WORKSPACE"
 	echo "RELEASE_NUMBER: $RELEASE_NUMBER"
 	echo "BUILD_NUMBER: $BUILD_NUMBER"
 	echo "DBPASSWORD: $DBPASSWORD"
@@ -18,13 +16,13 @@ function showargs() {
 
 function usage() {
 	showargs
-	echo "usage $0 [DEVELOPER WORKSPACE RELEASE_NUMBER DBPASSWORD SWAMPADMINPASSWORD]"
+	echo "usage $0 [RELEASE_NUMBER DBPASSWORD SWAMPADMINPASSWORD]"
+    echo "eg: ./install_swampinabox.bash 1.33.0-RELEASE"
 }
 
 function getargs() {
 	BINDIR=`dirname $0`
 	release_number_regex='^[0-9]+.[0-9]+.[0-9]+.*$'
-	ip_address_regex='^[0-9]+.[0-9]+.[0-9]+.[0-9]+$'
 	args=($*)
 	echo "Args: ${args[@]}"
 	for arg in "${args[@]}"
@@ -34,10 +32,6 @@ function getargs() {
 			return 1
 		elif [ "$arg" == '-install' -o "$arg" == '-upgrade' ]; then
 			MODE=$arg
-		elif [ -d "$arg" ]; then
-			WORKSPACE=$arg
-		elif [ -d "/home/$arg" ]; then
-			DEVELOPER=$arg
 		elif [[ $arg =~ $release_number_regex ]]; then
 			RELEASE_NUMBER=$arg
 		else
@@ -49,15 +43,10 @@ function getargs() {
 		MODE=-install
 	fi
 
-	if [ -z "$WORKSPACE" ]; then
-		if [ -z "$DEVELOPER" ]; then
-			WORKSPACE="$BINDIR/../../../.."
-		else
-			WORKSPACE=/home/$DEVELOPER/swamp
-		fi
-	fi
+	WORKSPACE="$BINDIR/../../../.."
+
 	if [ ! -d "$WORKSPACE" ]; then
-		echo "WORKSPACE: $WORKSPACE is not a directory" 
+		echo "WORKSPACE: $WORKSPACE is not a directory"
 		usage
 		return 1
 	fi

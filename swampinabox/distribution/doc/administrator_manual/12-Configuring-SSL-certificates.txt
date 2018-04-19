@@ -11,21 +11,21 @@ an SSL certificate signed by a trusted certificate authority.
 [NOTE]
 Below, the fully qualified domain name (FQDN) needs to correspond to the
 main URL for your SWAMP-in-a-Box website, for example
-`https://mysib.example.org`.
+`https://sib.example.org`.
 
 
 ==== Acquire the SSL Certificate ====
 
-The first step is to acquire a SSL certificate matching your SWAMP-in-a-Box
+The first step is to acquire an SSL certificate matching your SWAMP-in-a-Box
 domain name from a trusted certificate authority (CA). For the example
-above, the SSL certificate would match `mysib.example.org`.
+above, the SSL certificate would match `sib.example.org`.
 
 1. Generate a private key without a passphrase. For the example domain name
 used above, the command would be:
 
 +
 ----
-openssl genres -des3 -out mysib.example.org.private.key
+openssl genres -des3 -out sib.example.org.private.key
 ----
 
 2. Create your CSR. For the example domain name used above, the command
@@ -33,7 +33,7 @@ would be:
 
 +
 ----
-openssl req -new -key mysib.example.org.private.key -out mysib.example.org.csr
+openssl req -new -key sib.example.org.private.key -out sib.example.org.csr
 ----
 
 3. Purchase the SSL certificate by submitting your CSR. The vendor will send
@@ -60,8 +60,8 @@ domain used above):
 
 +
 ----
-SSLCertificateFile /etc/pki/tls/certs/mysib.example.org.cert
-SSLCertificateKeyFile /etc/pki/tls/private/mysib.example.org.private.key
+SSLCertificateFile /etc/pki/tls/certs/sib.example.org.cert
+SSLCertificateKeyFile /etc/pki/tls/private/sib.example.org.private.key
 ----
 
 +
@@ -82,4 +82,24 @@ Set the following parameters as shown:
 SSLProtocol all -SSLv2 -SSLv3
 SSLCipherSuite EDH+CAMELLIA:EDH+aRSA:EECDH+aRSA+AESGCM:EECDH+aRSA+SHA256:EECDH:+CAMELLIA128:+AES128:+SSLv3:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!DSS:!RC4:!SEED:!IDEA:!ECDSA:kEDH:CAMELLIA128-SHA:AES128-SHA
 SSLHonorCipherOrder On
+----
+
+
+==== Restart the `httpd` Service ====
+
+The third step is to restart Apache (`httpd`).
+
+Run the following command to verify that there are no syntax errors in
+Apache's configuration files.
+
+----
+apachectl -t
+----
+
+Fix any issues that are reported.
+
+Then as `root` (or using `sudo`), restart the `httpd` service:
+
+----
+service httpd restart
 ----

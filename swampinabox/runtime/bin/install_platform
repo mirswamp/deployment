@@ -9,103 +9,19 @@
 # Install a VM disk image as a new platform for assessments.
 #
 
+encountered_error=0
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
+set -o errtrace
+
 ##########################################################################
 
 platforms_image_store="/swamp/platforms/images"
 platforms_script_store="/opt/swamp/sql/platforms"
-vm_image_src="$1"
+
+BINDIR=$(dirname "$0")
+vm_image_src=$1
 vm_image_dest="$platforms_image_store/$(basename "$vm_image_src")"
-
-##########################################################################
-
-mysql_passwd_file="/etc/.mysql_root"
-mysql_cnf_file="/opt/swamp/sql/sql.cnf"
-
-function do_clean_up {
-    stty echo
-    rm -f "$mysql_cnf_file"
-    rm -f "$mysql_passwd_file"
-}
-
-function exit_normally {
-    do_clean_up
-    exit 0
-}
-
-function exit_with_error {
-    do_clean_up
-    echo "$0: Error while attempting to install: $vm_image_src" 1>&2
-    exit 1
-}
-
-#
-# Ensure that temporary files get removed.
-#
-trap 'exit_with_error' INT TERM
-
-##########################################################################
-
-ask_pass() {
-    prompt="$1"
-    if [ "$2" = "-confirm" ]; then need_confirm=1; else need_confirm=0; fi
-    need_password=1
-
-    while [ "$need_password" -eq 1 ]; do
-        ANSWER=""
-        CONFIRMATION=""
-
-        read -r -s -p "$prompt " ANSWER
-        echo
-
-        if [ -z "$ANSWER" ]; then
-            echo "*** Password cannot be empty. ***"
-        else
-            if [ "$need_confirm" -eq 1 ]; then
-                read -r -s -p "Retype password: " CONFIRMATION
-                echo
-
-                if [ "$ANSWER" != "$CONFIRMATION" ]; then
-                    echo "*** Passwords do not match. ***"
-                else
-                    need_password=0
-                fi
-            else
-                need_password=0
-            fi
-        fi
-    done
-}
-
-function save_password_to_disk() {
-    destination="$1"
-    password="$2"
-
-    reset_umask="$(umask -p)"
-    umask 377
-
-    rm -f "$destination"
-    echo "$password" | sudo openssl enc -aes-256-cbc -salt -out "$destination" -pass pass:swamp
-    chmod 400 "$destination"
-
-    $reset_umask
-}
-
-function test_db_password() {
-    username="$1"
-    password="$2"
-    encountered_error=0
-
-    save_password_to_disk "$mysql_passwd_file" "$password"
-    /opt/swamp/sbin/create_mysql_root_cnf "$mysql_cnf_file" "$mysql_passwd_file" "$username"
-
-    if ! mysql --defaults-file="$mysql_cnf_file" <<< ';' ; then
-        echo "Error: Failed to log into the database as '$username'" 1>&2
-        encountered_error=1
-    fi
-
-    do_clean_up
-    return $encountered_error
-}
+vm_image_dest="${vm_image_dest%%.gz}"
 
 ##########################################################################
 
@@ -113,13 +29,11 @@ if [ -z "$vm_image_src" ]; then
     echo "Usage: $0 <VM platform .qcow2 or .qcow2.gz file>" 1>&2
     exit 1
 fi
-
 if [ ! -r "$vm_image_src" ]; then
-    echo "Error: File does not exist or is not readable: $vm_image_src" 1>&2
+    echo "Error: File is not readable: $vm_image_src" 1>&2
     exit 1
 fi
-
-if [[ ! ( "$vm_image_src" =~ .qcow2$ ) && ! ( "$vm_image_src" =~ .qcow2.gz$ ) ]]; then
+if [[ ! ( "$vm_image_src" =~ \.qcow2$ ) && ! ( "$vm_image_src" =~ \.qcow2\.gz$ ) ]]; then
     echo "Error: Not a '.qcow2' or 'qcow2.gz' file: $vm_image_src" 1>&2
     exit 1
 fi
@@ -144,51 +58,51 @@ if [ -z "$platform_install_sql" ]; then
     echo "Error: Not a recognized installable platform: $vm_image_src" 1>&2
     exit 1
 fi
-
 if [ "$(whoami)" != "root" ]; then
     echo "Error: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
     exit 1
 fi
 
-##########################################################################
-
-success=1
-while [ $success -ne 0 ]; do
-    ask_pass "Enter database root password:"
-    DBROOT="$ANSWER"
-
-    test_db_password root "$DBROOT"
-    success=$?
-done
+source "$BINDIR/../sbin/db_support.functions"
+trap 'stty echo ; reset_db_support' EXIT
+trap 'stty echo ; reset_db_support ; exit 1' INT TERM
 
 ##########################################################################
 
-if [[ "$vm_image_src" =~ .qcow2$ ]]; then
-    echo "Copying '$(basename "$vm_image_src")' to '$platforms_image_store'"
+#
+# Prompt early for the database root password, so that the user can
+# wander off while the .qcow2 file is installed on the file system.
+#
+setup_db_support
 
-    cp    "$vm_image_src" "$vm_image_dest" || exit_with_error
-    chown root:root       "$vm_image_dest" || exit_with_error
-    chmod 644             "$vm_image_dest" || exit_with_error
+#
+# Install the .qcow2 file.
+#
+if [ "$vm_image_src" != "$vm_image_dest" ]; then
+    if [[ "$vm_image_src" =~ .qcow2$ ]]; then
+        echo "Copying '$(basename "$vm_image_src")' to '$(dirname "$vm_image_dest")'"
+        cp "$vm_image_src" "$vm_image_dest"
+    elif [[ "$vm_image_src" =~ .gz$ ]]; then
+        echo "Unzipping '$(basename "$vm_image_src")' into '$(dirname "$vm_image_dest")'"
+        gunzip -c "$vm_image_src" > "$vm_image_dest"
+    fi
 fi
+chown root:root "$vm_image_dest"
+chmod 644       "$vm_image_dest"
 
-if [[ "$vm_image_src" =~ .gz$ ]]; then
-    echo "Unzipping '$(basename "$vm_image_src")' into '$platforms_image_store'"
-
-    vm_image_dest=${vm_image_dest%%.gz}
-
-    gunzip -c "$vm_image_src" > "$vm_image_dest" || exit_with_error
-    chown root:root  "$vm_image_dest" || exit_with_error
-    chmod 644        "$vm_image_dest" || exit_with_error
-fi
-
-##########################################################################
-
+#
+# Update the database.
+#
 echo "Updating database records"
-
-save_password_to_disk "$mysql_passwd_file" "$DBROOT"       || exit_with_error
-/opt/swamp/sbin/execute_sql_script "$platform_install_sql" || exit_with_error
+do_mysql_command "$platform_install_sql"
 
 ##########################################################################
 
-echo "Install completed normally"
-exit_normally
+reset_db_support
+
+if [ $encountered_error -eq 0 ]; then
+    echo "Finished installing platform"
+else
+    echo "Error: Finished installing platform, but with errors"
+fi
+exit $encountered_error

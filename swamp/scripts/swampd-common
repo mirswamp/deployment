@@ -42,8 +42,7 @@ case "$1" in
 	# Start daemons.
 	echo -n "Starting SWAMP: "
 	cd $SWAMP/run
-	daemon --user swa-daemon --pidfile ${pidfile} $bin --debug -C $SWAMP/etc/swampmonitor.conf
-	/usr/bin/pgrep -f $mon > ${pidfile}
+	daemon --user swa-daemon --pidfile ${pidfile} $bin --debug -pidfile ${pidfile} -C $SWAMP/etc/swampmonitor.conf
 	RETVAL=$?
 	echo
     [ $RETVAL = 0 ] && touch ${lockfile}

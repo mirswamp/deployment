@@ -6,130 +6,102 @@
 # Copyright 2012-2018 Software Assurance Marketplace
 
 #
-# Rebuild the "tools" tables in the database.
+# Rebuild the 'tools' database.
 #
 
 encountered_error=0
-trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
 
 if [ "$(whoami)" != "root" ]; then
-    echo "Error: $0: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
+    echo "Error: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
     exit 1
 fi
 
 ############################################################################
 
-SWAMP_CONTEXT="$1"
+BINDIR=$(dirname "$0")
+swamp_context=$1
 
-source /opt/swamp/sbin/db_support.functions
-trap 'remove_mysql_options_file; stop_mysql_service; exit 1' INT TERM
+sql_temp=$(mktemp /tmp/rebuild_tools_db.XXXXXXXX)
 
-start_mysql_service
-create_mysql_options_file
+source "$BINDIR/db_support.functions"
+trap 'stty echo ; reset_db_support ; rm -f "$sql_temp"' EXIT
+trap 'stty echo ; reset_db_support ; rm -f "$sql_temp" ; exit 1' INT TERM
+
+setup_db_support
 
 ############################################################################
 
-tool_scripts_dirs=""
-tool_add_on_scripts_dir="/opt/swamp/sql/tools_add_on"
+function is_mir_swamp_like_context() {
+    [ "$swamp_context" = "-singleserver" ] || [ "$swamp_context" = "-mir-swamp" ]
+}
 
-tool_install_script="/opt/swamp/sql/util/tool_install.sql"
-tool_remove_all_script=""
-
-if [ "$SWAMP_CONTEXT" = -distribution ]; then
-
-    tool_scripts_dirs="/opt/swamp/sql/tools"
-    tool_remove_all_script="/opt/swamp/sql/util/delete_non_user_tools.sql"
-
-elif [ "$SWAMP_CONTEXT" = "-singleserver" -o "$SWAMP_CONTEXT" = "-mir-swamp" ]; then
-
-    tool_scripts_dirs="/opt/swamp/sql/tools /opt/swamp/sql/tools_other"
+if is_mir_swamp_like_context ; then
+    inventory_file_list=(tools-bundled.txt tools-metric.txt tools-MIR.txt)
     tool_remove_all_script="/opt/swamp/sql/util/delete_all_tools.sql"
-
 else
-
-    echo "Error: $0: Unknown or missing SWAMP context: $SWAMP_CONTEXT" 1>&2
-    exit 1
-
+    inventory_file_list=(tools-bundled.txt tools-metric.txt)
+    tool_remove_all_script="/opt/swamp/sql/util/delete_non_user_tools.sql"
 fi
 
 ############################################################################
 
-echo "Removing existing bundled tools from the database"
-
-if ! $mysql_command < "$tool_remove_all_script" ; then
-
-    echo "Error: $0: Failed to remove existing tools from the database" 1>&2
-    encountered_error=1
-
-fi
+echo "Resetting the tools database by removing existing bundled tools"
+do_mysql_command "$tool_remove_all_script"
 
 ############################################################################
 
 echo "Adding bundled tools for the current release to the database"
+for inventory_file in "${inventory_file_list[@]}" ; do
+    while read -r tool_archive ; do
+        tool_id=$(echo "$tool_archive" | sed -E -e 's/.gz$//' -e 's/.tar$//')
+        params_sql="/opt/swamp/sql/tools/$tool_id.sql"
+        install_sql="/opt/swamp/sql/util/tool_install.sql"
 
-for dir in $tool_scripts_dirs ; do
-    for tool_params_script in "$dir"/*.sql ; do
+        echo "Adding: $tool_id"
+        do_mysql_command "$params_sql" "$install_sql"
+    done < "/opt/swamp/etc/$inventory_file"
+done
+echo "Finished adding tools to the database"
 
-        tool=$(basename "$tool_params_script" .sql)
-        params_sql=$(cat "$tool_params_script")
-        install_sql=$(cat "$tool_install_script")
+############################################################################
 
-        echo ".. Adding: $tool"
+echo "Adding tool compatibility information to the database"
+echo "Adding: (bundled tools)"
+do_mysql_command "/opt/swamp/sql/populate_tool_metadata.sql"
 
-        if ! $mysql_command <<< "$params_sql ; $install_sql" ; then
+if ! is_mir_swamp_like_context ; then
+    for tool_meta_sql in /opt/swamp/sql/tools_add_on/*.meta.sql ; do
+        tool_id=$(basename "$tool_meta_sql" .meta.sql)
+        params_sql="/opt/swamp/sql/tools_add_on/$tool_id.sql"
 
-            echo "Error: $0: Failed to add: $tool" 1>&2
-            encountered_error=1
+        echo "select tool_version_uuid from tool_shed.tool_version where tool_uuid = @tool_uuid;" > "$sql_temp"
+        tool_version_uuids=$(do_mysql_command "$params_sql" "$sql_temp")
 
+        if [ ! -z "$tool_version_uuids" ]; then
+            while read -r tool_version_uuid ; do
+                escaped_tool_version_uuid=$tool_version_uuid
+                escaped_tool_version_uuid=${escaped_tool_version_uuid//\'/\'\'/}
+                escaped_tool_version_uuid=${escaped_tool_version_uuid//\\/\\\\/}
+
+                echo "Adding: $tool_id ($tool_version_uuid)"
+                echo "set @tool_version_uuid = '$escaped_tool_version_uuid';" > "$sql_temp"
+                do_mysql_command "$params_sql" "$sql_temp" "$tool_meta_sql"
+            done <<< "$tool_version_uuids"
         fi
     done
-done
-
-############################################################################
-
-echo "Populating metadata into the database for all tools"
-
-if ! $mysql_command < "/opt/swamp/sql/populate_tool_metadata.sql" ; then
-
-    echo "Error: $0: Failed to populate metadata into the database" 1>&2
-    encountered_error=1
-
 fi
 
-############################################################################
-
-echo "Populating additional metadata into the database for add-on tools"
-
-for tool_meta_script in "$tool_add_on_scripts_dir"/*.meta.sql ; do
-
-    tool=$(basename "$tool_meta_script" .meta.sql)
-    params_sql=$(cat "$tool_add_on_scripts_dir/$tool.sql")
-    metadata_sql=$(cat "$tool_meta_script")
-
-    tool_version_uuids=$($mysql_command -B -N <<< "$params_sql ; select tool_version_uuid from tool_shed.tool_version where tool_uuid = @tool_uuid ;")
-
-    if [ ! -z "$tool_version_uuids" ]; then
-        while read -r tool_version_uuid ; do
-            escaped_tool_version_uuid="$tool_version_uuid"
-            escaped_tool_version_uuid="${escaped_tool_version_uuid//\'/\'\'/}"
-            escaped_tool_version_uuid="${escaped_tool_version_uuid//\\/\\\\/}"
-
-            echo ".. Adding: $tool (version UUID: $tool_version_uuid)"
-
-            if ! $mysql_command <<< "$params_sql ; set @tool_version_uuid = '$escaped_tool_version_uuid' ; $metadata_sql" ; then
-
-                echo "Error: $0: Failed to add additional metadata for: $tool" 1>&2
-                encountered_error=1
-
-            fi
-        done <<< "$tool_version_uuids"
-    fi
-done
+echo "Finished adding tool compatibility information to the database"
 
 ############################################################################
 
-remove_mysql_options_file
-stop_mysql_service
+if [ $encountered_error -eq 0 ]; then
+    echo "Finished rebuilding the tools database"
+else
+    echo "Error: Finished rebuilding the tools database, but with errors" 1>&2
+fi
 
+reset_db_support
 exit $encountered_error

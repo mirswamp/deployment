@@ -1,4 +1,4 @@
-# SWAMP-in-a-Box specific general install section
+# SWAMP-in-a-Box non-backend specific install section
 
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
@@ -12,7 +12,7 @@ mkdir -p "$RPM_BUILD_ROOT"/opt/swamp/sbin
 
 install -m 755 swampinabox/bin/*        "$RPM_BUILD_ROOT"/opt/swamp/bin
 install -m 700 swampinabox/sbin/*       "$RPM_BUILD_ROOT"/opt/swamp/sbin
-install -m 644 inventory/platforms*.txt "$RPM_BUILD_ROOT"/opt/swamp/etc
+install -m 444 inventory/platforms*.txt "$RPM_BUILD_ROOT"/opt/swamp/etc
 
 cp -r swampinabox/doc/* "$RPM_BUILD_ROOT"/opt/swamp/doc
 find "$RPM_BUILD_ROOT"/opt/swamp/doc -type d -exec chmod 755 '{}' ';'

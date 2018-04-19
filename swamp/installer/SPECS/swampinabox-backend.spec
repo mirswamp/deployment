@@ -66,6 +66,7 @@ if [ "$1" = "2" ]; then
 fi
 
 echo "Finished running pre script"
+echo "Installing the files for %{name} (this will take some time)"
 
 #
 # Arguments to post are {1=>new, 2=>upgrade}
@@ -73,7 +74,6 @@ echo "Finished running pre script"
 %post
 %include common-post.txt
 %include swampinabox-post-general.txt
-%include swampinabox-post-directory.txt
 %include swampinabox-post-data.txt
 %include swampinabox-post-submit.txt
 %include swampinabox-post-exec.txt
@@ -92,3 +92,19 @@ else
 fi
 
 echo "Finished running post script"
+
+#
+# Arguments to preun are {0=>uninstall, 1=>upgrade}
+#
+%preun
+%include common-preun.txt
+
+if [ "$1" = "0" ]; then
+    codedx_emptydb_link="/opt/swamp/thirdparty/codedx/swamp/emptydb-codedx.sql"
+    if [ -h "$codedx_emptydb_link" ]; then
+        echo "Removing '$codedx_emptydb_link'"
+        rm -f "$codedx_emptydb_link"
+    fi
+fi
+
+echo "Finished running pre-uninstall script"

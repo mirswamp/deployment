@@ -33,7 +33,7 @@ function yum_update() {
 function yum_confirm() {
     encountered_not_installed=0
     for pkg in "$@" ; do
-        echo -n "Checking for '$pkg' ... "
+        echo -n "Checking for $pkg ... "
         if ! rpm -q --whatprovides "$pkg" ; then
             encountered_not_installed=1
         fi

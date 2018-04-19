@@ -1,3 +1,59 @@
+Noteworthy Changes in SWAMP-in-a-Box 1.33
+-----------------------------------------
+
+1. SWAMP-in-a-Box administrators can now configure where the SWAMP web
+application's backend stores its log entries. After installing or upgrading
+to SWAMP-in-a-Box version 1.33, the web application's backend will create
+daily log files in /var/www/swamp-web-server/storage/logs.
+
+The web application's backend can also be configured to make log entries in
+the system log, which is where they were made in previous versions of
+SWAMP-in-a-Box. Refer to the SWAMP-in-a-Box Reference Manual for details.
+
+2. CentOS and Scientific Linux 7 (32-bit and 64-bit) assessment platforms
+are now available for C/C++ packages.
+
+Any versions of GrammaTech CodeSonar and Synopsis Static Analysis (Coverity)
+that were previously installed will not work with these new platforms. Refer
+to the SWAMP-in-a-Box Administrator Manual for instructions on re-creating
+the SWAMP tool archives for these tools and adding them to the SWAMP.
+
+3. Updated versions of the CentOS and Scientific Linux 6.9 (32-bit and
+64-bit) assessment platforms are now available for C/C++ packages. If
+a CentOS or Scientific Linux 6 platform was previously installed, download
+and install these new versions.
+
+4. Code Dx version 2.8.3, a viewer for analyzing the results from
+assessments, can now be added to a SWAMP-in-a-Box installation. You must
+obtain Code Dx separately from Code Dx, Inc.
+
+5. To support SWAMP-in-a-Box installations that do not have internet access,
+we have updated the tool archive for retire.js version 1.2.10 to include
+documentation and scripts for creating a version of the tool archive that
+bundles vulnerability data instead of downloading it from the internet for
+each assessment.
+
+6. SWAMP-in-a-Box no longer requires that the host be configured with
+a timezone of UTC, and the SWAMP-in-a-Box installer and upgrader no longer
+modifies the host's timezone.
+
+All dates and times in the SWAMP web application are displayed in the web
+browser's local time. All dates and times in log files are in the host's
+local time. All dates and times stored with database records are converted
+to UTC.
+
+7. SWAMP-in-a-Box now includes a script for checking the health of the
+installation. Refer to the Troubleshooting section of the SWAMP-in-a-Box
+Administrator Manual for details.
+
+8. SWAMP users can now add a list of paths to files or directories to
+exclude from assessments for Python, Ruby, and Web Scripting packages.
+For Ruby packages, this does not apply to the tools Dawn and Brakeman,
+which do whole program analysis.
+
+9. General enhancements and bug fixes.
+
+
 Noteworthy Changes in SWAMP-in-a-Box 1.32
 -----------------------------------------
 

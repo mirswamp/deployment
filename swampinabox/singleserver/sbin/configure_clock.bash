@@ -6,21 +6,21 @@
 # Copyright 2012-2018 Software Assurance Marketplace
 
 #
-# Configure the timezone for SWAMP-in-a-Box.
+# Configure the time zone and set the clock.
 #
 
 encountered_error=0
-trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
 
-BINDIR="$(dirname "$0")"
-SWAMP_CONTEXT="$1"
+BINDIR=$(dirname "$0")
+swamp_context=$1
 
-. "$BINDIR/swampinabox_install_util.functions"
+source "$BINDIR/swampinabox_install_util.functions"
 
 ############################################################################
 
-if [ "$SWAMP_CONTEXT" = "-singleserver" ]; then
+if [ "$swamp_context" = "-singleserver" ]; then
     yum_install ntpdate
     yum_confirm ntpdate
 
@@ -28,15 +28,20 @@ if [ "$SWAMP_CONTEXT" = "-singleserver" ]; then
     yum_confirm ntp
     chkconfig ntpd on
 
-    # ntpd must be stopped before executing ntpdate
+    #
+    # 'ntpd' must be stopped before executing 'ntpdate'.
+    #
     "$BINDIR/manage_services.bash" stop ntpd
     ntpdate ntp1.mirsam.org
     "$BINDIR/manage_services.bash" start ntpd
 fi
 
-rm /etc/localtime
-if [ ! -h /etc/localtime ]; then
-    ln -sf /usr/share/zoneinfo/UTC /etc/localtime
-fi
+#
+# CSA-2807: No longer need to force UTC.
+#
+# rm /etc/localtime
+# if [ ! -h /etc/localtime ]; then
+#     ln -sf /usr/share/zoneinfo/UTC /etc/localtime
+# fi
 
 exit $encountered_error

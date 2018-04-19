@@ -15,7 +15,7 @@ VERSION="SED_VERSION"
 INSTALLER_TARBALL="$BINDIR/swampinabox-${VERSION}-installer.tar.gz"
 INSTALLER_DIR="$BINDIR/swampinabox-${VERSION}-installer"
 
-exit_with_error() {
+function exit_with_error() {
     echo ""
     echo "Error encountered. Check above for details." 1>&2
     exit 1

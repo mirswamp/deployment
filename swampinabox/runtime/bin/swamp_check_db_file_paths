@@ -1,0 +1,173 @@
+#!/bin/bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2018 Software Assurance Marketplace
+
+#
+# Verify that file paths in the database point to actual files.
+#
+
+encountered_error=0
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
+set -o errtrace
+
+function show_usage_and_exit() {
+    echo "Usage: $0 [options]" 1>&2
+    echo "" 1>&2
+    echo "Verify that file paths in the database point to actual files." 1>&2
+    echo "Missing files are displayed on standard out. Progress messages" 1>&2
+    echo "are displayed on standard error." 1>&2
+    echo "" 1>&2
+    echo "Options (provide at least one):" 1>&2
+    echo "  --assessments  Check results from assessments" 1>&2
+    echo "  --metric-runs  Check results from metric runs" 1>&2
+    echo "  --packages     Check uploaded packages" 1>&2
+    echo "  --tools        Check installed tools" 1>&2
+    echo "  --viewers      Check saved viewer databases" 1>&2
+    echo "  --all          Check all of the above" 1>&2
+    echo "" 1>&2
+    echo "Other options:" 1>&2
+    echo "  --checksums    Verify stored checksums" 1>&2
+    echo "  --help         Display this message" 1>&2
+    exit 1
+}
+
+BINDIR=$(dirname "$0")
+
+check_assessments=""
+check_metric_runs=""
+check_packages=""
+check_something=""
+check_tools=""
+check_viewers=""
+verify_checksums=""
+
+for option in "${@:1}" ; do
+    case "$option" in
+        --assessments) check_assessments="yes" check_something="yes" ;;
+        --metric-runs) check_metric_runs="yes" check_something="yes" ;;
+        --packages)    check_packages="yes"    check_something="yes" ;;
+        --tools)       check_tools="yes"       check_something="yes" ;;
+        --viewers)     check_viewers="yes"     check_something="yes" ;;
+        --checksums)   verify_checksums="yes" ;;
+
+        --all)
+            check_assessments="yes"
+            check_metric_runs="yes"
+            check_packages="yes"
+            check_something="yes"
+            check_tools="yes"
+            check_viewers="yes"
+            ;;
+
+        --help)
+            show_usage_and_exit
+            ;;
+
+        *)
+            echo "Error: Unrecognized option: $option" 1>&2
+            echo "" 1>&2
+            show_usage_and_exit
+            ;;
+    esac
+done
+
+if [ "$check_something" != "yes" ]; then
+    echo "Error: Must specify something to check" 1>&2
+    echo "" 1>&2
+    show_usage_and_exit
+fi
+if [ "$(whoami)" != "root" ]; then
+    echo "Error: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
+    exit 1
+fi
+
+source "$BINDIR/../sbin/db_support.functions"
+trap 'stty echo ; reset_db_support' EXIT
+trap 'stty echo ; reset_db_support ; exit 1' INT TERM
+
+setup_db_support
+
+############################################################################
+#
+# WARNING: Do NOT call this function with user-supplied values.
+#
+function check_column() {
+    table=$1
+    path_column=$2
+    checksum_column=$3
+
+    echo "Checking $table.$path_column"
+
+    counter=0
+    total=$($mysql_command <<< "select count(1) from $table")
+
+    if [ "$total" = "0" ]; then
+        return 0
+    fi
+
+    while IFS=$'\t' read -r path checksum ; do
+        counter=$((counter + 1))
+        message="Checking $table.$path_column ($counter / $total)"
+        echo -n -e "\\r$message" 1>&2
+
+        if [ ! -e "$path" ]; then
+            echo -n -e "\\r${message//[[:print:]]/ }\\r" 1>&2
+            echo "Error: File does not exist: $path"
+            encountered_error=1
+        elif [ "$verify_checksums" = "yes" ]; then
+            computed_checksum=$(sha512sum "$path" | awk '{ print $1 }')
+
+            if [ "$checksum" != "$computed_checksum" ]; then
+                echo -n -e "\\r${message//[[:print:]]/ }\\r" 1>&2
+                echo "Error: Checksum failed: $path"
+                encountered_error=1
+            fi
+        fi
+    done < <($mysql_command <<< "select $path_column, $checksum_column from $table")
+    echo 1>&2
+    return 0
+}
+
+############################################################################
+
+if [ "$check_tools" = "yes" ]; then
+    check_column tool_shed.tool_version tool_path checksum
+    check_column metric.metric_tool_version tool_path checksum
+fi
+if [ "$check_packages" = "yes" ]; then
+    check_column package_store.package_version package_path checksum
+fi
+if [ "$check_assessments" = "yes" ]; then
+    check_column assessment.assessment_result file_path checksum
+    check_column assessment.assessment_result source_archive_path source_archive_checksum
+    check_column assessment.assessment_result log_path log_checksum
+fi
+if [ "$check_metric_runs" = "yes" ]; then
+    check_column metric.metric_run result_path result_checksum
+    check_column metric.metric_run log_path log_checksum
+fi
+if [ "$check_viewers" = "yes" ]; then
+    check_column viewer_store.viewer_instance viewer_db_path viewer_db_checksum
+fi
+
+############################################################################
+
+reset_db_support
+
+if [ $encountered_error -ne 0 ]; then
+    if [ "$verify_checksums" = "yes" ]; then
+        echo "Error: Failed to verify all file paths and checksums"
+    else
+        echo "Error: Failed to verify all file paths"
+    fi
+else
+    if [ "$verify_checksums" = "yes" ]; then
+        echo "Verified all file paths and checksums"
+    else
+        echo "Verified all file paths (but skipped verification of checksums)"
+    fi
+fi
+exit $encountered_error

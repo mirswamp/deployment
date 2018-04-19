@@ -10,33 +10,30 @@
 #
 
 encountered_error=0
-trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
 
-BINDIR="$(dirname "$0")"
-WORKSPACE="$1"
-RELEASE_NUMBER="$2"
-BUILD_NUMBER="$3"
-MODE="$4"
+BINDIR=$(dirname "$0")
+workspace=$1
+release_number=$2
+build_number=$3
+mode=$4
 
-. "$BINDIR/swampinabox_install_util.functions"
+config_json="/var/www/html/config/config.json"
+dot_env="/var/www/swamp-web-server/.env"
+swamp_conf="/opt/swamp/etc/swamp.conf"
 
-old_swamp_web_server_version="$(get_rpm_version swamp-web-server)"
+source "$BINDIR/swampinabox_install_util.functions"
 
 ############################################################################
 
-echo "Workspace: $WORKSPACE"
-echo "Release number: $RELEASE_NUMBER"
-echo "Build number: $BUILD_NUMBER"
-echo "Mode: $MODE"
+echo "Mode: $mode"
+echo "Release number: $release_number"
+echo "Build number: $build_number"
+echo "Workspace: $workspace"
 
-echo ""
-echo "Stopping services"
-"$BINDIR/manage_services.bash" stop httpd condor mysql
-
-if [ "$MODE" = "-install" ]; then
+if [ "$mode" = "-install" ]; then
     echo ""
-    echo "Removing currently installed SWAMP RPMs"
     for pkg in \
             swamp-rt-java \
             swamp-rt-perl \
@@ -74,8 +71,8 @@ echo "Determining RPMs to install"
 rpms_to_install=()
 
 for pkg in swamp-rt-perl swampinabox-backend swamp-web-server; do
-    if [ "$(get_rpm_version "$pkg")" != "${RELEASE_NUMBER}-${BUILD_NUMBER}" ]; then
-        rpms_to_install+=($WORKSPACE/RPMS/${pkg}-${RELEASE_NUMBER}-${BUILD_NUMBER}.noarch.rpm)
+    if [ "$(get_rpm_version "$pkg")" != "${release_number}-${build_number}" ]; then
+        rpms_to_install+=($workspace/RPMS/${pkg}-${release_number}-${build_number}.noarch.rpm)
     fi
 done
 
@@ -84,12 +81,11 @@ if [ ${#rpms_to_install[@]} -ne 0 ]; then
     echo "Installing new SWAMP RPMs"
     yum_install "${rpms_to_install[@]}"
 
-    rpms_with_wrong_version=$(check_rpm_versions "${RELEASE_NUMBER}-${BUILD_NUMBER}" swamp-rt-perl swampinabox-backend swamp-web-server)
+    rpms_with_wrong_version=$(check_rpm_versions "${release_number}-${build_number}" swamp-rt-perl swampinabox-backend swamp-web-server)
 
     if [ ! -z "$rpms_with_wrong_version" ]; then
-        encountered_error=1
-        echo "Error: $0: Expected versions of RPMs not installed: $rpms_with_wrong_version" 1>&2
-        exit_with_error
+        echo "Error: Expected versions of RPMs not installed: $rpms_with_wrong_version" 1>&2
+        exit 1
     fi
 else
     echo "All RPMs appear to be installed already"
@@ -102,27 +98,35 @@ if [ ! -h /var/www/html/swamp-web-server ]; then
     ln -s /var/www/swamp-web-server /var/www/html/swamp-web-server
 fi
 
-if [ "$MODE" = "-install" ]; then
+if [ "$mode" = "-install" ]; then
+    echo "Creating the initial version of $(basename "$config_json")"
+    cp /var/www/html/config/config.swampinabox.json "$config_json"
+fi
+
+echo "Setting file system permissions on $(basename "$config_json")"
+chown root:root "$config_json"
+chmod 444       "$config_json"
+
+echo "Setting file system permissions on $(basename "$dot_env")"
+chown apache:apache "$dot_env"
+chmod 400           "$dot_env"
+
+echo "Setting file system permissions on $(basename "$swamp_conf")"
+chown swa-daemon:mysql "$swamp_conf"
+chmod 440              "$swamp_conf"
+
+echo "Patching $(basename "$dot_env")"
+sed -i -e "s/SED_ENVIRONMENT/SWAMP-in-a-Box/" "$dot_env"
+/opt/swamp/sbin/swamp_copy_config -i "$dot_env" -o "$dot_env" --no-space --quote-for-laravel-55
+
+if [ "$mode" = "-install" ]; then
     echo "Setting Laravel application key"
+    #
+    # CSA-3156: Set APP_KEY to nothing before generating it. The 'artisan'
+    # command fails silently if it doesn't like the current value.
+    #
+    sed -i -e 's/^\s*APP_KEY\s*=.*$/APP_KEY=/' "$dot_env"
     (cd /var/www/swamp-web-server ; php artisan key:generate --quiet)
 fi
-
-echo "Setting permissions on swamp.conf"
-chgrp mysql /opt/swamp/etc/swamp.conf
-chmod 440   /opt/swamp/etc/swamp.conf
-
-echo "Setting permissions on SWAMP backend web server configuration"
-chown apache:apache /var/www/swamp-web-server/.env
-chmod 400           /var/www/swamp-web-server/.env
-
-echo "Setting permissions on SWAMP frontend web server configuration"
-if [ "$MODE" = "-install" ]; then
-    cp /var/www/html/config/config.swampinabox.json /var/www/html/config/config.json
-fi
-chown root:root /var/www/html/config/config.json
-chmod 444       /var/www/html/config/config.json
-
-echo "Patching SWAMP backend web server configuration"
-sed -i -e "s/SED_ENVIRONMENT/SWAMP-in-a-Box/" /var/www/swamp-web-server/.env
 
 exit $encountered_error

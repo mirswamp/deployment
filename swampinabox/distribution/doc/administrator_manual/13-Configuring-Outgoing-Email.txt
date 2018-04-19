@@ -62,20 +62,16 @@ service postfix restart
 
 ==== Modify `/var/www/swamp-web-server/.env` to Enable Outgoing SWAMP Email ====
 
+[NOTE]
+Any values that include spaces must be enclosed in double-quotes. Any values
+that do _not_ include spaces must _not_ be enclosed in double-quotes.
+
 * Set `MAIL_ENABLED` to "true".
 
 * Set `MAIL_DRIVER` to "sendmail".
 
 * Set the `MAIL_FROM_ADDRESS` and `MAIL_FROM_NAME` to the email address and
   name you want to use as the sender of outgoing SWAMP emails.
-
-* Set the `MAIL_CONTACT_ADDRESS` to the email address you want to receive
-  contact email from users. This is displayed in the content of some SWAMP
-  emails.
-
-* Set the `MAIL_SECURITY_ADDRESS` to the email address you want to receive
-  security reports from users. This is displayed in the content of some
-  SWAMP emails.
 
 
 ==== Enable "Contact Us" for SWAMP-in-a-Box ====
@@ -114,6 +110,10 @@ Sample:
 
 Step 2: Modify `/var/www/swamp-web-server/.env` to configure contact message
 recipients. This is only necessary if outgoing email is enabled.
+
+[NOTE]
+Any values that include spaces must be enclosed in double-quotes. Any values
+that do _not_ include spaces must _not_ be enclosed in double-quotes.
 
 * Set `MAIL_CONTACT_ADDRESS` to the email address of the recipient of
   "Contact Us" messages.
@@ -168,6 +168,10 @@ Sample:
 Step 2: Modify `/var/www/swamp-web-server/.env` to configure security
 incident message recipients. This is only necessary if outgoing email is
 enabled.
+
+[NOTE]
+Any values that include spaces must be enclosed in double-quotes. Any values
+that do _not_ include spaces must _not_ be enclosed in double-quotes.
 
 * Set `MAIL_SECURITY_ADDRESS` to the email address of the recipient of
   "Report Security Incident" messages.

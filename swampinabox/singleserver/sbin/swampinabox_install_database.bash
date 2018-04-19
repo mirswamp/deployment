@@ -10,7 +10,7 @@
 #
 
 encountered_error=0
-trap 'encountered_error=1; echo "Error: $0: $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
 
 BINDIR="$(dirname "$0")"
@@ -111,7 +111,6 @@ function install_data() {
     $mysql_command < /opt/swamp/sql/populate_project.sql
     $mysql_command < /opt/swamp/sql/populate_tool_shed.sql
     $mysql_command < /opt/swamp/sql/populate_viewer_store.sql
-    $mysql_command < /opt/swamp/sql/populate_metric.sql
 
     echo "Running post-scripts"
     $mysql_command < /opt/swamp/sql/swamp_in_a_box_install_postscript.sql
@@ -127,11 +126,6 @@ function install_data() {
     swampadmin=${swampadmin//\'/\'\'}
     swampadmin=${swampadmin//\\/\\\\}
     echo "INSERT INTO user (user_uid, username, password, first_name, last_name, preferred_name, email, affiliation, admin, enabled_flag) VALUES ('80835e30-d527-11e2-8b8b-0800200c9a66', 'admin-s', '${swampadmin}', 'System', 'Admin', 'admin', null, null, 1, 1);" | $mysql_command project
-
-    if [ -f /opt/swamp/thirdparty/codedx/vendor/codedx.war ]; then
-        echo "Installing Code Dx records (reason: found 'codedx.war')"
-        /opt/swamp/bin/install_codedx
-    fi
 }
 
 function upgrade_data() {
@@ -156,11 +150,6 @@ function upgrade_data() {
     $mysql_command < /opt/swamp/sql/assessment_procs.sql
     $mysql_command < /opt/swamp/sql/viewer_store_procs.sql
     $mysql_command < /opt/swamp/sql/metric_procs.sql
-
-    if [ ! -f /opt/swamp/thirdparty/codedx/vendor/codedx.war ]; then
-        echo "Uninstalling Code Dx records (reason: 'codedx.war' not found)"
-        $mysql_command < /opt/swamp/sql/uninstall_codedx.sql
-    fi
 
     echo "Running post-scripts"
     $mysql_command < /opt/swamp/sql/swamp_in_a_box_upgrade_postscript.sql

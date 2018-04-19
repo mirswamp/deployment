@@ -10,7 +10,7 @@
 # copyright notice. Otherwise, exit with non-zero.
 #
 
-file_to_check="$1"
+file_to_check=$1
 copyright_string="Copyright 2012-2018 Software Assurance Marketplace"
 
 if [ -z "$file_to_check" ]; then
@@ -19,7 +19,7 @@ if [ -z "$file_to_check" ]; then
 fi
 
 if [ ! -r "$file_to_check" ]; then
-    echo "Error: No such file (or file is not readable): $file_to_check" 1>&2
+    echo "Error: File is not readable: $file_to_check" 1>&2
     exit 1
 fi
 

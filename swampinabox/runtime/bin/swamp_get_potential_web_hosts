@@ -10,12 +10,16 @@
 # and print out the hostnames (CNs) that they're issued for.
 #
 
-for cert_file in `grep -hr '^[[:space:]]*SSLCertificateFile' /etc/httpd/ | awk '{print $2}'`; do
+for cert_file in $(grep -hr '^[[:space:]]*SSLCertificateFile' /etc/httpd/ | awk '{print $2}') ; do
+    #
     # Trim leading and trailing whitespace because 'openssl' can't handle it.
+    #
     cert_file="${cert_file##[[:space:]]*}"
     cert_file="${cert_file%%[[:space:]]*}"
 
+    #
     # Print out the subject (CN) from the certificate.
+    #
     if [ -r "$cert_file" ]; then
         openssl x509 -noout -subject -in "$cert_file" | sed 's/^.*\/CN=//' | sed 's/\/.*$//'
     fi

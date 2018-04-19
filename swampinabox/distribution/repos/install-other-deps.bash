@@ -36,7 +36,7 @@ echo "#########################################"
 echo "##### Installing SWAMP dependencies #####"
 echo "#########################################"
 
-common_pkgs_to_install=(ant bind-utils git httpd libguestfs libguestfs-tools libguestfs-tools-c libvirt mod_ssl ncompress patch perl unzip zip)
+common_pkgs_to_install=(ant bind-utils curl git httpd libguestfs libguestfs-tools libguestfs-tools-c libvirt mod_ssl ncompress patch perl rubygems unzip zip)
 
 yum_install /usr/bin/scp "${common_pkgs_to_install[@]}"
 yum_confirm /usr/bin/scp "${common_pkgs_to_install[@]}"
