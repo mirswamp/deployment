@@ -17,4 +17,4 @@ condor-scientific-7.4-64-master-2018020201.qcow2
 condor-ubuntu-10.04-64-master-2016102702.qcow2
 condor-ubuntu-12.04-64-master-2016102702.qcow2
 condor-ubuntu-14.04-64-master-2016102702.qcow2
-condor-ubuntu-16.04-64-master-2018012401.qcow2
+condor-ubuntu-16.04-64-master-2018012491.qcow2

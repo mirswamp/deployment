@@ -70,7 +70,7 @@ sub get_status {
     my $command = $is_systemctl_avail ? 'show --property ActiveState' : 'status';
     my $status = tell_service($service, $command);
 
-    if ($status =~ /MySQL running|is running|=active/) {
+    if ($status =~ /MariaDB running|MySQL running|is running|=active/) {
         $status = 'running';
     }
     elsif ($status =~ /not running|stopped|=inactive|=failed/) {

@@ -1,3 +1,18 @@
+Noteworthy Changes in SWAMP-in-a-Box 1.33.1
+-------------------------------------------
+
+1. An updated version of the Ubuntu Linux version 16.04 platform is now
+available and will be automatically installed with SWAMP-in-a-Box 1.33.1.
+The updated platform no longer tries to update OS dependencies from
+less-reliable repositories, which should reduce the frequency with which
+assessments fail in the Install OS Dependencies step.
+
+2. We fixed a bug that caused assessments of Ruby packages to fail on the
+Assess step.
+
+3. General enhancements and bug fixes.
+
+
 Noteworthy Changes in SWAMP-in-a-Box 1.33
 -----------------------------------------
 

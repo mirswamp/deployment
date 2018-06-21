@@ -4,10 +4,18 @@ Support and Contact Information
 
 We welcome your feedback, contributions, and questions at:
 
-  * Email: sib@continuousassurance.org
-  * Phone: +1 (317) 274-3942
+  * Email: support@continuousassurance.org
 
-We also host a mailing list for the user community:
+To get updates on SWAMP-in-a-Box and be part of the user community, please
+join our mailing list:
 
   * Email: swampinabox@lists.discovery.wisc.edu
   * Sign up: https://lists.cosalab.org/mailman/listinfo/swampinabox
+
+To report a security incident or concern with SWAMP-in-a-Box, please contact
+us at:
+
+  * Email: security@continuousassurance.org
+
+You may encrypt your email for privacy using GPG (Key id#739202FA,
+fingerprint 2793 A0A7 4340 7587 FC2A 160F FE83 C695 7392 02FA).
