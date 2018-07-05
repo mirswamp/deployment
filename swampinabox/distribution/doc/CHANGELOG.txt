@@ -1,3 +1,10 @@
+Noteworthy Changes in SWAMP-in-a-Box 1.33.2
+-------------------------------------------
+
+1. We fixed a bug that caused assessments of Java 7 Source packages using
+the Maven, Gradle, or Ant+Ivy build systems to fail. 
+
+
 Noteworthy Changes in SWAMP-in-a-Box 1.33.1
 -------------------------------------------
 
