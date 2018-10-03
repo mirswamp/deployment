@@ -436,7 +436,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h1>SWAMP-in-a-Box Administrator Manual</h1>
 <div class="details">
 <span id="revnumber">version 1.33,</span>
-<span id="revdate">2018-06-14 15:04:21 -0500</span>
+<span id="revdate">2018-10-02 16:36:48 -0500</span>
 </div>
 <div id="toc" class="toc">
 <div id="toctitle">Table of Contents</div>
@@ -510,7 +510,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#support-and-contact-info">8. Support and Contact Information</a></li>
 <li><a href="#installing-dependencies">Appendix A: Installing Dependencies</a>
 <ul class="sectlevel2">
-<li><a href="#dependencies-htcondor">A.1. HTCondor 8.6</a></li>
+<li><a href="#dependencies-htcondor">A.1. HTCondor 8.7.8</a></li>
 <li><a href="#dependencies-mariadb">A.2. MariaDB 5.5</a></li>
 <li><a href="#dependencies-php">A.3. PHP 7.0</a></li>
 <li><a href="#dependencies-other">A.4. Other Assorted Utilities and Setup</a></li>
@@ -522,7 +522,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#about-code-dx">B.1. Code Dx</a></li>
 <li><a href="#about-codesonar">B.2. CodeSonar</a></li>
 <li><a href="#about-parasoft">B.3. Parasoft C/C++test and Parasoft Jtest</a></li>
-<li><a href="#about-coverity">B.4. Synopsys Static Analysis (Coverity)</a></li>
 </ul>
 </li>
 <li><a href="#_license_and_notices">Appendix C: License and Notices</a></li>
@@ -970,6 +969,23 @@ version.</p>
 </li>
 </ul>
 </div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<strong>Back up any customizations. The SWAMP-in-a-Box upgrade process will
+overwrite existing SWAMP files.</strong> Add on Tools, Platforms, and Viewers will
+be retained, as will customizations made to SWAMP-in-a-Box via configuration
+files (.env, config.json, swamp.conf, and services.conf). Any other
+customizations you have made by modifying SWAMP files will need to be
+reimplemented after an upgrade.
+</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -1243,13 +1259,10 @@ assessing packages.</p>
 <div class="ulist">
 <ul>
 <li>
-<p><a href="#about-codesonar">CodeSonar</a>,</p>
+<p><a href="#about-codesonar">CodeSonar</a>, and</p>
 </li>
 <li>
-<p><a href="#about-parasoft">Parasoft C/C++test</a>, and</p>
-</li>
-<li>
-<p><a href="#about-coverity">Synopsys Static Analysis (Coverity)</a>.</p>
+<p><a href="#about-parasoft">Parasoft C/C++test</a>.</p>
 </li>
 </ul>
 </div>
@@ -1305,7 +1318,6 @@ similar.</p>
 <dt class="hdlist1">CodeSonar</dt>
 <dt class="hdlist1">Parasoft C/C++test</dt>
 <dt class="hdlist1">Parasoft Jtest</dt>
-<dt class="hdlist1">Synopsys Static Analysis (Coverity)</dt>
 <dd>
 <p>Refer to the <a href="#obtaining-add-ons">appendix on obtaining add ons</a> for
 information on how to contact each tool&#8217;s vendor. Obtain one or both of the
@@ -1344,15 +1356,6 @@ parasoft_cpptest_engine_&lt;version&gt;_linux_x86_64.tar.gz  (64-bit)</pre>
 parasoft_jtest_&lt;version&gt;_linux_x86_64.tar.gz  (64-bit)</pre>
 </div>
 </div>
-<div class="paragraph">
-<p>The archives for Synopsis Static Analysis (Coverity) should be named:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>cov-analysis-linux-&lt;version&gt;.tar.gz    (32-bit)
-cov-analysis-linux64-&lt;version&gt;.tar.gz  (64-bit)</pre>
-</div>
-</div>
 </dd>
 <dt class="hdlist1">OWASP Dependency Check</dt>
 <dd>
@@ -1379,24 +1382,23 @@ you have write access to (for example, your home directory).</p>
 <dt class="hdlist1">CodeSonar</dt>
 <dt class="hdlist1">Parasoft C/C++test</dt>
 <dt class="hdlist1">Parasoft Jtest</dt>
-<dt class="hdlist1">Synopsys Static Analysis (Coverity)</dt>
 <dd>
 <p>Run the <code>make_swamp_tool</code> script to package the vendor&#8217;s installers into the
 archive format that the SWAMP uses.</p>
 <div class="listingblock">
 <div class="content">
 <pre>/opt/swamp/bin/make_swamp_tool \
-    --tool-name &lt;gt-csonar or coverity or ps-ctest or ps-jtest&gt; \
+    --tool-name &lt;gt-csonar or ps-ctest or ps-jtest&gt; \
     --tool-version &lt;version&gt; \
     --installer-linux32 &lt;path to 32-bit archive&gt; \
     --installer-linux64 &lt;path to 64-bit archive&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Specify <code>gt-csonar</code>, <code>coverity</code>, <code>ps-ctest</code>, or <code>ps-jtest</code> for the
-<code>--tool-name</code> option, depending on the tool being packaged. Omit the
-<code>--installer-linux32</code> option if you have only the 64-bit installer, and
-similarly for the <code>--installer-linux64</code> option.</p>
+<p>Specify <code>gt-csonar</code>, <code>ps-ctest</code>, or <code>ps-jtest</code> for the <code>--tool-name</code> option,
+depending on the tool being packaged. Omit the <code>--installer-linux32</code> option
+if you have only the 64-bit installer, and similarly for the
+<code>--installer-linux64</code> option.</p>
 </div>
 <div class="paragraph">
 <p>When <code>make_swamp_tool</code> completes, the output should include the path to the
@@ -1439,9 +1441,6 @@ with the following command line arguments:</p>
 for <code>&lt;id&gt;</code> include:</p>
 <div class="ulist">
 <ul>
-<li>
-<p><code>coverity</code>: Synopsys Static Analysis (Coverity)</p>
-</li>
 <li>
 <p><code>dependency-check</code>: OWASP Dependency Check</p>
 </li>
@@ -1505,7 +1504,6 @@ the size of the tool archive.</p>
 <dt class="hdlist1">CodeSonar</dt>
 <dt class="hdlist1">Parasoft C/C++test</dt>
 <dt class="hdlist1">Parasoft Jtest</dt>
-<dt class="hdlist1">Synopsys Static Analysis (Coverity)</dt>
 <dd>
 <p>Use the <code>--license-server-host</code> and <code>--license-server-port</code> options to
 specify the hostname of the license server to use and the port on which to
@@ -1914,7 +1912,7 @@ time they sign in.</p>
 a password reset the next time the user signs in.</p>
 </li>
 <li>
-<p>Contact Us and Report Security Incident pages (if enabled)
+<p>Contact Us and Report Security Incident pages (if enabled) may
 include a means to submit a message directly through the web interface.</p>
 </li>
 <li>
@@ -1990,8 +1988,8 @@ name you want to use as the sender of outgoing SWAMP emails.</p>
 <div class="paragraph">
 <p>Enabling "Contact Us" creates a Contact link in the SWAMP menu bar. This
 link provides access to the "Contact Us" page, which displays general
-contact information and, if email is enabled, provides a form for users to
-submit a contact/support message.</p>
+contact information. If email is enabled, this page can also be configured
+to provide a form for users to submit a contact/support message.</p>
 </div>
 <div class="paragraph">
 <p>Step 1: Modify <code>/var/www/html/config/config.json</code> to enable the "Contact Us"
@@ -2036,8 +2034,9 @@ removing parameters in this file.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Step 2: Modify <code>/var/www/swamp-web-server/.env</code> to configure contact message
-recipients. This is only necessary if outgoing email is enabled.</p>
+<p>Step 2: Optionally modify <code>/var/www/swamp-web-server/.env</code> to enable a web
+form and to configure contact message recipients. This is only applicable
+when outgoing email is enabled.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -2055,6 +2054,9 @@ that do <em>not</em> include spaces must <em>not</em> be enclosed in double-quot
 <div class="ulist">
 <ul>
 <li>
+<p>Set <code>APP_CONTACT_FORM</code> to "true"</p>
+</li>
+<li>
 <p>Set <code>MAIL_CONTACT_ADDRESS</code> to the email address of the recipient of
 "Contact Us" messages.</p>
 </li>
@@ -2070,9 +2072,9 @@ messages.</p>
 <div class="paragraph">
 <p>Enabling "Report Security Incident" creates a Security link on the SWAMP
 Contact Us page. This link provides access to the "Report Security Incident"
-page, which displays information about reporting a security incident and, if
-email is enabled, provides a form for users to submit a security incident
-report.</p>
+page, which displays information about reporting a security incident. If
+email is enabled, this page can also be configured to provide a form for
+users to submit a security incident report.</p>
 </div>
 <div class="paragraph">
 <p>You must have already enabled the "Contact Us" page (see above).</p>
@@ -2126,9 +2128,9 @@ removing parameters in this file.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Step 2: Modify <code>/var/www/swamp-web-server/.env</code> to configure security
-incident message recipients. This is only necessary if outgoing email is
-enabled.</p>
+<p>Step 2: Optionally modify <code>/var/www/swamp-web-server/.env</code> to enable a web
+form and to configure security incident message recipients. This is only
+applicable when outgoing email is enabled.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -2145,6 +2147,9 @@ that do <em>not</em> include spaces must <em>not</em> be enclosed in double-quot
 </div>
 <div class="ulist">
 <ul>
+<li>
+<p>Set <code>APP_CONTACT_FORM</code> to "true"</p>
+</li>
 <li>
 <p>Set <code>MAIL_SECURITY_ADDRESS</code> to the email address of the recipient of
 "Report Security Incident" messages.</p>
@@ -3912,7 +3917,7 @@ fingerprint 2793 A0A7 4340 7587 FC2A 160F FE83 C695 7392 02FA).</p>
 <div class="ulist">
 <ul>
 <li>
-<p><a href="#dependencies-htcondor">HTCondor 8.6</a>,</p>
+<p><a href="#dependencies-htcondor">HTCondor 8.7.8</a>,</p>
 </li>
 <li>
 <p><a href="#dependencies-mariadb">MariaDB 5.5</a>,</p>
@@ -3947,7 +3952,7 @@ on obtaining and extracting the installer.
 </table>
 </div>
 <div class="sect2">
-<h3 id="dependencies-htcondor">A.1. HTCondor 8.6</h3>
+<h3 id="dependencies-htcondor">A.1. HTCondor 8.7.8</h3>
 <div class="paragraph">
 <p>The set-up scripts for SWAMP-in-a-Box configure and download HTCondor from
 the repository hosted by the University of Wisconsin-Madison, generally
@@ -4234,44 +4239,6 @@ information for C/C++test or Jtest can be found at:</p>
 </ul>
 </div>
 </div>
-<div class="sect2">
-<h3 id="about-coverity">B.4. Synopsys Static Analysis (Coverity)</h3>
-<div class="paragraph">
-<p>SWAMP-in-a-Box can be used with Synopsys Static Analysis (Coverity).
-Synopsys Static Analysis is an accurate and comprehensive static analysis
-solution for finding critical quality defects and security violations. Its
-high-fidelity analysis delivers business relevant findings for developers
-and security audit teams alike. Synopsys' SAST solutions are uniquely
-designed to scale from safety-critical IoT software to global enterprise
-systems.</p>
-</div>
-<div class="paragraph">
-<p>Contact information for obtaining Synopsys Static Analysis (Coverity) and
-licensing information for Synopsys Static Analysis (Coverity) can be found at:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><a href="mailto:software-integrity-sales@synopsys.com">software-integrity-sales@synopsys.com</a>,</p>
-</li>
-<li>
-<p>U.S. Sales +1-800-873-8193,</p>
-</li>
-<li>
-<p>International Sales +1-415-321-5237, or</p>
-</li>
-<li>
-<p><a href="https://www.synopsys.com/software-integrity/security-testing/static-analysis-sast.html" class="bare">https://www.synopsys.com/software-integrity/security-testing/static-analysis-sast.html</a>.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Synopsys Static Analysis (Coverity) is third-party software maintained by
-Synopsys, Inc. Copyright 2018 Synopsys, Inc. Synopsys Static Analysis
-(Coverity) is a registered trademark of Synopsys, Inc. All rights reserved
-worldwide.</p>
-</div>
-</div>
 </div>
 </div>
 <div class="sect1">
@@ -4506,7 +4473,7 @@ License v3.0 (<a href="https://www.gnu.org/licenses/lgpl-3.0.en.html" class="bar
 <div id="footer">
 <div id="footer-text">
 Version 1.33<br>
-Last updated 2018-06-14 15:04:21 CDT
+Last updated 2018-10-02 16:36:48 CDT
 </div>
 </div>
 </body>

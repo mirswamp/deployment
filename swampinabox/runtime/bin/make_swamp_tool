@@ -30,7 +30,7 @@ use Config;
 my $verbose = 0;
 
 
-my $version = '1.2.4 (Mar 09, 2018)';
+my $version = '1.2.5 (Jul 19, 2018)';
 
 my %toolProps = (
 	'coverity'	=> {
@@ -144,7 +144,7 @@ options:
     --tool-version                  version of the tool
     --tool-config                   configuration string to configure tool
     --installer-linux               path to installer
-    --installer_linux32             path to 32-bit installer
+    --installer-linux32             path to 32-bit installer
     --installer-linux64             path to 64-bit installer
     --temp-dir                      temporary directory ($temp)
     --output-dir                 -o directory to place SWAMP packaged tool ($out)
@@ -899,8 +899,8 @@ sub ValidatePsCtestInstallers
     my ($version, $installerLinux, $installerLinux32, $installerLinux64) = @_;
 
     my @errors;
-    my $re32 = "(^|\/)parasoft_cpptest_engine_${version}_linux.tar.gz\$";
-    my $re64 = "(^|\/)parasoft_cpptest_engine_${version}_linux_x86_64.tar.gz\$";
+    my $re32 = "(^|\/)parasoft_cpptest_(?:engine|standard)_${version}_linux.tar.gz\$";
+    my $re64 = "(^|\/)parasoft_cpptest_(?:engine|standard)_${version}_linux_x86_64.tar.gz\$";
     my @reqFiles = ("cpptest/cpptestcli", "cpptest/bin/cpptestscan");
 
     if (defined $installerLinux32 && -f $installerLinux32)  {

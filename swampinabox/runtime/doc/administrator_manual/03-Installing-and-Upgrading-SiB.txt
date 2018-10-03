@@ -54,6 +54,14 @@ reset the passwords below.*
   be upgraded to 1.29 or 1.30, before upgrading them to a more recent
   version.
 
+[IMPORTANT]
+*Back up any customizations. The SWAMP-in-a-Box upgrade process will
+overwrite existing SWAMP files.* Add on Tools, Platforms, and Viewers will
+be retained, as will customizations made to SWAMP-in-a-Box via configuration
+files (.env, config.json, swamp.conf, and services.conf). Any other
+customizations you have made by modifying SWAMP files will need to be
+reimplemented after an upgrade.
+
 
 Run `yum update`
 ~~~~~~~~~~~~~~~~

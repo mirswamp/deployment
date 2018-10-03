@@ -33,7 +33,7 @@ enabled:
 * SWAMP Administrators can flag inactive users as hibernated. This forces
   a password reset the next time the user signs in.
 
-* Contact Us and Report Security Incident pages (if enabled)
+* Contact Us and Report Security Incident pages (if enabled) may
   include a means to submit a message directly through the web interface.
 
 * Emails are sent to notify users of events such as removal from project
@@ -78,8 +78,8 @@ that do _not_ include spaces must _not_ be enclosed in double-quotes.
 
 Enabling "Contact Us" creates a Contact link in the SWAMP menu bar. This
 link provides access to the "Contact Us" page, which displays general
-contact information and, if email is enabled, provides a form for users to
-submit a contact/support message.
+contact information. If email is enabled, this page can also be configured
+to provide a form for users to submit a contact/support message.
 
 Step 1: Modify `/var/www/html/config/config.json` to enable the "Contact Us"
 page and set display parameters.
@@ -108,12 +108,15 @@ Sample:
   },
 ----
 
-Step 2: Modify `/var/www/swamp-web-server/.env` to configure contact message
-recipients. This is only necessary if outgoing email is enabled.
+Step 2: Optionally modify `/var/www/swamp-web-server/.env` to enable a web
+form and to configure contact message recipients. This is only applicable
+when outgoing email is enabled.
 
 [NOTE]
 Any values that include spaces must be enclosed in double-quotes. Any values
 that do _not_ include spaces must _not_ be enclosed in double-quotes.
+
+* Set `APP_CONTACT_FORM` to "true"
 
 * Set `MAIL_CONTACT_ADDRESS` to the email address of the recipient of
   "Contact Us" messages.
@@ -126,9 +129,9 @@ that do _not_ include spaces must _not_ be enclosed in double-quotes.
 
 Enabling "Report Security Incident" creates a Security link on the SWAMP
 Contact Us page. This link provides access to the "Report Security Incident"
-page, which displays information about reporting a security incident and, if
-email is enabled, provides a form for users to submit a security incident
-report.
+page, which displays information about reporting a security incident. If 
+email is enabled, this page can also be configured to provide a form for 
+users to submit a security incident report.
 
 You must have already enabled the "Contact Us" page (see above).
 
@@ -165,13 +168,15 @@ Sample:
   },
 ----
 
-Step 2: Modify `/var/www/swamp-web-server/.env` to configure security
-incident message recipients. This is only necessary if outgoing email is
-enabled.
+Step 2: Optionally modify `/var/www/swamp-web-server/.env` to enable a web
+form and to configure security incident message recipients. This is only
+applicable when outgoing email is enabled.
 
 [NOTE]
 Any values that include spaces must be enclosed in double-quotes. Any values
 that do _not_ include spaces must _not_ be enclosed in double-quotes.
+
+* Set `APP_CONTACT_FORM` to "true"
 
 * Set `MAIL_SECURITY_ADDRESS` to the email address of the recipient of
   "Report Security Incident" messages.

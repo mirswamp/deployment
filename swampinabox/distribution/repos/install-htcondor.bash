@@ -21,7 +21,7 @@ echo "### Installing HTCondor ###"
 echo "###########################"
 
 os_version=$(get_os_ver)
-repo_file="$BINDIR/resources/htcondor-stable-rhel${os_version}.repo"
+repo_file="$BINDIR/resources/htcondor-development-rhel${os_version}.repo"
 
 if [ ! -r "$repo_file" ]; then
     echo "Error: No such file: $repo_file" 1>&2
@@ -42,7 +42,7 @@ rpm --import http://research.cs.wisc.edu/htcondor/yum/RPM-GPG-KEY-HTCondor
 # update' can't cause a newer, untested major version to be installed.
 #
 
-target_condor="8.6"
+target_condor="8.7.8"
 
 yum_install yum-plugin-versionlock
 yum_confirm yum-plugin-versionlock || exit_with_error
@@ -54,7 +54,7 @@ if yum versionlock list | grep -- :condor- 1>/dev/null 2>/dev/null ; then
 fi
 
 echo ""
-yum_install "condor-all-${target_condor}.*"
+yum_install "condor-all-${target_condor}"
 yum_confirm condor-all || exit_with_error
 
 echo ""

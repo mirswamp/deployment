@@ -45,7 +45,6 @@ AGENTPKGS= \
 	lib/SWAMP/Locking.pm \
 	lib/SWAMP/PackageTypes.pm \
 	lib/SWAMP/CodeDX.pm \
-	lib/SWAMP/Libvirt.pm \
 	lib/SWAMP/ThreadFix.pm \
 	lib/SWAMP/FloodlightAccess.pm \
 	lib/SWAMP/ScarfXmlReader.pm
@@ -77,7 +76,7 @@ COMMONSOURCES=SOURCES TEMPSOURCES $(destfiles) TEMPSOURCES/mysql_timezone.cnf TE
 # include common codedx codedx.war
 SWAMPTARBALL=SOURCES/swamp-1.tar.gz
 SWAMPCONF::
-	(cat ../config/swamp.conf; echo "buildnumber=$(BUILD_NUMBER)") > TEMPSOURCES/swamp.conf
+	cp ../config/swamp.conf TEMPSOURCES/swamp.conf
 $(SWAMPTARBALL): $(COMMONSOURCES) common resultparser codedx codedx.war SWAMPCONF
 	cp ../../lib/lib_mysqludf_sys.so TEMPSOURCES/Data_Server
 	cp ../../../db/backup_db TEMPSOURCES
@@ -89,7 +88,7 @@ $(SWAMPTARBALL): $(COMMONSOURCES) common resultparser codedx codedx.war SWAMPCON
 # include common codedx codedx.war
 SINGLESERVERTARBALL=SOURCES/singleserver-1.tar.gz
 SINGLESERVERCONF::
-	(cat ../config/swamp.conf.singleserver; echo "buildnumber=$(BUILD_NUMBER)") > TEMPSOURCES/swamp.conf
+	cp ../config/swamp.conf.singleserver TEMPSOURCES/swamp.conf
 $(SINGLESERVERTARBALL): $(COMMONSOURCES) resultparser common codedx codedx.war SINGLESERVERCONF
 	cp ../../lib/lib_mysqludf_sys.so TEMPSOURCES/Data_Server
 	cp ../../../db/backup_db TEMPSOURCES
@@ -102,7 +101,7 @@ $(SINGLESERVERTARBALL): $(COMMONSOURCES) resultparser common codedx codedx.war S
 # exclude codedx.war
 SWAMPINABOXTARBALL=SOURCES/swampinabox-1.tar.gz
 SWAMPINABOXCONF::
-	(cat ../config/swamp.conf.swampinabox; echo "buildnumber=$(BUILD_NUMBER)") > TEMPSOURCES/swamp.conf
+	cp ../config/swamp.conf.swampinabox TEMPSOURCES/swamp.conf
 $(SWAMPINABOXTARBALL): $(COMMONSOURCES) resultparser common codedx SWAMPINABOXCONF
 	cp ../../lib/lib_mysqludf_sys.so TEMPSOURCES/Data_Server
 	cp ../../../db/backup_db TEMPSOURCES
@@ -172,7 +171,7 @@ toolchain:
 	tar zxOf /swampcs/releases/cloc-$(CLOC_VERSION).tar.gz --strip-components 3 cloc-$(CLOC_VERSION)/noarch/in-files/cloc-$(CLOC_VERSION).tar.gz | tar zx -C TEMPSOURCES --strip-components 1 cloc-$(CLOC_VERSION)/cloc
 
 versioninfo:
-	echo SWAMP:$(RELEASE_NUMBER).$(BUILD_NUMBER) > TEMPSOURCES/versions.txt
+	echo buildnumber:$(BUILD_NUMBER) >> TEMPSOURCES/versions.txt
 	echo c-assess:$(C_ASSESS_VERSION) >> TEMPSOURCES/versions.txt
 	echo java-assess:$(JAVA_ASSESS_VERSION) >> TEMPSOURCES/versions.txt
 	echo ruby-assess:$(RUBY_ASSESS_VERSION) >> TEMPSOURCES/versions.txt
@@ -218,9 +217,7 @@ inventory:
 	cp ../../inventory/*.txt TEMPSOURCES/inventory/.
 
 swampinabox-runtime:
-	cp -r ../../swampinabox/runtime/bin/*      TEMPSOURCES/swampinabox/bin
-	cp -r ../../swampinabox/runtime/sbin/*     TEMPSOURCES/swampinabox/sbin
-	cp -r ../../swampinabox/distribution/doc/* TEMPSOURCES/swampinabox/doc
+	cp -r ../../swampinabox/runtime/*  TEMPSOURCES/swampinabox/.
 
 SOURCES:
 	mkdir -p $@

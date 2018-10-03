@@ -1,0 +1,1 @@
+condor-8.6.11-x86_64_<OS_VER>-stripped.tar.gz

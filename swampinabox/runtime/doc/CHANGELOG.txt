@@ -1,3 +1,30 @@
+Noteworthy Changes in SWAMP-in-a-Box 1.33.4
+-------------------------------------------
+
+1. An updated version of the Ubuntu Linux version 16.04 platform is now
+available and will be automatically installed with SWAMP-in-a-Box 1.33.4.
+
+2. SWAMP-in-a-Box now automatically re-tries (up to three additional 
+times) assessments that finish with an error related to networking. This 
+includes assessments for which a VM does not have network connectivity or 
+for which OS dependencies cannot be installed. In many cases these 
+assessments succeed on the first retry.
+
+3. SWAMP-in-a-Box administrators can now configure which viewer is 
+initially selected on the Assessment Results page. When SWAMP-in-a-Box 
+1.33.4 is installed, this configuration is set to use the Native Viewer.
+Note that this is only applicable if a third-party viewer has been added 
+to SWAMP-in-a-Box.
+
+4. Parasoft C/C++test versions 10.3.4 and 10.4.0 can now be added to a 
+SWAMP-in-a-Box installation. You must license Parasoft C/C++test and obtain 
+either the 32-bit or 64-bit tool archive files separately from Parasoft.
+
+5. Parasoft Jtest versions 10.3.4 and 10.4.0 can now be added to a 
+SWAMP-in-a-Box installation. You must license Parasoft Jtest and obtain 
+the 64-bit tool archive files separately from Parasoft. 
+
+
 Noteworthy Changes in SWAMP-in-a-Box 1.33.2
 -------------------------------------------
 

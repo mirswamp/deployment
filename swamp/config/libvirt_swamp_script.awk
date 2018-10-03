@@ -193,13 +193,18 @@ END {
     if(attrs["JobVMEvents"] == "true")
     {
     	print "<serial type='file'>" ;
-		print "<source path='" attrs["VM_WORKING_DIR"] "/events/JobVMEvents.log'/>" ;
+		print "<source path='" attrs["VM_WORKING_DIR"] "/JobVMEvents.log'/>" ;
 		print "<target port='1'/>" ;
 		print "</serial>" ;
     }
 
+    # Enable VMIP TTY
+	print "<serial type='file'>" ;
+	print "<source path='" attrs["VM_WORKING_DIR"] "/vmip.txt'/>" ;
+	print "<target port='2'/>" ;
+	print "</serial>" ;
 
-     print "</devices></domain>"
+    print "</devices></domain>"
 
     
     exit(0);

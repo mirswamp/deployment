@@ -13,6 +13,7 @@ TOMCATLOG="$TOMCATDIR/logs/catalina.out"
 RUNOUT="/mnt/out/run.out"
 RUNEPOCH="/mnt/out/run.epoch"
 EVENTOUT="/dev/ttyS1"
+VMIPOUT="/dev/ttyS2"
 shutdown_on_error=1
 
 # function to echo events to RUNOUT and EVENTOUT
@@ -32,19 +33,29 @@ echo `date +%s` > $RUNEPOCH
 cd /mnt/in
 
 # check for ip connectivity
-VMIP=$(ip -4 -o address show dev eth0  | awk '{print $4}' | sed -e's/\/.*$//')
+for i in {1..10}
+do
+	VMIP=$(ip route get 1 | awk '{print $7; exit}')
+	# this will implicitly wait for 1 second between each of 3 pings
+	ping -c 3 $VMIP
+	if [ $? == 0 ]
+	then
+		break
+	fi
+done
 echo "$VMIP `hostname`" >> /etc/hosts
 ping -c 3 `hostname`
 if [ $? != 0 ]
 then
-    	record_event NOIP "ERROR: NO IP ADDRESS"
-		if [ $shutdown_on_error -eq 1 ]
-		then
-			record_event NOIPSHUTDOWN "Shutting down $VIEWER viewer via run.sh"
-			shutdown -h now
-			exit
-		fi
+	record_event NOIP "ERROR: NO IP ADDRESS"
+	if [ $shutdown_on_error -eq 1 ]
+	then
+		record_event NOIPSHUTDOWN "Shutting down $VIEWER viewer via run.sh"
+		shutdown -h now
+		exit
+	fi
 fi
+echo $VMIP > $VMIPOUT
 
 # set viewer database backup as shutdown service
 cp /mnt/in/swamp-shutdown-service /etc/init.d/.

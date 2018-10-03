@@ -130,6 +130,34 @@ to "false". Note that in order to show lines-of-code, metric analysis must
 be enabled, and by default, SWAMP-in-a-Box installations do not have metric
 analysis enabled.
 
+`APP_CONTACT_FORM`::
+Whether a web form is provided to submit Contact messages. When set to
+"true", and if email is enabled, the Contact Us page provides a web form to 
+submit contact messages to the configured contact address. Likewise, the 
+Submit Security Incident page provides a web form to submit security 
+messages to the configures security address. When set to "false", these 
+pages provide a mailto link to the corresponding addresses.
+
++
+The SWAMP-in-a-Box installer sets this parameter to "false". This is 
+applicable only when SWAMP-in-a-Box is configured to enable "Contact Us"
+or "Report Security Incident".
+
+`APP_SIGN_UP`::
+Whether SWAMP-in-a-Box provides a means for new users to sign-up for 
+accounts. When set to "false", the Sign-Up button is removed from the 
+Home page. The SWAMP-in-a-Box installer sets this to "true"
+
++
+Note that if SWAMP-in-a-Box is configured to use a read-only LDAP server
+for user management the "Sign-Up" button will not be present on the Home 
+page regardless of this setting.
+
+`APP_DEFAULT_VIEWER`::
+The result viewer selected by default on the Assessment Results page. Set 
+this to either "Native" or "Code DX". The SWAMP-in-a-Box installer sets this
+parameter to "Native".
+
 
 HTCondor Settings
 ~~~~~~~~~~~~~~~~~
@@ -150,8 +178,8 @@ application.
 
 SWAMP-in-a-Box is installed with outgoing email disabled. Prior to enabling
 and configuring outgoing email (instructions can be found in the
-SWAMP-in-a-Box User Manual), you must first configure an outgoing email
-server for use with the SWAMP-in-a-Box host.
+SWAMP-in-a-Box Administrator Manual), you must first configure an outgoing 
+email server for use with the SWAMP-in-a-Box host.
 
 `MAIL_ENABLED`::
 

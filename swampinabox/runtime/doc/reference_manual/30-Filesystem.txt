@@ -6,14 +6,21 @@ SWAMP-in-a-Box's File System
 Configuration Files
 ~~~~~~~~~~~~~~~~~~~
 
+`/var/www/swamp_web_server/.env`::
+`/var/www/html/config/config.json`::
+
+SWAMP web application configuration files. Directions for modifying `.env` 
+and `config.json` can be found in this document and in the SWAMP-in-a-Box 
+Administrator Manual.
+
 `/opt/swamp/etc/swamp.conf`::
 `/opt/swamp/etc/log4perl.conf`::
 `/opt/swamp/etc/services.conf`::
 `/opt/swamp/etc/swampmonitor.conf`::
 
 SWAMP backend configuration files. Directions for modifying `swamp.conf` can
-be found in the SWAMP-in-a-Box User Manual. There should be no need to
-directly modify `log4perl.conf`, `services.conf`, and `swampmonitor.conf`.
+be found in the SWAMP-in-a-Box Administrator Manual. There should be no need 
+to directly modify `log4perl.conf`, `services.conf`, or `swampmonitor.conf`.
 
 `/etc/condor/condor_config`::
 `/etc/condor/config.d/swampinabox_*.conf`::

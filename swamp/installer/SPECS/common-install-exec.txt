@@ -29,7 +29,6 @@ install -m 644 lib/SWAMP/vmu_ViewerSupport.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5
 
 install -m 644 lib/SWAMP/Locking.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Locking.pm
 install -m 644 lib/SWAMP/PackageTypes.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/PackageTypes.pm
-install -m 644 lib/SWAMP/Libvirt.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Libvirt.pm
 install -m 644 lib/SWAMP/FloodlightAccess.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/FloodlightAccess.pm
 install -m 644 lib/SWAMP/ScarfXmlReader.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/ScarfXmlReader.pm
 

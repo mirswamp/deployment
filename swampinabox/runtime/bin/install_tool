@@ -211,7 +211,6 @@ Usage: $PROGRAM_NAME --tool <id> <--add|--remove|--replace|--configure> [options
 Manage the SWAMP's add-on tools on this host.
 
 Values for the --tool option, to select the tool to update (choose one):
-  coverity            Synopsys Static Analysis (Coverity)
   dependency-check    OWASP Dependency Check
   gt-csonar           GrammaTech CodeSonar
   ps-ctest            Parasoft C/C++test

@@ -70,29 +70,3 @@ information for C/C++test or Jtest can be found at:
 
   * swamp@parasoft.com, and
   * +1-719-424-7907.
-
-
-[[about-coverity]]
-Synopsys Static Analysis (Coverity)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-SWAMP-in-a-Box can be used with Synopsys Static Analysis (Coverity).
-Synopsys Static Analysis is an accurate and comprehensive static analysis
-solution for finding critical quality defects and security violations. Its
-high-fidelity analysis delivers business relevant findings for developers
-and security audit teams alike. Synopsys' SAST solutions are uniquely
-designed to scale from safety-critical IoT software to global enterprise
-systems.
-
-Contact information for obtaining Synopsys Static Analysis (Coverity) and
-licensing information for Synopsys Static Analysis (Coverity) can be found at:
-
-  * software-integrity-sales@synopsys.com,
-  * U.S. Sales +1-800-873-8193,
-  * International Sales +1-415-321-5237, or
-  * https://www.synopsys.com/software-integrity/security-testing/static-analysis-sast.html.
-
-Synopsys Static Analysis (Coverity) is third-party software maintained by
-Synopsys, Inc. Copyright 2018 Synopsys, Inc. Synopsys Static Analysis
-(Coverity) is a registered trademark of Synopsys, Inc. All rights reserved
-worldwide.

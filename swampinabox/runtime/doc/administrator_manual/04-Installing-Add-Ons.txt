@@ -62,9 +62,8 @@ assessing packages.
 
 For C/C++ packages, three additional tools can be installed:
 
-  * <<about-codesonar,CodeSonar>>,
-  * <<about-parasoft,Parasoft C/C++test>>, and
-  * <<about-coverity,Synopsys Static Analysis (Coverity)>>.
+  * <<about-codesonar,CodeSonar>>, and
+  * <<about-parasoft,Parasoft C/C++test>>.
 
 For Java packages, two additional tools can be installed:
 
@@ -95,7 +94,6 @@ similar.
 CodeSonar::
 Parasoft C/C++test::
 Parasoft Jtest::
-Synopsys Static Analysis (Coverity)::
 
 Refer to the <<obtaining-add-ons,appendix on obtaining add ons>> for
 information on how to contact each tool's vendor. Obtain one or both of the
@@ -135,15 +133,6 @@ parasoft_jtest_<version>_linux_x86.tar.gz     (32-bit)
 parasoft_jtest_<version>_linux_x86_64.tar.gz  (64-bit)
 ----
 
-+
-The archives for Synopsis Static Analysis (Coverity) should be named:
-
-+
-----
-cov-analysis-linux-<version>.tar.gz    (32-bit)
-cov-analysis-linux64-<version>.tar.gz  (64-bit)
-----
-
 OWASP Dependency Check::
 
 Visit https://platform.swampinabox.org/tool-archives/ and download the
@@ -166,7 +155,6 @@ you have write access to (for example, your home directory).
 CodeSonar::
 Parasoft C/C++test::
 Parasoft Jtest::
-Synopsys Static Analysis (Coverity)::
 
 Run the `make_swamp_tool` script to package the vendor's installers into the
 archive format that the SWAMP uses.
@@ -174,17 +162,17 @@ archive format that the SWAMP uses.
 +
 ----
 /opt/swamp/bin/make_swamp_tool \
-    --tool-name <gt-csonar or coverity or ps-ctest or ps-jtest> \
+    --tool-name <gt-csonar or ps-ctest or ps-jtest> \
     --tool-version <version> \
     --installer-linux32 <path to 32-bit archive> \
     --installer-linux64 <path to 64-bit archive>
 ----
 
 +
-Specify `gt-csonar`, `coverity`, `ps-ctest`, or `ps-jtest` for the
-`--tool-name` option, depending on the tool being packaged. Omit the
-`--installer-linux32` option if you have only the 64-bit installer, and
-similarly for the `--installer-linux64` option.
+Specify `gt-csonar`, `ps-ctest`, or `ps-jtest` for the `--tool-name` option,
+depending on the tool being packaged. Omit the `--installer-linux32` option
+if you have only the 64-bit installer, and similarly for the
+`--installer-linux64` option.
 
 +
 When `make_swamp_tool` completes, the output should include the path to the
@@ -219,7 +207,6 @@ with the following command line arguments:
 * `--tool <id>`: This specifies the tool being managed. Recognized values
   for `<id>` include:
 
-  ** `coverity`: Synopsys Static Analysis (Coverity)
   ** `dependency-check`: OWASP Dependency Check
   ** `gt-csonar`: GrammaTech CodeSonar
   ** `ps-ctest`: Parasoft C/C++test
@@ -262,7 +249,6 @@ As `root` (or using `sudo`), run the `install_tool` script with the
 CodeSonar::
 Parasoft C/C++test::
 Parasoft Jtest::
-Synopsys Static Analysis (Coverity)::
 
 Use the `--license-server-host` and `--license-server-port` options to
 specify the hostname of the license server to use and the port on which to

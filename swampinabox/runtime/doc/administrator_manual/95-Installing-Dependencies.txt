@@ -23,7 +23,7 @@ on obtaining and extracting the installer.
 
 
 [[dependencies-htcondor]]
-=== HTCondor 8.6 ===
+=== HTCondor 8.7.8 ===
 
 The set-up scripts for SWAMP-in-a-Box configure and download HTCondor from
 the repository hosted by the University of Wisconsin-Madison, generally
