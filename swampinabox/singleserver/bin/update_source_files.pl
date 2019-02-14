@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 use strict;
 use warnings;
@@ -105,9 +105,6 @@ my $dstpath = '/opt/swamp';
 update_source_files($srcpath, $dstpath, $diff, $update);
 
 # deployment support code
-$srcpath = "/home/$username/swamp/deployment/DenimGroup";
-$dstpath = '/opt/swamp/thirdparty/threadfix';
-update_source_files($srcpath, $dstpath, $diff, $update);
 $srcpath = "/home/$username/swamp/deployment/SecureDecisions";
 $dstpath = '/opt/swamp/thirdparty/codedx';
 update_source_files($srcpath, $dstpath, $diff, $update);

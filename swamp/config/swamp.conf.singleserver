@@ -1,5 +1,8 @@
 # Configuration file for SWAMP Singleserver
 
+# HTCondor installation location.
+htcondor_root = /opt/swamp/htcondor
+
 # HTCondor collector location. Set this on data server, submit, and execute node(s).
 htcondor_collector_host = HOSTNAME
 
@@ -9,7 +12,7 @@ dbPerlDsnPort = 3306
 dbPerlUser = java_agent
 dbPerlPass = <dataserver password>
 
-# agentMonitorHost and launchPadHost should point to the submit node. 
+# agentMonitorHost and launchPadHost should point to the submit node.
 # Set these values on the data server, submit, and execute node(s).
 agentMonitorHost = localhost
 agentMonitorPort = 8084
@@ -23,7 +26,7 @@ resultsFolder = /swamp/working/results/
 reporturl = https://HOSTNAME/results
 
 # Viewer VM timeout parameters. Set these on the execute node(s).
-# Frequency in minutes to execute checktimeout script in a viewer VM via cron. 
+# Frequency in minutes to execute checktimeout script in a viewer VM via cron.
 vruntimeout_frequency = 10
 # Number of seconds before an idle viewer VM is permitted to self-terminate
 vruntimeout_duration = 28800

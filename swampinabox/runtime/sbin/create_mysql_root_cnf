@@ -3,81 +3,67 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 #
-# Create a configuration file for use with 'mysql --defaults-file'
-# for logging into the database as the given user ('root' by default).
+# Create a configuration file for use with 'mysql --defaults-file'.
 #
 
-dest_file=$1
+encountered_error=0
+trap 'encountered_error=1 ; echo "Error (unexpected): $BASH_COMMAND" 1>&2' ERR
+set -o errtrace
 
-allow_overwrite=""
-db_user=""
-src_file=""
+unset CDPATH
+BINDIR=$(cd -- "$(dirname -- "$0")" && pwd)
+
+############################################################################
+
+cnf_file=$1
+db_user=root
+password_file=/etc/.mysql_root
 
 for option in "${@:2}" ; do
     case "$option" in
-        --allow-overwrite) allow_overwrite="yes" ;;
-        --password-file=*) src_file=${option#--password-file=} ;;
         --user=*)          db_user=${option#--user=} ;;
+        --password-file=*) password_file=${option#--password-file=} ;;
     esac
 done
 
-if [ "$(whoami)" != "root" ]; then
-    echo "Error: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
+if [ -z "$cnf_file" ]; then
+    echo "Usage: $0 <configuration file> [options]" 1>&2
     exit 1
 fi
-if [ -z "$dest_file" ]; then
-    echo "Usage: $0 <destination file> [options]" 1>&2
-    exit 1
+if [ ! -f "$password_file" ] || [ ! -r "$password_file" ]; then
+    password_file=/etc/.mysql
 fi
-if [ -e "$dest_file" ] && [ "$allow_overwrite" != "yes" ]; then
-    echo "Error: Already exists: $dest_file" 1>&2
-    exit 1
-fi
-if [ ! -z "$src_file" ] && [ ! -r "$src_file" ]; then
-    echo "Error: Unable to read password file: $src_file" 1>&2
+if [ ! -f "$password_file" ] || [ ! -r "$password_file" ]; then
+    echo "Error: Failed to find a readable password file" 1>&2
     exit 1
 fi
 
-#
-# For the password file, try a couple of defaults.
-#
-if [ -z "$src_file" ]; then
-    src_file="/etc/.mysql_root"
-fi
-if [ ! -r "$src_file" ]; then
-    src_file="/etc/.mysql"
-fi
-if [ ! -r "$src_file" ]; then
-    echo "Error: Unable to read default password files" 1>&2
-    exit 1
-fi
-
-#
-# For the database user, default to 'root'.
-#
-if [ -z "$db_user" ]; then
-    db_user="root"
-fi
+############################################################################
 
 #
 # In the options file for MySQL:
 #   - Quote values, in case they contain '#'.
-#   - Escape backslashes (the only character that needs escaping).
+#   - Escape backslashes, the only character that needs escaping.
 #
-# See: http://dev.mysql.com/doc/refman/5.7/en/option-files.html
+# Reference: http://dev.mysql.com/doc/refman/5.7/en/option-files.html
 #
 db_user=${db_user//\\/\\\\}
-db_password=$(openssl enc -d -aes-256-cbc -in "$src_file" -pass pass:swamp)
+db_password=$("$BINDIR"/decode_mysql_root "$password_file")
 db_password=${db_password//\\/\\\\}
 
 umask 0077
-touch "$dest_file"
-chmod 0600 "$dest_file"
+touch "$cnf_file"
+chmod u=rw,og="" "$cnf_file"
 
-echo "[client]" > "$dest_file"
-echo "user='$db_user'" >> "$dest_file"
-echo "password='$db_password'" >> "$dest_file"
-chmod 0400 "$dest_file"
+cat >"$cnf_file" <<EOF
+[client]
+user='$db_user'
+password='$db_password'
+EOF
+
+chmod u=r,og="" "$cnf_file"
+
+exit $encountered_error

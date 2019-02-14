@@ -1,7 +1,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 VIEWER="CodeDX"
 viewer="codedx"
@@ -64,35 +64,9 @@ chkconfig --add swamp-shutdown-service
 service swamp-shutdown-service start
 chmod +x /mnt/in/backup_viewerdb.sh
 
-# start the timeout script via cron and check timeout every CHECKTIMEOUT_FREQUENCY minutes
-chmod +x /mnt/in/checktimeout
-chmod +x /mnt/in/checktimeout.pl
-echo "*/$CHECKTIMEOUT_FREQUENCY * * * * root /mnt/in/checktimeout" >> /etc/crontab
-
-# untar legacy VIEWER viewer database if extant
-# this is legacy and should be done externally
-if [ -r viewerdb.tar.gz ]
-then
-	record_event LEGACYVIEWERDB "Restoring viewerdb.tar.gz"
-	tar tzf viewerdb.tar.gz --exclude=*/* >> $RUNOUT 2>&1
-    # /bin/rm -rf /var/lib/mysql/* >> $RUNOUT 2>&1
-    tar -C /var/lib/mysql -xzf viewerdb.tar.gz
-	echo "" >> $RUNOUT 2>&1
-fi
-
 # set ownership of mysql
 chown -R mysql:mysql /var/lib/mysql/* >> $RUNOUT 2>&1
 sed -i -e'/\[mysqld\]/c[mysqld]\nlower_case_table_names=2' /etc/my.cnf.d/server.cnf >> $RUNOUT 2>&1
-
-# untar viewer database restore script and webapp config bundle if extant
-# contains:
-# 	user database
-# 	user source code subdirectory structure
-if [ -r ${viewer}_viewerdb.tar.gz ]
-then
-	record_event VIEWERDB "Unbundle ${viewer}_viewerdb.tar.gz"
-	tar xzf ${viewer}_viewerdb.tar.gz
-fi
 
 # start mysql service
 record_event MYSQLSTART "Starting mysql service"
@@ -113,47 +87,44 @@ else
 fi
 
 # restore mysql database from scripts if extant 
-if [ ! -r viewerdb.tar.gz ] # new format, not legacy
+read -r mysqlpw < $MYSQLPWFILE
+# initialize mysql database
+if [ -r emptydb-mysql-${viewer}.sql ]
 then
-	read -r mysqlpw < $MYSQLPWFILE
-	# initialize mysql database
-	if [ -r emptydb-mysql-${viewer}.sql ]
-	then
-		record_event MYSQLEMPTY "Restoring $VIEWER viewer database from emptydb-mysql-${viewer}.sql"
-		mysql --user='root' --password="$mysqlpw" mysql < emptydb-mysql-${viewer}.sql >> $RUNOUT 2>&1
-		# reset root password
-		mysqladmin --user='root' --password="$mysqlpw" flush-privileges
-		mysqladmin --user='root' --password='m@r1ad8l3tm31n' password $mysqlpw
-		mysqladmin --user='root' --password="$mysqlpw" flush-privileges
-		echo "" >> $RUNOUT 2>&1
-	fi
-	# flush priveleges
-	if [ -r flushprivs.sql ]
-	then
-		record_event MYSQLGRANT "Granting privileges for $VIEWER viewer database from flushprivs.sql"
-		mysql --user='root' --password="$mysqlpw" mysql < flushprivs.sql >> $RUNOUT 2>&1
-		echo "" >> $RUNOUT 2>&1
-	fi
-	# drop and create viewer database
-	if [ -r resetdb-${viewer}.sql ]
-	then
-		record_event MYSQLDROP "Dropping $VIEWER viewer database from resetdb-${viewer}.sql"
-		mysql --user='root' --password="$mysqlpw" < resetdb-${viewer}.sql >> $RUNOUT 2>&1
-		echo "" >> $RUNOUT 2>&1
-	fi
-	# if a previously saved user database exists load it, 
-	if [ -r ${viewer}.sql ]
-	then
-		record_event USERDB "Restoring $VIEWER user database from ${viewer}.sql"
-		mysql --user='root' --password="$mysqlpw" ${viewer} < ${viewer}.sql >> $RUNOUT 2>&1
-		echo "" >> $RUNOUT 2>&1
-	# otherwise load empty database for this version of viewer
-	elif [ -r emptydb-${viewer}.sql ]
-	then
-		record_event EMPTYDB "Restoring $VIEWER viewer database from emptydb-${viewer}.sql"
-		mysql --user='root' --password="$mysqlpw" ${viewer} < emptydb-${viewer}.sql >> $RUNOUT 2>&1
-		echo "" >> $RUNOUT 2>&1
-	fi
+	record_event MYSQLEMPTY "Restoring $VIEWER viewer database from emptydb-mysql-${viewer}.sql"
+	mysql --user='root' --password="$mysqlpw" mysql < emptydb-mysql-${viewer}.sql >> $RUNOUT 2>&1
+	# reset root password
+	mysqladmin --user='root' --password="$mysqlpw" flush-privileges
+	mysqladmin --user='root' --password='m@r1ad8l3tm31n' password $mysqlpw
+	mysqladmin --user='root' --password="$mysqlpw" flush-privileges
+	echo "" >> $RUNOUT 2>&1
+fi
+# flush priveleges
+if [ -r flushprivs.sql ]
+then
+	record_event MYSQLGRANT "Granting privileges for $VIEWER viewer database from flushprivs.sql"
+	mysql --user='root' --password="$mysqlpw" mysql < flushprivs.sql >> $RUNOUT 2>&1
+	echo "" >> $RUNOUT 2>&1
+fi
+# drop and create viewer database
+if [ -r resetdb-${viewer}.sql ]
+then
+	record_event MYSQLDROP "Dropping $VIEWER viewer database from resetdb-${viewer}.sql"
+	mysql --user='root' --password="$mysqlpw" < resetdb-${viewer}.sql >> $RUNOUT 2>&1
+	echo "" >> $RUNOUT 2>&1
+fi
+# if a previously saved user database exists load it, 
+if [ -r ${viewer}.sql ]
+then
+	record_event USERDB "Restoring $VIEWER user database from ${viewer}.sql"
+	mysql --user='root' --password="$mysqlpw" ${viewer} < ${viewer}.sql >> $RUNOUT 2>&1
+	echo "" >> $RUNOUT 2>&1
+# otherwise load empty database for this version of viewer
+elif [ -r emptydb-${viewer}.sql ]
+then
+	record_event EMPTYDB "Restoring $VIEWER viewer database from emptydb-${viewer}.sql"
+	mysql --user='root' --password="$mysqlpw" ${viewer} < emptydb-${viewer}.sql >> $RUNOUT 2>&1
+	echo "" >> $RUNOUT 2>&1
 fi
 
 # unbundle ${viewer}_config if extant to new location outside of webapps
@@ -168,7 +139,7 @@ else
 	record_event EMPTYCONFIG "Creating empty $VIEWER config"
 	mkdir -p /var/lib/${viewer}/$PROJECT/config >> $RUNOUT 2>&1
 fi
-record_event PROPERTIESS "Copying ${viewer}.props and logback.xml to $VIEWER config"
+record_event PROPERTIES "Copying ${viewer}.props and logback.xml to $VIEWER config"
 cp ${viewer}.props /var/lib/${viewer}/$PROJECT/config >> $RUNOUT 2>&1
 cp logback.xml /var/lib/${viewer}/$PROJECT/config >> $RUNOUT 2>&1
 
@@ -180,6 +151,8 @@ ln -s $TOMCATVERSION $TOMCATDIR
 mkdir -p $TOMCATDIR/webapps/$PROJECT >> $RUNOUT 2>&1
 record_event WARFILE "Restoring $VIEWER webapp from ${viewer}.war"
 unzip -d $TOMCATDIR/webapps/$PROJECT ${viewer}.war
+# copy version file to config directory
+cp $TOMCATDIR/webapps/$PROJECT/WEB-INF/classes/version.properties /var/lib/codedx/$PROJECT/config
 
 # indicate that ${viewer} should skip initial installation
 touch /var/lib/codedx/$PROJECT/config/.installation >> $RUNOUT 2>&1
@@ -243,6 +216,12 @@ echo "" >> $RUNOUT 2>&1
 echo "`date +"%Y/%m/%d %H:%M:%S"`: Contents of $TOMCATDIR/webapps" >> $RUNOUT 2>&1
 ls -lart $TOMCATDIR/webapps >> $RUNOUT 2>&1
 
+# start the timeout script via cron and check timeout every CHECKTIMEOUT_FREQUENCY minutes
+record_event TIMERSTART "Starting checktimeout"
+chmod +x /mnt/in/checktimeout
+chmod +x /mnt/in/checktimeout.pl
+echo "*/$CHECKTIMEOUT_FREQUENCY * * * * root /mnt/in/checktimeout" >> /etc/crontab
+
 # viewer is up
 echo "" >> $RUNOUT 2>&1
 record_event VIEWERUP "$VIEWER viewer is UP"
@@ -251,3 +230,4 @@ record_event VIEWERUP "$VIEWER viewer is UP"
 echo BEGIN ifconfig >> $RUNOUT 2>&1
 ip -o -4 address show dev eth0 >> $RUNOUT 2>&1
 echo END ifconfig >> $RUNOUT 2>&1
+

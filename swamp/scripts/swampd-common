@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 ### BEGIN INIT INFO
 # Provides: swampd
@@ -35,7 +35,7 @@ pidfile=${PIDFILE-${SWAMP}/run/${mon}.pid}
 lockfile=/tmp/swamp.lck
 export PERLLIB=$PERLLIB:$SWAMP/perl5
 export PERL5LIB=$PERL5LIB:$SWAMP/perl5
-export PATH=/opt/perl5/perls/perl-5.18.1/bin:$PATH
+source /etc/profile.d/swamp.sh
 # See how we were called.
 case "$1" in
   start)
@@ -48,16 +48,17 @@ case "$1" in
     [ $RETVAL = 0 ] && touch ${lockfile}
 	;;
   stop)
-	# Stop daemons.
+	# Stop daemons. Provide delay to allow for graceful shutdown.
 	echo -n "Shutting down SWAMP: "
-	killproc -p ${pidfile} $mon
+	killproc -p ${pidfile} -d 10 $mon
     RETVAL=$?
 	echo
 	[ $RETVAL = 0 ] && rm -f ${lockfile} ${pidfile}
 	;;
   restart)
+	# Stop and start daemons. Provide delay for graceful shutdown.
 	$0 stop
-    sleep 2 # Give the existing daemon time to vacate
+    sleep 10
 	$0 start
 	;;
   reload)

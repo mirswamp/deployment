@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2019 Software Assurance Marketplace
+
+#
+# Check that 'kvm' virtualization is supported.
+#
+
+############################################################################
+
+function has_amd_svm_flag {
+    grep -i '\<svm\>' /proc/cpuinfo 1>/dev/null 2>&1
+}
+
+function has_intel_vmx_flag {
+    grep -i '\<vmx\>' /proc/cpuinfo 1>/dev/null 2>&1
+}
+
+#
+# If running as 'root', display information that might be helpful in
+# determining whether the host is running on bare metal versus in a virtual
+# machine.
+#
+if which dmidecode 1>/dev/null 2>&1 ; then
+    if [ "$(whoami)" = "root" ]; then
+        echo -n "Looking for system manufacturer ... "
+        dmidecode -s system-manufacturer
+        echo -n "Looking for system product name ... "
+        dmidecode -s system-product-name
+    fi
+fi
+
+#
+# Check that the necessary CPU extensions (flags) are present.
+#
+echo -n "Checking for CPU virtualization extensions ... "
+
+if has_amd_svm_flag ; then
+    echo "found svm"
+elif has_intel_vmx_flag ; then
+    echo "found vmx"
+else
+    echo "not found"
+    echo "" 1>&2
+    echo "Error: CPU virtualization extensions not found" 1>&2
+    echo "Perhaps try enabling Intel Virtual Technology extensions in the BIOS." 1>&2
+    exit 1
+fi
+
+#
+# Check that the 'kvm' kernel modules are loaded.
+#
+echo -n "Checking for the kvm kernel module ... "
+
+if lsmod | grep '\<kvm\>' 1>/dev/null 2>&1 ; then
+    echo "loaded"
+else
+    echo "not loaded"
+    echo "" 1>&2
+    echo "Error: The 'kvm' kernel module is not loaded" 1>&2
+    echo "Perhaps try loading the 'kvm' kernel module." 1>&2
+    exit 1
+fi
+
+echo -n "Checking for the kvm_amd and kvm_intel kernel modules ... "
+
+if lsmod | grep '\<kvm_amd\>' 1>/dev/null 2>&1 ; then
+    echo "kvm_amd loaded"
+elif lsmod | grep '\<kvm_intel\>' 1>/dev/null 2>&1 ; then
+    echo "kvm_intel loaded"
+else
+    echo "not loaded"
+    echo "" 1>&2
+    echo "Error: The 'kvm_amd' and 'kvm_intel' kernel modules are not loaded" 1>&2
+    echo "Perhaps try loading the 'kvm_amd' or 'kvm_intel' kernel module." 1>&2
+    exit 1
+fi

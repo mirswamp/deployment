@@ -51,8 +51,7 @@ Long-term Storage Files
 `/swamp/platforms/images`::
 
 Directory containing the virtual machine images for performing assessments
-and running the optional Code Dx viewer. The SWAMP-in-a-Box installer makes
-`/var/lib/libvirt/images` a symbolic link to this directory.
+and running the optional Code Dx viewer. 
 
 `/swamp/SCAProjects`::
 

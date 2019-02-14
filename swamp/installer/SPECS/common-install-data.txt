@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/bin
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/etc
@@ -52,16 +52,15 @@ install -m 400 Data_Server/Tool_Shed/populate_tool_shed.sql ${RPM_BUILD_ROOT}/op
 install -m 400 Data_Server/Tool_Shed/populate_tool_metadata.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Viewer_Store/populate_viewer_store.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 
-install -m 644 lib/SWAMP/vmu_Support.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_Support.pm
-install -m 644 lib/SWAMP/vmu_AssessmentSupport.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_AssessmentSupport.pm
-install -m 644 lib/SWAMP/vmu_ViewerSupport.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_ViewerSupport.pm
-
 install -m 400 Data_Server/Viewer_Store/install_codedx.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Viewer_Store/uninstall_codedx.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 SWAMP_in_a_Box/enable_metric_runs.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 
+install -m 644 lib/SWAMP/vmu_Support.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_Support.pm
+install -m 644 lib/SWAMP/vmu_AssessmentSupport.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_AssessmentSupport.pm
+install -m 644 lib/SWAMP/vmu_ViewerSupport.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/vmu_ViewerSupport.pm
+
 install -m 644 lib/SWAMP/CodeDX.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/CodeDX.pm
-install -m 644 lib/SWAMP/ThreadFix.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/ThreadFix.pm
 install -m 644 lib/SWAMP/Locking.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/Locking.pm
 install -m 644 lib/SWAMP/FrameworkUtils.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/FrameworkUtils.pm
 install -m 644 lib/SWAMP/PackageTypes.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/PackageTypes.pm
@@ -82,6 +81,7 @@ install -m 755 vmu_killrun.pl ${RPM_BUILD_ROOT}/opt/swamp/bin
 install -m 400 swamp.conf $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 644 no-build.xslt $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 644 log4perl.conf $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 dependencies.txt $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 755 swamp.sh $RPM_BUILD_ROOT/etc/profile.d
 
 install -m 400 Data_Server/Platform_Store/platforms/*          $RPM_BUILD_ROOT/opt/swamp/sql/platforms

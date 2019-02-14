@@ -1,0 +1,3 @@
+# Allow web server to obtain vm list via virsh for status page
+Defaults: apache !requiretty, !visiblepw
+apache       ALL = NOPASSWD: /usr/bin/virsh

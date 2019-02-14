@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 #
 # Install Code Dx.
@@ -24,6 +24,10 @@ codedx_install_sql="/opt/swamp/sql/install_codedx.sql"
 codedx_emptydb=""
 codedx_version=""
 codedx_properties="WEB-INF/classes/version.properties"
+
+source "$BINDIR/../sbin/db_support.functions"
+trap 'stty echo ; reset_db_support' EXIT
+trap 'stty echo ; reset_db_support ; exit 1' INT TERM
 
 ############################################################################
 
@@ -92,7 +96,9 @@ echo "Setting up empty Code Dx database for version $codedx_version"
 ln -sf "$codedx_emptydb" "$codedx_swamp/emptydb-codedx.sql"
 
 echo "Adding SWAMP database entries for Code Dx"
-"$BINDIR/../sbin/execute_sql_script" "$codedx_install_sql"
+setup_db_support
+do_mysql_command "$codedx_install_sql"
+reset_db_support
 
 ############################################################################
 

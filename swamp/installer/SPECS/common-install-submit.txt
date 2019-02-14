@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/bin
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/etc
@@ -33,6 +33,7 @@ install -m 755 vmu_AgentMonitor.pl $RPM_BUILD_ROOT/opt/swamp/bin
 install -m 755 vmu_LaunchPad.pl $RPM_BUILD_ROOT/opt/swamp/bin
 
 install -m 644 log4perl.conf $RPM_BUILD_ROOT/opt/swamp/etc
+install -m 644 dependencies.txt $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 400 swamp.conf $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 755 swamp.sh $RPM_BUILD_ROOT/etc/profile.d
 

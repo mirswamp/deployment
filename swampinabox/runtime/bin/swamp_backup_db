@@ -1,0 +1,105 @@
+#!/bin/bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2019 Software Assurance Marketplace
+
+echo
+echo "### Backing up the SWAMP's SQL databases"
+echo
+
+encountered_error=0
+trap 'encountered_error=1 ; echo "Error (unexpected): $BASH_COMMAND" 1>&2' ERR
+set -o errtrace
+
+unset CDPATH
+BINDIR=$(cd -- "$(dirname -- "$0")" && pwd)
+. "$BINDIR"/swamp_utility.functions
+
+output_dir=""
+
+############################################################################
+
+show_usage_and_exit() {
+    cat 1>&2 <<EOF
+Usage: $0 [options]
+
+Create a backup of the SWAMP's SQL tables and records.
+
+Options:
+  --output-dir=<DIR>  Save the backup into this directory
+  --help, -?          Display this message
+EOF
+    exit 1
+}
+
+for option in "$@" ; do
+    case "$option" in
+        --output-dir=*) output_dir=${option#--output-dir=} ;;
+
+        -\?|-h|-help|--help) show_usage_and_exit ;;
+
+        *)  echo "Error: Not a recognized option: $option" 1>&2
+            echo
+            show_usage_and_exit
+            ;;
+    esac
+done
+
+if [ -z "$output_dir" ]; then
+    echo "Error: '--output-dir' must be specified" 1>&2
+    echo
+    show_usage_and_exit
+fi
+if [ ! -d "$output_dir" ]; then
+    echo "Error: Not a directory: $output_dir" 1>&2
+    exit 1
+fi
+
+############################################################################
+
+trap 'reset_db_support' EXIT
+setup_db_support
+
+############################################################################
+
+now=$(date +"%Y%m%d_%H%M%S")
+destination=$output_dir/swamp_sql_db_backup_$now.sql
+
+cat <<EOF
+The backup will be saved into:
+
+    $destination
+
+Creating backup (this will take some time)
+EOF
+
+$mysqldump_command \
+    --opt \
+    --add-drop-database \
+    --add-drop-table \
+    --events \
+    --routines \
+    --databases \
+            assessment \
+            metric \
+            package_store \
+            platform_store \
+            project \
+            tool_shed \
+            viewer_store \
+    >"$destination"
+
+############################################################################
+
+reset_db_support
+
+if [ $encountered_error -eq 0 ]; then
+    echo
+    echo "Finished backing up the SWAMP's SQL databases"
+else
+    echo
+    echo "Finished backing up the SWAMP's SQL databases, but with errors" 1>&2
+fi
+exit $encountered_error

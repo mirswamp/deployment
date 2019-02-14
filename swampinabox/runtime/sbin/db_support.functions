@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 #
 # The functions below are meant to be called in pairs:
@@ -16,11 +16,13 @@
 # the pair was called.
 #
 
-mysql_password_file="/etc/.mysql_root"
-mysql_options_file="/opt/swamp/sql/sql.cnf"
+mysql_password_file=/etc/.mysql_root
+mysql_options_file=/opt/swamp/sql/sql.cnf
 mysql_command="mysql --defaults-file=$mysql_options_file -B -N"
+mysqldump_command="mysqldump --defaults-file=$mysql_options_file"
+tell_service=$BINDIR/../sbin/swamp_manage_service
 
-function mysql_password_file_is_readable() {
+function mysql_password_file_is_readable {
     #
     # Accommodate scripts that use '/etc/.mysql'.
     #
@@ -31,16 +33,16 @@ function mysql_password_file_is_readable() {
 #
 # Manage the file that stores the encrypted password.
 #
-mysql_password_file_needs_rm="no"
+mysql_password_file_needs_rm=no
 
-function create_mysql_password_file() {
+function create_mysql_password_file {
     if ! mysql_password_file_is_readable ; then
-        mysql_password_file_needs_rm="yes"
-        /opt/swamp/sbin/create_mysql_root "$mysql_password_file" --test
+        mysql_password_file_needs_rm=yes
+        $BINDIR/../sbin/create_mysql_root "$mysql_password_file" --test
     fi
 }
 
-function remove_mysql_password_file() {
+function remove_mysql_password_file {
     if [ "$mysql_password_file_needs_rm" != "no" ]; then
         rm -f "$mysql_password_file"
     fi
@@ -50,16 +52,16 @@ function remove_mysql_password_file() {
 #
 # Manage the options file for the 'mysql' client.
 #
-mysql_options_file_needs_rm="no"
+mysql_options_file_needs_rm=no
 
-function create_mysql_options_file() {
+function create_mysql_options_file {
     if [ ! -e "$mysql_options_file" ] && mysql_password_file_is_readable ; then
-        mysql_options_file_needs_rm="yes"
-        /opt/swamp/sbin/create_mysql_root_cnf "$mysql_options_file"
+        mysql_options_file_needs_rm=yes
+        $BINDIR/../sbin/create_mysql_root_cnf "$mysql_options_file"
     fi
 }
 
-function remove_mysql_options_file() {
+function remove_mysql_options_file {
     if [ "$mysql_options_file_needs_rm" != "no" ]; then
         rm -f "$mysql_options_file"
     fi
@@ -69,20 +71,26 @@ function remove_mysql_options_file() {
 #
 # Manage the MySQL service.
 #
-started_mysql_service="no"
+started_mysql_service=no
 
-function start_mysql_service() {
-    initial_mysql_service_status=$(/opt/swamp/sbin/swamp_manage_service mysql status)
+function start_mysql_service {
+    initial_mysql_service_status=$("$tell_service" mysql status)
 
     if [ "$initial_mysql_service_status" = "stopped" ]; then
-        started_mysql_service="yes"
-        /opt/swamp/sbin/swamp_manage_service mysql start
+        started_mysql_service=yes
+        echo "Telling the mysql system service to start"
+        "$tell_service" mysql start
     fi
 }
 
-function stop_mysql_service() {
+function stop_mysql_service {
     if [ "$started_mysql_service" != "no" ]; then
-        /opt/swamp/sbin/swamp_manage_service mysql stop
+        echo "Telling the mysql system service to stop"
+        "$tell_service" mysql stop
+
+        if [ "$("$tell_service" mysql status)" = "stopped" ]; then
+            started_mysql_service=no
+        fi
     fi
 }
 
@@ -91,7 +99,16 @@ function stop_mysql_service() {
 # Other utility functions.
 #
 
-function do_mysql_command() {
+function remove_db_password_files {
+    rm -f /etc/.mysql_root
+    rm -f /etc/.mysql_web
+    rm -f /etc/.mysql_java
+    rm -f /etc/.mysql_admin
+    rm -f /opt/swamp/sql/sql.cnf
+    stty echo 1>/dev/null 2>&1 || true
+}
+
+function do_mysql_command {
     for arg in "$@" ; do
         if [ ! -r "$arg" ]; then
             echo "Error: File is not readable: $arg" 1>&2
@@ -101,14 +118,15 @@ function do_mysql_command() {
     cat "$@" | $mysql_command
 }
 
-function setup_db_support() {
+function setup_db_support {
     start_mysql_service
     create_mysql_password_file
     create_mysql_options_file
 }
 
-function reset_db_support() {
+function reset_db_support {
     remove_mysql_options_file
     remove_mysql_password_file
     stop_mysql_service
+    stty echo 1>/dev/null 2>&1 || true
 }

@@ -40,8 +40,39 @@ in order for the system to continue functioning correctly. To set the new
 hostname, as `root` (or using `sudo`), run the following command:
 
 ----
-/opt/swamp/bin/swamp_set_web_host --force --hostname="<new hostname>"
+/opt/swamp/bin/swamp_set_web_host --hostname="<new hostname>"
 ----
+
+
+Backing Up and Restoring the SQL Database
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[IMPORTANT]
+SWAMP-in-a-Box uses MariaDB as its SQL database implementation. While it is
+technically possible to use MariaDB's `mysqldump` command and `mysql` shell
+to back up and restore the SQL database, that process will not account for
+changes to the database schemas and records between SWAMP-in-a-Box releases.
+
+The SWAMP-in-a-Box upgrade script creates a backup of the SWAMP's SQL
+database prior to upgrading it. A backup can also be created at any other
+time by running the following command as `root` (or using `sudo`):
+
+----
+/opt/swamp/bin/swamp_backup_db --output-dir=<DIR>
+----
+
+Replace `<DIR>` with the directory where the backup should be saved, and
+provide the database's `root` user's password when asked. The command's
+output will indicate where the backup has been saved.
+
+To restore the backup, run the following command as `root` (or using `sudo`):
+
+----
+/opt/swamp/bin/swamp_restore_db --sql-db-file=<FILE>
+----
+
+Replace `<FILE>` with the path to the file created by `swamp_backup_db`, and
+provide the database's `root` user's password when asked.
 
 
 Managing Disk Space
@@ -115,14 +146,35 @@ Managing HTCondor
 
 SWAMP-in-a-Box uses an HTCondor pool to run assessments and the
 <<add-on-viewers,optional Code Dx viewer>>. Each SWAMP assessment and viewer
-instance is submitted to the HTCondor pool as a single job. The `condor_q`
-and `condor_status` commands can be used to examine HTCondor's queue of jobs
-and the resources it has for running those jobs.
+instance is submitted to the HTCondor pool as a single job. The commands
+listed below can be used to examine and modify HTCondor's queue of jobs and
+the resources available to it for running those jobs.
 
 [TIP]
-The listings from `condor_q` and `condor_status -vm`, described below, can
-also be found in the SWAMP web application. As a SWAMP administrator, go to
+Much of the functionality provided by the commands listed below is also
+available through the SWAMP web application. As a SWAMP administrator, go to
 the System Overview page, and from there, to the Review Status page.
+
+[IMPORTANT]
+====
+SWAMP-in-a-Box installs and uses a "personal" HTCondor pool. As a result,
+HTCondor's commands are not in the shell's default search path, and each
+command must be run in an environment where `CONDOR_CONFIG` is set to the
+path to the SWAMP's HTCondor configuration file.
+
+Shells started after SWAMP-in-a-Box has been installed should automatically
+load `/etc/profile.d/swamp.sh`, which modifies the shell's environment so
+that the commands listed below may be run exactly as shown.
+
+When using `sudo` to run the commands, first run `sudo -i`, which starts
+a new shell that runs as `root`. Then run the commands as shown.
+Alternatively, explicitly specify the value for `CONDOR_CONFIG` and the full
+path to the command as part of the `sudo` command:
+
+----
+sudo CONDOR_CONFIG=/opt/swamp/htcondor/etc/condor_config /opt/swamp/htcondor/bin/<command> ...
+----
+====
 
 `condor_q`::
 
@@ -155,6 +207,17 @@ Lists all of the available resources that HTCondor can use to run jobs that
 require a virtual machine. All SWAMP jobs require a virtual machine. On
 a normally functioning system, there should be at least one "machine" in
 this list.
+
+`condor_release <job ID>`::
+
+Releases a job that is on-hold, which allows HTCondor to try scheduling and
+running the job again. This command must be run as `root` (or using `sudo`).
+
+`condor_rm <job ID>`::
+
+Removes a job from the queue. This command must be run as `root` (or using
+`sudo`). It can be used to remove a job from the queue, though this should
+not be necessary on a normally functioning system.
 
 
 Managing SWAMP Daemons

@@ -1,9 +1,9 @@
-#!/opt/perl5/perls/perl-5.18.1/bin/perl
+#!/usr/bin/env perl
 
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 #
 # Patch keys in a "key = val" configuration file.
@@ -22,9 +22,30 @@ use English qw( -no_match_vars );
 use Getopt::Long;
 use POSIX qw(strftime);
 
-use File::Slurp qw(read_file write_file);
-
 ############################################################################
+
+#
+# Return the contents of the given file as a string.
+#
+sub read_file {
+    my ($path) = @_;
+    local $INPUT_RECORD_SEPARATOR = undef;
+    open(my $fh, '<', $path) || die "Error: Failed to open: $path\n";
+    my $contents = <$fh>;
+    close($fh) || die "Error: Failed to close: $path\n";
+    return $contents;
+}
+
+#
+# Write the given string to the given file.
+#
+sub write_file {
+    my ($path, $contents) = @_;
+    open(my $fh, '>', $path) || die "Error: Failed to open: $path\n";
+    print {$fh} $contents || die "Error: Failed to write: $path\n";
+    close($fh) || die "Error: Failed to close: $path\n";
+    return;
+}
 
 #
 # Execute the given command, and return all its output and its status code.
@@ -131,21 +152,21 @@ Usage: $PROGRAM_NAME [required arguments] [options]
 Patch keys in a "key = val" configuration file.
 
 Required arguments:
-    -i file                 The configuration file to modify
-    --input file
-    --source file
-    --output file
-    --destination file
+    -i <file>           The configuration file to modify
+    --input <file>
+    --source <file>
+    --output <file>
+    --destination <file>
 
 Options (specify these in pairs, multiple times, as needed):
-    --key string            The key to add or modify
-    --val string            The value to set
+    --key <string>      The key to add or modify
+    --val <string>      The value to set
 
 Other options:
-    --no-space              Don't include spaces around the "="
-    --skip-disk             Don't write the updated destination to disk
-    --stdout                Display the updated destination on standard out
-    --help, -?              Display this message
+    --no-space          Don't include spaces around the "="
+    --skip-disk         Don't write the updated destination to disk
+    --stdout            Display the updated destination on standard out
+    --help, -?          Display this message
 EOF
 
     print $usage_message;

@@ -15,11 +15,11 @@ facility. The SWAMP originally went live in February 2014 as a web
 application at https://www.mir-swamp.org, where it provides continuous
 software assurance capabilities to developers and researchers.
 
-The SWAMP is funded by the Department of Homeland Security (DHS) Science and
-Technology Directorate, Homeland Security Advanced Research Projects Agency,
-Cyber Security Division (DHS S&T/HSARPA/CSD); BAA 11-02; and the Air Force
-Research Laboratory, Information Directorate under agreement number
-FA8750-12-2-0289.
+The SWAMP project is funded by the Department of Homeland Security (DHS)
+Science and Technology Directorate, Homeland Security Advanced Research
+Projects Agency, Cyber Security Division (DHS S&T/HSARPA/CSD); BAA 11-02;
+and the Air Force Research Laboratory, Information Directorate under
+agreement number FA8750-12-2-0289.
 
 
 What Is SWAMP-in-a-Box

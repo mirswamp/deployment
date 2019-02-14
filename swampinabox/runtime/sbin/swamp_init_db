@@ -1,0 +1,199 @@
+#!/bin/bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2019 Software Assurance Marketplace
+
+echo
+echo "### Initializing the SWAMP's SQL databases"
+echo
+
+encountered_error=0
+trap 'encountered_error=1 ; echo "Error (unexpected): $BASH_COMMAND" 1>&2' ERR
+set -o errtrace
+
+unset CDPATH
+BINDIR=$(cd -- "$(dirname -- "$0")" && pwd)
+. "$BINDIR"/../bin/swamp_utility.functions
+
+mode=""
+swamp_context=""
+
+############################################################################
+
+show_usage_and_exit() {
+    cat 1>&2 <<EOF
+Usage: $0 [options]
+
+Install or upgrade the SWAMP's SQL tables and records.
+
+Options:
+  -install       Install tables and records into empty/new databases
+  -upgrade       Upgrade tables and records to the current release
+  -distribution  Set up everything for a typical SWAMP-in-a-Box
+  -singleserver  Set up everything for a developer of SWAMP-in-a-Box
+  -help, -?      Display this message
+EOF
+    exit 1
+}
+
+for option in "$@" ; do
+    case "$option" in
+        -install|-upgrade)
+            mode=$option
+            ;;
+        -distribution|-singleserver)
+            swamp_context=$option
+            ;;
+        -\?|-h|-help|--help)
+            show_usage_and_exit
+            ;;
+        *)  echo "Error: Not a recognized option: $option" 1>&2
+            echo
+            show_usage_and_exit
+            ;;
+    esac
+done
+
+if [ -z "$mode" ]; then
+    echo "Error: Must specify either '-install' or '-upgrade'" 1>&2
+    echo
+    show_usage_and_exit
+fi
+if [ -z "$swamp_context" ]; then
+    echo "Error: Must specify either '-distribution' or '-singleserver'" 1>&2
+    echo
+    show_usage_and_exit
+fi
+
+############################################################################
+
+do_install() {
+    echo "Creating database users"
+
+    dbweb=$("$BINDIR"/decode_mysql_root /etc/.mysql_web)
+    dbweb=${dbweb//\'/\'\'}
+    dbweb=${dbweb//\\/\\\\}
+
+    dbjava=$("$BINDIR"/decode_mysql_root /etc/.mysql_java)
+    dbjava=${dbjava//\'/\'\'}
+    dbjava=${dbjava//\\/\\\\}
+
+    cat <<EOF | $mysql_command
+        use mysql;
+        CREATE USER 'web'@'%' IDENTIFIED BY '${dbweb}';
+        CREATE USER 'java_agent'@'%' IDENTIFIED BY '${dbjava}';
+        CREATE USER 'java_agent'@'localhost' IDENTIFIED BY '${dbjava}';
+EOF
+
+    echo "Installing 'sys_exec'"
+    do_mysql_command \
+        /opt/swamp/sql/sys_exec.sql
+
+    echo "Installing tables"
+    do_mysql_command \
+        /opt/swamp/sql/project_tables.sql \
+        /opt/swamp/sql/platform_store_tables.sql \
+        /opt/swamp/sql/package_store_tables.sql \
+        /opt/swamp/sql/assessment_tables.sql \
+        /opt/swamp/sql/viewer_store_tables.sql \
+        /opt/swamp/sql/tool_shed_tables.sql \
+        /opt/swamp/sql/metric_tables.sql
+
+    echo "Installing stored procedures"
+    do_mysql_command \
+        /opt/swamp/sql/project_procs.sql \
+        /opt/swamp/sql/platform_store_procs.sql \
+        /opt/swamp/sql/tool_shed_procs.sql \
+        /opt/swamp/sql/package_store_procs.sql \
+        /opt/swamp/sql/assessment_procs.sql \
+        /opt/swamp/sql/viewer_store_procs.sql \
+        /opt/swamp/sql/metric_procs.sql
+
+    echo "Populating tables"
+    do_mysql_command \
+        /opt/swamp/sql/populate_assessment.sql \
+        /opt/swamp/sql/populate_package_store.sql \
+        /opt/swamp/sql/populate_project.sql \
+        /opt/swamp/sql/populate_tool_shed.sql \
+        /opt/swamp/sql/populate_viewer_store.sql
+
+    echo "Running post-scripts"
+    do_mysql_command /opt/swamp/sql/swamp_in_a_box_install_postscript.sql
+
+    if [ "$swamp_context" = "-singleserver" ]; then
+        post_script=swamp_in_a_box_install_postscript_single_server.sql
+    else
+        post_script=swamp_in_a_box_install_postscript_distribution.sql
+    fi
+    do_mysql_command /opt/swamp/sql/"$post_script"
+
+    echo "Creating the SWAMP's 'admin-s' user"
+
+    swampadmin=$("$BINDIR"/decode_mysql_root /etc/.mysql_admin)
+    swampadmin=${swampadmin//\'/\'\'}
+    swampadmin=${swampadmin//\\/\\\\}
+
+    cat <<EOF | $mysql_command
+        use project;
+        INSERT INTO user (
+            user_uid,
+            username, password,
+            first_name, last_name, preferred_name,
+            email, affiliation, admin, enabled_flag
+        ) VALUES (
+            '80835e30-d527-11e2-8b8b-0800200c9a66',
+            'admin-s', '${swampadmin}',
+            'System', 'Admin', 'admin',
+            null, null, 1, 1
+        );
+EOF
+}
+
+############################################################################
+
+do_upgrade() {
+    echo "Running 'directory' upgrade scripts"
+    (cd -- /opt/swamp/sql/upgrades_directory && do_mysql_command upgrade_script.sql)
+
+    echo "Upgrading 'directory' stored procedures"
+    do_mysql_command /opt/swamp/sql/project_procs.sql
+
+    echo "Running 'dataserver' upgrade scripts"
+    (cd -- /opt/swamp/sql/upgrades_data && do_mysql_command upgrade_script.sql)
+
+    echo "Upgrading 'dataserver' stored procedures"
+    do_mysql_command \
+        /opt/swamp/sql/platform_store_procs.sql \
+        /opt/swamp/sql/tool_shed_procs.sql \
+        /opt/swamp/sql/package_store_procs.sql \
+        /opt/swamp/sql/assessment_procs.sql \
+        /opt/swamp/sql/viewer_store_procs.sql \
+        /opt/swamp/sql/metric_procs.sql
+}
+
+############################################################################
+
+trap 'reset_db_support' EXIT
+setup_db_support
+
+############################################################################
+
+case "$mode" in
+    -install|--install) do_install ;;
+    -upgrade|--upgrade) do_upgrade ;;
+esac
+
+############################################################################
+
+reset_db_support
+
+if [ $encountered_error -eq 0 ]; then
+    echo
+    echo "Finished initializing the SWAMP's SQL databases"
+else
+    echo
+    echo "Finished initializing the SWAMP's SQL databases, but with errors" 1>&2
+fi
+exit $encountered_error

@@ -1,7 +1,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 %define _target_os  Linux
 %define _arch       noarch
@@ -82,14 +82,6 @@ if [ "$1" = "1" ]; then
     chkconfig --add swamp
 fi
 chkconfig swamp on
-
-service_script="/opt/swamp/sbin/swamp_manage_service"
-echo "Starting service: swamp"
-if [ -x "$service_script" ]; then
-    "$service_script" swamp start
-else
-    service swamp start
-fi
 
 echo "Finished running post script"
 

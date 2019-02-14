@@ -1,0 +1,37 @@
+Configuring a Welcome Message for SWAMP-in-a-Box
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can configure SWAMP-in-a-Box to display a welcome message as a pop up 
+whenever a user accesses the SWAMP-in-a-Box home page (not signed in).
+
+You can use this to provide a welcome message, convey information about 
+your SWAMP-in-a-Box, or provide status information.
+
+
+==== Before You Begin ====
+
+* You need `root` access to the SWAMP-in-a-Box host.
+
+
+==== Modify `/var/www/html/config/config.json` with your message ====
+
+* Add a `notifications` array containing a `welcome` array.
+
+* Add `title` and `message` values to the `welcome` array.
+
+Note:
+
+* The `config.json` file defines parameters within JSON arrays. Therefore,
+  it is important to maintain the array format when editing, adding, or
+  removing parameters in this file.
+
+Sample:
+
+----
+  "notifications": {
+    "welcome": {
+      "message": "Your message here!",
+      "title": "Welcome to SWAMP-in-a-Box for <organization>"
+    }
+  },
+----

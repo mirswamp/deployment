@@ -1,10 +1,19 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 RUNOUT=/mnt/out/run.out
+SKIPPEDBUNDLE=/mnt/out/skippedbundle
 EVENTOUT="/dev/ttyS1"
+
+if ! grep 'viewer is UP' $RUNOUT
+then
+	echo "VIEWERDBBUNDLESKIP" > $EVENTOUT
+	touch $SKIPPEDBUNDLE
+	exit
+fi
+
 echo "VIEWERDBBACKUP" > $EVENTOUT
 echo "`date +"%Y/%m/%d %H:%M:%S"`: mysqldump to /mnt/out/codedx.sql"
 echo "`date +"%Y/%m/%d %H:%M:%S"`: mysqldump to /mnt/out/codedx.sql" >> $RUNOUT 2>&1

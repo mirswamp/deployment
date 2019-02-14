@@ -5,7 +5,6 @@ Installing Dependencies
 
 The software packages that SWAMP-in-a-Box depends on include:
 
-  * <<dependencies-htcondor>>,
   * <<dependencies-mariadb>>,
   * <<dependencies-php>>, and
   * <<dependencies-other,other assorted utilities>>.
@@ -20,22 +19,6 @@ In the sections below, `<installer-dir>` refers to the directory containing
 the SWAMP-in-a-Box installer. Refer back to the section on
 <<installing-sib,installing and upgrading SWAMP-in-a-Box>> for instructions
 on obtaining and extracting the installer.
-
-
-[[dependencies-htcondor]]
-=== HTCondor 8.7.8 ===
-
-The set-up scripts for SWAMP-in-a-Box configure and download HTCondor from
-the repository hosted by the University of Wisconsin-Madison, generally
-following the instructions provided on the project's home page at
-https://research.cs.wisc.edu/htcondor/index.html. The specific packages
-installed are `condor-all` and its dependencies.
-
-The following script will install HTCondor using the process described above:
-
-----
-<installer-dir>/repos/install-htcondor.bash
-----
 
 
 [[dependencies-mariadb]]
@@ -85,11 +68,11 @@ The following script will install PHP using the process described above:
 
 
 [[dependencies-other]]
-=== Other Assorted Utilities and Setup ===
+=== Other Assorted Utilities ===
 
-In addition to HTCondor, MariaDB, and PHP, the set-up scripts for
-SWAMP-in-a-Box download assorted software packages from CentOS's default
-repositories. The specific packages installed are:
+In addition to MariaDB and PHP, the set-up scripts for SWAMP-in-a-Box 
+download assorted software packages from CentOS's default repositories. The 
+specific packages installed are:
 
   * `ant`,
   * `bind-utils`,
@@ -104,15 +87,15 @@ repositories. The specific packages installed are:
   * `ncompress`,
   * `patch`,
   * `perl`,
+  * `perl-parent`,
+  * `python34`,
   * `rubygems`,
   * `unzip`,
   * `zip`,
 
 and their dependencies.
 
-The following script will install these packages and perform additional,
-necessary configuration of the SWAMP-in-a-Box host. It must be run after
-HTCondor, MariaDB, and PHP are installed, as described above:
+The following script will install these packages:
 
 ----
 <installer-dir>/repos/install-other-deps.bash

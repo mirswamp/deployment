@@ -1,0 +1,121 @@
+#!/bin/bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2019 Software Assurance Marketplace
+
+echo
+echo "### Restoring the SWAMP's SQL databases"
+echo
+
+encountered_error=0
+trap 'encountered_error=1 ; echo "Error (unexpected): $BASH_COMMAND" 1>&2' ERR
+set -o errtrace
+
+unset CDPATH
+BINDIR=$(cd -- "$(dirname -- "$0")" && pwd)
+RUNTIME=$BINDIR/..
+
+. "$RUNTIME"/bin/swamp_utility.functions
+
+############################################################################
+
+show_usage_and_exit() {
+    cat 1>&2 <<EOF
+Usage: $0 [options]
+
+Restore the SWAMP's SQL tables and records from a backup.
+
+Options:
+  --sql-db-file=<FILE>  Restore the tables and records from this backup
+  --help, -?            Display this message
+EOF
+    exit 1
+}
+
+############################################################################
+
+sql_db_file=""
+
+for option in "$@" ; do
+    case "$option" in
+        --sql-db-file=*) sql_db_file=${option#--sql-db-file=} ;;
+
+        -\?|-h|-help|--help) show_usage_and_exit ;;
+
+        *)  echo "Error: Not a recognized option: $option" 1>&2
+            echo
+            show_usage_and_exit
+            ;;
+    esac
+done
+
+if [ -z "$sql_db_file" ]; then
+    echo "Error: '--sql-db-file' must be specified" 1>&2
+    echo
+    show_usage_and_exit
+fi
+if [ ! -f "$sql_db_file" ]; then
+    echo "Error: Not a file: $sql_db_file" 1>&2
+    exit 1
+fi
+
+############################################################################
+
+cat <<EOF
+The restore process will *erase* all existing database records. Uploaded
+package archives and results from assessments on the file system will not be
+affected. However, depending on the backup you are restoring from, some of
+those packages and results might no longer be accessible from the SWAMP web
+application and SWAMP API, which is used by various SWAMP-related plugins.
+
+EOF
+printf 'Are you sure you want to proceed? [N/y] '
+read -r answer
+printf '\n'
+
+if [ "$answer" != "y" ]; then
+    exit 1
+fi
+
+############################################################################
+
+trap 'reset_db_support' EXIT
+setup_db_support
+
+############################################################################
+
+echo "Restoring the backup (this will take some time)"
+
+exit_with_error() {
+    echo
+    echo "Error: Failed to completely restore the backup" 1>&2
+    exit 1
+}
+
+#
+# Restore the backup.
+#
+do_mysql_command "$sql_db_file" || exit_with_error
+
+#
+# Run the upgrade scripts to ensure that the restored tables and records
+# are in sync with the current release.
+#
+"$RUNTIME"/sbin/swamp_init_db -upgrade -distribution || exit_with_error
+"$RUNTIME"/sbin/rebuild_platforms_db                 || exit_with_error
+"$RUNTIME"/sbin/rebuild_tools_db -distribution       || exit_with_error
+
+############################################################################
+
+reset_db_support
+
+if [ $encountered_error -eq 0 ]; then
+    echo
+    echo "Finished restoring the SWAMP's SQL databases"
+else
+    echo
+    echo "Finished restoring the SWAMP's SQL databases, but with errors" 1>&2
+fi
+exit $encountered_error

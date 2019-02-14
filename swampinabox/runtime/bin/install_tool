@@ -1,9 +1,9 @@
-#!/opt/perl5/perls/perl-5.18.1/bin/perl
+#!/usr/bin/env perl
 
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 #
 # Install an add-on tool on a SWAMP-in-a-Box.
@@ -20,11 +20,14 @@ use warnings;
 
 use English qw( -no_match_vars );
 use File::Basename;
+use File::Spec::Functions qw(catfile);
 use Getopt::Long;
 use POSIX qw(strftime);
 use Socket;
 
-use File::Slurp qw(read_file write_file);
+use FindBin;
+use lib "$FindBin::Bin/../perl5", '/opt/swamp/perl5';
+use SWAMP::SiB_Utilities qw(:all);
 
 #
 # These DB-related constants shouldn't ever be configurable by the user:
@@ -44,64 +47,6 @@ my @temp_objects = ($sql_options_file);
 ############################################################################
 
 #
-# Execute the given command, and return all its output and its status code.
-#
-sub do_command {
-    my ($cmd)  = @_;
-    my $output = qx($cmd 2>&1);    # capture both standard out and standard error
-    my $status = $CHILD_ERROR;
-    return ($output, $status);
-}
-
-#
-# Return the given string without leading and trailing whitespace.
-#
-sub trim {
-    my ($val) = @_;
-    if ($val) {
-        $val =~ s/^\s+|\s+$//g;
-    }
-    return $val;
-}
-
-#
-# Backslash escape all double quotes in the given string.
-#
-sub escape_dquotes {
-    my ($val) = @_;
-    if ($val) {
-        $val =~ s/"/\\"/g;
-    }
-    return $val;
-}
-
-#
-# Backslash escape all single quotes in the given string.
-#
-sub escape_squotes {
-    my ($val) = @_;
-    if ($val) {
-        $val =~ s/'/\\'/g;
-    }
-    return $val;
-}
-
-#
-# Create a backup copy of the given file.
-#
-sub backup_file {
-    my ($filename) = @_;
-    my $current_datetime = strftime('%Y%m%d%H%M%S', localtime);
-    my $old_filename     = escape_dquotes(qq($filename));
-    my $new_filename     = escape_dquotes(qq($filename.$current_datetime));
-    my ($output, $status) = do_command(qq(cp -p "$old_filename" "$new_filename"));
-    if ($status) {
-        exit_abnormally("Failed to create backup copy of: $filename", $output);
-    }
-    return;
-}
-
-#
 # Get the value for a key in the given string of "key = value" pairs.
 #
 sub get_key_val {
@@ -110,26 +55,6 @@ sub get_key_val {
 
     my @vals = ($config =~ /^[ \t]*$escaped_key[ \t]*=(.*)$/m);
     return $vals[0];
-}
-
-#
-# Add/update a key-value pair in the given string of "key = value" pairs.
-#
-sub merge_key_val {
-    my ($config, $key, $val, $no_space) = @_;
-    my $escaped_key       = quotemeta $key;
-    my $contains_key      = ($config =~ /^[ \t]*$escaped_key[ \t]*=/m);
-    my $ends_with_newline = ($config =~ /\n$/);
-    my $space             = ($no_space ? q() : q( ));
-    $val                  = ($no_space ? $val : trim($val));
-
-    if ($contains_key) {
-        $config =~ s/^[ \t]*$escaped_key[ \t]*=.*$/$key$space=$space$val/gm;
-    }
-    else {
-        $config .= ($ends_with_newline ? q() : qq(\n)) . "$key$space=$space$val\n";
-    }
-    return $config;
 }
 
 ############################################################################
@@ -149,33 +74,10 @@ sub toggle_terminal_echo {
 }
 
 #
-# Remove temporary files and directories.
-#
-sub remove_temp_objects {
-    my $object = pop @temp_objects;
-    while ($object) {
-        if (-f $object) {
-            unlink $object || print "Error: Failed to remove file: $object\n";
-        }
-        elsif (-d $object) {
-            rmdir $object || print "Error: Failed to remove directory: $object\n";
-        }
-        elsif (-e $object) {
-            print "Error: Not sure how to remove: $object\n";
-        }
-        $object = pop @temp_objects;
-    }
-    if (scalar @temp_objects > 0) {
-        print "Error: Failed to remove all temporary objects\n";
-    }
-    return;
-}
-
-#
 # Perform all necessary cleanup tasks (e.g., before exiting).
 #
 sub do_cleanup {
-    remove_temp_objects();
+    remove_temp_objects(\@temp_objects);
     return;
 }
 
@@ -186,23 +88,6 @@ local $SIG{INT}  = sub { do_cleanup(); toggle_terminal_echo(1); exit 1; };
 local $SIG{TERM} = sub { do_cleanup(); toggle_terminal_echo(1); exit 1; };
 
 ############################################################################
-
-sub exit_normally {
-    do_cleanup();
-    exit 0;
-}
-
-sub exit_abnormally {
-    my ($message, $details) = @_;
-    $message = trim($message);
-    $details = trim($details);
-
-    if ($message) {
-        print "Error: $message" . ($details ? " ($details)" : q()) . "\n";
-    }
-    do_cleanup();
-    exit 1;
-}
 
 sub show_usage_and_exit {    ## no critic (RequireFinalReturn)
     my $usage_message = <<"EOF";
@@ -247,8 +132,8 @@ sub get_options {
 
         # Where to find various configuration files
         'bundled-tools-inventory-file' => '/opt/swamp/etc/tools-bundled.txt',
-        'condor-limits-file' => '/etc/condor/config.d/swampinabox_90_concurrency_limits.conf',
-        'swamp-conf-file'    => '/opt/swamp/etc/services.conf',
+        'services-conf-file'           => '/opt/swamp/etc/services.conf',
+        'swamp-conf-file'              => '/opt/swamp/etc/swamp.conf',
 
         # Where to find supporting SQL scripts
         'tool-install-file'   => '/opt/swamp/sql/util/tool_install.sql',
@@ -390,7 +275,7 @@ sub get_options {
         }
     }
 
-    for my $key (qw(bundled-tools-inventory-file condor-limits-file swamp-conf-file tool-install-file tool-uninstall-file)) {
+    for my $key (qw(bundled-tools-inventory-file services-conf-file swamp-conf-file tool-install-file tool-uninstall-file)) {
         my $val = $options{$key};
         if (!-f $val) {
             push @errors, "Missing file from SWAMP installation: $val";
@@ -634,7 +519,7 @@ sub get_tool_version_uuid {
 ############################################################################
 
 sub update_license_server_config {
-    my ($options, $swamp_conf) = @_;
+    my ($options, $services_conf) = @_;
     my $license_server_host_key = $options->{'license-server-host-key'};
     my $host                    = $options->{'license-server-host'};
     my $license_server_port_key = $options->{'license-server-port-key'};
@@ -643,14 +528,14 @@ sub update_license_server_config {
     if ($license_server_host_key && $host && $license_server_port_key && $port) {
         print "Processing updates to license server configuration ($host, port $port)\n";
 
-        $swamp_conf = merge_key_val($swamp_conf, $license_server_host_key, $host);
-        $swamp_conf = merge_key_val($swamp_conf, $license_server_port_key, $port);
+        $services_conf = merge_key_val($services_conf, $license_server_host_key, $host);
+        $services_conf = merge_key_val($services_conf, $license_server_port_key, $port);
     }
-    return $swamp_conf;
+    return $services_conf;
 }
 
 sub update_tool_config {
-    my ($options, $swamp_conf) = @_;
+    my ($options, $services_conf) = @_;
     my $tool_conf_file = $options->{'tool-conf-file'} || q();
 
     if (-r $tool_conf_file) {
@@ -669,16 +554,16 @@ sub update_tool_config {
             if ($key) {
                 my $val = get_key_val($tool_conf, $key);
                 if (defined $val) {
-                    $swamp_conf = merge_key_val($swamp_conf, $key, $val);
+                    $services_conf = merge_key_val($services_conf, $key, $val);
                 }
             }
         }
     }
-    return $swamp_conf;
+    return $services_conf;
 }
 
 sub update_user_password_config {
-    my ($options, $swamp_conf) = @_;
+    my ($options, $services_conf) = @_;
     my $user_key     = $options->{'license-server-user-key'};
     my $password_key = $options->{'license-server-password-key'};
 
@@ -688,7 +573,7 @@ sub update_user_password_config {
 
         if (!($response =~ /^y(es)?$/i)) {
             print "Not updating configuration for license server user/password\n";
-            return $swamp_conf;
+            return $services_conf;
         }
 
         print 'Enter license server user: ';
@@ -702,10 +587,10 @@ sub update_user_password_config {
         print "\n";
         chomp $password;
 
-        $swamp_conf = merge_key_val($swamp_conf, $user_key, $user);
-        $swamp_conf = merge_key_val($swamp_conf, $password_key, $password);
+        $services_conf = merge_key_val($services_conf, $user_key, $user);
+        $services_conf = merge_key_val($services_conf, $password_key, $password);
     }
-    return $swamp_conf;
+    return $services_conf;
 }
 
 ############################################################################
@@ -762,25 +647,28 @@ sub update_swamp_config {
     #
     # Update the SWAMP's configuration.
     #
-    my $swamp_conf_file     = $options->{'swamp-conf-file'};
-    my $swamp_conf          = (-r $swamp_conf_file) ? read_file($swamp_conf_file) : q();
-    my $original_swamp_conf = $swamp_conf;
+    my $services_conf_file     = $options->{'services-conf-file'};
+    my $services_conf          = (-r $services_conf_file) ? read_file($services_conf_file) : q();
+    my $original_services_conf = $services_conf;
 
-    $swamp_conf = update_license_server_config($options, $swamp_conf);
-    $swamp_conf = update_tool_config($options, $swamp_conf);
-    $swamp_conf = update_user_password_config($options, $swamp_conf);
+    $services_conf = update_license_server_config($options, $services_conf);
+    $services_conf = update_tool_config($options, $services_conf);
+    $services_conf = update_user_password_config($options, $services_conf);
 
-    if ($swamp_conf ne $original_swamp_conf) {
-        print "Writing new version of '$swamp_conf_file'\n";
+    if ($services_conf ne $original_services_conf) {
+        print "Writing new version of '$services_conf_file'\n";
 
-        backup_file($swamp_conf_file);
-        write_file($swamp_conf_file, $swamp_conf);
+        backup_file($services_conf_file);
+        write_file($services_conf_file, $services_conf);
     }
 
     #
     # Update HTCondor's configuration.
     #
-    my $condor_limits_file = $options->{'condor-limits-file'};
+    my $swamp_conf_file    = $options->{'swamp-conf-file'};
+    my $swamp_conf         = (-r $swamp_conf_file) ? read_file($swamp_conf_file) : q();
+    my $htcondor_root      = trim(get_key_val($swamp_conf, 'htcondor_root'));
+    my $condor_limits_file = catfile($htcondor_root, 'local', 'config', 'swampinabox_90_concurrency_limits.conf');
     my $condor_limits_key  = $options->{'condor-limits-key'};
     my $limit              = $options->{'limit'};
 
@@ -799,7 +687,11 @@ sub update_swamp_config {
 
         print "Instructing HTCondor daemons to reconfigure themselves\n";
 
-        my ($output, $status) = do_command('condor_reconfig');
+        my $htcondor_root_arg   = make_shell_arg($htcondor_root);
+        my $htcondor_config_arg = qq(CONDOR_CONFIG=$htcondor_root_arg/etc/condor_config);
+        my $condor_reconfig     = qq($htcondor_config_arg $htcondor_root_arg/sbin/condor_reconfig);
+
+        my ($output, $status) = do_command($condor_reconfig);
         if ($status) {
             exit_abnormally('Failed to reconfigure HTCondor daemons', $output);
         }

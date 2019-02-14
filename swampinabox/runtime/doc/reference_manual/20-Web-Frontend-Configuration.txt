@@ -14,22 +14,6 @@ values for the parameters described below are stored as nested JSON objects.
 The remainder of this section describes the parameters.
 
 
-Web Services
-~~~~~~~~~~~~
-
-`servers.web`::
-
-The root URL used to access the SWAMP web application's routes. The
-SWAMP-in-a-Box installer sets this based on the hostname specified during
-the install process (usually, the host's detected hostname).
-
-+
-When the hostname changes, use the `/opt/swamp/bin/swamp_set_web_host`
-utility script to update this parameter, because that script will update not
-only this parameter but also all other configuration locations where the
-hostname is referenced.
-
-
 Contact Information
 ~~~~~~~~~~~~~~~~~~~
 
@@ -44,24 +28,24 @@ Support
 
 These parameters affect the display of information on the Contact Us page.
 
+`contact.support.description`::
+
+The description of the person or team receiving messages displayed for
+Contact Us messages.
+
 `contact.support.email`::
 
 The email address displayed for Contact Us messages. This should have the
 same value as the the `MAIL_CONTACT_ADDRESS` parameter in the
 <<backend-mail-settings,backend configuration file>>.
 
-`contact.support.phoneNumber`::
-
-The phone number displayed for Contact Us messages.
-
-`contact.support.description`::
-
-The description of the person or team receiving messages displayed for
-Contact Us messages.
-
 `contact.support.message`::
 
 Additional text displayed for Contact Us messages.
+
+`contact.support.phoneNumber`::
+
+The phone number displayed for Contact Us messages.
 
 
 Security
@@ -72,24 +56,24 @@ Incident page. If the `support` section is defined but the `security`
 section is not, the SWAMP web application does not provide a link from the
 Contact Us page to the Report Security Incident page.
 
+`contact.security.description`::
+
+The description of the person or team receiving messages displayed for
+Report Security Incident messages.
+
 `contact.security.email`::
 
 The email address displayed for Report Security Incident messages. This
 should have the same value as the `MAIL_SECURITY_ADDRESS` parameter in the
 <<backend-mail-settings,backend configuration file>>.
 
-`contact.security.phoneNumber`::
-
-The phone number displayed for Report Security Incident messages.
-
-`contact.security.description`::
-
-The description of the person or team receiving messages displayed for
-Report Security Incident messages.
-
 `contact.security.message`::
 
 Additional text displayed for Report Security Incident messages.
+
+`contact.security.phoneNumber`::
+
+The phone number displayed for Report Security Incident messages.
 
 
 Cookies
@@ -100,17 +84,17 @@ the state of various layout elements: the position of the navigation bar,
 the state of the Show Numbering flag, the state of the Auto Refresh flag,
 and the state of the Show Grouping flag.
 
-`cookie.name`::
-
-The name given to the SWAMP layout cookie. The SWAMP-in-a-Box installer sets
-this to "swamp".
-
 `cookie.domain`::
 
 The name of the domain for the SWAMP layout cookie. Set this to "null" to
 use the same domain name as in the `APP_URL` parameter in the
 <<backend-web-app,backend configuration file>>. The SWAMP-in-a-Box installer
-sets this "null".
+sets this to "null".
+
+`cookie.name`::
+
+The name given to the SWAMP layout cookie. The SWAMP-in-a-Box installer sets
+this to "swamp".
 
 `cookie.path`::
 
@@ -121,6 +105,23 @@ The path for SWAMP layout cookie. The SWAMP-in-a-Box installer sets this to
 
 Whether the SWAMP layout cookie is sent only for encrypted connections. The
 SWAMP-in-a-Box installer sets this to "true".
+
+
+Welcome Message
+~~~~~~~~~~~~~~~
+
+These parameters provide a message that is displayed in a pop-up when users 
+access the SWAMP-in-a-Box home page (not signed in). You can use it to 
+display a Welcome message or information about the status of your system. 
+When these parameters are not present, no message is displayed.
+
+`notifications.welcome.message`::
+
+The content of the message, which is displayed in a pop-up.
+
+`notifications.welcome.title`::
+
+The text displayed in the titlebar of the message pop-up.
 
 
 Other Configurable Behaviors
@@ -138,22 +139,36 @@ the Code Dx results viewer. The SWAMP-in-a-Box installer sets this to
 "true".
 
 
+Web Services
+~~~~~~~~~~~~
+
+`servers.web`::
+
+The path used to access the SWAMP web application's routes. The
+SWAMP-in-a-Box installer sets this based on the hostname specified during
+the install process (usually, the host's detected hostname). For
+SWAMP-in-a-Box this is set to the relative path from the SWAMP-in-a-Box URL
+to the API location "/swamp-web-server/public".  
+
++
+When the hostname changes, use the `/opt/swamp/bin/swamp_set_web_host`
+utility script to update this parameter, because that script will update not
+only this parameter but also all other configuration locations where the
+hostname is referenced.
+
+
 [[config-json-examples]]
 Examples
 ~~~~~~~~
 
 [example]
-.Without the `contact` Section
+.Without the `contact` or `notifications` Sections
 ====
 ----
 {
-  "servers": {
-    "web": "<Web application routes root URL>"
-  },
-
   "cookie": {
-    "name": "swamp",
     "domain": null,
+    "name": "swamp",
     "path": "/",
     "secure": true
   },
@@ -163,6 +178,10 @@ Examples
       "allow_multiple_tool_selection": true,
       "allow_viewing_zero_weaknesses": true
     }
+  },
+  
+  "servers": {
+    "web" : "/swamp-web-server/public"
   }
 }
 ----
@@ -170,35 +189,31 @@ Examples
 
 
 [example]
-.With the `contact` Section
+.With the `contact` and `notifications` Sections
 ====
 Parameters (lines) below whose sample value include "(optional)" may be
 omitted.
 
 ----
 {
-  "servers": {
-    "web": "<Web application routes root URL>"
-  },
-
   "contact": {
     "support": {
-      "email": "<Support email address (optional)>",
-      "phoneNumber": "<Support phone number (optional)>",
       "description": "Support staff",
-      "message": "Feel free to contact us with questions."
+      "email": "<Support email address (optional)>",
+      "message": "Feel free to contact us with questions.",
+      "phoneNumber": "<Support phone number (optional)>"
     },
     "security": {
-      "email": "<Security email address (optional)>",
-      "phoneNumber": "<Security phone number (optional)>",
       "description": "Security team",
-      "message": "<Security message here (optional)>"
+      "email": "<Security email address (optional)>",
+      "message": "<Security message here (optional)>",
+      "phoneNumber": "<Security phone number (optional)>"
     }
   },
-
+  
   "cookie": {
-    "name": "swamp",
     "domain": null,
+    "name": "swamp",
     "path": "/",
     "secure": true
   },
@@ -208,6 +223,19 @@ omitted.
       "allow_multiple_tool_selection": true,
       "allow_viewing_zero_weaknesses": true
     }
+  },
+  
+  "notifications": {
+    "welcome": {
+      "title": "Message Title",
+      "message": "Your message here!"
+    }
+  }
+}
+  
+  
+  "servers": {
+    "web" : "/swamp-web-server/public"
   }
 }
 ----

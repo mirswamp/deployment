@@ -3,54 +3,78 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
-echo ""
+echo
 echo "### Building SWAMP-in-a-Box Installer"
-echo ""
+echo
 
 encountered_error=0
 trap 'encountered_error=1 ; echo "Error (unexpected): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
 
 unset CDPATH
-BINDIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+BINDIR=$(cd -- "$(dirname -- "$0")" && pwd)
 
-############################################################################
-
-version_number=$1
-build_number=$2
+version_number=""
+build_number=""
 skip_rpms=""
 skip_tar_file=""
+
+############################################################################
 
 #
 # During development, it is sometimes convenient to reuse the RPMs from
 # a previous build or to skip tar'ing and untar'ing the installer archive.
 #
-for option in "${@:3}" ; do
-    case "$option" in
-        *skip-rpm*)       skip_rpms=yes ;;
-        *skip-tarball*)   skip_tar_file=yes ;;
-        *skip-tar-ball*)  skip_tar_file=yes ;;
-        *skip-tarfile*)   skip_tar_file=yes ;;
-        *skip-tar-file*)  skip_tar_file=yes ;;
-    esac
-done
-
-############################################################################
-
 show_usage_and_exit() {
     cat 1>&2 <<EOF
-Usage: $0 <version number> <build number> [options]
+Usage: $0 [options] <version number> <build number>
 
 Build the SWAMP-in-a-Box installer.
 
 Options:
   --skip-rpms      Do not build new RPMs (use ones built previously)
   --skip-tar-file  Do not build the installer tar file
+  --fast           Same as "--skip-rpms --skip-tar-file"
+  --help, -?       Display this message
 EOF
     exit 1
 }
+
+for option in "$@" ; do
+    case "$option" in
+        --skip-rpm)       skip_rpms=yes ;;
+        --skip-rpms)      skip_rpms=yes ;;
+        --skip-tarball)   skip_tar_file=yes ;;
+        --skip-tar-ball)  skip_tar_file=yes ;;
+        --skip-tarfile)   skip_tar_file=yes ;;
+        --skip-tar-file)  skip_tar_file=yes ;;
+        --fast)           skip_rpms=yes skip_tar_file=yes ;;
+
+        -\?|-h|-help|--help)
+            show_usage_and_exit
+            ;;
+
+        -*) echo "Error: Not a recognized option: $option" 1>&2
+            echo
+            show_usage_and_exit
+            ;;
+
+        *)  if [ -z "$version_number" ]; then
+                version_number=$option
+            elif [ -z "$build_number" ]; then
+                build_number=$option
+            else
+                echo "Error: Not a recognized argument: $option" 1>&2
+                echo
+                show_usage_and_exit
+            fi
+            ;;
+    esac
+done
+
+############################################################################
 
 if [ "$(whoami)" = "root" ]; then
     echo "Error: Refusing to run as 'root'" 1>&2
@@ -58,12 +82,12 @@ if [ "$(whoami)" = "root" ]; then
 fi
 if [ -z "$version_number" ]; then
     echo "Error: Required argument is missing: version number" 1>&2
-    echo "" 1>&2
+    echo
     show_usage_and_exit
 fi
 if [ -z "$build_number" ]; then
     echo "Error: Required argument is missing: build number" 1>&2
-    echo "" 1>&2
+    echo
     show_usage_and_exit
 fi
 
@@ -91,11 +115,14 @@ if [ "$skip_rpms" = "yes" ]; then
     rpm_file=$(find \
                     "$DEPLOYMENT"/swamp/RPMS -name "${rpm_name}-*.rpm" \
                 | head -n 1)
-    rpm_basename=$(basename -- "$rpm_file" .noarch.rpm)
-    rpm_version=${rpm_basename//${rpm_name}-/}
 
-    version_number=${rpm_version//-*/}
-    build_number=${rpm_version//*-/}
+    if [ -z "$rpm_file" ]; then
+        echo "Error: Failed to find previously-built RPMs" 1>&2
+        exit 1
+    fi
+
+    version_number=$(rpm -p -q --qf '%{VERSION}' "$rpm_file")
+    build_number=$(rpm -p -q --qf '%{RELEASE}' "$rpm_file")
 fi
 
 #
@@ -146,19 +173,10 @@ build_installer_tar_file() {
     mkdir -p "$BUILD_DIR"/sbin
 
     #
-    # Copy the installer scripts. The "singleserver" collection contains
-    # symlinks into the "runtime" collection, so follow those links and copy
-    # the actual files.
+    # Copy the installer scripts. Follow symlinks.
     #
-    cp -d  "$SIB_ROOT"/distribution/bin/*  "$BUILD_DIR"/bin/.
-    cp -rH "$SIB_ROOT"/singleserver/sbin/* "$BUILD_DIR"/sbin/.
-    cp     "$SIB_ROOT"/distribution/sbin/* "$BUILD_DIR"/sbin/.
-
-    #
-    # Copy runtime files that we need before the RPMs are installed.
-    #
-    cp "$SIB_ROOT"/runtime/sbin/create_mysql_root     "$BUILD_DIR/sbin/."
-    cp "$SIB_ROOT"/runtime/sbin/create_mysql_root_cnf "$BUILD_DIR/sbin/."
+    cp -RH "$SIB_ROOT"/distribution/bin/*  "$BUILD_DIR"/bin/.
+    cp -RH "$SIB_ROOT"/singleserver/sbin/* "$BUILD_DIR"/sbin/.
 
     #
     # Copy dependencies that are bundled with the installer.
@@ -168,7 +186,7 @@ build_installer_tar_file() {
 
     local htcondor_version
     htcondor_version=$(grep -o -E "condor-${version_re}" "$dependencies_conf")
-    htcondor_version=${htcondor_version//condor-/}
+    htcondor_version=$(printf '%s\n' "$htcondor_version" | sed -e 's/condor-//')
 
     cp /swampcs/htcondor/condor-"${htcondor_version}"-*.tar.gz "$BUILD_DIR"/dependencies/htcondor/.
 
@@ -194,8 +212,8 @@ build_installer_tar_file() {
     rm     "$BUILD_DIR"/sbin/swampinabox_build_rpms.bash
 
     #
-    # Ensure that file permissions are accurate.
-    # Assume that execute bits are set properly in source control.
+    # Ensure that file permissions are correct.
+    # Assume that execute bits are set correctly in source control.
     #
     chmod -R u=rwX,og=rX "$BUILD_DIR"
 
@@ -203,7 +221,7 @@ build_installer_tar_file() {
     # Final steps.
     #
     if [ "$skip_tar_file" = "yes" ]; then
-        echo ""
+        echo
         echo "Built directory: $BUILD_DIR"
         return 0
     fi
@@ -213,7 +231,7 @@ build_installer_tar_file() {
         -C "$(dirname -- "$BUILD_DIR")" \
         "$(basename -- "$BUILD_DIR")"
     rm -rf "$BUILD_DIR"
-    echo ""
+    echo
     echo "Built tar file: $INSTALLER_TAR_FILE"
 }
 
@@ -229,9 +247,12 @@ release_files() {
     # Copy the installer tar file and documentation.
     #
     mv "$INSTALLER_TAR_FILE"                                "$RELEASE_DIR"/.
-    cp "$SIB_ROOT"/runtime/doc/*_manual.{html,pdf}          "$RELEASE_DIR"/.
+    cp "$SIB_ROOT"/runtime/doc/*_manual.html                "$RELEASE_DIR"/.
+    cp "$SIB_ROOT"/runtime/doc/*_manual.pdf                 "$RELEASE_DIR"/.
     cp "$SIB_ROOT"/distribution/util/extract-installer.bash "$RELEASE_DIR"/.
-    sed -i -e "s/SED_VERSION/$version_number/" "$RELEASE_DIR"/extract-installer.bash
+    sed -i \
+        -e "s/SED_VERSION/$version_number/" \
+        "$RELEASE_DIR"/extract-installer.bash
 
     #
     # Generate MD5 checksums.
@@ -244,8 +265,8 @@ release_files() {
     done
 
     #
-    # Ensure that file permissions are accurate.
-    # Assume that execute bits are set properly in source control.
+    # Ensure that file permissions are correct.
+    # Assume that execute bits are set correctly in source control.
     #
     chmod -R u=rwX,og=rX "$RELEASE_DIR"
     find "$RELEASE_DIR" -type f -exec chmod ugo=rX '{}' ';'
@@ -253,7 +274,7 @@ release_files() {
     #
     # Final steps.
     #
-    echo ""
+    echo
     echo "Built release directory: $RELEASE_DIR"
     ls -lha "$RELEASE_DIR"
 }
@@ -270,10 +291,10 @@ build_installer_tar_file
 # Build the final installer bundle.
 #
 if [ ! -f "$INSTALLER_TAR_FILE" ] || [ "$skip_tar_file" = "yes" ]; then
-    echo ""
+    echo
     echo "Skipping release step: Did not make tar file"
 elif [ ! -d "$RELEASE_ROOT" ]; then
-    echo ""
+    echo
     echo "Skipping release step: Not a directory: $RELEASE_ROOT"
 else
     release_files
@@ -283,10 +304,10 @@ fi
 # Write out the final disposition of the build.
 #
 if [ $encountered_error -eq 0 ]; then
-    echo ""
+    echo
     echo "Finished building the installer"
 else
-    echo "" 1>&2
+    echo
     echo "Finished building the installer, but with errors" 1>&2
 fi
 exit $encountered_error

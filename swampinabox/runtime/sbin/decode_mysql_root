@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2019 Software Assurance Marketplace
+
+#
+# Decode an encrypted password file, and write the result to standard out.
+#
+
+password_file=$1
+
+if [ -z "$password_file" ]; then
+    echo "Usage: $0 <encrypted password file>" 1>&2
+    exit 1
+fi
+if [ ! -f "$password_file" ] || [ ! -r "$password_file" ]; then
+    echo "Error: Not a readable file: $password_file" 1>&2
+    exit 1
+fi
+
+openssl enc -d -aes-256-cbc -in "$password_file" -pass pass:swamp

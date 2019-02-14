@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 #
 # Configure Apache (httpd) for SWAMP-in-a-Box.
@@ -30,7 +30,7 @@ echo "Found httpd version $httpd_version"
 
 if [ -f "$httpd_conf_template" ]; then
     echo "Patching $httpd_conf"
-    diff -wu "$httpd_conf" "$httpd_conf_template" | patch "$httpd_conf"
+    diff -wu "$httpd_conf" "$httpd_conf_template" | patch -s "$httpd_conf"
 else
     echo "" 1>&2
     echo "Error: No such file: $httpd_conf_template" 1>&2
@@ -43,7 +43,7 @@ echo ""
 echo ""
 echo "Patching $php_ini"
 
-if ! /opt/swamp/sbin/swamp_patch_config -i "$php_ini" \
+if ! "$BINDIR/runtime/sbin/swamp_patch_config" -i "$php_ini" \
             --key post_max_size \
             --val 800M \
             --key upload_max_filesize \

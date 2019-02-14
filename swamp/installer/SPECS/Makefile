@@ -1,7 +1,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 rpms: submit exec dataserver dirserver
 
@@ -12,15 +12,10 @@ swampinabox-install.txt: common-install-*.txt swampinabox-install-*.txt
 	cat $^ | sort -u | grep "^mkdir" > $@
 	cat $^ | grep -v "^\s*\#" | sort -u | grep -v "^mkdir" >> $@
 
-swampinabox-nothreadfix-install.txt: common-install-*.txt swampinabox-install-*.txt
-	cat $^ | sort -u | grep "^mkdir" | grep -v threadfix > $@
-	cat $^ | sort -u | grep -v "^mkdir" | grep -v threadfix >> $@
-	mv $@ swampinabox-install.txt
-
-singleserver: clean swampinabox-files.txt swampinabox-nothreadfix-install.txt
+singleserver: clean swampinabox-files.txt swampinabox-install.txt
 	rpmbuild --verbose --define '_topdir $(TOPDIR)' -bb swampinabox-backend.spec
 
-swampinabox: clean swampinabox-files.txt swampinabox-nothreadfix-install.txt
+swampinabox: clean swampinabox-files.txt swampinabox-install.txt
 	rpmbuild --verbose --define '_topdir $(TOPDIR)' -bb swampinabox-backend.spec
 
 dirserver:
@@ -36,4 +31,4 @@ submit:
 	rpmbuild --verbose --define '_topdir $(TOPDIR)' -bb swamp-submit.spec
 
 clean:
-	rm -f swampinabox-files.txt swampinabox-install.txt swampinabox-nothreadfix-install.txt
+	rm -f swampinabox-files.txt swampinabox-install.txt

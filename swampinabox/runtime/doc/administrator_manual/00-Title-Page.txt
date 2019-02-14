@@ -1,1 +1,1 @@
-= SWAMP-in-a-Box Administrator Manual =
+= SWAMP-in-a-Box Administrator Manual

@@ -1,0 +1,119 @@
+#!/usr/bin/env perl
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2019 Software Assurance Marketplace
+
+#
+# Wait for the SWAMP's HTCondor installation to become generally available.
+#
+
+use utf8;
+use strict;
+use warnings;
+
+use Carp;
+use English qw( -no_match_vars );
+use Getopt::Long;
+
+use FindBin;
+use lib "$FindBin::Bin/../perl5", '/opt/swamp/perl5';
+use SWAMP::SiB_Utilities qw(:all);
+
+############################################################################
+
+sub show_usage_and_exit {
+    my $usage_message = <<"EOF";
+Usage: $PROGRAM_NAME [options]
+
+Wait for the SWAMP's HTCondor installation to become generally available.
+Specifically, wait until 'condor_q' can query the 'schedd' and until
+'condor_status' can find at least one execution slot capable of starting
+virtual machines.
+
+Options:
+  --help, -?  Display this message
+EOF
+    print $usage_message;
+    exit 1;
+}
+
+############################################################################
+
+sub wait_for_htcondor {
+    my ($swamp_conf_path) = @_;
+
+    #
+    # Determine the root directory of the HTCondor installation.
+    #
+    if (!defined $swamp_conf_path) {
+        $swamp_conf_path = '/opt/swamp/etc/swamp.conf';
+    }
+
+    my $swamp_conf    = read_file($swamp_conf_path);
+    my $htcondor_root = trim(get_key_val($swamp_conf, 'htcondor_root'));
+
+    if (!defined $htcondor_root) {
+        croak 'Error: Failed to determine the location of the HTCondor installation';
+    }
+
+    #
+    # Assemble the strings for the 'condor_q' and 'condor_status' commands.
+    #
+    my $htcondor_root_arg   = make_shell_arg($htcondor_root);
+    my $htcondor_config_arg = qq(CONDOR_CONFIG=$htcondor_root_arg/etc/condor_config);
+    my $condor_q_arg        = qq($htcondor_root_arg/bin/condor_q);
+    my $condor_status_arg   = qq($htcondor_root_arg/bin/condor_status);
+    my $condor_q            = qq($htcondor_config_arg $condor_q_arg);
+    my $condor_status       = qq($htcondor_config_arg $condor_status_arg);
+
+    #
+    # Poll 'condor_q' and 'condor_status'.
+    #
+    my $poll_condor_q      = qq($condor_q);
+    my $poll_condor_status = qq($condor_status -vm -af:, Name);
+    my $poll_interval      = 2;
+    my $poll_limit         = 15;    ## no critic (MagicNumbers)
+
+    print 'Waiting for HTCondor daemons to start ...';
+
+    for my $poll_command ($poll_condor_q, $poll_condor_status) {
+        my $tries = 0;
+
+        my ($output, $error) = do_command($poll_command);
+        my $ok = (!$error && defined $output && trim($output) ne q());
+
+        while (!$ok && $tries < $poll_limit) {
+            $tries += 1;
+            sleep $poll_interval;
+            print q(.);
+
+            ($output, $error) = do_command($poll_command);
+            $ok = (!$error && defined $output && trim($output) ne q());
+        }
+        if (!$ok) {
+            print " timed out\n";
+            return 1;
+        }
+    }
+    print " ok\n";
+    return 0;
+}
+
+############################################################################
+
+sub main() {
+    my %options = ();
+    my $ok = Getopt::Long::GetOptions(\%options, 'help|?');
+
+    if (!$ok || $options{'help'}) {
+        print "\n" if !$ok;
+        show_usage_and_exit();
+    }
+
+    return wait_for_htcondor();
+}
+
+my $exit_code = main();
+exit $exit_code;

@@ -3,14 +3,14 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
-#
-# Build the SWAMP RPMs for SWAMP-in-a-Box.
-#
+echo ""
+echo "### Building the SWAMP-in-a-Box RPMs"
+echo ""
 
 encountered_error=0
-trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1 ; echo "Error (unexpected): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
 
 BACKEND_TARGET=$1
@@ -18,39 +18,24 @@ WORKSPACE=$2
 RELEASE_NUMBER=$3
 BUILD_NUMBER=$4
 
-echo "Target:             $BACKEND_TARGET"
-echo "Workspace:          $WORKSPACE"
-echo "Release number:     $RELEASE_NUMBER"
-echo "Build number:       $BUILD_NUMBER"
-
-if [ -z "$BACKEND_TARGET" ]; then
-    echo "Error: BACKEND_TARGET is empty" 1>&2
-    exit 1
-fi
-if [ -z "$WORKSPACE" ]; then
-    echo "Error: WORKSPACE is empty" 1>&2
-    exit 1
-fi
-if [ -z "$RELEASE_NUMBER" ]; then
-    echo "Error: RELEASE_NUMBER is empty" 1>&2
-    exit 1
-fi
-
 export RELEASE_NUMBER
 export BUILD_NUMBER
-export PATH="/opt/perl5/perls/perl-5.18.1/bin:$PATH"
 
 startupdir=$(pwd)
 
+echo "Version: $RELEASE_NUMBER (build $BUILD_NUMBER)"
+echo "Target: $BACKEND_TARGET"
+echo "Workspace: $WORKSPACE"
+
 ############################################################################
 
-function do_make() {
+function do_make {
     make "$@" || exit_with_error
 }
 
-function exit_with_error() {
+function exit_with_error {
     echo "" 1>&2
-    echo "Error encountered." 1>&2
+    echo "Error: Build is NOT complete" 1>&2
     exit 1
 }
 
@@ -87,15 +72,16 @@ echo "=== Found the following RPMs for this build ==="
 echo "==============================================="
 cd "$startupdir"
 echo "Current working directory: $(pwd)"
-mkdir -p "$WORKSPACE/deployment/swamp/RPMS"
 rm -f "$WORKSPACE"/deployment/swamp/RPMS/*
-find "$WORKSPACE"/deployment/swamp/*/RPMS -name '*.rpm' -exec cp '{}' "$WORKSPACE/deployment/swamp/RPMS" ';' -print
+find "$WORKSPACE"/deployment/swamp/*/RPMS \
+    -name '*.rpm' \
+    -print \
+    -exec cp "{}" "$WORKSPACE/deployment/swamp/RPMS" ";"
 
 echo ""
 echo "================================="
 echo "=== Cleaning build byproducts ==="
 echo "================================="
-
 for package_dir in \
         "$WORKSPACE/deployment/swamp/runtime-installer" \
         "$WORKSPACE/deployment/swamp/installer" \
@@ -107,4 +93,11 @@ for package_dir in \
     do_make clean
 done
 
+############################################################################
+
+if [ $encountered_error -eq 0 ]; then
+    echo "Finished building the SWAMP-in-a-Box RPMs"
+else
+    echo "Finished building the SWAMP-in-a-Box RPMs, but with errors" 1>&2
+fi
 exit $encountered_error

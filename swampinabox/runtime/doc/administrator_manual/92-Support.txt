@@ -6,8 +6,8 @@ We welcome your feedback, contributions, and questions at:
 
   * Email: support@continuousassurance.org
 
-To get updates on SWAMP-in-a-Box and be part of the user community, please
-join our mailing list:
+To receive updates on SWAMP-in-a-Box and be part of the user community,
+please join our mailing list:
 
   * Email: swampinabox@lists.discovery.wisc.edu
   * Sign up: https://lists.cosalab.org/mailman/listinfo/swampinabox
@@ -17,5 +17,5 @@ us at:
 
   * Email: security@continuousassurance.org
 
-You may encrypt your email for privacy using GPG (Key id#739202FA,
+You may encrypt your email for privacy using GPG (key id#739202FA,
 fingerprint 2793 A0A7 4340 7587 FC2A 160F FE83 C695 7392 02FA).

@@ -166,7 +166,14 @@ HTCondor Settings
 
 The hostname of the HTCondor collector to contact for information about the
 SWAMP's currently running assessments. The SWAMP-in-a-Box installer sets
-this to "localhost.localdomain".
+this to "localhost".
+
+`HTCONDOR_ROOT`::
+
+The path to the root directory of the HT Condor process used for 
+SWAMP-in-a-Box assessments. SWAMP-in-a-Box sets this to 
+"/opt/swamp/htcondor", which is the location of the HT Condor instance 
+installed for SWAMP-in-a-Box.
 
 
 [[backend-mail-settings]]

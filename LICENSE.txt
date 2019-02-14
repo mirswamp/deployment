@@ -3,9 +3,9 @@ Software Assurance Marketplace (SWAMP) License
 The Software Assurance Marketplace (SWAMP) is released under the open source
 Apache License, Version 2.0, reproduced below.
 
-Additional notices for SWAMP can be found at the bottom of this page.
+Additional notices for SWAMP can be found following the license.
 
-______________________________________________________________________________
+............................................................................
 
                                  Apache License
                            Version 2.0, January 2004
@@ -184,32 +184,34 @@ ______________________________________________________________________________
 
    END OF TERMS AND CONDITIONS
 
-   Copyright 2012-2018 Software Assurance Marketplace
+   Copyright 2012-2019 Software Assurance Marketplace
 
+............................................................................
 
 NOTICES
 
 * This product includes HTCondor
-  (https://research.cs.wisc.edu/htcondor/index.html) software developed by the
-  Center for High Throughput Computing at the University of Wisconsin-Madison.
-  All rights reserved.  More details about the HTCondor license can be found
-  at https://research.cs.wisc.edu/htcondor/license.html.
+  (https://research.cs.wisc.edu/htcondor/index.html) software developed by
+  the Center for High Throughput Computing at the University of
+  Wisconsin-Madison. All rights reserved. Details about the HTCondor license
+  can be found at https://research.cs.wisc.edu/htcondor/license.html.
 
 * This product contains Laravel (https://laravel.com/), an open source PHP
-  framework licensed under the MIT license
-  (https://opensource.org/licenses/MIT).  Copyright Taylor Otwell.
+  framework licensed under the MIT License
+  (https://opensource.org/licenses/MIT). Copyright Taylor Otwell.
 
-* This product contains Code Dx, a commercial product created by Code Dx, Inc.
-  Copyright 2010-2018 Code Dx, Inc. All rights Reserved.  SWAMP has a
-  partnership with Code Dx, Inc. and offers a SWAMP specific version of Code
-  Dx software to be used solely with SWAMP software.  Code Dx software shall
-  not be redistributed with SWAMP software without written consent of SWAMP or
-  Code Dx, Inc.  Contact for licensing information and support for Code Dx can
-  be found at sales@codedx.com, +1-631-759-3993, or
+* This product contains Code Dx, a commercial product created by Code Dx,
+  Inc. Copyright 2010-2019 Code Dx, Inc. All rights reserved. SWAMP has
+  a partnership with Code Dx, Inc. and offers a SWAMP-specific version of
+  Code Dx software to be used solely with SWAMP software. Code Dx software
+  shall not be redistributed with SWAMP software without written consent of
+  SWAMP or Code Dx, Inc. Contact for licensing information and support for
+  Code Dx can be found at sales@codedx.com, +1-631-759-3993, or
   https://codedx.com/support/?v=7516fd43adaa.
 
-* This product includes a compiled, unmodified version of lib_mysql_sys
-  library, an open source library developed by Roland Bouman and Bernardo
-  Damele A.G. and licensed under LGPL v3.0, the GNU Lesser General Public
-  License v3.0 (https://www.gnu.org/licenses/lgpl-3.0.en.html).  Copyright
-  2007, 2008-2009 Roland Bouman and Bernardo Damele A.G. All rights reserved.
+* This product includes a compiled, unmodified version of lib_mysqludf_sys,
+  an open source library developed by Roland Bouman and Bernardo Damele A. G.
+  and licensed under the GNU Lesser General Public License v2.1
+  (https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html). Copyright
+  2007 Roland Bouman, 2008-2009 Roland Bouman and Bernardo Damele A. G. All
+  rights reserved.

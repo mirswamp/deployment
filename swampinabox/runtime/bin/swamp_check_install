@@ -1,9 +1,9 @@
-#!/opt/perl5/perls/perl-5.18.1/bin/perl
+#!/opt/swamp/bin/swamp_perl
 
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 #
 # Display diagnostic information about the SWAMP current installation.
@@ -18,8 +18,6 @@ use utf8;
 use strict;
 use warnings;
 
-use FindBin qw($Bin);
-use lib ("$Bin/../perl5", '/opt/swamp/perl5');
 use English qw( -no_match_vars );
 use File::Spec::Functions qw(catfile);
 use Getopt::Long;
@@ -30,6 +28,13 @@ use Log::Log4perl;
 use Log::Log4perl::Level;
 use Try::Tiny qw(try);
 
+use FindBin;
+use lib "$FindBin::Bin/../perl5", '/opt/swamp/perl5';
+
+use SWAMP::SiB_Utilities qw(
+  make_shell_arg
+  trim
+);
 use SWAMP::vmu_Support qw(
   database_connect
   database_disconnect
@@ -149,28 +154,6 @@ sub do_line_count_command {
         return;
     }
     return scalar split /^/, $output;
-}
-
-#
-# Return the given string without leading and trailing whitespace.
-#
-sub trim {
-    my ($val) = @_;
-    if ($val) {
-        $val =~ s/^\s+|\s+$//g;
-    }
-    return $val;
-}
-
-#
-# Backslash escape all double quotes in the given string.
-#
-sub escape_dquotes {
-    my ($val) = @_;
-    if ($val) {
-        $val =~ s/"/\\"/g;
-    }
-    return $val;
 }
 
 ############################################################################
@@ -305,7 +288,7 @@ sub check_system_service {
     my $passed_checks = 1;
 
     print "Checking the status of the $service system service ... ";
-    my $output = do_basic_command(qq("$Bin/../sbin/swamp_manage_service" "$service" status));
+    my $output = do_basic_command(qq("$FindBin::Bin/../sbin/swamp_manage_service" "$service" status));
 
     if (!defined $output) {
         $passed_checks = 0;
@@ -399,15 +382,37 @@ sub check_htcondor {
     # isn't running. It's possible for HTCondor to be running outside of the
     # system service.
     #
-    check_system_service('condor');
+    check_system_service('swamp-condor');
+
+    #
+    # Determine how to invoke the HTCondor command line utilities.
+    #
+    my $swamp_config = getSwampConfig();
+    if (!$swamp_config) {
+        add_error_line(q(Failed to load the SWAMP backend's configuration));
+        return;
+    }
+
+    my $htcondor_root = $swamp_config->get('htcondor_root');
+    if (!$htcondor_root) {
+        add_error_line(q(Failed to determine the location of the HTCondor installation));
+        return;
+    }
+
+    my $htcondor_root_arg   = make_shell_arg($htcondor_root);
+    my $htcondor_config_arg = qq(CONDOR_CONFIG=$htcondor_root_arg/etc/condor_config);
+    my $condor_q_arg        = qq($htcondor_root_arg/bin/condor_q);
+    my $condor_status_arg   = qq($htcondor_root_arg/bin/condor_status);
+    my $condor_q            = qq($htcondor_config_arg $condor_q_arg);
+    my $condor_status       = qq($htcondor_config_arg $condor_status_arg);
 
     if ($options->{'wait-for-condor'}) {
         print 'Waiting for HTCondor daemons to start ...';
 
         my $limit              = 15;
         my $poll_time          = 2;
-        my $poll_condor_q      = q(condor_q);
-        my $poll_condor_status = q(condor_status -vm -af:, Name);
+        my $poll_condor_q      = qq($condor_q);
+        my $poll_condor_status = qq($condor_status -vm -af:, Name);
         my $poll_opts          = {'no-warn' => 1};
         my $tries;
 
@@ -440,10 +445,10 @@ sub check_htcondor {
     }
 
     print 'Looking for HTCondor version ... ';
-    do_basic_command(q(condor_status -version));
+    do_basic_command(qq($condor_status -version));
 
     print 'Checking for HTCondor execute slots ... ';
-    $output = do_line_count_command(qq(condor_status -af:, $status_fields));
+    $output = do_line_count_command(qq($condor_status -af:, $status_fields));
     print "$output slots\n" if defined $output;
 
     if (!defined $output || $output == 0) {
@@ -451,7 +456,7 @@ sub check_htcondor {
     }
 
     print 'Checking for HTCondor execute slots with VM support ... ';
-    $output = do_line_count_command(qq(condor_status -vm -af:, $status_fields));
+    $output = do_line_count_command(qq($condor_status -vm -af:, $status_fields));
     print "$output slots\n" if defined $output;
 
     if (!defined $output || $output == 0) {
@@ -462,7 +467,7 @@ sub check_htcondor {
     }
 
     print 'Looking for jobs in the HTCondor queue ... ';
-    $output = do_line_count_command(qq(condor_q -af:, $q_fields));
+    $output = do_line_count_command(qq($condor_q -af:, $q_fields));
     print "$output jobs\n" if defined $output;
 
     if (defined $output) {
@@ -470,15 +475,15 @@ sub check_htcondor {
     }
 
     print 'Looking for idle jobs in the HTCondor queue ... ';
-    $output = do_line_count_command(qq(condor_q -constraint "JobStatus == 1" -af:, $q_fields));
+    $output = do_line_count_command(qq($condor_q -constraint "JobStatus == 1" -af:, $q_fields));
     print "$output jobs\n" if defined $output;
 
     print 'Looking for running jobs in the HTCondor queue ... ';
-    $output = do_line_count_command(qq(condor_q -constraint "JobStatus == 2" -af:, $q_fields));
+    $output = do_line_count_command(qq($condor_q -constraint "JobStatus == 2" -af:, $q_fields));
     print "$output jobs\n" if defined $output;
 
     print 'Looking for held jobs in the HTCondor queue ... ';
-    $output = do_line_count_command(qq(condor_q -constraint "JobStatus == 5" -af:, $q_fields));
+    $output = do_line_count_command(qq($condor_q -constraint "JobStatus == 5" -af:, $q_fields));
     print "$output jobs\n" if defined $output;
 
     if (defined $output && $output > 0) {
@@ -541,25 +546,6 @@ sub check_php {
     }
     else {
         add_error_line('Failed to determine PHP version');
-    }
-    return;
-}
-
-############################################################################
-
-#
-# Requirement: 'swa-daemon' must be able to use 'sudo' without a password.
-#
-sub check_sudo {
-    print 'Checking whether swa-daemon can run sudo without a password ... ';
-    my ($output, $status) = do_command(q(sudo -u swa-daemon sudo -n /opt/perl5/perls/perl-5.18.1/bin/perl -V));
-
-    if ($status || !defined $output) {
-        print "no\n";
-        add_error_line(q(swa-daemon cannot run SWAMP's perl without a password));
-    }
-    else {
-        print "ok\n";
     }
     return;
 }
@@ -782,7 +768,7 @@ sub check_http_host {
             }
         }
         else {
-            print "failed\n";
+            print "$lesser_oops\n";
             $passed_checks = 0;
         }
     }
@@ -799,8 +785,8 @@ sub check_http_host {
 #
 sub do_curl_command {
     my ($curl_cmd, $resource) = @_;
-    my $escaped_resource = escape_dquotes($resource);
-    my ($output, $status) = do_command(qq($curl_cmd "$escaped_resource"), {'no-warn' => 1});
+    my $resource_arg = make_shell_arg($resource);
+    my ($output, $status) = do_command(qq($curl_cmd $resource_arg), {'no-warn' => 1});
 
     if ($status || !defined $output) {
         return;
@@ -864,7 +850,6 @@ sub main() {
     check_htcondor($options);
     check_libvirt();
     check_php();
-    check_sudo();
     check_swamp_daemons();
     check_web_server($options);
     add_info_line("Tested the SWAMP web application at '$hostname'");
@@ -891,13 +876,13 @@ sub main() {
     }
 
     if (scalar @all_errors > 0) {
-        $exit_code = 1;
+        $exit_code = 100;
         print "\n";
         print "Summary: ERRORS were found with the SWAMP installation\n";
         print "Review the list of warnings and errors above for details.\n";
     }
     elsif (scalar @all_warnings > 0) {
-        $exit_code = 2;
+        $exit_code = 101;
         print "\n";
         print "Summary: Potential issues were found with the SWAMP installation\n";
         print "Review the list of warnings above for details.\n";

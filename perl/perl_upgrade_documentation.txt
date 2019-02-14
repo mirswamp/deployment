@@ -1,7 +1,21 @@
-This is a documentation of all the missing perl module after the a perl version upgrade. The last
-upgrade was done in 1.34-release. The perl is upgraded from perl 5.18.1 to 5.26.1 .
-The missing perl modules are listed as following, and need to be mannually installed as
-"cpanm MODULE-NAME":
+###########################################################################
+# This is a documentation of installing SWAMP perl runtime and perl modules.
+# written by Jieru.
+# This documentation includes:
+#    1. Instructions to upgrade Perl Version on dt (for testing purpose))
+#    2. Add a new perl module to the existing perl
+#    3. Test the new PERL rpm version in browser
+###########################################################################
+
+The last upgrade was done in 1.34-release. The perl is upgraded from perl 5.18.1 to 5.26.1 .
+The missing perl modules for the entire SWAMP runtime are listed as following, and need to be mannually installed
+by doing "cpanm MODULE-NAME".
+#######################################################################
+Note that XML-Parser requires expat-devel (yum install expat-devel)
+Note that XML::LibXSLT requires libxslt and libxml2 and their *-devel packages (yum install libxml2-devel libxslt-devel)
+Note that DBD::mysql requires mysql-devel (yum install mysql-devel)
+Note that the perl runtime must be built on Centos6 to be compatible with both Cento6 and Centos7.
+##############
 Log::Log4perl
 File::Remove
 XML::Parser
@@ -16,30 +30,92 @@ XML::LibXML
 XML::LibXSLT
 XML::XPath
 DBD::mysql
+File::Slurp
 MongoDB
+XML::Simple
+#############
 
 #################################################################
 Instructions to upgrade Perl Version on dt (for testing purpose)
 #################################################################
+Install new core perl from cpan
 1. Install perl-NEW-VERSION into /opt/perl5/ (IMPORTANT: make sure perl is installed into the correct path)
+
+  1.1 Make sure perlbrew is installed by running "which perlbrew". If it is not installed, install it by "cpan
+App::perlbrew" or "curl -L https://install.perlbrew.pl | bash". Then followed by command "perlbrew init".
+
+  1.2 Make sure there is no folder named perl5 under /opt. Set the perlbrew install path by running "export PERLBREW_ROOT=/opt/perl5".
+
+  1.3 Then install the NEW-VERSION perl by running "perlbrew install perl-[perl-NEW-VERSION]". For example,
+"perlbrew install perl-5.26.1".
+
+  1.4 Set the perl path to the perl which just get downloaded by running "export
+PATH=/opt/perl5/perls/perl-[NEW-VERSION]/bin:$PATH"
+
+  1.5 Check the perl path by doing: "which perl", it should return the NEW-VERSION perl
+
+Install additional perl modules from cpan
 2. Install all required perl modules listed above
+Before doing the install, you should make sure the right cpanm is used. Run "which cpanm", it should returns
+the cpanm associated with the correct perl version.
+e.g. cpanm Log::Log4perl ...
+
+Clean up resultant perl runtime filesystem
+3. cd into /opt/perl5/, delete all the folders except the "perls" by running "rm -rf [folder_name]";
+   make sure in /opt/per5/perls, there is only perl-NEW-VERSION.
+
+Bundle new version of perl for swamp distribution and update inventory
+4. Bundle /opt/perl5 into perlbin_exec_w-[perl-NEW-VERSION].tar.gz. Stay in /opt directory, run "sudo tar -czvf perlbin_exec_w-[perl-NEW-VERSION].tar.gz ./perl5/"
+5. Move perlbin_exec_w-[perl-NEW-VERSION].tar.gz result into SWAMP/deployment/perl by runnning
+"mv perlbin_exec_w-[perl-NEW-VERSION].tar.gz ~/SWAMP/deployment/perl/"
+6. cd into SWAMP/deployment/inventory/; change to perlbin_exec_w-[perl-CURRENT-VERSION].tar.gz to the
+"perlbin_exec_w-[perl-NEW-VERSION].tar.gz" in dependencies.txt
+
+Ensure that all perl scripts compile with the new version of perl runtime
+7. cd into SWAMP/deployment/swamp/scripts; run Command "source swamp.sh"
+8. cd into SWAMP/services/perl/agents, execute: for f in *.pl; do perl -cw $f; done
+   make sure all perl scripts has no error checked.
+9. cd into /home/jhu/SWAMP/services/perl/vmtools; execute: for f in masterify_vm start_vm vm_cleanup
+vm_masterinfo vm_output; do perl -cw $f; done
+   make sure all perl scripts has not error checked.
+
+Install swampinabox and test
+10. Run the install_swampinabox.bash or upgrade_swampinabox.bash script
+
+##########################################
+Add a new perl module to the existing perl
+##########################################
+This case happens when the developer finds a perl module is missing and need to add that specific perl
+module/perl lib into the perl runtime.
+
+1. Verify the existing perl and cpanm by doing:
+which perl   ->  should return: /opt/perl5/perls/perl-[PERL-VERSION]/bin/perl
+which cpanm  ->  should return: /opt/perl5/perls/perl-[PERL-VERSION]/bin/cpanm
+
+2. Install the new perl module by doing:
+sudo /opt/perl5/perls/perl-[PERL-VERSION]/bin/cpanm NEW_PERL_MODULE
+eg: sudo /opt/perl5/perls/perl-5.26.1/bin/cpanm Log::Log4perl
+
 3. cd into SWAMP/services/perl/agents, execute: for f in *.pl; do perl -cw $f; done
-make sure all perl scripts has no error checked.
-4. cd into /opt/swamp/bin: search for text "perl-old-version" (eg: perl-5.18.1), replace them with text
-"perl-new-version" (eg: perl-5.26.1):
-   The list of files needed change includes:
-   vmu_PostAssessment_launcher
-   vmu_PreAssessment.pl
-   vmu_PreAssessment_launcher
-   vmu_PreViewer.pl
-   vmu_PreViewer_launcher
-   vmu_PostViewer_launcher
-5. cd into /usr/local/bin: search for text "perl-old-version" (eg: perl-5.18.1), replace them with text
-"perl-new-version" (eg: perl-5.26.1):
-   The list of files needed change includes:
-   Execute_execution_record
-   Kill_run
-   Launch_viewer
-6. In /etc/rc.d/init.d/swamp: change "perl-old-version" (eg: perl-5.18.1) to "perl-new-version" (eg:
-perl-5.26.1) in the line of "export PATH"
-7. cd into /etc/sudoers.d/ as root, change "perl-old-version" (eg: perl-5.18.1) to "perl-new-version" (perl-5.26.1) in 10_swamp_sudo_config .
+   make sure all perl scripts has no error checked.
+4. cd into /home/jhu/SWAMP/services/perl/vmtools; execute: for f in masterify_vm start_vm vm_cleanup
+vm_masterinfo vm_output; do perl -cw $f; done
+   make sure all perl scripts has not error checked.
+
+5. Bundle /opt/perl5 into perlbin_exec_w-[perl-VERSION].tar.gz. Stay in /opt/, run "sudo tar -czvf perlbin_exec_w-[perl-VERSION].tar.gz ./perl5/"
+
+6. Move perlbin_exec_w-[perl-VERSION].tar.gz result into SWAMP/deployment/perl by runnning
+"mv perlbin_exec_w-[perl-VERSION].tar.gz ~/SWAMP/deployment/perl/"
+
+7. Run the install_swampinabox.bash or upgrade_swampinabox.bash script
+
+#########################################
+Test the new PERL rpm version in browser
+#########################################
+1. Add a new package by uploading a code package and enter all the required assessment information. 
+2. Run the assessment, and make sure the assessment is successfully completed
+3. After the assessment is done, launch native viewer
+4. For error report, launcher native viewer for error report
+5. Launch CodeDX viewer
+
+

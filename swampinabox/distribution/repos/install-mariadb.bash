@@ -3,29 +3,26 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
-BINDIR="$(dirname "$0")"
+echo
+echo "### Installing MariaDB"
+echo
 
-. "$BINDIR/resources/common-helper.functions"
+unset CDPATH
+BINDIR=$(cd -- "$(dirname -- "$0")" && pwd)
+. "$BINDIR"/resources/common-helper.functions
+
+check_user            || exit 1
+check_os_dist_and_ver || exit 1
+check_os_dist_upgrade || exit 1
 
 ############################################################################
 
-check_os_dist_and_ver  || exit_with_error
-check_user             || exit_with_error
-check_os_dist_upgrade  || exit_with_error
-
-echo ""
-echo "##########################"
-echo "### Installing MariaDB ###"
-echo "##########################"
-
-os_version=$(get_os_ver)
-
-case "$os_version" in
+case "$(get_os_version)" in
     6)
-        echo "Copying 'MariaDB55.repo' to '/etc/yum/repos.d'"
-        cp "$BINDIR/resources/MariaDB55.repo" /etc/yum.repos.d/.
+        echo "Copying 'MariaDB55.repo' to '/etc/yum.repos.d'"
+        cp "$BINDIR"/resources/MariaDB55.repo /etc/yum.repos.d/.
 
         echo "Importing GPG key"
         rpm --import https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
@@ -38,11 +35,11 @@ case "$os_version" in
         yum_confirm mariadb mariadb-server mariadb-libs || exit_with_error
         ;;
     *)
-        echo "Error: Unsupported OS version." 1>&2
+        echo
+        echo "Error: Unsupported OS version" 1>&2
         exit_with_error
         ;;
 esac
 
-echo ""
-echo "Finished installing MariaDB."
-exit 0
+echo
+echo "Finished installing MariaDB"

@@ -1,5 +1,0 @@
-[htcondor-development]
-name=HTCondor Development RPM Repository for Redhat Enterprise Linux 6
-baseurl=https://research.cs.wisc.edu/htcondor/yum/development/rhel6
-enabled=1
-gpgcheck=1

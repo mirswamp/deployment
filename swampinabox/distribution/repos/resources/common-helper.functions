@@ -3,45 +3,45 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
-function exit_with_error() {
-    echo "Error: Setup is NOT complete." 1>&2
+exit_with_error() {
+    echo
+    echo "Error: Setup is not complete" 1>&2
     exit 1
 }
 
-function yum_downgrade() {
-    echo "Downgrading: $*"
-    yum -y downgrade "$@"
-}
-
-function yum_erase() {
-    echo "Erasing: $*"
-    yum -y erase "$@"
-}
-
-function yum_install() {
+#
+# Install RPMs using 'yum'.
+#
+yum_install() {
     echo "Installing: $*"
     yum -y install "$@"
 }
 
-function yum_update() {
-    echo "Updating: $*"
-    yum -y update "$@"
-}
-
-function yum_confirm() {
-    encountered_not_installed=0
+#
+# Check whether there are RPMs providing the given list of resources.
+#
+yum_confirm() {
+    local not_installed=()
     for pkg in "$@" ; do
-        echo -n "Checking for $pkg ... "
-        if ! rpm -q --whatprovides "$pkg" ; then
-            encountered_not_installed=1
+        printf 'Checking for %s ... ' "$pkg"
+        if ! rpm -q --whatprovides "$pkg" 2>&1 ; then
+            not_installed+=("$pkg")
         fi
     done
-    return $encountered_not_installed
+    if [ ${#not_installed[@]} -gt 0 ]; then
+        echo
+        echo "Error: No packages provide: ${not_installed[*]}" 1>&2
+        return 1
+    fi
+    return 0
 }
 
-function get_os_dist() {
+#
+# Write to standard out this host's Linux distribution.
+#
+get_os_distribution() {
     if [ -r /etc/centos-release ]; then
         echo "CentOS Linux"
         return 0
@@ -54,150 +54,124 @@ function get_os_dist() {
     return 1
 }
 
-function get_os_ver() {
+#
+# Write to standard out this host's OS's major version.
+#
+get_os_version() {
     if [ -r /etc/centos-release ]; then
-        awk '{ print substr($0, match($0, /[[:digit:]]+/), RLENGTH); }' /etc/centos-release
+        awk '{ print substr($0, match($0, /[[:digit:]]+/), RLENGTH) ; }' \
+            /etc/centos-release
         return 0
     fi
-
     if [ -r /etc/redhat-release ]; then
-        awk '{ print substr($0, match($0, /[[:digit:]]+/), RLENGTH); }' /etc/redhat-release
+        awk '{ print substr($0, match($0, /[[:digit:]]+/), RLENGTH) ; }' \
+            /etc/redhat-release
         return 0
     fi
     echo "Unknown"
     return 1
 }
 
-function check_os_dist_and_ver() {
-    if [ "$SWAMP_CHECK_OS_DIST_AND_VER" = "done" ]; then
+#
+# Check whether this host is running a supported OS.
+#
+check_os_dist_and_ver() {
+    if [ "$SWAMP_CHECK_OS_DIST_AND_VER" = "completed" ]; then
         return 0
     fi
 
-    distribution=$(get_os_dist)
-    version=$(get_os_ver)
+    local distribution
+    local version
 
-    echo "We appear to be running on: $distribution $version"
+    distribution=$(get_os_distribution)
+    version=$(get_os_version)
+
+    echo "Checking OS support ... $distribution $version"
 
     case "$distribution $version" in
-        "CentOS Linux 6")
-            ;;
-        "CentOS Linux 7")
-            ;;
-        "Red Hat Linux 6")
-            ;;
-        "Red Hat Linux 7")
-            ;;
+        "CentOS Linux 6") ;;
+        "CentOS Linux 7") ;;
+        "Red Hat Linux 6") ;;
+        "Red Hat Linux 7") ;;
         *)
+            echo
             echo "Warning: This set up script might not work for $distribution $version."
-            echo -n "Continue anyway? [N/y] "
-            read ANSWER
-            if [ "$ANSWER" != "y" ]; then
+            printf 'Continue anyway? [N/y] '
+            read -r answer
+            printf '\n'
+            if [ "$answer" != "y" ]; then
                 return 1
             fi
             ;;
     esac
 
-    export SWAMP_CHECK_OS_DIST_AND_VER="done"
+    export SWAMP_CHECK_OS_DIST_AND_VER=completed
     return 0
 }
 
-function check_os_dist_upgrade() {
-    if [ "$SWAMP_OS_DIST_UPGRADE" = "done" ]; then
+#
+# Check whether this host's OS is in need of significant updates.
+#
+check_os_dist_upgrade() {
+    if [ "$SWAMP_OS_DIST_UPGRADE" = "completed" ]; then
         return 0
     fi
 
     for release_pkg in centos-release redhat-release-server ; do
-        if rpm -q --whatprovides "$release_pkg" 1>/dev/null 2>/dev/null ; then
-            if [ "$SWAMP_YUM_MAKECACHE" != "done" ]; then
-                echo ""
-                echo "Running 'yum makecache' ..."
-                yum makecache
-                export SWAMP_YUM_MAKECACHE="done"
-            fi
+        if rpm -q --whatprovides "$release_pkg" 1>/dev/null 2>&1 ; then
+            echo "Running 'yum makecache' ..."
+            yum makecache
 
-            echo ""
             echo "Running 'yum check-update $release_pkg' ..."
-            yum check-update "$release_pkg" 1>/dev/null 2>/dev/null
-            ok=$?
+            yum check-update "$release_pkg"
+            local ok=$?
 
             if [ $ok -eq 100 ]; then
-                echo ""
-                echo "Warning: The '$release_pkg' package is out of date."
-                echo "This probably means that a significant update is available."
-                echo ""
-                echo "Running this setup script might cause inconsistent versions"
-                echo "of various packages to be installed on the system that yum/rpm"
-                echo "might not warn about."
-                echo ""
-                echo "Consider running 'yum update' first, before continuing with"
-                echo "this script."
-                echo ""
-                echo -n "Continue anyway? [N/y] "
-                read ANSWER
-                if [ "$ANSWER" != "y" ]; then
+                echo
+                cat <<EOF
+Warning: The '$release_pkg' package is out of date.
+
+This probably means that significant updates are available for this host.
+Running this setup script might cause inconsistent versions of packages to
+be installed that yum/rpm will not warn about.
+
+Consider running 'yum update' first, before continuing with this script.
+EOF
+                printf 'Continue anyway? [N/y] '
+                read -r answer
+                printf '\n'
+                if [ "$answer" != "y" ]; then
                     return 1
                 fi
             elif [ $ok -ne 0 ]; then
-                echo ""
-                echo "Error: Failed to run 'yum check-update $release_pkg'." 1>&2
-                echo "Perhaps check that repositories are configured correctly." 1>&2
+                echo
+                echo "Error: Failed to run 'yum check-update $release_pkg'" 1>&2
+                echo "Perhaps check that yum's repositories are configured correctly." 1>&2
                 return 1
             fi
         fi
     done
 
-    export SWAMP_OS_DIST_UPGRADE="done"
+    export SWAMP_OS_DIST_UPGRADE=completed
     return 0
 }
 
-function check_user() {
-    if [ "$SWAMP_CHECK_USER" = "done" ]; then
-        return 0
-    fi
-
+#
+# Check whether essential commands are in the current user's $PATH.
+#
+check_user() {
     if [ "$(whoami)" != "root" ]; then
         echo "Error: This set up script must be run as 'root'. Perhaps use 'sudo'." 1>&2
         return 1
     fi
-
-    for prog in rpm yum cp ln useradd; do
-        echo -n "Checking for '$prog' ... "
-        which $prog
-        if [ $? -ne 0 ]; then
-            echo "Error: '$prog' is not found in $USER's path." 1>&2
+    for cmd in cp rpm yum ; do
+        printf 'Checking for %s ... ' "$cmd"
+        if ! command -v "$cmd" 2>&1 ; then
+            echo    # write a newline because 'command' printed nothing
+            echo
+            echo "Error: '$cmd' is not in $USER's \$PATH" 1>&2
             return 1
         fi
     done
-
-    export SWAMP_CHECK_USER="done"
     return 0
-}
-
-function compare_versions() {
-
-    # Assumes version strings of the form X.Y.Z,
-    # where X, Y, and Z are all non-negative integers.
-    #
-    # Return 0 if $1 < $2.
-    # Return 1 if $1 = $2.
-    # Return 2 if $1 > $2.
-
-    IFS=. first=($1)
-    IFS=. second=($2)
-
-    for i in 0 1 2; do
-        x=${first[$i]}
-        y=${second[$i]}
-
-        if [ ! -z "$x" ] && [ ! -z "$y" ]; then
-            if [ "$x" -lt "$y" ]; then
-                return 0
-            fi
-            if [ "$x" -gt "$y" ]; then
-                return 2
-            fi
-        fi
-    done
-
-    return 1
 }

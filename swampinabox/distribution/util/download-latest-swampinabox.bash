@@ -3,136 +3,147 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 #
-# Download the latest (most recent) SWAMP-in-a-Box release from
-# platform.swampinabox.org (or the location specified below).
+# Download the most recent SWAMP-in-a-Box release.
 #
 
-BINDIR="$(dirname "$0")"
-PLATFORM_HOST="platform.swampinabox.org"
-PLATFORM_RELEASE_DIR="siab-latest-release"
-PLATFORM_BASE_URL="https://$PLATFORM_HOST/$PLATFORM_RELEASE_DIR"
+unset CDPATH
+BINDIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+DOWNLOAD_W_CONTINUE=""
+DOWNLOAD_WO_CONTINUE=""
+DOWNLOAD_TO_STDOUT=""
+PLATFORM_BASE_URL=https://platform.swampinabox.org/siab-latest-release
 
-function exit_with_incomplete() {
-    echo ""
-    echo "Downloads are not complete." 1>&2
+############################################################################
+
+function exit_with_error {
+    echo "" 1>&2
+    echo "Error: Something unexpected happened, downloads are NOT complete" 1>&2
     exit 1
 }
 
-function exit_with_error() {
-    echo ""
-    echo "Error encountered. Downloads are not complete." 1>&2
-    exit 1
+function remove_file {
+    path=$1
+    if [ -e "$path" ]; then
+        echo "Removing $path"
+        rm -f "$path"
+    fi
 }
+
+############################################################################
 
 #
 # Determine how to download files and whether we can verify checksums.
 #
 
-echo -n "Checking for wget ... "
-which wget
-wget_ok=$?
-
 echo -n "Checking for curl ... "
 which curl
 curl_ok=$?
+
+echo -n "Checking for wget ... "
+which wget
+wget_ok=$?
 
 echo -n "Checking for md5sum ... "
 which md5sum
 md5sum_ok=$?
 
-if [ $wget_ok -eq 0 ]; then
-    DOWNLOAD_W_CONTINUE="wget --continue"
-    DOWNLOAD_WO_CONTINUE="wget"
-    DOWNLOAD_TO_STDOUT="wget -O -"
-elif [ $curl_ok -eq 0 ]; then
+if [ $curl_ok -eq 0 ]; then
     DOWNLOAD_W_CONTINUE="curl --fail -O -C -"
     DOWNLOAD_WO_CONTINUE="curl --fail -O"
     DOWNLOAD_TO_STDOUT="curl --fail"
+elif [ $wget_ok -eq 0 ]; then
+    DOWNLOAD_W_CONTINUE="wget --continue"
+    DOWNLOAD_WO_CONTINUE="wget"
+    DOWNLOAD_TO_STDOUT="wget -O -"
 fi
 
 if [ -z "$DOWNLOAD_TO_STDOUT" ]; then
-    echo ""
-    echo "Error: Didn't find a suitable program for downloading files." 1>&2
-    exit_with_error
+    echo "" 1>&2
+    echo "Error: Failed to find a command for downloading files" 1>&2
+    exit 1
 fi
 
 #
 # Determine the SWAMP-in-a-Box version number.
 #
 
-echo ""
 echo "Determining SWAMP-in-a-Box version"
-VERSION=$($DOWNLOAD_TO_STDOUT "$PLATFORM_BASE_URL/version.txt")
+version=$($DOWNLOAD_TO_STDOUT "$PLATFORM_BASE_URL/version.txt")
 
-if [[ "$VERSION" =~ ^[0-9]+.[0-9]+ ]]; then
-    echo ""
-    echo "Found SWAMP-in-a-Box version: $VERSION"
-else
-    echo ""
-    echo "Found SWAMP-in-a-Box version: (error: $VERSION)" 1>&2
-    exit_with_error
+if [[ ! ( "$version" =~ ^[[:digit:]]+.[[:digit:]]+ ) ]]; then
+    echo "" 1>&2
+    echo "Error: Failed to determine SWAMP-in-a-Box version (found: $version)" 1>&2
+    exit 1
 fi
 
 #
-# Confirm where files be downloaded to.
+# Confirm where files will be downloaded to.
 #
 
-LOCAL_DESTINATION_DIR="$BINDIR/swampinabox-$VERSION-release"
+LOCAL_DESTINATION_DIR=$BINDIR/swampinabox-$version-release
 
 echo ""
-echo "The SWAMP-in-a-Box $VERSION installer will be downloaded to:"
-echo "$LOCAL_DESTINATION_DIR"
+echo "########################################################################"
+echo ""
+echo "The SWAMP-in-a-Box $version installer will be downloaded to:"
+echo ""
+echo "    $LOCAL_DESTINATION_DIR"
 
 if [ $md5sum_ok -ne 0 ]; then
-    echo ""
-    echo "Warning: 'md5sum' is not in $USER's path. Unable to verify downloaded files." 1>&2
+    echo "" 1>&2
+    echo "Warning: 'md5sum' is not available, unable to verify downloaded files" 1>&2
 fi
 
 echo ""
 echo -n "Continue with the downloads? [N/y] "
-read ANSWER
-if [ "$ANSWER" != "y" ]; then
-    exit_with_incomplete
+read -r answer
+echo ""
+
+if [ "$answer" != "y" ]; then
+    exit 1
 fi
 
-echo ""
-echo "Creating: $LOCAL_DESTINATION_DIR"
+#
+# Create the directory where files will be downloaded to.
+#
+
+echo "Creating $LOCAL_DESTINATION_DIR"
+
 mkdir -p "$LOCAL_DESTINATION_DIR" || exit_with_error
-cd "$LOCAL_DESTINATION_DIR" || exit_with_error
-echo "Current working directory: $(pwd)"
+cd    -- "$LOCAL_DESTINATION_DIR" || exit_with_error
+
+echo "Working directory is now $(pwd)"
 
 #
 # Download the list of files to download and their checksums.
 #
 
-if [ -e "md5sums.txt" ]; then
-    echo "Removing: md5sums.txt"
-    rm -f md5sums.txt
-fi
+remove_file md5sums.txt
 
+echo ""
 echo "Downloading file list"
 $DOWNLOAD_WO_CONTINUE "$PLATFORM_BASE_URL/md5sums.txt" || exit_with_error
 
 echo ""
 echo "Files that will be downloaded:"
-
-while read checksum filename; do
-    echo "    $filename"
+while read -r checksum filename ; do
+    echo "  - $filename"
 done <<< "$(cat md5sums.txt)"
-
 echo ""
 
 #
 # Download the files themselves and verify their checksums.
 #
 
-while read checksum filename; do
-    echo "$checksum  $filename" > "$filename.md5"
+downloads_failed=no
 
-    needs_download="yes"
+while read -r checksum filename ; do
+    echo "Creating $filename.md5"
+    echo "$checksum  $filename" > "$filename.md5"
+    needs_download=yes
 
     #
     # Without md5sum, assume that the entire file needs to be downloaded.
@@ -140,76 +151,69 @@ while read checksum filename; do
     # a partial download.
     #
 
-    if [ $md5sum_ok -eq 0 -a -e "$filename" ]; then
-        echo -n "Verifying checksum for '$filename' ... "
-        md5sum -c "$filename.md5" 1>/dev/null 2>/dev/null
+    if [ $md5sum_ok -eq 0 ] && [ -e "$filename" ]; then
+        echo -n "Verifying checksum for $filename ... "
 
-        if [ $? -eq 0 ]; then
+        if md5sum -c "$filename.md5" 1>/dev/null 2>&1 ; then
             echo "ok"
-            needs_download="no"
+            needs_download=no
         else
-            echo "checksum failed (download required?)"
+            echo "failed (download required?)"
         fi
     fi
 
     if [ "$needs_download" = "yes" ]; then
         if [ $md5sum_ok -eq 0 ]; then
-            echo "Downloading: $filename"
+            echo "Downloading $filename"
             $DOWNLOAD_W_CONTINUE "$PLATFORM_BASE_URL/$filename"
         else
-            if [ -e "$filename" ]; then
-                echo "Removing: $filename"
-                rm -f "$filename"
+            remove_file "$filename"
+            echo "Downloading $filename"
+            if ! $DOWNLOAD_WO_CONTINUE "$PLATFORM_BASE_URL/$filename" ; then
+                downloads_failed=yes
             fi
-            echo "Downloading: $filename"
-            $DOWNLOAD_WO_CONTINUE "$PLATFORM_BASE_URL/$filename"
         fi
 
         if [ $md5sum_ok -eq 0 ]; then
-            echo -n "Verifying checksum for '$filename' ... "
-            md5sum -c "$filename.md5" 1>/dev/null 2>/dev/null
+            echo -n "Verifying checksum for $filename ... "
 
-            if [ $? -eq 0 ]; then
+            if md5sum -c "$filename.md5" 1>/dev/null 2>&1 ; then
                 echo "ok"
             else
-                echo "checksum failed"
-                downloads_failed="yes"
+                echo "failed"
+                downloads_failed=yes
             fi
         fi
     fi
 
-    echo "Removing: $filename.md5"
-    rm -f "$filename.md5"
+    remove_file "$filename.md5"
 done <<< "$(cat md5sums.txt)"
 
 #
 # Post-process the downloaded files.
 #
 
-if [ "$downloads_failed" = "yes" ]; then
-    echo ""
-    echo "Error: Some files could not be downloaded successfully." 1>&2
-    exit_with_error
-fi
-
-if [ -e "extract-installer.bash" ]; then
-    echo ""
-    echo "Making 'extract-installer.bash' executable"
+if [ -e extract-installer.bash ]; then
+    echo "Making extract-installer.bash executable"
     chmod +x extract-installer.bash
 fi
 
+if [ "$downloads_failed" != "no" ]; then
+    echo "" 1>&2
+    echo "Error: Some files were not downloaded successfully" 1>&2
+    exit 1
+fi
+
 #
-# Echo final instructions.
+# Write out final instructions.
 #
 
-echo ""
 echo ""
 echo "########################################################################"
 echo ""
 echo "The SWAMP-in-a-Box installer has been downloaded to:"
-echo "$LOCAL_DESTINATION_DIR"
+echo ""
+echo "    $LOCAL_DESTINATION_DIR"
 echo ""
 echo "To install SWAMP-in-a-Box, start by reading the administrator manual,"
-echo "a copy of which can be found in '$LOCAL_DESTINATION_DIR'."
-
-exit 0
+echo "a copy of which can be found in the installer directory listed above."

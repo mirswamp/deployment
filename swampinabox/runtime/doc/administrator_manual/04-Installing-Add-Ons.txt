@@ -54,6 +54,42 @@ SWAMP. Note that `install_platform` will likely take several minutes to
 complete due to the size of the file.
 
 
+Enabling Android Assessments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can enable SWAMP-in-a-Box to assess Android Java Source and Android .APK
+packages.
+
+
+==== Before You Begin ====
+
+* You will need `root` access to the SWAMP-in-a-Box host.
+* You will need `root` access to the SWAMP-in-a-Box database.
+* You will need to make sure you have enough available hard drive space on
+your SWAMP-in-a-Box host to download and decompress the Android Ubuntu
+platform image.
+
+[NOTE]
+The Android Ubuntu platform includes the OS dependencies needed to build and
+assess Android Packages. As such it is quite large. The downloadable .qcow2.gz
+file needed to add the platform is over 28 GB. The decompressed, installed
+.qcow2 file takes up about 175 GB in the /swamp/platforms/images directory.
+
+
+==== Procedure ====
+
+1. Download and install the Android Ubuntu 12.04 64-bit platform following
+the procedure for <<add-on-platforms>>.
+
+2. Optionally delete the Android Ubuntu platform .qcow2.gz file if you wish to
+conserve disk space.
+
+When the Android Ubuntu platform is added, the Android Java Source and
+Android .APK package types are enabled. Android-specific tools are installed
+with SWAMP-in-a-Box, but they cannot be used for assessments until the
+Android Ubuntu platform is added.
+
+
 Installing Additional Tools
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

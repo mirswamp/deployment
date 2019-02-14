@@ -431,14 +431,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
-<body class="article" style="max-width: 55em;">
+<body class="article toc2 toc-left">
 <div id="header">
 <h1>SWAMP-in-a-Box Reference Manual</h1>
 <div class="details">
-<span id="revnumber">version 1.33,</span>
-<span id="revdate">2018-10-02 16:36:43 -0500</span>
+<span id="revnumber">version 1.34,</span>
+<span id="revdate">2019-02-14 11:58:43 -0600</span>
 </div>
-<div id="toc" class="toc">
+<div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#backend-configuration">1. SWAMP Web Application Backend Configuration</a>
@@ -455,11 +455,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#frontend-configuration">2. SWAMP Web Application Frontend Configuration</a>
 <ul class="sectlevel2">
-<li><a href="#_web_services">2.1. Web Services</a></li>
-<li><a href="#_contact_information">2.2. Contact Information</a></li>
-<li><a href="#_cookies">2.3. Cookies</a></li>
+<li><a href="#_contact_information">2.1. Contact Information</a></li>
+<li><a href="#_cookies">2.2. Cookies</a></li>
+<li><a href="#_welcome_message">2.3. Welcome Message</a></li>
 <li><a href="#_other_configurable_behaviors">2.4. Other Configurable Behaviors</a></li>
-<li><a href="#config-json-examples">2.5. Examples</a></li>
+<li><a href="#_web_services">2.5. Web Services</a></li>
+<li><a href="#config-json-examples">2.6. Examples</a></li>
 </ul>
 </li>
 <li><a href="#_swamp_in_a_boxs_file_system">3. SWAMP-in-a-Box&#8217;s File System</a>
@@ -667,7 +668,14 @@ parameter to "Native".</p>
 <dd>
 <p>The hostname of the HTCondor collector to contact for information about the
 SWAMP&#8217;s currently running assessments. The SWAMP-in-a-Box installer sets
-this to "localhost.localdomain".</p>
+this to "localhost".</p>
+</dd>
+<dt class="hdlist1"><code>HTCONDOR_ROOT</code></dt>
+<dd>
+<p>The path to the root directory of the HT Condor process used for
+SWAMP-in-a-Box assessments. SWAMP-in-a-Box sets this to
+"/opt/swamp/htcondor", which is the location of the HT Condor instance
+installed for SWAMP-in-a-Box.</p>
 </dd>
 </dl>
 </div>
@@ -1260,26 +1268,7 @@ values for the parameters described below are stored as nested JSON objects.
 <p>The remainder of this section describes the parameters.</p>
 </div>
 <div class="sect2">
-<h3 id="_web_services">2.1. Web Services</h3>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><code>servers.web</code></dt>
-<dd>
-<p>The root URL used to access the SWAMP web application&#8217;s routes. The
-SWAMP-in-a-Box installer sets this based on the hostname specified during
-the install process (usually, the host&#8217;s detected hostname).</p>
-<div class="paragraph">
-<p>When the hostname changes, use the <code>/opt/swamp/bin/swamp_set_web_host</code>
-utility script to update this parameter, because that script will update not
-only this parameter but also all other configuration locations where the
-hostname is referenced.</p>
-</div>
-</dd>
-</dl>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_contact_information">2.2. Contact Information</h3>
+<h3 id="_contact_information">2.1. Contact Information</h3>
 <div class="paragraph">
 <p>These parameters affect the display of information on the Contact Us and
 Report Security Incident pages. If this collection of parameters is not
@@ -1287,36 +1276,36 @@ defined, as is the case when SWAMP-in-a-Box is initially installed, the link
 to the Contact page in the SWAMP web application&#8217;s main menu is hidden.</p>
 </div>
 <div class="sect3">
-<h4 id="_support">2.2.1. Support</h4>
+<h4 id="_support">2.1.1. Support</h4>
 <div class="paragraph">
 <p>These parameters affect the display of information on the Contact Us page.</p>
 </div>
 <div class="dlist">
 <dl>
+<dt class="hdlist1"><code>contact.support.description</code></dt>
+<dd>
+<p>The description of the person or team receiving messages displayed for
+Contact Us messages.</p>
+</dd>
 <dt class="hdlist1"><code>contact.support.email</code></dt>
 <dd>
 <p>The email address displayed for Contact Us messages. This should have the
 same value as the the <code>MAIL_CONTACT_ADDRESS</code> parameter in the
 <a href="#backend-mail-settings">backend configuration file</a>.</p>
 </dd>
-<dt class="hdlist1"><code>contact.support.phoneNumber</code></dt>
-<dd>
-<p>The phone number displayed for Contact Us messages.</p>
-</dd>
-<dt class="hdlist1"><code>contact.support.description</code></dt>
-<dd>
-<p>The description of the person or team receiving messages displayed for
-Contact Us messages.</p>
-</dd>
 <dt class="hdlist1"><code>contact.support.message</code></dt>
 <dd>
 <p>Additional text displayed for Contact Us messages.</p>
+</dd>
+<dt class="hdlist1"><code>contact.support.phoneNumber</code></dt>
+<dd>
+<p>The phone number displayed for Contact Us messages.</p>
 </dd>
 </dl>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_security">2.2.2. Security</h4>
+<h4 id="_security">2.1.2. Security</h4>
 <div class="paragraph">
 <p>These parameters affect the display of information on the Report Security
 Incident page. If the <code>support</code> section is defined but the <code>security</code>
@@ -1325,31 +1314,31 @@ Contact Us page to the Report Security Incident page.</p>
 </div>
 <div class="dlist">
 <dl>
+<dt class="hdlist1"><code>contact.security.description</code></dt>
+<dd>
+<p>The description of the person or team receiving messages displayed for
+Report Security Incident messages.</p>
+</dd>
 <dt class="hdlist1"><code>contact.security.email</code></dt>
 <dd>
 <p>The email address displayed for Report Security Incident messages. This
 should have the same value as the <code>MAIL_SECURITY_ADDRESS</code> parameter in the
 <a href="#backend-mail-settings">backend configuration file</a>.</p>
 </dd>
-<dt class="hdlist1"><code>contact.security.phoneNumber</code></dt>
-<dd>
-<p>The phone number displayed for Report Security Incident messages.</p>
-</dd>
-<dt class="hdlist1"><code>contact.security.description</code></dt>
-<dd>
-<p>The description of the person or team receiving messages displayed for
-Report Security Incident messages.</p>
-</dd>
 <dt class="hdlist1"><code>contact.security.message</code></dt>
 <dd>
 <p>Additional text displayed for Report Security Incident messages.</p>
+</dd>
+<dt class="hdlist1"><code>contact.security.phoneNumber</code></dt>
+<dd>
+<p>The phone number displayed for Report Security Incident messages.</p>
 </dd>
 </dl>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_cookies">2.3. Cookies</h3>
+<h3 id="_cookies">2.2. Cookies</h3>
 <div class="paragraph">
 <p>These parameters affect the SWAMP layout cookie, which is used to persist
 the state of various layout elements: the position of the navigation bar,
@@ -1358,17 +1347,17 @@ and the state of the Show Grouping flag.</p>
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1"><code>cookie.name</code></dt>
-<dd>
-<p>The name given to the SWAMP layout cookie. The SWAMP-in-a-Box installer sets
-this to "swamp".</p>
-</dd>
 <dt class="hdlist1"><code>cookie.domain</code></dt>
 <dd>
 <p>The name of the domain for the SWAMP layout cookie. Set this to "null" to
 use the same domain name as in the <code>APP_URL</code> parameter in the
 <a href="#backend-web-app">backend configuration file</a>. The SWAMP-in-a-Box installer
-sets this "null".</p>
+sets this to "null".</p>
+</dd>
+<dt class="hdlist1"><code>cookie.name</code></dt>
+<dd>
+<p>The name given to the SWAMP layout cookie. The SWAMP-in-a-Box installer sets
+this to "swamp".</p>
 </dd>
 <dt class="hdlist1"><code>cookie.path</code></dt>
 <dd>
@@ -1379,6 +1368,27 @@ sets this "null".</p>
 <dd>
 <p>Whether the SWAMP layout cookie is sent only for encrypted connections. The
 SWAMP-in-a-Box installer sets this to "true".</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_welcome_message">2.3. Welcome Message</h3>
+<div class="paragraph">
+<p>These parameters provide a message that is displayed in a pop-up when users
+access the SWAMP-in-a-Box home page (not signed in). You can use it to
+display a Welcome message or information about the status of your system.
+When these parameters are not present, no message is displayed.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>notifications.welcome.message</code></dt>
+<dd>
+<p>The content of the message, which is displayed in a pop-up.</p>
+</dd>
+<dt class="hdlist1"><code>notifications.welcome.title</code></dt>
+<dd>
+<p>The text displayed in the titlebar of the message pop-up.</p>
 </dd>
 </dl>
 </div>
@@ -1402,20 +1412,37 @@ the Code Dx results viewer. The SWAMP-in-a-Box installer sets this to
 </div>
 </div>
 <div class="sect2">
-<h3 id="config-json-examples">2.5. Examples</h3>
+<h3 id="_web_services">2.5. Web Services</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>servers.web</code></dt>
+<dd>
+<p>The path used to access the SWAMP web application&#8217;s routes. The
+SWAMP-in-a-Box installer sets this based on the hostname specified during
+the install process (usually, the host&#8217;s detected hostname). For
+SWAMP-in-a-Box this is set to the relative path from the SWAMP-in-a-Box URL
+to the API location "/swamp-web-server/public".</p>
+<div class="paragraph">
+<p>When the hostname changes, use the <code>/opt/swamp/bin/swamp_set_web_host</code>
+utility script to update this parameter, because that script will update not
+only this parameter but also all other configuration locations where the
+hostname is referenced.</p>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="config-json-examples">2.6. Examples</h3>
 <div class="exampleblock">
-<div class="title">Example 1. Without the <code>contact</code> Section</div>
+<div class="title">Example 1. Without the <code>contact</code> or <code>notifications</code> Sections</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
 <pre>{
-  "servers": {
-    "web": "&lt;Web application routes root URL&gt;"
-  },
-
   "cookie": {
-    "name": "swamp",
     "domain": null,
+    "name": "swamp",
     "path": "/",
     "secure": true
   },
@@ -1425,6 +1452,10 @@ the Code Dx results viewer. The SWAMP-in-a-Box installer sets this to
       "allow_multiple_tool_selection": true,
       "allow_viewing_zero_weaknesses": true
     }
+  },
+
+  "servers": {
+    "web" : "/swamp-web-server/public"
   }
 }</pre>
 </div>
@@ -1432,7 +1463,7 @@ the Code Dx results viewer. The SWAMP-in-a-Box installer sets this to
 </div>
 </div>
 <div class="exampleblock">
-<div class="title">Example 2. With the <code>contact</code> Section</div>
+<div class="title">Example 2. With the <code>contact</code> and <code>notifications</code> Sections</div>
 <div class="content">
 <div class="paragraph">
 <p>Parameters (lines) below whose sample value include "(optional)" may be
@@ -1441,28 +1472,24 @@ omitted.</p>
 <div class="listingblock">
 <div class="content">
 <pre>{
-  "servers": {
-    "web": "&lt;Web application routes root URL&gt;"
-  },
-
   "contact": {
     "support": {
-      "email": "&lt;Support email address (optional)&gt;",
-      "phoneNumber": "&lt;Support phone number (optional)&gt;",
       "description": "Support staff",
-      "message": "Feel free to contact us with questions."
+      "email": "&lt;Support email address (optional)&gt;",
+      "message": "Feel free to contact us with questions.",
+      "phoneNumber": "&lt;Support phone number (optional)&gt;"
     },
     "security": {
-      "email": "&lt;Security email address (optional)&gt;",
-      "phoneNumber": "&lt;Security phone number (optional)&gt;",
       "description": "Security team",
-      "message": "&lt;Security message here (optional)&gt;"
+      "email": "&lt;Security email address (optional)&gt;",
+      "message": "&lt;Security message here (optional)&gt;",
+      "phoneNumber": "&lt;Security phone number (optional)&gt;"
     }
   },
 
   "cookie": {
-    "name": "swamp",
     "domain": null,
+    "name": "swamp",
     "path": "/",
     "secure": true
   },
@@ -1472,6 +1499,19 @@ omitted.</p>
       "allow_multiple_tool_selection": true,
       "allow_viewing_zero_weaknesses": true
     }
+  },
+
+  "notifications": {
+    "welcome": {
+      "title": "Message Title",
+      "message": "Your message here!"
+    }
+  }
+}
+
+
+  "servers": {
+    "web" : "/swamp-web-server/public"
   }
 }</pre>
 </div>
@@ -1535,8 +1575,7 @@ uploads up to 800M.</p>
 <dt class="hdlist1"><code>/swamp/platforms/images</code></dt>
 <dd>
 <p>Directory containing the virtual machine images for performing assessments
-and running the optional Code Dx viewer. The SWAMP-in-a-Box installer makes
-<code>/var/lib/libvirt/images</code> a symbolic link to this directory.</p>
+and running the optional Code Dx viewer.</p>
 </dd>
 <dt class="hdlist1"><code>/swamp/SCAProjects</code></dt>
 <dd>
@@ -1644,8 +1683,8 @@ if they continue appear to be available in the SWAMP.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 1.33<br>
-Last updated 2018-10-02 16:36:43 CDT
+Version 1.34<br>
+Last updated 2019-02-14 11:58:43 CST
 </div>
 </div>
 </body>

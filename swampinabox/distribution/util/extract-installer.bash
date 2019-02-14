@@ -3,31 +3,44 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 #
 # Extract the SWAMP-in-a-Box installer.
-# Assumes that this script is in the same directory as the tarballs.
+# The tar file(s) must be in the same directory as this script.
 #
 
-BINDIR="$(dirname "$0")"
-VERSION="SED_VERSION"
-INSTALLER_TARBALL="$BINDIR/swampinabox-${VERSION}-installer.tar.gz"
-INSTALLER_DIR="$BINDIR/swampinabox-${VERSION}-installer"
+unset CDPATH
+BINDIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
-function exit_with_error() {
-    echo ""
-    echo "Error encountered. Check above for details." 1>&2
-    exit 1
-}
+#
+# This version string should be replaced with a real value when the
+# build script assembles the final, distributable installer bundle.
+#
+version=SED_VERSION
 
-if [ ! -r "$INSTALLER_TARBALL" ]; then
-    echo "Error: No such file (or file is not readable): $INSTALLER_TARBALL" 1>&2
+#
+# The locations of the installer tar file(s) and final directory.
+#
+installer_dir=$BINDIR/swampinabox-$version-installer
+installer_tar_file=$BINDIR/swampinabox-$version-installer.tar.gz
+
+############################################################################
+
+if [ ! -r "$installer_tar_file" ]; then
+    echo "Error: File is not readable: $installer_tar_file" 1>&2
     exit 1
 fi
 
-echo "Extracting: $INSTALLER_TARBALL"
+echo "Extracting: $installer_tar_file"
 echo ""
-tar -xzv --no-same-owner --no-same-permissions -C "$BINDIR" -f "$INSTALLER_TARBALL" || exit_with_error
+if ! tar -xzv --no-same-owner --no-same-permissions -C "$BINDIR" -f "$installer_tar_file" ; then
+    echo "" 1>&2
+    echo "Error: Something unexpected happened, check above for details" 1>&2
+    exit 1
+fi
 echo ""
-echo "The SWAMP-in-a-Box installer can be found in: $INSTALLER_DIR"
+echo "The SWAMP-in-a-Box installer can be found in:"
+echo ""
+echo "    $installer_dir"
+echo ""

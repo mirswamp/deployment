@@ -100,10 +100,10 @@ Sample:
 ----
   "contact": {
     "support": {
-      "email": "<Support email address (optional)>",
-      "phoneNumber": "<Support phone number (optional)>",
       "description": "Support staff",
-      "message": "Feel free to contact us with questions."
+      "email": "<Support email address (optional)>",
+      "message": "Feel free to contact us with questions.",
+      "phoneNumber": "<Support phone number (optional)>"
     }
   },
 ----
@@ -154,16 +154,16 @@ Sample:
 ----
   "contact": {
     "support": {
-      "email": "<Support email address (optional)>",
-      "phoneNumber": "<Support phone number (optional)>",
       "description": "Support staff",
-      "message": "Feel free to contact us with questions."
+      "email": "<Support email address (optional)>",
+      "message": "Feel free to contact us with questions.",
+      "phoneNumber": "<Support phone number (optional)>"
     },
     "security": {
-      "email": "<Security email address (optional)>",
-      "phoneNumber": "<Security phone number (optional)>",
       "description": "Security team",
-      "message": "<Security message here (optional)>"
+      "email": "<Security email address (optional)>",
+      "message": "<Security message here (optional)>",
+      "phoneNumber": "<Security phone number (optional)>"
     }
   },
 ----

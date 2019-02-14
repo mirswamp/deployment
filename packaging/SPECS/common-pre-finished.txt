@@ -1,0 +1,9 @@
+# SWAMP and SWAMP-in-a-Box common pre-install script section
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2019 Software Assurance Marketplace
+
+echo "Finished running pre script"
+echo "Installing the files for %{name} (this will take some time)"

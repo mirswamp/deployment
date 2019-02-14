@@ -1,3 +1,85 @@
+Noteworthy Changes in SWAMP-in-a-Box 1.34
+-----------------------------------------
+
+1. SWAMP-in-a-Box now supports uploading and assessment of .NET package that 
+can be built using msbuild on Linux. SWAMP automatically reviews Solution 
+and .NET project files and determines which can be built using a framework 
+that does not require windows. You can then select which of those .NET 
+projects to assess.
+
+2. We have added three tools for assessment of .NET packages on a Linux 
+platform: Code Cracker v1.1.0, devskim 0.1.10, and Security Code Scan 2.7.1. 
+These tools are automatically deployed on SWAMP-in-a-Box.
+
+3. GitHub Webhooks can now be configured to update SWAMP packages. when the 
+GitHub Webhook is triggered, a new package version will be added to an 
+existing SWAMP package. Package parameters are copied from the previous 
+package version and used with a new archive of package code cloned from 
+GitHub. You can edit Package information to get the Payload URL and set the 
+Secret Token needed to configure a GitHub Webhook to the SWAMP.
+
+4. A new schedule is now available for use in all projects. This schedule, 
+"On Push" runs assessments whenever a new push to a GitHub repository 
+triggers a GitHub Webhook to generate a new Package Version in the SWAMP. 
+This schedule works with an assessment for the "latest" version of a Package 
+that is configured to update based on a GitHub Webhook trigger.
+
+5. You can now enable assessment of Android Java Source and Android .APK 
+packages in SWAMP-in-a-Box. To do so you need to download and install as an 
+add-on the Android Ubuntu platform image (it is quite large). When that 
+platform is added, the Android Java Source and Android .APK package types 
+are enabled. Android specific tools are installed with SWAMP-in-a-Box 1.34, 
+but they cannot be used for assessments until the Android Ubuntu platform is 
+added.
+
+6. SWAMP Packages can now be generated via an External URL that points to a 
+downloadable archive.
+
+7. For users who are in multiple projects, associated project is now 
+displayed for records on the Package, Assessments, Assessment Results, and 
+Scheduled Assessment Runs pages. Additionally, you can specifically set the 
+project when adding a new assessments.
+
+8. HT Condor is now configured to preempt an assessment or metric run in 
+order to create a slot for a Code DX viewer run when all slots are in use.
+
+9. An updated version of the Ubuntu Linux version 16.04 platform is now
+available and will be automatically installed with SWAMP-in-a-Box 1.34.
+
+10. we've updated the platform image files for all SWAMP platforms in order 
+to provide a workaround for a bug in guestfish version 1.38 
+(https://bugzilla.redhat.com/show_bug.cgi?id=1661038). SWAMP 1.34 is 
+required to run VMs with the new platforms, which have a date in the 
+filename of 2019 or later. SWAMP 1.34 is compatible with pre 2019 versions 
+of platforms; however, pre 2019 platforms will not currently work with 
+guestfish 1.38 (which is distributed with the latest CentOS 7). If you are 
+running a SWAMP-in-a-Box in CentOS 7 you should upgrade to SWAMP-in-a-Box 
+1.34 and upgrade any additional platforms you have installed as add ons.
+
+11. There is now a script available to restore a database backup (made as 
+part of the SWAMP-in-a-Box upgrade process). Please refer to the 
+SWAMP-in-a-Box Administrator Guide for details.
+
+12. You can now configure SWAMP-in-a-Box to display a custom welcome message 
+on the home page (not signed-in). Please refer to the SWAMP-in-a-Box 
+Administrator Guide for details.
+
+13. We have changed the way the web front-end for SWAMP-in-a-Box identifies 
+the corresponding web server. Specifically, the web server configured in 
+/var/www/html/config/config.json is now a relative path instead of an 
+absolute URL. This change affects the way the Java CLI and related SWAMP 
+plugins connect to a SWAMP-in-a-Box API. SWAMP plugins have been updated to 
+accommodate this change. SWAMP-in-a-Box 1.34 will only work with the 
+following versions: Java CLI version 1.5.2 or higher; SWAMP Eclipse Plugin 
+version 1.1.2 or higher; SWAMP Jenkins Plugin version 1.2.1 or higher. 
+
+14. We have discontinued support for the Ubuntu 10.04 assessment platform. If
+you have installed this platform as an add-on, it will be removed when You 
+upgrade to SWAMP-in-a-Box 1.34.
+
+15. General enhancements and bug fixes.
+
+
 Noteworthy Changes in SWAMP-in-a-Box 1.33.4
 -------------------------------------------
 

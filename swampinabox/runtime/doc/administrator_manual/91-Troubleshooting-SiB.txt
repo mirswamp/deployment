@@ -300,12 +300,6 @@ Indicates that the script found an unsupported version of PHP installed on
 the host. Refer to the appendix on <<dependencies-php,installing PHP>> for
 instructions on installing the required version of PHP.
 
-swa-daemon cannot run SWAMP's perl without a password::
-
-Indicates that the SWAMP's configuration for `sudo` either is not present or
-is being overridden, which will prevent the SWAMP from performing
-assessments. <<support-and-contact-info,Contact SWAMP staff>>.
-
 
 [[collecting-log-files]]
 Collecting Log Files
@@ -414,3 +408,15 @@ Exits the `virsh` shell.
 5. Use the `destroy` command, as described above, to shut down the virtual
 machine. The SWAMP should finish processing the assessment and make its
 results available in the SWAMP web application.
+
+
+Using Java CLI and Related Plugins with SWAMP-in-a-Box
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+SWAMP-in-a-Box supports the following minimum versions of Java CLI and
+related plug-ins. If you are using an earlier version, please upgrade.
+
+* Java CLI version 1.5.2
+* SWAMP Eclipse Plugin version 1.1.2
+* SWAMP Jenkins Plugin version 1.2.1
+

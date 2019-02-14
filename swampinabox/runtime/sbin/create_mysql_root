@@ -1,82 +1,81 @@
 #!/bin/bash
+set +o pipefail
 
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 #
 # Prompt for a password, encrypt it, and save the result into a file.
 #
 
-BINDIR=$(dirname "$0")
-dest_file=$1
+encountered_error=0
+trap 'encountered_error=1 ; echo "Error (unexpected): $BASH_COMMAND" 1>&2' ERR
+set -o errtrace
 
-confirm_entry=""
-db_user=""
-php_bcrypt_entry=""
-prompt=""
-test_entry=""
+unset CDPATH
+BINDIR=$(cd -- "$(dirname -- "$0")" && pwd)
+
+############################################################################
+
+password_file=$1
+
+if [ -z "$password_file" ]; then
+    echo "Usage: $0 <password file> [options]" 1>&2
+    exit 1
+fi
+
+############################################################################
+
+db_user="root"
+prompt="Enter the password for the database's 'root' user: "
+
+need_retype=""
+need_db_test=""
+need_php_bcrypt=""
 
 for option in "${@:2}" ; do
     case "$option" in
-        --confirm)    confirm_entry="yes" ;;
-        --php-bcrypt) php_bcrypt_entry="yes" ;;
-        --test)       test_entry="yes" ;;
-        --prompt=*)   prompt=${option#--prompt=} ;;
-        --user=*)     db_user=${option#--user=} ;;
+        --user=*)      db_user=${option#--user=} ;;
+        --prompt=*)    prompt=${option#--prompt=} ;;
+
+        --confirm)     need_retype=yes ;;
+        --test)        need_db_test=yes ;;
+        --php-bcrypt)  need_php_bcrypt=yes ;;
     esac
 done
 
 ############################################################################
 
-cnf_temp=""
-password_temp=""
+tmp_cnf_file=""
+tmp_password_file=""
 
-function do_cleanup() {
-    rm -f "$cnf_temp" "$password_temp"
+do_cleanup() {
+    rm -f "$tmp_cnf_file" \
+          "$tmp_password_file"
+    stty echo 1>/dev/null 2>&1 || :
 }
-
-trap 'stty echo ; do_cleanup' EXIT
-trap 'stty echo ; do_cleanup ; exit 1' INT TERM
+trap 'do_cleanup' EXIT
 
 ############################################################################
 
-if [ "$(whoami)" != "root" ]; then
-    echo "Error: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
-    exit 1
-fi
-if [ -z "$dest_file" ]; then
-    echo "Usage: $0 <destination file> [options]" 1>&2
-    exit 1
-fi
-if [ -e "$dest_file" ]; then
-    echo "Error: Already exists: $dest_file" 1>&2
-    exit 1
-fi
-if [ -z "$db_user" ]; then
-    db_user="root"
-fi
-if [ -z "$prompt" ]; then
-    prompt="Enter the password for the database's 'root' user: "
-fi
-
-############################################################################
-
-function ask_pass() {
-    need_password=1
+ask_for_password() {
+    local need_password=1
     while [ $need_password -eq 1 ]; do
-        read -r -s -p "$prompt" ANSWER
-        echo 1>&2
+        printf '%s' "$prompt"
+        read -r -s DB_PASSWORD
+        printf '\n'
 
-        if [ -z "$ANSWER" ]; then
+        if [ -z "$DB_PASSWORD" ]; then
             echo "*** Password cannot be empty. ***" 1>&2
         else
-            if [ "$confirm_entry" = "yes" ]; then
-                read -r -s -p "Retype password: " CONFIRMATION
-                echo 1>&2
+            if [ "$need_retype" = "yes" ]; then
+                printf 'Retype password: '
+                read -r -s CONFIRMATION
+                printf '\n'
 
-                if [ "$ANSWER" != "$CONFIRMATION" ]; then
+                if [ "$DB_PASSWORD" != "$CONFIRMATION" ]; then
                     echo "*** Passwords do not match. ***" 1>&2
                 else
                     need_password=0
@@ -88,61 +87,57 @@ function ask_pass() {
     done
 }
 
-function save_pass() {
-    password=$1
-    destination=$2
+save_password() {
+    local destination=$1
+    local password=$DB_PASSWORD
 
-    if [ "$php_bcrypt_entry" = "yes" ]; then
+    if [ "$need_php_bcrypt" = "yes" ]; then
         password=${password//\\/\\\\}
         password=${password//\'/\\\'}
-        password="{BCRYPT}$(php -r "echo password_hash('$password', PASSWORD_BCRYPT);")"
+        password=$(php -r "echo password_hash('$password', PASSWORD_BCRYPT);")
+        password="{BCRYPT}$password"
     fi
 
     umask 0077
     touch "$destination"
-    chmod 0600 "$destination"
-    echo "$password" | sudo openssl enc -aes-256-cbc -salt -out "$destination" -pass pass:swamp
-    chmod 0400 "$destination"
+    chmod u=rw,og="" "$destination"
+    printf '%s\n' "$password" \
+        | openssl enc -aes-256-cbc -salt -out "$destination" -pass pass:swamp
+    chmod u=r,og="" "$destination"
 }
 
-function test_db_password() {
-    db_user=$1
-    db_password=$2
+test_password() {
+    local test_failed=0
 
-    cnf_temp=$(mktemp /tmp/create_mysql_root.XXXXXXXX)
-    password_temp=$(mktemp /tmp/create_mysql_root.XXXXXXXX)
+    tmp_cnf_file=$(mktemp create_mysql_root.XXXXXXXX)
+    tmp_password_file=$(mktemp create_mysql_root.XXXXXXXX)
 
-    save_pass "$db_password" "$password_temp"
-    "$BINDIR/create_mysql_root_cnf" "$cnf_temp" \
+    save_password "$tmp_password_file"
+
+    "$BINDIR"/create_mysql_root_cnf \
+        "$tmp_cnf_file" \
         --user="$db_user" \
-        --password-file="$password_temp" \
-        --allow-overwrite
+        --password-file="$tmp_password_file"
 
-    mysql --defaults-file="$cnf_temp" <<< ';'
-    success=$?
-
-    rm -f "$cnf_temp" "$password_temp"
-
-    if [ $success -ne 0 ]; then
-        echo "Error: Failed to log into the database as '$db_user'" 1>&2
-        return 1
+    if ! echo ";" | mysql --defaults-file="$tmp_cnf_file"
+    then
+        test_failed=1
+        echo "*** Failed to log into the database as '$db_user'. ***" 1>&2
     fi
-    return 0
+
+    do_cleanup
+    return $test_failed
 }
 
 ############################################################################
 
-success=1
-while [ $success -ne 0 ]; do
-    ask_pass
-    DB_PASSWORD=$ANSWER
+ask_for_password
 
-    if [ "$test_entry" = "yes" ]; then
-        test_db_password "$db_user" "$DB_PASSWORD"
-        success=$?
-    else
-        success=0
-    fi
-done
+if [ "$need_db_test" = "yes" ]; then
+    while ! test_password ; do
+        ask_for_password
+    done
+fi
 
-save_pass "$DB_PASSWORD" "$dest_file"
+save_password "$password_file"
+exit $encountered_error

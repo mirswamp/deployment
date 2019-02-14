@@ -431,14 +431,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
-<body class="article" style="max-width: 55em;">
+<body class="article toc2 toc-left">
 <div id="header">
 <h1>SWAMP-in-a-Box Administrator Manual</h1>
 <div class="details">
-<span id="revnumber">version 1.33,</span>
-<span id="revdate">2018-10-02 16:36:48 -0500</span>
+<span id="revnumber">version 1.34,</span>
+<span id="revdate">2019-02-14 11:58:37 -0600</span>
 </div>
-<div id="toc" class="toc">
+<div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_introduction">1. Introduction</a>
@@ -449,7 +449,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_documentation_for_swamp_in_a_box">1.4. Documentation for SWAMP-in-a-Box</a></li>
 </ul>
 </li>
-<li><a href="#_system_requirements">2. System Requirements</a>
+<li><a href="#system-requirements">2. System Requirements</a>
 <ul class="sectlevel2">
 <li><a href="#hardware-requirements">2.1. Hardware Requirements</a></li>
 <li><a href="#_supported_operating_systems">2.2. Supported Operating Systems</a></li>
@@ -475,8 +475,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_installing_additional_components">4. Installing Additional Components</a>
 <ul class="sectlevel2">
 <li><a href="#add-on-platforms">4.1. Installing Additional Platforms</a></li>
-<li><a href="#_installing_additional_tools">4.2. Installing Additional Tools</a></li>
-<li><a href="#add-on-viewers">4.3. Installing Additional Viewers</a></li>
+<li><a href="#_enabling_android_assessments">4.2. Enabling Android Assessments</a></li>
+<li><a href="#_installing_additional_tools">4.3. Installing Additional Tools</a></li>
+<li><a href="#add-on-viewers">4.4. Installing Additional Viewers</a></li>
 </ul>
 </li>
 <li><a href="#_configuring_swamp_in_a_box">5. Configuring SWAMP-in-a-Box</a>
@@ -486,17 +487,19 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_configuring_outgoing_email_for_swamp_in_a_box">5.3. Configuring Outgoing Email for SWAMP-in-a-Box</a></li>
 <li><a href="#_configuring_ldap_for_user_authentication_and_attributes">5.4. Configuring LDAP for User Authentication and Attributes</a></li>
 <li><a href="#_configuring_third_party_sign_in_via_oauth2_providers">5.5. Configuring Third-party Sign-in via OAuth2 Providers</a></li>
+<li><a href="#_configuring_a_welcome_message_for_swamp_in_a_box">5.6. Configuring a Welcome Message for SWAMP-in-a-Box</a></li>
 </ul>
 </li>
 <li><a href="#_maintaining_swamp_in_a_box">6. Maintaining SWAMP-in-a-Box</a>
 <ul class="sectlevel2">
 <li><a href="#checking-for-updates">6.1. Checking for Updates</a></li>
 <li><a href="#updating-the-hostname">6.2. Updating the Host&#8217;s Hostname</a></li>
-<li><a href="#_managing_disk_space">6.3. Managing Disk Space</a></li>
-<li><a href="#_managing_firewalls">6.4. Managing Firewalls</a></li>
-<li><a href="#managing-htcondor">6.5. Managing HTCondor</a></li>
-<li><a href="#_managing_swamp_daemons">6.6. Managing SWAMP Daemons</a></li>
-<li><a href="#_other_considerations_3">6.7. Other Considerations</a></li>
+<li><a href="#_backing_up_and_restoring_the_sql_database">6.3. Backing Up and Restoring the SQL Database</a></li>
+<li><a href="#_managing_disk_space">6.4. Managing Disk Space</a></li>
+<li><a href="#_managing_firewalls">6.5. Managing Firewalls</a></li>
+<li><a href="#managing-htcondor">6.6. Managing HTCondor</a></li>
+<li><a href="#_managing_swamp_daemons">6.7. Managing SWAMP Daemons</a></li>
+<li><a href="#_other_considerations_3">6.8. Other Considerations</a></li>
 </ul>
 </li>
 <li><a href="#_troubleshooting_swamp_in_a_box">7. Troubleshooting SWAMP-in-a-Box</a>
@@ -505,16 +508,16 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#collecting-log-files">7.2. Collecting Log Files</a></li>
 <li><a href="#_debugging_failed_assessments">7.3. Debugging Failed Assessments</a></li>
 <li><a href="#_debugging_stuck_assessments">7.4. Debugging Stuck Assessments</a></li>
+<li><a href="#_using_java_cli_and_related_plugins_with_swamp_in_a_box">7.5. Using Java CLI and Related Plugins with SWAMP-in-a-Box</a></li>
 </ul>
 </li>
 <li><a href="#support-and-contact-info">8. Support and Contact Information</a></li>
 <li><a href="#installing-dependencies">Appendix A: Installing Dependencies</a>
 <ul class="sectlevel2">
-<li><a href="#dependencies-htcondor">A.1. HTCondor 8.7.8</a></li>
-<li><a href="#dependencies-mariadb">A.2. MariaDB 5.5</a></li>
-<li><a href="#dependencies-php">A.3. PHP 7.0</a></li>
-<li><a href="#dependencies-other">A.4. Other Assorted Utilities and Setup</a></li>
-<li><a href="#troubleshooting-installing-dependencies">A.5. Troubleshooting Issues with Installing Dependencies</a></li>
+<li><a href="#dependencies-mariadb">A.1. MariaDB 5.5</a></li>
+<li><a href="#dependencies-php">A.2. PHP 7.0</a></li>
+<li><a href="#dependencies-other">A.3. Other Assorted Utilities</a></li>
+<li><a href="#troubleshooting-installing-dependencies">A.4. Troubleshooting Issues with Installing Dependencies</a></li>
 </ul>
 </li>
 <li><a href="#obtaining-add-ons">Appendix B: Obtaining Additional Tools and Viewers</a>
@@ -524,7 +527,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#about-parasoft">B.3. Parasoft C/C++test and Parasoft Jtest</a></li>
 </ul>
 </li>
-<li><a href="#_license_and_notices">Appendix C: License and Notices</a></li>
+<li><a href="#_license_and_notices">Appendix C: License and Notices</a>
+<ul class="sectlevel2">
+<li><a href="#_apache_license_version_2_0">C.1. Apache License, Version 2.0</a></li>
+<li><a href="#_notices">C.2. Notices</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -546,11 +554,11 @@ application at <a href="https://www.mir-swamp.org" class="bare">https://www.mir-
 software assurance capabilities to developers and researchers.</p>
 </div>
 <div class="paragraph">
-<p>The SWAMP is funded by the Department of Homeland Security (DHS) Science and
-Technology Directorate, Homeland Security Advanced Research Projects Agency,
-Cyber Security Division (DHS S&amp;T/HSARPA/CSD); BAA 11-02; and the Air Force
-Research Laboratory, Information Directorate under agreement number
-FA8750-12-2-0289.</p>
+<p>The SWAMP project is funded by the Department of Homeland Security (DHS)
+Science and Technology Directorate, Homeland Security Advanced Research
+Projects Agency, Cyber Security Division (DHS S&amp;T/HSARPA/CSD); BAA 11-02;
+and the Air Force Research Laboratory, Information Directorate under
+agreement number FA8750-12-2-0289.</p>
 </div>
 </div>
 <div class="sect2">
@@ -588,7 +596,7 @@ SWAMP web application after SWAMP-in-a-Box has been installed.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_system_requirements">2. System Requirements</h2>
+<h2 id="system-requirements">2. System Requirements</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>SWAMP-in-a-Box is designed to be installed on a dedicated host, one that is
@@ -1248,7 +1256,68 @@ complete due to the size of the file.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_installing_additional_tools">4.2. Installing Additional Tools</h3>
+<h3 id="_enabling_android_assessments">4.2. Enabling Android Assessments</h3>
+<div class="paragraph">
+<p>You can enable SWAMP-in-a-Box to assess Android Java Source and Android .APK
+packages.</p>
+</div>
+<div class="sect3">
+<h4 id="_before_you_begin_3">4.2.1. Before You Begin</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>You will need <code>root</code> access to the SWAMP-in-a-Box host.</p>
+</li>
+<li>
+<p>You will need <code>root</code> access to the SWAMP-in-a-Box database.</p>
+</li>
+<li>
+<p>You will need to make sure you have enough available hard drive space on
+your SWAMP-in-a-Box host to download and decompress the Android Ubuntu
+platform image.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The Android Ubuntu platform includes the OS dependencies needed to build and
+assess Android Packages. As such it is quite large. The downloadable .qcow2.gz
+file needed to add the platform is over 28 GB. The decompressed, installed
+.qcow2 file takes up about 175 GB in the /swamp/platforms/images directory.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_procedure_2">4.2.2. Procedure</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Download and install the Android Ubuntu 12.04 64-bit platform following
+the procedure for <a href="#add-on-platforms">Installing Additional Platforms</a>.</p>
+</li>
+<li>
+<p>Optionally delete the Android Ubuntu platform .qcow2.gz file if you wish to
+conserve disk space.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>When the Android Ubuntu platform is added, the Android Java Source and
+Android .APK package types are enabled. Android-specific tools are installed
+with SWAMP-in-a-Box, but they cannot be used for assessments until the
+Android Ubuntu platform is added.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_installing_additional_tools">4.3. Installing Additional Tools</h3>
 <div class="paragraph">
 <p>The SWAMP-in-a-Box installer includes and installs a variety of tools for
 assessing packages.</p>
@@ -1299,7 +1368,7 @@ for installing and configuring the tools for use in the SWAMP is largely
 similar.</p>
 </div>
 <div class="sect3">
-<h4 id="_before_you_begin_3">4.2.1. Before You Begin</h4>
+<h4 id="_before_you_begin_4">4.3.1. Before You Begin</h4>
 <div class="ulist">
 <ul>
 <li>
@@ -1312,7 +1381,7 @@ similar.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_obtain_the_tool_installerarchive_from_its_vendor">4.2.2. Obtain the Tool Installer/Archive from Its Vendor</h4>
+<h4 id="_obtain_the_tool_installerarchive_from_its_vendor">4.3.2. Obtain the Tool Installer/Archive from Its Vendor</h4>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">CodeSonar</dt>
@@ -1376,7 +1445,7 @@ you have write access to (for example, your home directory).</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="add-on-tool-create-archive">4.2.3. Create the SWAMP Tool Archive</h4>
+<h4 id="add-on-tool-create-archive">4.3.3. Create the SWAMP Tool Archive</h4>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">CodeSonar</dt>
@@ -1428,7 +1497,7 @@ without internet access</a> (i.e., "internet-inaccessible" assessments).</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_install_the_tool">4.2.4. Install the Tool</h4>
+<h4 id="_install_the_tool">4.3.4. Install the Tool</h4>
 <div class="paragraph">
 <p>The <code>install_tool</code> script is used to install and manage any tools that are
 added onto a SWAMP-in-a-Box installation. The script must always be invoked
@@ -1494,7 +1563,7 @@ the size of the tool archive.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="add-on-tool-configure">4.2.5. Configure the Tool</h4>
+<h4 id="add-on-tool-configure">4.3.5. Configure the Tool</h4>
 <div class="paragraph">
 <p>As <code>root</code> (or using <code>sudo</code>), run the <code>install_tool</code> script with the
 <code>--configure</code> option, providing additional options as needed.</p>
@@ -1551,7 +1620,7 @@ additional entries that should be added to <code>services.conf</code>:</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_manage_the_installed_versions_of_the_tool">4.2.6. Manage the Installed Versions of the Tool</h4>
+<h4 id="_manage_the_installed_versions_of_the_tool">4.3.6. Manage the Installed Versions of the Tool</h4>
 <div class="ulist">
 <ul>
 <li>
@@ -1596,7 +1665,7 @@ package the 32-bit and 64-bit archives together for the SWAMP. Then as
 </div>
 </div>
 <div class="sect2">
-<h3 id="add-on-viewers">4.3. Installing Additional Viewers</h3>
+<h3 id="add-on-viewers">4.4. Installing Additional Viewers</h3>
 <div class="paragraph">
 <p>The SWAMP-in-a-Box installer includes and installs only a "native" viewer
 for viewing the results of an assessment. The SWAMP web application also
@@ -1612,7 +1681,7 @@ obtaining this SWAMP-specific version of Code Dx from Code Dx, Inc.
 standalone Code Dx installation.)</p>
 </div>
 <div class="sect3">
-<h4 id="_before_you_begin_4">4.3.1. Before You Begin</h4>
+<h4 id="_before_you_begin_5">4.4.1. Before You Begin</h4>
 <div class="ulist">
 <ul>
 <li>
@@ -1631,7 +1700,7 @@ within the expanded contents.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_procedure_2">4.3.2. Procedure</h4>
+<h4 id="_procedure_3">4.4.2. Procedure</h4>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -1692,7 +1761,7 @@ assessment will still fail.
 </table>
 </div>
 <div class="sect3">
-<h4 id="_before_you_begin_5">5.1.1. Before You Begin</h4>
+<h4 id="_before_you_begin_6">5.1.1. Before You Begin</h4>
 <div class="ulist">
 <ul>
 <li>
@@ -1702,7 +1771,7 @@ assessment will still fail.
 </div>
 </div>
 <div class="sect3">
-<h4 id="_procedure_3">5.1.2. Procedure</h4>
+<h4 id="_procedure_4">5.1.2. Procedure</h4>
 <div class="paragraph">
 <p>Modify <code>/opt/swamp/etc/swamp.conf</code> such that the line</p>
 </div>
@@ -1922,7 +1991,7 @@ membership and disabling and re-enabling of projects and user accounts.</p>
 </ul>
 </div>
 <div class="sect3">
-<h4 id="_before_you_begin_6">5.3.1. Before You Begin</h4>
+<h4 id="_before_you_begin_7">5.3.1. Before You Begin</h4>
 <div class="ulist">
 <ul>
 <li>
@@ -2025,10 +2094,10 @@ removing parameters in this file.</p>
 <div class="content">
 <pre>  "contact": {
     "support": {
-      "email": "&lt;Support email address (optional)&gt;",
-      "phoneNumber": "&lt;Support phone number (optional)&gt;",
       "description": "Support staff",
-      "message": "Feel free to contact us with questions."
+      "email": "&lt;Support email address (optional)&gt;",
+      "message": "Feel free to contact us with questions.",
+      "phoneNumber": "&lt;Support phone number (optional)&gt;"
     }
   },</pre>
 </div>
@@ -2113,16 +2182,16 @@ removing parameters in this file.</p>
 <div class="content">
 <pre>  "contact": {
     "support": {
-      "email": "&lt;Support email address (optional)&gt;",
-      "phoneNumber": "&lt;Support phone number (optional)&gt;",
       "description": "Support staff",
-      "message": "Feel free to contact us with questions."
+      "email": "&lt;Support email address (optional)&gt;",
+      "message": "Feel free to contact us with questions.",
+      "phoneNumber": "&lt;Support phone number (optional)&gt;"
     },
     "security": {
-      "email": "&lt;Security email address (optional)&gt;",
-      "phoneNumber": "&lt;Security phone number (optional)&gt;",
       "description": "Security team",
-      "message": "&lt;Security message here (optional)&gt;"
+      "email": "&lt;Security email address (optional)&gt;",
+      "message": "&lt;Security message here (optional)&gt;",
+      "phoneNumber": "&lt;Security phone number (optional)&gt;"
     }
   },</pre>
 </div>
@@ -2227,7 +2296,7 @@ instead of in the <code>user</code> table in the SWAMP&#8217;s local database.</
 <div class="sect3">
 <h4 id="_configuring_ldap_options_in_the_web_backend_configuration_file">5.4.1. Configuring LDAP Options in the Web Backend Configuration File</h4>
 <div class="sect4">
-<h5 id="_before_you_begin_7">Before You Begin</h5>
+<h5 id="_before_you_begin_8">Before You Begin</h5>
 <div class="ulist">
 <ul>
 <li>
@@ -2241,7 +2310,7 @@ the parameters discussed below.</p>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_procedure_4">Procedure</h5>
+<h5 id="_procedure_5">Procedure</h5>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -2349,7 +2418,7 @@ have no administrator users.</p>
 <p>You can use the following procedure to promote a user to a SWAMP administrator.</p>
 </div>
 <div class="sect4">
-<h5 id="_before_you_begin_8">Before You Begin</h5>
+<h5 id="_before_you_begin_9">Before You Begin</h5>
 <div class="ulist">
 <ul>
 <li>
@@ -2377,7 +2446,7 @@ file.</p>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_procedure_5">Procedure</h5>
+<h5 id="_procedure_6">Procedure</h5>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -2767,7 +2836,7 @@ Currently, the following identity providers are supported:</p>
 <div class="sect3">
 <h4 id="_creating_a_github_oauth_application_for_your_swamp_in_a_box">5.5.1. Creating a GitHub OAuth Application for Your SWAMP-in-a-Box</h4>
 <div class="sect4">
-<h5 id="_before_you_begin_9">Before You Begin</h5>
+<h5 id="_before_you_begin_10">Before You Begin</h5>
 <div class="ulist">
 <ul>
 <li>
@@ -2778,7 +2847,7 @@ OAuth application.</p>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_procedure_6">Procedure</h5>
+<h5 id="_procedure_7">Procedure</h5>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -2841,7 +2910,7 @@ SWAMP-in-a-Box&#8217;s hostname</p>
 <div class="sect3">
 <h4 id="_enabling_github_as_an_oauth2_provider">5.5.2. Enabling GitHub as an OAuth2 Provider</h4>
 <div class="sect4">
-<h5 id="_before_you_begin_10">Before You Begin</h5>
+<h5 id="_before_you_begin_11">Before You Begin</h5>
 <div class="ulist">
 <ul>
 <li>
@@ -2855,7 +2924,7 @@ SWAMP-in-a-Box&#8217;s GitHub OAuth application.</p>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_procedure_7">Procedure</h5>
+<h5 id="_procedure_8">Procedure</h5>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -2886,7 +2955,7 @@ GITHUB_CLIENT_SECRET=&lt;Your Client Secret&gt;</pre>
 <div class="sect3">
 <h4 id="_creating_google_oauth_credentials_for_your_swamp_in_a_box">5.5.3. Creating Google OAuth Credentials for Your SWAMP-in-a-Box</h4>
 <div class="sect4">
-<h5 id="_before_you_begin_11">Before You Begin</h5>
+<h5 id="_before_you_begin_12">Before You Begin</h5>
 <div class="ulist">
 <ul>
 <li>
@@ -2897,7 +2966,7 @@ create OAuth credentials.</p>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_procedure_8">Procedure</h5>
+<h5 id="_procedure_9">Procedure</h5>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -3022,7 +3091,7 @@ SWAMP-in-a-Box&#8217;s hostname</p>
 <div class="sect3">
 <h4 id="_enabling_google_as_an_oauth2_provider">5.5.4. Enabling Google as an OAuth2 Provider</h4>
 <div class="sect4">
-<h5 id="_before_you_begin_12">Before You Begin</h5>
+<h5 id="_before_you_begin_13">Before You Begin</h5>
 <div class="ulist">
 <ul>
 <li>
@@ -3036,7 +3105,7 @@ SWAMP-in-a-Box&#8217;s Google OAuth credentials.</p>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_procedure_9">Procedure</h5>
+<h5 id="_procedure_10">Procedure</h5>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -3067,7 +3136,7 @@ GOOGLE_CLIENT_SECRET=&lt;Your Client Secret&gt;</pre>
 <div class="sect3">
 <h4 id="_registering_for_cilogon_oauth2_credentials">5.5.5. Registering for CILogon OAuth2 Credentials</h4>
 <div class="sect4">
-<h5 id="_procedure_10">Procedure</h5>
+<h5 id="_procedure_11">Procedure</h5>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -3112,7 +3181,7 @@ hostname</p>
 <div class="sect3">
 <h4 id="_enabling_cilogon_as_an_oauth2_provider">5.5.6. Enabling CILogon as an OAuth2 Provider</h4>
 <div class="sect4">
-<h5 id="_before_you_begin_13">Before You Begin</h5>
+<h5 id="_before_you_begin_14">Before You Begin</h5>
 <div class="ulist">
 <ul>
 <li>
@@ -3126,7 +3195,7 @@ SWAMP-in-a-Box&#8217;s CILogon OAuth2 credentials.</p>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_procedure_11">Procedure</h5>
+<h5 id="_procedure_12">Procedure</h5>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -3151,6 +3220,65 @@ CILOGON_CLIENT_SECRET=&lt;Your Client Secret&gt;</pre>
 <p>Save your changes.</p>
 </li>
 </ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuring_a_welcome_message_for_swamp_in_a_box">5.6. Configuring a Welcome Message for SWAMP-in-a-Box</h3>
+<div class="paragraph">
+<p>You can configure SWAMP-in-a-Box to display a welcome message as a pop up
+whenever a user accesses the SWAMP-in-a-Box home page (not signed in).</p>
+</div>
+<div class="paragraph">
+<p>You can use this to provide a welcome message, convey information about
+your SWAMP-in-a-Box, or provide status information.</p>
+</div>
+<div class="sect3">
+<h4 id="_before_you_begin_15">5.6.1. Before You Begin</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>You need <code>root</code> access to the SWAMP-in-a-Box host.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_modify_varwwwhtmlconfigconfig_json_with_your_message">5.6.2. Modify <code>/var/www/html/config/config.json</code> with your message</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Add a <code>notifications</code> array containing a <code>welcome</code> array.</p>
+</li>
+<li>
+<p>Add <code>title</code> and <code>message</code> values to the <code>welcome</code> array.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Note:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The <code>config.json</code> file defines parameters within JSON arrays. Therefore,
+it is important to maintain the array format when editing, adding, or
+removing parameters in this file.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Sample:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  "notifications": {
+    "welcome": {
+      "message": "Your message here!",
+      "title": "Welcome to SWAMP-in-a-Box for &lt;organization&gt;"
+    }
+  },</pre>
 </div>
 </div>
 </div>
@@ -3201,12 +3329,57 @@ hostname, as <code>root</code> (or using <code>sudo</code>), run the following c
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>/opt/swamp/bin/swamp_set_web_host --force --hostname="&lt;new hostname&gt;"</pre>
+<pre>/opt/swamp/bin/swamp_set_web_host --hostname="&lt;new hostname&gt;"</pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_managing_disk_space">6.3. Managing Disk Space</h3>
+<h3 id="_backing_up_and_restoring_the_sql_database">6.3. Backing Up and Restoring the SQL Database</h3>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+SWAMP-in-a-Box uses MariaDB as its SQL database implementation. While it is
+technically possible to use MariaDB&#8217;s <code>mysqldump</code> command and <code>mysql</code> shell
+to back up and restore the SQL database, that process will not account for
+changes to the database schemas and records between SWAMP-in-a-Box releases.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The SWAMP-in-a-Box upgrade script creates a backup of the SWAMP&#8217;s SQL
+database prior to upgrading it. A backup can also be created at any other
+time by running the following command as <code>root</code> (or using <code>sudo</code>):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>/opt/swamp/bin/swamp_backup_db --output-dir=&lt;DIR&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Replace <code>&lt;DIR&gt;</code> with the directory where the backup should be saved, and
+provide the database&#8217;s <code>root</code> user&#8217;s password when asked. The command&#8217;s
+output will indicate where the backup has been saved.</p>
+</div>
+<div class="paragraph">
+<p>To restore the backup, run the following command as <code>root</code> (or using <code>sudo</code>):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>/opt/swamp/bin/swamp_restore_db --sql-db-file=&lt;FILE&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Replace <code>&lt;FILE&gt;</code> with the path to the file created by <code>swamp_backup_db</code>, and
+provide the database&#8217;s <code>root</code> user&#8217;s password when asked.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_managing_disk_space">6.4. Managing Disk Space</h3>
 <div class="paragraph">
 <p>SWAMP-in-a-Box will use increasing amounts of disk space as SWAMP users
 upload packages and assess them. However, disk space from temporary files
@@ -3265,7 +3438,7 @@ assessments that failed. The following <code>find</code> command, when run as <c
 </div>
 </div>
 <div class="sect2">
-<h3 id="_managing_firewalls">6.4. Managing Firewalls</h3>
+<h3 id="_managing_firewalls">6.5. Managing Firewalls</h3>
 <div class="paragraph">
 <p>Refer back to the section on <a href="#configure-firewalls">configuring firewalls</a>
 for information on the network traffic that the SWAMP-in-a-Box host is
@@ -3275,13 +3448,13 @@ configuration.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="managing-htcondor">6.5. Managing HTCondor</h3>
+<h3 id="managing-htcondor">6.6. Managing HTCondor</h3>
 <div class="paragraph">
 <p>SWAMP-in-a-Box uses an HTCondor pool to run assessments and the
 <a href="#add-on-viewers">optional Code Dx viewer</a>. Each SWAMP assessment and viewer
-instance is submitted to the HTCondor pool as a single job. The <code>condor_q</code>
-and <code>condor_status</code> commands can be used to examine HTCondor&#8217;s queue of jobs
-and the resources it has for running those jobs.</p>
+instance is submitted to the HTCondor pool as a single job. The commands
+listed below can be used to examine and modify HTCondor&#8217;s queue of jobs and
+the resources available to it for running those jobs.</p>
 </div>
 <div class="admonitionblock tip">
 <table>
@@ -3290,9 +3463,42 @@ and the resources it has for running those jobs.</p>
 <i class="fa icon-tip" title="Tip"></i>
 </td>
 <td class="content">
-The listings from <code>condor_q</code> and <code>condor_status -vm</code>, described below, can
-also be found in the SWAMP web application. As a SWAMP administrator, go to
+Much of the functionality provided by the commands listed below is also
+available through the SWAMP web application. As a SWAMP administrator, go to
 the System Overview page, and from there, to the Review Status page.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>SWAMP-in-a-Box installs and uses a "personal" HTCondor pool. As a result,
+HTCondor&#8217;s commands are not in the shell&#8217;s default search path, and each
+command must be run in an environment where <code>CONDOR_CONFIG</code> is set to the
+path to the SWAMP&#8217;s HTCondor configuration file.</p>
+</div>
+<div class="paragraph">
+<p>Shells started after SWAMP-in-a-Box has been installed should automatically
+load <code>/etc/profile.d/swamp.sh</code>, which modifies the shell&#8217;s environment so
+that the commands listed below may be run exactly as shown.</p>
+</div>
+<div class="paragraph">
+<p>When using <code>sudo</code> to run the commands, first run <code>sudo -i</code>, which starts
+a new shell that runs as <code>root</code>. Then run the commands as shown.
+Alternatively, explicitly specify the value for <code>CONDOR_CONFIG</code> and the full
+path to the command as part of the <code>sudo</code> command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>sudo CONDOR_CONFIG=/opt/swamp/htcondor/etc/condor_config /opt/swamp/htcondor/bin/&lt;command&gt; ...</pre>
+</div>
+</div>
 </td>
 </tr>
 </table>
@@ -3331,11 +3537,22 @@ require a virtual machine. All SWAMP jobs require a virtual machine. On
 a normally functioning system, there should be at least one "machine" in
 this list.</p>
 </dd>
+<dt class="hdlist1"><code>condor_release &lt;job ID&gt;</code></dt>
+<dd>
+<p>Releases a job that is on-hold, which allows HTCondor to try scheduling and
+running the job again. This command must be run as <code>root</code> (or using <code>sudo</code>).</p>
+</dd>
+<dt class="hdlist1"><code>condor_rm &lt;job ID&gt;</code></dt>
+<dd>
+<p>Removes a job from the queue. This command must be run as <code>root</code> (or using
+<code>sudo</code>). It can be used to remove a job from the queue, though this should
+not be necessary on a normally functioning system.</p>
+</dd>
 </dl>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_managing_swamp_daemons">6.6. Managing SWAMP Daemons</h3>
+<h3 id="_managing_swamp_daemons">6.7. Managing SWAMP Daemons</h3>
 <div class="paragraph">
 <p>SWAMP-in-a-Box includes a collection of daemons that run on the host, all
 managed by the <code>swamp</code> system service. These daemons must be running in
@@ -3353,7 +3570,7 @@ service swamp restart</pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_other_considerations_3">6.7. Other Considerations</h3>
+<h3 id="_other_considerations_3">6.8. Other Considerations</h3>
 <div class="paragraph">
 <p>SWAMP-in-a-Box uses Apache HTTP Server, HTCondor, and MariaDB. For
 instructions on how to interact with or administer Apache HTTP Server,
@@ -3699,12 +3916,6 @@ script.</p>
 the host. Refer to the appendix on <a href="#dependencies-php">installing PHP</a> for
 instructions on installing the required version of PHP.</p>
 </dd>
-<dt class="hdlist1">swa-daemon cannot run SWAMP&#8217;s perl without a password</dt>
-<dd>
-<p>Indicates that the SWAMP&#8217;s configuration for <code>sudo</code> either is not present or
-is being overridden, which will prevent the SWAMP from performing
-assessments. <a href="#support-and-contact-info">Contact SWAMP staff</a>.</p>
-</dd>
 </dl>
 </div>
 </div>
@@ -3862,6 +4073,26 @@ results available in the SWAMP web application.</p>
 </ol>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_using_java_cli_and_related_plugins_with_swamp_in_a_box">7.5. Using Java CLI and Related Plugins with SWAMP-in-a-Box</h3>
+<div class="paragraph">
+<p>SWAMP-in-a-Box supports the following minimum versions of Java CLI and
+related plug-ins. If you are using an earlier version, please upgrade.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Java CLI version 1.5.2</p>
+</li>
+<li>
+<p>SWAMP Eclipse Plugin version 1.1.2</p>
+</li>
+<li>
+<p>SWAMP Jenkins Plugin version 1.2.1</p>
+</li>
+</ul>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -3878,8 +4109,8 @@ results available in the SWAMP web application.</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>To get updates on SWAMP-in-a-Box and be part of the user community, please
-join our mailing list:</p>
+<p>To receive updates on SWAMP-in-a-Box and be part of the user community,
+please join our mailing list:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -3903,7 +4134,7 @@ us at:</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>You may encrypt your email for privacy using GPG (Key id#739202FA,
+<p>You may encrypt your email for privacy using GPG (key id#739202FA,
 fingerprint 2793 A0A7 4340 7587 FC2A 160F FE83 C695 7392 02FA).</p>
 </div>
 </div>
@@ -3916,9 +4147,6 @@ fingerprint 2793 A0A7 4340 7587 FC2A 160F FE83 C695 7392 02FA).</p>
 </div>
 <div class="ulist">
 <ul>
-<li>
-<p><a href="#dependencies-htcondor">HTCondor 8.7.8</a>,</p>
-</li>
 <li>
 <p><a href="#dependencies-mariadb">MariaDB 5.5</a>,</p>
 </li>
@@ -3952,25 +4180,7 @@ on obtaining and extracting the installer.
 </table>
 </div>
 <div class="sect2">
-<h3 id="dependencies-htcondor">A.1. HTCondor 8.7.8</h3>
-<div class="paragraph">
-<p>The set-up scripts for SWAMP-in-a-Box configure and download HTCondor from
-the repository hosted by the University of Wisconsin-Madison, generally
-following the instructions provided on the project&#8217;s home page at
-<a href="https://research.cs.wisc.edu/htcondor/index.html" class="bare">https://research.cs.wisc.edu/htcondor/index.html</a>. The specific packages
-installed are <code>condor-all</code> and its dependencies.</p>
-</div>
-<div class="paragraph">
-<p>The following script will install HTCondor using the process described above:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>&lt;installer-dir&gt;/repos/install-htcondor.bash</pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="dependencies-mariadb">A.2. MariaDB 5.5</h3>
+<h3 id="dependencies-mariadb">A.1. MariaDB 5.5</h3>
 <div class="paragraph">
 <p>For CentOS 6, the set-up scripts for SWAMP-in-a-Box configure and download
 MariaDB from the repository hosted by the MariaDB Foundation, using the
@@ -3994,7 +4204,7 @@ CentOS&#8217;s default repositories. The specific packages installed are
 </div>
 </div>
 <div class="sect2">
-<h3 id="dependencies-php">A.3. PHP 7.0</h3>
+<h3 id="dependencies-php">A.2. PHP 7.0</h3>
 <div class="paragraph">
 <p>The set-up scripts for SWAMP-in-a-Box configure and download PHP from Remi&#8217;s
 RPM Repository, using the instructions produced by the "configuration
@@ -4039,11 +4249,11 @@ are:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="dependencies-other">A.4. Other Assorted Utilities and Setup</h3>
+<h3 id="dependencies-other">A.3. Other Assorted Utilities</h3>
 <div class="paragraph">
-<p>In addition to HTCondor, MariaDB, and PHP, the set-up scripts for
-SWAMP-in-a-Box download assorted software packages from CentOS&#8217;s default
-repositories. The specific packages installed are:</p>
+<p>In addition to MariaDB and PHP, the set-up scripts for SWAMP-in-a-Box
+download assorted software packages from CentOS&#8217;s default repositories. The
+specific packages installed are:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -4087,6 +4297,12 @@ repositories. The specific packages installed are:</p>
 <p><code>perl</code>,</p>
 </li>
 <li>
+<p><code>perl-parent</code>,</p>
+</li>
+<li>
+<p><code>python34</code>,</p>
+</li>
+<li>
 <p><code>rubygems</code>,</p>
 </li>
 <li>
@@ -4101,9 +4317,7 @@ repositories. The specific packages installed are:</p>
 <p>and their dependencies.</p>
 </div>
 <div class="paragraph">
-<p>The following script will install these packages and perform additional,
-necessary configuration of the SWAMP-in-a-Box host. It must be run after
-HTCondor, MariaDB, and PHP are installed, as described above:</p>
+<p>The following script will install these packages:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -4112,7 +4326,7 @@ HTCondor, MariaDB, and PHP are installed, as described above:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="troubleshooting-installing-dependencies">A.5. Troubleshooting Issues with Installing Dependencies</h3>
+<h3 id="troubleshooting-installing-dependencies">A.4. Troubleshooting Issues with Installing Dependencies</h3>
 <div class="paragraph">
 <p>The SWAMP-in-a-Box setup and install process requires downloading and
 installing packages from multiple package repositories. On systems
@@ -4249,8 +4463,10 @@ information for C/C++test or Jtest can be found at:</p>
 Apache License, Version 2.0, reproduced below.</p>
 </div>
 <div class="paragraph">
-<p>Additional notices for the SWAMP can be found at the end of this section.</p>
+<p>Additional notices for SWAMP can be found following the license.</p>
 </div>
+<div class="sect2">
+<h3 id="_apache_license_version_2_0">C.1. Apache License, Version 2.0</h3>
 <div class="literalblock">
 <div class="content">
 <pre>                                 Apache License
@@ -4430,50 +4646,54 @@ Apache License, Version 2.0, reproduced below.</p>
 
    END OF TERMS AND CONDITIONS
 
-   Copyright 2012-2018 Software Assurance Marketplace</pre>
+   Copyright 2012-2019 Software Assurance Marketplace</pre>
 </div>
 </div>
+</div>
+<div class="sect2">
+<h3 id="_notices">C.2. Notices</h3>
 <div class="ulist">
-<div class="title">NOTICES</div>
 <ul>
 <li>
 <p>This product includes HTCondor
-(<a href="https://research.cs.wisc.edu/htcondor/index.html" class="bare">https://research.cs.wisc.edu/htcondor/index.html</a>) software developed by the
-Center for High Throughput Computing at the University of Wisconsin-Madison.
-All rights reserved.  More details about the HTCondor license can be found
-at <a href="https://research.cs.wisc.edu/htcondor/license.html" class="bare">https://research.cs.wisc.edu/htcondor/license.html</a>.</p>
+(<a href="https://research.cs.wisc.edu/htcondor/index.html" class="bare">https://research.cs.wisc.edu/htcondor/index.html</a>) software developed by
+the Center for High Throughput Computing at the University of
+Wisconsin-Madison. All rights reserved. Details about the HTCondor license
+can be found at <a href="https://research.cs.wisc.edu/htcondor/license.html" class="bare">https://research.cs.wisc.edu/htcondor/license.html</a>.</p>
 </li>
 <li>
 <p>This product contains Laravel (<a href="https://laravel.com/" class="bare">https://laravel.com/</a>), an open source PHP
-framework licensed under the MIT license
-(<a href="https://opensource.org/licenses/MIT" class="bare">https://opensource.org/licenses/MIT</a>).  Copyright Taylor Otwell.</p>
+framework licensed under the MIT License
+(<a href="https://opensource.org/licenses/MIT" class="bare">https://opensource.org/licenses/MIT</a>). Copyright Taylor Otwell.</p>
 </li>
 <li>
-<p>This product contains Code Dx, a commercial product created by Code Dx, Inc.
-Copyright 2010-2018 Code Dx, Inc. All rights Reserved.  SWAMP has a
-partnership with Code Dx, Inc. and offers a SWAMP specific version of Code
-Dx software to be used solely with SWAMP software.  Code Dx software shall
-not be redistributed with SWAMP software without written consent of SWAMP or
-Code Dx, Inc.  Contact for licensing information and support for Code Dx can
-be found at <a href="mailto:sales@codedx.com">sales@codedx.com</a>, +1-631-759-3993, or
+<p>This product contains Code Dx, a commercial product created by Code Dx,
+Inc. Copyright 2010-2019 Code Dx, Inc. All rights reserved. SWAMP has
+a partnership with Code Dx, Inc. and offers a SWAMP-specific version of
+Code Dx software to be used solely with SWAMP software. Code Dx software
+shall not be redistributed with SWAMP software without written consent of
+SWAMP or Code Dx, Inc. Contact for licensing information and support for
+Code Dx can be found at <a href="mailto:sales@codedx.com">sales@codedx.com</a>, +1-631-759-3993, or
 <a href="https://codedx.com/support/?v=7516fd43adaa" class="bare">https://codedx.com/support/?v=7516fd43adaa</a>.</p>
 </li>
 <li>
-<p>This product includes a compiled, unmodified version of lib_mysql_sys
-library, an open source library developed by Roland Bouman and Bernardo
-Damele A.G. and licensed under LGPL v3.0, the GNU Lesser General Public
-License v3.0 (<a href="https://www.gnu.org/licenses/lgpl-3.0.en.html" class="bare">https://www.gnu.org/licenses/lgpl-3.0.en.html</a>).  Copyright
-2007, 2008-2009 Roland Bouman and Bernardo Damele A.G. All rights reserved.</p>
+<p>This product includes a compiled, unmodified version of lib_mysqludf_sys,
+an open source library developed by Roland Bouman and Bernardo Damele A. G.
+and licensed under the GNU Lesser General Public License v2.1
+(<a href="https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html" class="bare">https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html</a>). Copyright
+2007 Roland Bouman, 2008-2009 Roland Bouman and Bernardo Damele A. G. All
+rights reserved.</p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 </div>
+</div>
 <div id="footer">
 <div id="footer-text">
-Version 1.33<br>
-Last updated 2018-10-02 16:36:48 CDT
+Version 1.34<br>
+Last updated 2019-02-14 11:58:37 CST
 </div>
 </div>
 </body>

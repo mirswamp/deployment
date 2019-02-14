@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 #
 # Install the platform files for the current SWAMP-in-a-Box release.
@@ -39,11 +39,15 @@ function remove_deprecated_distribution_files() {
             condor-scientific-5.11-32-master-2016080901.qcow2 \
             condor-scientific-5.11-64-master-2016080901.qcow2 \
             condor-scientific-6.4-64-master-2015071401.qcow2 \
+            condor-ubuntu-10.04-64-master-2016102702.qcow2 \
             condor-ubuntu-12.04-64-master-2015012801.qcow2 \
             condor-ubuntu-16.04-64-master-2016102702.qcow2 \
             condor-ubuntu-16.04-64-master-2017092701.qcow2 \
+            condor-ubuntu-16.04-64-master-2018012401.qcow2 \
+            condor-ubuntu-16.04-64-master-2018070301.qcow2 \
             condor-universal-centos-6.8-64-viewer-master-2016110801.qcow2 \
             condor-universal-centos-6.9-64-viewer-master-2017101001.qcow2 \
+            condor-universal-centos-6.9-64-viewer-master-2018032001.qcow2 \
             ; do
         file_to_remove="${old_install_dir}/${old_file}"
         if [ -f "$file_to_remove" ]; then

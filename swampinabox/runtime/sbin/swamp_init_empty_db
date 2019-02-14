@@ -1,0 +1,211 @@
+#!/usr/bin/env perl
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2019 Software Assurance Marketplace
+
+#
+# Initialize the SQL database.
+#
+
+use utf8;
+use strict;
+use warnings;
+
+use English qw( -no_match_vars );
+use File::Path qw(rmtree);
+use Getopt::Long;
+
+use FindBin;
+use lib "$FindBin::Bin/../perl5", '/opt/swamp/perl5';
+use SWAMP::SiB_Utilities qw(:all);
+
+############################################################################
+
+my $mysql_data_dir        = '/var/lib/mysql';
+my $mysql_service         = 'mysql';
+my $mysql_user            = 'mysql';
+my $password_file         = '/etc/.mysql_root';
+my $whoami                = trim(qx(whoami));
+
+my $decode_mysql_root     = "$FindBin::Bin/decode_mysql_root";
+my $swamp_manage_service  = "$FindBin::Bin/swamp_manage_service";
+
+my $decode_mysql_root_arg = make_shell_arg($decode_mysql_root);
+my $password_file_arg     = make_shell_arg($password_file);
+
+############################################################################
+
+#
+# Perform all necessary cleanup tasks (e.g., before exiting).
+#
+sub do_cleanup {
+    if ($whoami eq 'root') {
+        system $swamp_manage_service, '--quiet', $mysql_service, 'stop';
+    }
+    return;
+}
+
+#
+# Make sure cleanup tasks happen, even on common signals.
+#
+END { local $CHILD_ERROR; do_cleanup(); }
+local $SIG{TERM} = sub { exit 1; };
+local $SIG{HUP}  = $SIG{TERM};
+local $SIG{INT}  = $SIG{TERM};
+local $SIG{QUIT} = $SIG{TERM};
+
+############################################################################
+
+#
+# Manage a system service.
+#
+sub tell_service {
+    my ($service, $command) = @_;
+    system($swamp_manage_service, $service, $command)
+      and    # 'system' returns the program's exit code
+      exit_abnormally("Failed to tell the $service system service to $command");
+    return;
+}
+
+#
+# Remove existing data files.
+#
+sub remove_data_files {
+    print "Removing data files in $mysql_data_dir\n";
+    rmtree($mysql_data_dir, {keep_root => 1, safe => 1, error => \my $err});
+
+    if (scalar @{$err} > 0) {
+        for my $diag (@{$err}) {
+            my ($file, $message) = each %{$diag};
+            if ($file eq q()) {
+                print "Error: Failed to remove $mysql_data_dir: $message\n";
+            }
+            else {
+                print "Error: Failed to remove $file: $message\n";
+            }
+        }
+        exit_abnormally("Failed to remove data files in $mysql_data_dir");
+    }
+    return;
+}
+
+#
+# Install new data files.
+#
+sub install_data_files {
+    my $user_arg     = "--user=$mysql_user";
+    my $data_dir_arg = "--datadir=$mysql_data_dir";
+
+    print "Installing new data files in $mysql_data_dir ...\n";
+    system('mysql_install_db', $user_arg, $data_dir_arg)
+      and    # 'system' returns the program's exit code
+      exit_abnormally("Failed to install new data files in $mysql_data_dir");
+    return;
+}
+
+#
+# Secure the installation.
+#
+sub secure_installation {
+    print "Setting the 'root' user's password and removing 'test' databases\n";
+
+    #
+    # Read in the new 'root' password.
+    #
+    my ($password, $error) =
+      do_command(qq($decode_mysql_root_arg $password_file_arg));
+    if ($error) {
+        exit_abnormally("Failed to determine the 'root' user's password");
+    }
+
+    chomp $password;
+    if ($password eq q()) {
+        exit_abnormally("The 'root' user's password is empty");
+    }
+
+    #
+    # Set the new 'root' password. Escape special characters.
+    #
+    my $mysql_command = 'mysql -u root';
+    $password =~ s{\\}{\\\\}g;
+    $password =~ s{\'}{\'\'}g;
+
+    open(my $fh, '|-', $mysql_command)
+      or exit_abnormally("Failed to run '$mysql_command'");
+    print {$fh} qq(
+        use mysql;
+        UPDATE user SET PASSWORD = password('$password') WHERE user = 'root';
+        DELETE FROM user WHERE user = '';
+        DELETE FROM user WHERE user = 'root'
+                         AND host NOT IN ('localhost', '127.0.0.1', '::1');
+        DELETE FROM db WHERE db = 'test' OR db = 'test\\_%';
+        FLUSH PRIVILEGES;
+      )
+      or exit_abnormally("Failed to send SQL statements to '$mysql_command'");
+
+    close($fh)
+      or exit_abnormally(
+        $OS_ERROR
+        ? "Failed to exit from '$mysql_command'"
+        : "Failed to run all required SQL statements"
+      );
+    return;
+}
+
+############################################################################
+
+sub show_usage_and_exit {
+    my $usage_message = <<"EOF";
+Usage: $PROGRAM_NAME [options]
+
+Erase existing SQL database data files and reinitialize them.
+
+Options:
+  --force     Perform the actions described above
+  --help, -?  Display this message
+EOF
+    print $usage_message;
+    exit 1;
+}
+
+sub main() {
+    print "\n";
+    print "### Initializing the SQL database\n";
+    print "\n";
+
+    my %options = ();
+    my $ok = Getopt::Long::GetOptions(\%options, 'force', 'help|?');
+
+    if (!$ok || $options{'help'}) {
+        print "\n" if !$ok;
+        show_usage_and_exit();
+    }
+
+    if (!$options{'force'}) {
+        print "Error: Refusing to do anything without '--force'\n";
+        print "\n";
+        show_usage_and_exit();
+    }
+
+    if ($whoami ne 'root') {
+        print
+          "Error: This utility must be run as 'root'. Perhaps use 'sudo'.\n";
+        exit 1;
+    }
+
+    tell_service($mysql_service, 'stop');
+    remove_data_files();
+    install_data_files();
+    tell_service($mysql_service, 'start');
+    secure_installation();
+    tell_service($mysql_service, 'stop');
+
+    print "\n";
+    print "Finished initializing the SQL database\n";
+    return;
+}
+
+main();
+exit_normally();

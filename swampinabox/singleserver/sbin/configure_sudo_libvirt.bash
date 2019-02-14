@@ -3,60 +3,69 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
-#
-# Configure 'sudo' and 'libvirt' for SWAMP-in-a-Box.
-#
+echo
+echo "### Configuring 'sudo' and 'libvirt'"
+echo
 
 encountered_error=0
-trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
+trap 'encountered_error=1 ; echo "Error (unexpected): $BASH_COMMAND" 1>&2' ERR
 set -o errtrace
 
-BINDIR=$(dirname "$0")
+unset CDPATH
+BINDIR=$(cd -- "$(dirname -- "$0")" && pwd)
+. "$BINDIR"/runtime/bin/swamp_utility.functions
 
 ############################################################################
 
-echo "Checking for and removing old configuration files"
-for old_file in /etc/sudoers.d/10_slotusers ; do
+echo "Removing old configuration files"
+for old_file in \
+        /etc/sudoers.d/10_slotusers \
+        ; do
     if [ -f "$old_file" ]; then
         echo "Removing: $old_file"
         rm -f "$old_file"
     fi
 done
-echo "Finished checking for and removing old configuration files"
 
-echo "Installing the SWAMP sudoers configuration"
-install -m 640 -o root -g root "$BINDIR/../config_templates/10_swamp_sudo_config" /etc/sudoers.d/.
+echo "Installing 10_swamp_sudo_config"
+install \
+    -m 640 -o root -g root \
+    "$BINDIR"/../config_templates/sudoers/10_swamp_sudo_config \
+    /etc/sudoers.d/.
 
 echo "Installing qemu-kvm-us"
-install -m 755 -o root -g root "$BINDIR/../config_templates/qemu-kvm-us"  /usr/libexec/qemu-kvm-us
+install \
+    -m 755 -o root -g root \
+    "$BINDIR"/../config_templates/qemu-kvm-us \
+    /usr/libexec/.
 
-echo "Creating the slotusers group"
-groupadd -f slotusers
-
-if ! groupmems -g slotusers -l | grep swa-daemon 1>/dev/null 2>/dev/null ; then
-    echo "Adding the swa-daemon user to the slotusers group"
-    groupmems -g slotusers -a swa-daemon
-fi
+############################################################################
 
 #
 # 'libvirtd' needs to be running for the 'virsh' commands below to work.
 #
-"$BINDIR/manage_services.bash" restart libvirtd
+tell_service libvirtd restart
 
-#
-# CSA-2693: Destroy the old 'swamponabox' network before adding 'swampinabox'.
-#
-if virsh net-uuid swamponabox 1>/dev/null 2>/dev/null ; then
-    virsh net-destroy swamponabox
-    virsh net-undefine swamponabox
+if ! virsh net-uuid swampinabox 1>/dev/null 2>&1 ; then
+    echo "Defining the swampinabox virtual network"
+    virsh -q net-define "$BINDIR"/../config_templates/libvirt/swampinabox.xml
+
+    echo "Starting the swampinabox virtual network"
+    virsh -q net-start swampinabox
+    virsh -q net-autostart swampinabox
+else
+    echo "Found the swampinabox virtual network"
 fi
 
-if ! virsh net-uuid swampinabox 1>/dev/null 2>/dev/null ; then
-    virsh net-define "$BINDIR/../config_templates/swampinabox.xml"
-    virsh net-autostart swampinabox
-    virsh net-start swampinabox
-fi
+############################################################################
 
+if [ $encountered_error -eq 0 ]; then
+    echo
+    echo "Finished configuring 'sudo' and 'libvirt'"
+else
+    echo
+    echo "Finished configuring 'sudo' and 'libvirt', but with errors" 1>&2
+fi
 exit $encountered_error

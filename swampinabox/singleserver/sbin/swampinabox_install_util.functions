@@ -1,71 +1,112 @@
+#!/bin/bash
+
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
-############################################################################
 #
-# Control flow.
+# Utility functions that are specific to the SWAMP-in-a-Box installer.
 #
 
-function remove_db_password_files() {
-    for file in \
-            /opt/swamp/sql/sql.cnf \
-            /etc/.mysql_root \
-            /etc/.mysql_web \
-            /etc/.mysql_java \
-            /etc/.mysql_admin \
-            ; do
-        if [ -f "$file" ]; then
-            rm -f "$file"
+#
+# Remove temporary DB password files. Reset the terminal's 'echo' property.
+#
+function remove_db_password_files {
+    rm -f /etc/.mysql_root
+    rm -f /etc/.mysql_web
+    rm -f /etc/.mysql_java
+    rm -f /etc/.mysql_admin
+    rm -f /opt/swamp/sql/sql.cnf
+    stty echo 1>/dev/null 2>&1 || true
+}
+
+#
+# Tell the given list of (potential) system services to start/stop/restart.
+#
+function tell_services {
+    local action=$1
+    local tell_svc=$BINDIR/runtime/sbin/swamp_manage_service
+
+    for svc in "${@:2}" ; do
+        if [ "$("$tell_svc" "$svc" status)" != "error" ]; then
+            echo "Telling the $svc system service to $action"
+            "$tell_svc" "$svc" "$action"
         fi
     done
 }
 
 ############################################################################
+
 #
-# Working with 'yum' and RPMs.
+# Process command-line arguments for the "singleserver" installer.
 #
+function get_args {
+    MODE=""
+    RELEASE_NUMBER=""
+    BUILD_NUMBER=""
+    DBPASSWORD=""
+    SWAMPADMINPASSWORD=""
 
-function yum_erase() {
-    echo "Erasing: $*"
-    yum -y erase "$@"
-}
+    for arg in "$@" ; do
+        case "$arg" in
+            -install|--install) MODE=-install ;;
+            -upgrade|--upgrade) MODE=-upgrade ;;
 
-function yum_install() {
-    echo "Installing: $*"
-    yum -y install "$@"
-}
+            \?|h|-h|-help|--help)
+                echo "Usage: $0 <release number> <DB password> <SWAMP admin password>" 1>&2
+                exit 1
+                ;;
 
-function yum_confirm() {
-    encountered_not_installed=0
-    for pkg in "$@" ; do
-        echo -n "Checking for $pkg ... "
-        if ! rpm -q --whatprovides "$pkg" ; then
-            encountered_not_installed=1
-        fi
+            *)
+                if [ -z "$RELEASE_NUMBER" ]; then
+                    RELEASE_NUMBER=$arg
+                elif [ -z "$DBPASSWORD" ]; then
+                    DBPASSWORD=$arg
+                else
+                    SWAMPADMINPASSWORD=$arg
+                fi
+                ;;
+        esac
     done
-    return $encountered_not_installed
-}
 
-function get_rpm_version() {
-    pkg="$1"
-    if yum_confirm "$pkg" 1>/dev/null 2>/dev/null ; then
-        rpm -q --qf '%{VERSION}-%{RELEASE}' "$pkg"
-    else
-        echo ""
+    #
+    # Set reasonable defaults for anything that wasn't specified.
+    #
+    if [ -z "$MODE" ]; then
+        MODE=-install
     fi
-}
+    if [ -z "$RELEASE_NUMBER" ] \
+       && rpm -q --whatprovides swampinabox-backend 1>/dev/null 2>&1
+    then
+        RELEASE_NUMBER=$(rpm -q --qf '%{VERSION}' swampinabox-backend)
+    fi
+    if [ -z "$BUILD_NUMBER" ]; then
+        BUILD_NUMBER=$(date +"%Y%m%d%H%M%S").singleserver
+    fi
+    if [ -z "$DBPASSWORD" ]; then
+        DBPASSWORD=swampinabox
+    fi
+    if [ -z "$SWAMPADMINPASSWORD" ]; then
+        SWAMPADMINPASSWORD=swamp
+    fi
 
-function check_rpm_versions() {
-    version="$1"
-    rpms_with_wrong_version=()
+    #
+    # Write out what we found, and check for errors.
+    #
+    echo "Version: $RELEASE_NUMBER (build $BUILD_NUMBER)"
+    echo "Mode: $MODE"
+    echo "DB password: $DBPASSWORD"
+    echo "SWAMP admin password: $SWAMPADMINPASSWORD"
 
-    for pkg in "${@:2}" ; do
-        if [ "$(get_rpm_version "$pkg")" != "$version" ]; then
-            rpms_with_wrong_version+=($pkg)
-        fi
-    done
-
-    echo "${rpms_with_wrong_version[@]}"
+    if [ -z "$RELEASE_NUMBER" ]; then
+        echo "" 1>&2
+        echo "Error: Release number (version) must be specified" 1>&2
+        exit 1
+    fi
+    if [[ ! ( "$RELEASE_NUMBER" =~ ^[[:digit:]]+([.][[:digit:]]+).*$ ) ]]; then
+        echo "" 1>&2
+        echo "Error: Release number (version) is not well-formed" 1>&2
+        exit 1
+    fi
 }

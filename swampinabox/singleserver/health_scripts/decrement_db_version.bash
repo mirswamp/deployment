@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 # This script is used to decrement the last row of the MYSQL assessment table's
 # database_version_no, after the first upgrade of swampinabox.
@@ -16,6 +16,7 @@ function validate_result() {
 	    echo "Exiting ..."
 	    exit
     fi
+    return 0
 }
 
 # check if the user runs with sudo
@@ -35,7 +36,7 @@ fi
 
 # ask for the database password
 echo -n "Enter database root password: "
-read ANSWER
+read -s ANSWER
 if [ ! -z $ANSWER ]; then
     DBROOT=$ANSWER
 fi
@@ -47,16 +48,20 @@ echo user=root >> /opt/swamp/sql/sql.cnf
 chmod 400 /opt/swamp/sql/sql.cnf
 opt=--defaults-file=/opt/swamp/sql/sql.cnf
 
-echo "Decrementing the last row of the MYSQL's assessment.database_version_no by one"
 # decrement the database version number in assessment database_version table
 result=`echo "USE assessment;UPDATE database_version SET database_version_no=database_version_no-1 ORDER BY database_version_id DESC LIMIT 1;" | mysql $opt 2>&1`
 validate_result $result
+if [ $? -eq 0 ]; then
+    echo -e "\nDecremented the last row of the MYSQL's assessment.database_version_no by one"
+fi
 
-echo "Decrementing the last row of the MYSQL's project.database_version_no by one"
 # decrement the database version number in project database_version table
 result=`echo "USE project;UPDATE database_version SET database_version_no=database_version_no-1 ORDER BY
 database_version_id DESC LIMIT 1;" | mysql $opt 2>&1`
 validate_result $result
+if [ $? -eq 0 ]; then
+    echo "Decremented the last row of the MYSQL's project.database_version_no by one"
+fi
 
 # remove the login
 /bin/rm -f /opt/swamp/sql/sql.cnf

@@ -3,99 +3,225 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 #
-# Install or upgrade SWAMP-in-a-Box on the current host.
+# Install or upgrade SWAMP-in-a-Box on this host.
 #
 
-BINDIR="$(dirname "$0")"
-relayhost="128.104.153.20"
-now="$(date +"%Y%m%d_%H%M%S")"
+unset CDPATH
+BINDIR=$(cd -- "$(dirname -- "$0")" && pwd)
+
+now=$(date +"%Y%m%d_%H%M%S")
+relay_host=128.104.153.20
+
+############################################################################
+
+show_usage_and_exit() {
+    echo "Usage: $0 <version number> [database password] [SWAMP administrator password]" 1>&2
+    exit 1
+}
+
+get_args() {
+    MODE=""
+    VERSION_NUMBER=""
+    BUILD_NUMBER=""
+    DBPASSWORD=""
+    SWAMPADMINPASSWORD=""
+
+    for arg in "$@" ; do
+        case "$arg" in
+            -install)
+                MODE=-install
+                ;;
+            -upgrade)
+                MODE=-upgrade
+                ;;
+            -\?|-h|-help|--help)
+                show_usage_and_exit
+                ;;
+            *)  if [ -z "$VERSION_NUMBER" ]; then
+                    VERSION_NUMBER=$arg
+                elif [ -z "$DBPASSWORD" ]; then
+                    DBPASSWORD=$arg
+                else
+                    SWAMPADMINPASSWORD=$arg
+                fi
+                ;;
+        esac
+    done
+
+    #
+    # Set reasonable defaults for anything that was not specified.
+    #
+    if [ -z "$MODE" ]; then
+        MODE=-install
+    fi
+    if [ -z "$VERSION_NUMBER" ] \
+       && rpm -q --whatprovides swampinabox-backend 1>/dev/null 2>&1
+    then
+        VERSION_NUMBER=$(rpm -q --qf '%{VERSION}' swampinabox-backend)
+    fi
+    if [ -z "$BUILD_NUMBER" ]; then
+        BUILD_NUMBER=$(date +"%Y%m%d%H%M%S").singleserver
+    fi
+    if [ -z "$DBPASSWORD" ]; then
+        DBPASSWORD=swampinabox
+    fi
+    if [ -z "$SWAMPADMINPASSWORD" ]; then
+        SWAMPADMINPASSWORD=swamp
+    fi
+
+    #
+    # Check for errors.
+    #
+    if [ -z "$VERSION_NUMBER" ]; then
+        echo "Error: Version number is required" 1>&2
+        echo
+        show_usage_and_exit
+    fi
+    if [[ ! ( "$VERSION_NUMBER" =~ ^[[:digit:]]+([.][[:digit:]]+).*$ ) ]]; then
+        echo "Error: Version number is not well formed" 1>&2
+        echo
+        show_usage_and_exit
+    fi
+
+    #
+    # Write out what we found.
+    #
+    echo "Version: $VERSION_NUMBER (build $BUILD_NUMBER)"
+    echo "Mode: $MODE"
+    echo "Database password: $DBPASSWORD"
+    echo "SWAMP administrator password: $SWAMPADMINPASSWORD"
+}
+
+############################################################################
 
 #
-# Ensure that we're running as 'root' because we will be creating the
+# Determine the install type, log file location, etc.
+#
+if [ -d "$BINDIR"/../log ]; then
+    swamp_log_dir=$BINDIR/../log
+else
+    swamp_log_dir=.
+fi
+
+if [[ "$0" =~ install_swampinabox ]]; then
+    get_args -install "$@" || exit 1
+    swamp_log_file=$swamp_log_dir/install_swampinabox_$now.log
+else
+    get_args -upgrade "$@" || exit 1
+    swamp_log_file=$swamp_log_dir/upgrade_swampinabox_$now.log
+fi
+
+WORKSPACE=$BINDIR/../../../..
+
+#
+# Check that the SWAMP's Git repositories have been checked out into the
+# expected locations.
+#
+for repo in \
+        db \
+        deployment \
+        proprietary \
+        services \
+        swamp-web-server \
+        www-front-end \
+        ; do
+    if [ ! -d "$WORKSPACE/$repo" ]; then
+        echo
+        echo "Error: Missing Git repository: $WORKSPACE/$repo" 1>&2
+        exit 1
+    fi
+done
+
+#
+# Ensure that we are running as 'root', because we will be creating the
 # DB password files here, before running the core install/upgrade script.
 #
 if [ "$(whoami)" != "root" ]; then
+    echo
     echo "Error: This script must be run as 'root'. Perhaps use 'sudo'." 1>&2
+    exit 1
+fi
+
+#
+# Do the set up tasks that the "distribution" install requires the user to
+# do separately from the main install and the set up tasks that are specific
+# to a "singleserver" install.
+#
+set -o pipefail
+if ! "$BINDIR"/../sbin/swampinabox_do_singleserver_setup.bash \
+        "$MODE" \
+        "$relay_host" \
+    2>&1 | tee -a "$swamp_log_dir/singleserver_setup_$now.log"
+then
+    exit 1
+fi
+
+#
+# Build the SWAMP-in-a-Box RPMs.
+#
+set -o pipefail
+if ! "$BINDIR"/../sbin/swampinabox_build_rpms.bash \
+        "singleserver" \
+        "$WORKSPACE" \
+        "$VERSION_NUMBER" \
+        "$BUILD_NUMBER" \
+    2>&1 | tee -a "$swamp_log_dir/singleserver_build_rpms_$now.log"
+then
     exit 1
 fi
 
 #
 # Ensure that temporary DB password files get removed.
 #
-source "$BINDIR/../sbin/swampinabox_install_util.functions"
+remove_db_password_files() {
+    rm -f /etc/.mysql_root  \
+          /etc/.mysql_web   \
+          /etc/.mysql_java  \
+          /etc/.mysql_admin \
+          /opt/swamp/sql/sql.cnf
+    stty echo 1>/dev/null 2>&1 || :
+}
 trap 'remove_db_password_files' EXIT
-trap 'remove_db_password_files ; exit 1' INT TERM
 
 #
-# Determine the install type, log file location, etc.
+# Save encrypted DB passwords into files for use by other scripts.
 #
-if [ -d "$BINDIR/../log" ]; then
-    swamp_log_dir="$BINDIR/../log"
-else
-    swamp_log_dir="."
-fi
+echo
+echo "### Saving DB Password Files"
+echo
+remove_db_password_files
 
-if [[ "$0" =~ install_swampinabox ]]; then
-    source "$BINDIR/../sbin/getargs.function"
-    getargs "-install $*" || exit 1
-    swamp_log_file="$swamp_log_dir/install_swampinabox_$now.log"
-else
-    source "$BINDIR/../sbin/getargs.function"
-    getargs "-upgrade $*" || exit 1
-    swamp_log_file="$swamp_log_dir/upgrade_swampinabox_$now.log"
-fi
+save_password_cmd=$BINDIR/../sbin/runtime/sbin/create_mysql_root
 
-#
-# Attempt to ensure that the SWAMP Git repositories have been checked out
-# into the expected locations.
-#
-for repo in db deployment proprietary services swamp-web-server www-front-end; do
-    if [ ! -d "$WORKSPACE/$repo" ]; then
-        echo "Error: Missing SWAMP Git repository: $WORKSPACE/$repo" 1>&2
-        exit 1
-    fi
-done
+printf '%s\n' "$DBPASSWORD" \
+    | "$save_password_cmd" /etc/.mysql_root  --prompt=""
+printf '%s\n' "$DBPASSWORD" \
+    | "$save_password_cmd" /etc/.mysql_web   --prompt=""
+printf '%s\n' "$DBPASSWORD" \
+    | "$save_password_cmd" /etc/.mysql_java  --prompt=""
+printf '%s\n' "$SWAMPADMINPASSWORD" \
+    | "$save_password_cmd" /etc/.mysql_admin --prompt="" --php-bcrpt
 
 #
-# Save encrypted DB password(s) into files for use by other scripts.
-# Minimize the chance of the passwords appearing in process listings.
-#
-reset_umask=$(umask -p)
-umask 0377
-
-echo "$DBPASSWORD" | sudo openssl enc -aes-256-cbc -salt -out /etc/.mysql_root -pass pass:swamp
-chmod 0400 /etc/.mysql_root
-echo "$DBPASSWORD" | sudo openssl enc -aes-256-cbc -salt -out /etc/.mysql_web -pass pass:swamp
-chmod 0400 /etc/.mysql_web
-echo "$DBPASSWORD" | sudo openssl enc -aes-256-cbc -salt -out /etc/.mysql_java -pass pass:swamp
-chmod 0400 /etc/.mysql_java
-echo "$SWAMPADMINPASSWORD" | sudo openssl enc -aes-256-cbc -salt -out /etc/.mysql_admin -pass pass:swamp
-chmod 0400 /etc/.mysql_admin
-
-$reset_umask
-
-#
-# Execute the core of the install/upgrade process.
+# Run the core of the install/upgrade process.
 #
 set -o pipefail
-"$BINDIR/../sbin/swampinabox_do_install.bash" \
-        "$WORKSPACE" \
-        "$RELEASE_NUMBER" \
-        "$BUILD_NUMBER" \
-        "$relayhost" \
+"$BINDIR"/../sbin/swampinabox_do_install.bash \
         "$MODE" \
-        "$swamp_log_file" \
         "-singleserver" \
-    |& tee "$swamp_log_file"
+        "$VERSION_NUMBER" \
+        "$BUILD_NUMBER" \
+        "$WORKSPACE/deployment/swamp/RPMS" \
+    2>&1 | tee -a "$swamp_log_file"
 main_install_exit_code=$?
 
 #
-# Copy the log file for the install/upgrade, if we can.
+# Copy the log file to a more permanent location, if we can.
 #
 if [ -d /opt/swamp/log ]; then
-    cp "$swamp_log_file" /opt/swamp/log
+    cp "$swamp_log_file" /opt/swamp/log/.
 fi
 exit $main_install_exit_code

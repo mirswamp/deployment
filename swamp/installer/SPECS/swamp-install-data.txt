@@ -3,18 +3,22 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 mkdir -p "$RPM_BUILD_ROOT"/opt/swamp/bin
+mkdir -p "$RPM_BUILD_ROOT"/opt/swamp/perl5/SWAMP
 mkdir -p "$RPM_BUILD_ROOT"/opt/swamp/sbin
 mkdir -p "$RPM_BUILD_ROOT"/opt/swamp/sql
 
 install -m 400 Data_Server/Project/project_procs.sql     "$RPM_BUILD_ROOT"/opt/swamp/sql
 
+install -m 644 swampinabox/perl5/SWAMP/SiB_Utilities.pm  "$RPM_BUILD_ROOT"/opt/swamp/perl5/SWAMP
+
 install -m 755 swampinabox/bin/swamp_check_db_file_paths "$RPM_BUILD_ROOT"/opt/swamp/bin
 install -m 700 swampinabox/sbin/create_mysql_root        "$RPM_BUILD_ROOT"/opt/swamp/sbin
 install -m 700 swampinabox/sbin/create_mysql_root_cnf    "$RPM_BUILD_ROOT"/opt/swamp/sbin
 install -m 700 swampinabox/sbin/db_support.functions     "$RPM_BUILD_ROOT"/opt/swamp/sbin
+install -m 700 swampinabox/sbin/decode_mysql_root        "$RPM_BUILD_ROOT"/opt/swamp/sbin
 install -m 700 swampinabox/sbin/rebuild_platforms_db     "$RPM_BUILD_ROOT"/opt/swamp/sbin
 install -m 700 swampinabox/sbin/rebuild_tools_db         "$RPM_BUILD_ROOT"/opt/swamp/sbin
 install -m 700 swampinabox/sbin/swamp_manage_service     "$RPM_BUILD_ROOT"/opt/swamp/sbin

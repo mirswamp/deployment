@@ -3,84 +3,141 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 #
-# Wrapper script for managing system services.
-# Abstracts out 'service' vs. 'systemctl', for example.
+# Manage a system service.
 #
-
-#
-# For 'perlcritic'.
-#
-## no critic (MagicNumbers, RequireDotMatchAnything, RequireLineBoundaryMatching, RequireExtendedFormatting)
 
 use utf8;
 use strict;
 use warnings;
 
 use English qw( -no_match_vars );
+use Getopt::Long;
 
-my $debug = 0;
-
-#
-# Test for whether 'systemctl' is available.
-#
-if ($debug) {
-    print q(Testing for 'systemctl' ... );
-    print `which systemctl 2>&1`;
-}
-else {
-    my $ignored = `which systemctl 1>/dev/null 2>/dev/null`;
-}
-
-my $is_systemctl_avail = (0 == $CHILD_ERROR);
-
-if ($is_systemctl_avail) {
-    print "Found 'systemctl'\n" if $debug;
-}
-else {
-    print "Did not find 'systemctl', using 'service'\n" if $debug;
-}
+use FindBin;
+use lib "$FindBin::Bin/../perl5", '/opt/swamp/perl5';
+use SWAMP::SiB_Utilities qw(make_shell_arg trim);
 
 #
-# Query or control a service using 'service' or 'systemctl'.
+# Store command line options and data derived from them.
+#
+my %options = ();
+
+#
+# Determine whether 'systemctl' is available.
+#
+my $ignored       = qx(command -v systemctl 2>&1);
+my $use_systemctl = (0 == $CHILD_ERROR);
+
+#
+# Define the exit codes from checking a system service's status. Reference:
+#
+#     https://refspecs.linuxfoundation.org/lsb.shtml
+#     Core Specification, Generic Part, Init Script Actions
+#
+use constant {
+    SERVICE_RUNNING => 0,
+    SERVICE_STOPPED => 3,
+};
+
+############################################################################
+
+#
+# Show a basic usage message and exit.
+#
+sub show_usage_and_exit {
+    my $usage_message = <<"EOF";
+Usage: $PROGRAM_NAME [options] <service> <command>
+
+Manage a system service. Commands include: start, stop, restart, status.
+
+Options:
+  --quiet         Do not display messages for state changes
+  --skip-missing  Exit normally if the service is in an "error" state
+  --help, -?      Display this message
+EOF
+    print $usage_message;
+    exit 1;
+}
+
+#
+# Control or query a service using 'systemctl' or 'service'.
+# WARNING: Assumes that '$command' is not arbitrary input from the user.
 #
 sub tell_service {
     my ($service, $command) = @_;
-    my $system_command;
+    my $service_arg    = make_shell_arg($service);
+    my $system_command = "service $service_arg $command";
 
-    if ($is_systemctl_avail) {
-        $system_command = "systemctl $command $service";
-    }
-    else {
-        $system_command = "service $service $command";
+    if ($use_systemctl) {
+        $system_command = "systemctl $command $service_arg";
     }
 
-    print "Calling: $system_command\n" if $debug;
-    return (`$system_command` || q());    # baydemir TODO: capture stderr?
+    my $output = qx($system_command 2>&1);
+    my $error  = $CHILD_ERROR;
+    return ($output, $error);
 }
 
 #
-# Determine whether a service is "stopped" or "running".
+# Determine whether a service is 'stopped' or 'running'.
 # WARNING: Might not work in all contexts or for all services.
 #
 sub get_status {
     my ($service) = @_;
-    my $command = $is_systemctl_avail ? 'show --property ActiveState' : 'status';
-    my $status = tell_service($service, $command);
+    my ($status, $exit_code) = tell_service($service, 'status');
+    $exit_code >>= 8;    ## no critic (MagicNumbers)
 
-    if ($status =~ /MariaDB running|MySQL running|is running|=active/) {
-        $status = 'running';
-    }
-    elsif ($status =~ /not running|stopped|=inactive|=failed/) {
-        $status = 'stopped';
+    #
+    # Most services that we care about seem to conform to the LSB.
+    # The notable exception is the 'swamp' service on an 'init.d' system.
+    #
+    if ($use_systemctl || $service ne 'swamp') {
+        if ($exit_code == SERVICE_RUNNING) {
+            $status = 'running';
+        }
+        elsif ($exit_code == SERVICE_STOPPED) {
+            $status = 'stopped';
+        }
+        else {
+            $status = 'error';
+        }
     }
     else {
-        $status = 'error';
+        #
+        # NOTE baydemir: We used to grok the output for all services on all
+        # systems. We preserve most of those strings here, in case we need to
+        # go back to grokking the output in the future.
+        #
+        if ($status =~ /MariaDB running|MySQL running|is running/) {
+            $status = 'running';
+        }
+        elsif ($status =~ /not running|stopped/) {
+            $status = 'stopped';
+        }
+        else {
+            $status = 'error';
+        }
     }
+    return $status;
+}
 
-    print "status $service: $status\n" if $debug;
+#
+# Wait for a service to reach the given status. The wait period depends on
+# the service. Return the service's status at the end of the wait period.
+#
+sub wait_for_service {
+    my ($service, $target_status) = @_;
+    my $status    = get_status($service);
+    my $interval  = 2;
+    my $wait_time = 15;    ## no critic (MagicNumbers)
+
+    while ($status ne $target_status && $wait_time > 0) {
+        sleep $interval;
+        $wait_time -= $interval;
+        $status = get_status($service);
+    }
     return $status;
 }
 
@@ -89,92 +146,110 @@ sub get_status {
 #
 sub toggle_service {
     my ($service, $command, $old_state, $new_state) = @_;
-    my $output = q();
     my $status = get_status($service);
 
     if ($status eq $new_state) {
-        print "$command $service: already $new_state\n" if $debug;
         return 0;
     }
-
-    if ($status eq $old_state) {
-        $output = tell_service($service, $command);
-        print $output;
-
-        $status = get_status($service);
-        if ($status eq $new_state) {
-            print "$command $service: succeeded\n" if $debug;
-            return 0;
+    elsif ($status eq $old_state) {
+        if (!$options{'quiet'}) {
+            print "Telling the $service system service to $command\n";
         }
-    }
+        my ($output, $error) = tell_service($service, $command);
+        return 1 if $error;
 
-    print "$command $service: failed, current status: $status\n" if $debug;
+        $status = wait_for_service($service, $new_state);
+        return ($status eq $new_state) ? 0 : 1;
+    }
     return 1;
 }
 
 sub start_service {
     my ($service) = @_;
-    print "Starting service: $service\n" if $debug;
     return toggle_service($service, 'start', 'stopped', 'running');
 }
 
 sub stop_service {
     my ($service) = @_;
-    print "Stopping service: $service\n" if $debug;
     return toggle_service($service, 'stop', 'running', 'stopped');
 }
 
+#
+# Restart a service.
+#
 sub restart_service {
     my ($service) = @_;
-    my $output    = q();
-    my $status    = get_status($service);
+    my $status = get_status($service);
 
     if ($status eq 'running') {
-        print "Restarting service: $service\n" if $debug;
-        $output = tell_service($service, 'restart');
-        print $output;
+        if (!$options{'quiet'}) {
+            print "Telling the $service system service to restart\n";
+        }
+        my ($output, $error) = tell_service($service, 'restart');
+        return 1 if $error;
+
+        $status = wait_for_service($service, 'running');
+        return ($status eq 'running') ? 0 : 1;
     }
     elsif ($status eq 'stopped') {
-        print "Starting service: $service\n" if $debug;
-        $output = tell_service($service, 'start');
-        print $output;
+        return start_service($service);
+    }
+    return 1;
+}
+
+############################################################################
+
+sub main() {
+    my $ok =
+      Getopt::Long::GetOptions(\%options, 'quiet', 'skip-missing', 'help|?');
+    my ($service, $command) = @ARGV;
+
+    if (!$ok || $options{'help'}) {
+        print "\n" if !$ok;
+        show_usage_and_exit();
     }
 
-    $status = get_status($service);
-    return ($status eq 'running' ? 0 : 1);
+    if (!defined $service || !defined $command) {
+        print "Error: Missing required arguments\n";
+        print "\n";
+        show_usage_and_exit();
+    }
+
+    #
+    # Determine the action to perform on the specified service.
+    #
+    my %actions = (
+        'start'   => sub { return start_service($service); },
+        'stop'    => sub { return stop_service($service); },
+        'restart' => sub { return restart_service($service); },
+        'status'  => sub { print get_status($service) . "\n"; return 0; },
+    );
+    my $action = $actions{$command};
+
+    if (!defined $action) {
+        print "Error: Not a recognized command: $command\n";
+        print "\n";
+        show_usage_and_exit();
+    }
+
+    #
+    # Require that we are running as 'root'.
+    # Even querying a service's status might fail, otherwise.
+    #
+    if (trim(qx(whoami)) ne 'root') {
+        print
+          "Error: This utility must be run as 'root'. Perhaps use 'sudo'.\n";
+        exit 1;
+    }
+
+    #
+    # Perform the action on the service, unless it is not necessary.
+    #
+    if ($options{'skip-missing'} && get_status($service) eq 'error') {
+        return 0;
+    }
+    return $action->();
 }
 
-#
-# Show a basic usage message.
-#
-sub show_usage_and_exit {
-    die "Usage: $PROGRAM_NAME <service> <status|start|stop|restart>\n";
-}
-
-#
-# Main.
-#
-my $service = $ARGV[0];
-my $command = $ARGV[1];
-
-if (!$service || !$command) {
-    show_usage_and_exit();
-}
-
-if ($command eq 'status') {
-    my $status = get_status($service);
-    chomp $status;
-    print $status . "\n";
-    exit 0;
-}
-elsif ($command eq 'start') {
-    exit start_service($service);
-}
-elsif ($command eq 'stop') {
-    exit stop_service($service);
-}
-elsif ($command eq 'restart') {
-    exit restart_service($service);
-}
-
-show_usage_and_exit();
+my $exit_code = main();
+exit $exit_code;

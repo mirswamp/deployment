@@ -1,20 +1,23 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2018 Software Assurance Marketplace
+# Copyright 2012-2019 Software Assurance Marketplace
 
 DIRS=SOURCES RPMS SPECS SRPMS BUILD TEMPSOURCES
 RELEASE_NUMBER ?= 0.10
 BUILD_NUMBER ?= dev
 TAP=results.tap
-C_ASSESS_VERSION=$(shell grep c-assess ../../inventory/frameworks.txt | sed 's/c-assess-//' | sed 's/.tar.gz//')
-JAVA_ASSESS_VERSION=$(shell grep java-assess ../../inventory/frameworks.txt | sed 's/java-assess-//' | sed 's/.tar//')
-RUBY_ASSESS_VERSION=$(shell grep ruby-assess ../../inventory/frameworks.txt | sed 's/ruby-assess-//' | sed 's/.tar//')
-SCRIPT_ASSESS_VERSION=$(shell grep script-assess ../../inventory/frameworks.txt | sed 's/script-assess-//' | sed 's/.tar//')
+
+C_ASSESS_VERSION=$(shell grep c-assess ../../inventory/frameworks.txt | sed 's/c-assess-//' | sed 's/.tar.gz//' | sed 's/.tar//')
+JAVA_ASSESS_VERSION=$(shell grep java-assess ../../inventory/frameworks.txt | sed 's/java-assess-//' | sed 's/.tar.gz//' | sed 's/.tar//')
+RUBY_ASSESS_VERSION=$(shell grep ruby-assess ../../inventory/frameworks.txt | sed 's/ruby-assess-//' | sed 's/.tar.gz//' | sed 's/.tar//')
+SCRIPT_ASSESS_VERSION=$(shell grep script-assess ../../inventory/frameworks.txt | sed 's/script-assess-//' | sed 's/.tar.gz//' | sed 's/.tar//')
+
 RESULTPARSER_VERSION=$(shell grep resultparser ../../inventory/frameworks.txt | sed 's/resultparser-//' | sed 's/.tar//')
 CLOC_VERSION=$(shell grep cloc ../../inventory/tools-metric.txt | sed 's/cloc-//' | sed 's/.tar.gz//')
 CODEDX_WAR_VERSION=$(shell grep codedx ../../inventory/viewers.txt | sed 's/codedx-//' | sed 's/.war//')
-THREADFIX_WAR_VERSION=$(shell grep threadfix ../../inventory/viewers.txt | sed 's/threadfix-//' | sed 's/.war//')
+PERL_RPM_DEPENDENCY_VERSION=$(shell grep perlbin ../../inventory/dependencies.txt | sed 's/perlbin_exec_w-//' | sed 's/.tar.gz//')
+HTCONDOR_DEPENDENCY_VERSION=$(shell grep -oE 'condor-[[:digit:]]+(\.[[:digit:]]+)*' ../../inventory/dependencies.txt | sed -E -e 's/condor-//')
 
 AGENTFILES= \
 	arun.sh \
@@ -27,10 +30,7 @@ AGENTFILES= \
 	vmu_AgentMonitor.pl \
 	vmu_csa_agent.pl \
 	vmu_launchviewer.pl \
-	vmu_PreAssessment_launcher \
-	vmu_PostAssessment_launcher \
-	vmu_PreViewer_launcher \
-	vmu_PostViewer_launcher \
+	vmu_perl_launcher \
 	vmu_LaunchPad.pl \
 	vmu_calldorun.pl \
 	vmu_killrun.pl \
@@ -45,8 +45,8 @@ AGENTPKGS= \
 	lib/SWAMP/Locking.pm \
 	lib/SWAMP/PackageTypes.pm \
 	lib/SWAMP/CodeDX.pm \
-	lib/SWAMP/ThreadFix.pm \
 	lib/SWAMP/FloodlightAccess.pm \
+	lib/SWAMP/mongoDBUtils.pm \
 	lib/SWAMP/ScarfXmlReader.pm
 
 CONFIG= \
@@ -69,7 +69,7 @@ TOP=../../..
 
 destfiles:=$(AGENTFILES:%=TEMPSOURCES/%) $(AGENTPKGS:%=TEMPSOURCES/%) $(CONFIG:%=TEMPSOURCES/%) $(SCRIPTS:%=TEMPSOURCES/%) $(SQLSCRIPTS:%=TEMPSOURCES/%)
 
-COMMONSOURCES=SOURCES TEMPSOURCES $(destfiles) TEMPSOURCES/mysql_timezone.cnf TEMPSOURCES/mysql_global_settings.cnf versioninfo toolchain TEMPSOURCES/scripts.tar inventory swampinabox-runtime
+COMMONSOURCES=SOURCES TEMPSOURCES $(destfiles) TEMPSOURCES/mysql_timezone.cnf TEMPSOURCES/mysql_global_settings.cnf versioninfo dependencies toolchain TEMPSOURCES/scripts.tar inventory swampinabox-runtime
 
 # tar file for swamp (rpm)
 # use swamp.conf
@@ -125,7 +125,7 @@ scarfcparsing:
 	(cd ../../../services/perl/agents/Scarf_Parsing_C ; make)
 	cp ../../../services/perl/agents/Scarf_Parsing_C/yajl/install/lib/libyajl.so.2 TEMPSOURCES
 	strip TEMPSOURCES/libyajl.so.2
-	cp ../../../services/perl/agents/Scarf_Parsing_C/vmu_Scarf_CParsing TEMPSOURCES 
+	cp ../../../services/perl/agents/Scarf_Parsing_C/vmu_Scarf_CParsing TEMPSOURCES
 	strip TEMPSOURCES/vmu_Scarf_CParsing
 	cp ../config/Scarf_ToolList.json TEMPSOURCES
 
@@ -164,10 +164,30 @@ TEMPSOURCES/mysql_global_settings.cnf:
 
 # Here we map the current version of assessment tools to the single version installed
 toolchain:
-	cp /swampcs/releases/c-assess-$(C_ASSESS_VERSION).tar.gz TEMPSOURCES/c-assess.tar.gz
-	cp /swampcs/releases/java-assess-$(JAVA_ASSESS_VERSION).tar TEMPSOURCES/java-assess.tar
-	cp /swampcs/releases/ruby-assess-$(RUBY_ASSESS_VERSION).tar TEMPSOURCES/ruby-assess.tar
-	cp /swampcs/releases/script-assess-$(SCRIPT_ASSESS_VERSION).tar TEMPSOURCES/script-assess.tar
+	if [ -r /swampcs/releases/c-assess-$(C_ASSESS_VERSION).tar ]; \
+	then \
+		cp /swampcs/releases/c-assess-$(C_ASSESS_VERSION).tar TEMPSOURCES/c-assess.tar; \
+	else \
+		cp /swampcs/releases/c-assess-$(C_ASSESS_VERSION).tar.gz TEMPSOURCES/c-assess.tar.gz; \
+	fi;
+	if [ -r /swampcs/releases/java-assess-$(JAVA_ASSESS_VERSION).tar ]; \
+	then \
+		cp /swampcs/releases/java-assess-$(JAVA_ASSESS_VERSION).tar TEMPSOURCES/java-assess.tar; \
+	else \
+		cp /swampcs/releases/java-assess-$(JAVA_ASSESS_VERSION).tar.gz TEMPSOURCES/java-assess.tar.gz; \
+	fi;
+	if [ -r /swampcs/releases/ruby-assess-$(RUBY_ASSESS_VERSION).tar ]; \
+	then \
+		cp /swampcs/releases/ruby-assess-$(RUBY_ASSESS_VERSION).tar TEMPSOURCES/ruby-assess.tar; \
+	else \
+		cp /swampcs/releases/ruby-assess-$(RUBY_ASSESS_VERSION).tar.gz TEMPSOURCES/ruby-assess.tar.gz; \
+	fi;
+	if [ -r /swampcs/releases/script-assess-$(SCRIPT_ASSESS_VERSION).tar ]; \
+	then \
+		cp /swampcs/releases/script-assess-$(SCRIPT_ASSESS_VERSION).tar TEMPSOURCES/script-assess.tar; \
+	else \
+		cp /swampcs/releases/script-assess-$(SCRIPT_ASSESS_VERSION).tar.gz TEMPSOURCES/script-assess.tar.gz; \
+	fi;
 	tar zxOf /swampcs/releases/cloc-$(CLOC_VERSION).tar.gz --strip-components 3 cloc-$(CLOC_VERSION)/noarch/in-files/cloc-$(CLOC_VERSION).tar.gz | tar zx -C TEMPSOURCES --strip-components 1 cloc-$(CLOC_VERSION)/cloc
 
 versioninfo:
@@ -176,7 +196,12 @@ versioninfo:
 	echo java-assess:$(JAVA_ASSESS_VERSION) >> TEMPSOURCES/versions.txt
 	echo ruby-assess:$(RUBY_ASSESS_VERSION) >> TEMPSOURCES/versions.txt
 	echo script-assess:$(SCRIPT_ASSESS_VERSION) >> TEMPSOURCES/versions.txt
+	echo codedx:$(CODEDX_WAR_VERSION) >> TEMPSOURCES/versions.txt
 	echo cloc:$(CLOC_VERSION) >> TEMPSOURCES/versions.txt
+	
+dependencies:
+	echo htcondor:$(HTCONDOR_DEPENDENCY_VERSION) >> TEMPSOURCES/dependencies.txt
+	echo perl-rpm:$(PERL_RPM_DEPENDENCY_VERSION) >> TEMPSOURCES/dependencies.txt
 
 resultparser:
 	cp /swampcs/releases/resultparser-$(RESULTPARSER_VERSION).tar TEMPSOURCES/resultparser.tar
@@ -202,22 +227,11 @@ codedx.war:
 	ln -s codedx-$(CODEDX_WAR_VERSION).war TEMPSOURCES/codedx/codedx.war
 	ln -s emptydb-codedx-$(CODEDX_WAR_VERSION).sql TEMPSOURCES/codedx/emptydb-codedx.sql
 
-threadfix:
-	cp ../../DenimGroup/emptydb-mysql-threadfix.sql TEMPSOURCES/threadfix/emptydb-mysql-threadfix.sql
-	cp ../../DenimGroup/emptydb-threadfix-$(THREADFIX_WAR_VERSION).sql TEMPSOURCES/threadfix/emptydb-threadfix.sql
-	cp ../../DenimGroup/resetdb-threadfix.sql TEMPSOURCES/threadfix/resetdb-threadfix.sql
-	cp ../../DenimGroup/threadfix.jdbc.properties TEMPSOURCES/threadfix/threadfix.jdbc.properties
-	cp ../../DenimGroup/threadfix_viewerdb.sh TEMPSOURCES/threadfix/threadfix_viewerdb.sh
-	cp ../../DenimGroup/vrun.sh TEMPSOURCES/threadfix/vrun.sh
-
-threadfix.war:
-	cp ../../../proprietary/DenimGroup/threadfix-$(THREADFIX_WAR_VERSION).war TEMPSOURCES/threadfix/threadfix.war
-
 inventory:
 	cp ../../inventory/*.txt TEMPSOURCES/inventory/.
 
 swampinabox-runtime:
-	cp -r ../../swampinabox/runtime/*  TEMPSOURCES/swampinabox/.
+	cp -r ../../swampinabox/runtime/* TEMPSOURCES/swampinabox/.
 
 SOURCES:
 	mkdir -p $@
@@ -229,7 +243,6 @@ SRPMS:
 	mkdir -p $@
 	mkdir -p $@/common
 	mkdir -p $@/codedx
-	mkdir -p $@/threadfix
 BUILD:
 	mkdir -p $@
 TEMPSOURCES:
@@ -237,10 +250,7 @@ TEMPSOURCES:
 	mkdir -p $@/common
 	mkdir -p $@/codedx
 	mkdir -p $@/inventory
-	mkdir -p $@/threadfix
-	mkdir -p $@/swampinabox/bin
-	mkdir -p $@/swampinabox/doc
-	mkdir -p $@/swampinabox/sbin
+	mkdir -p $@/swampinabox
 
 $(SCRIPTS:%=TEMPSOURCES/%): ../scripts/
 	$(CP) $(<)$(@:TEMPSOURCES/%=%)  $@
@@ -280,4 +290,3 @@ show_versions:
 	@echo "RESULTPARSER_VERSION: <$(RESULTPARSER_VERSION)>"
 	@echo "CLOC_VERSION: <$(CLOC_VERSION)>"
 	@echo "CODEDX_WAR_VERSION: <$(CODEDX_WAR_VERSION)>"
-	@echo "THREADFIX_WAR_VERSION: <$(THREADFIX_WAR_VERSION)>"
