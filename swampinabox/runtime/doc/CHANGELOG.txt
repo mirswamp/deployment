@@ -1,3 +1,16 @@
+Noteworthy Changes in SWAMP-in-a-Box 1.34.1
+-------------------------------------------
+
+1. SWAMP-in-a-Box now supports Code Dx version 3.5.5. You must obtain 
+Code Dx separately from Code Dx, Inc. Please refer to the SWAMP-in-a-Box 
+Administrator Manual for details on how to install Code Dx as an additional 
+results viewer. If you have added Code Dx 2.8.3 to an existing
+SWAMP-in-a-Box installation, adding Code Dx 3.5.5 will automatically 
+replace the older version with Code Dx 3.5.5.
+
+2. General enhancements and bug fixes.
+
+
 Noteworthy Changes in SWAMP-in-a-Box 1.34
 -----------------------------------------
 
@@ -41,7 +54,7 @@ Scheduled Assessment Runs pages. Additionally, you can specifically set the
 project when adding a new assessments.
 
 8. HT Condor is now configured to preempt an assessment or metric run in 
-order to create a slot for a Code DX viewer run when all slots are in use.
+order to create a slot for a Code Dx viewer run when all slots are in use.
 
 9. An updated version of the Ubuntu Linux version 16.04 platform is now
 available and will be automatically installed with SWAMP-in-a-Box 1.34.

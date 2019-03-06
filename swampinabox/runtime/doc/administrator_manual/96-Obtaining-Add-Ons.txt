@@ -24,7 +24,7 @@ License Agreement (EULA) with Code Dx, Inc. Once you have agreed to the
 EULA, you will receive a download kit from Code Dx, Inc.
 
 Code Dx is third-party software created and maintained by Code Dx, Inc.
-Copyright 2010-2018 Code Dx, Inc. All rights reserved.
+Copyright 2010-2019 Code Dx, Inc. All rights reserved.
 
 
 [[about-codesonar]]
@@ -46,7 +46,7 @@ CodeSonar can be found at:
   * https://www.grammatech.com/products/codesonar.
 
 CodeSonar is third-party software created and maintained by GrammaTech, Inc.
-Copyright 2018 GrammaTech, Inc. CodeSonar is a registered trademark of
+Copyright 2019 GrammaTech, Inc. CodeSonar is a registered trademark of
 GrammaTech, Inc. All rights reserved.
 
 

@@ -23,6 +23,7 @@ use SWAMP::SiB_Utilities qw(:all);
 
 ############################################################################
 
+my $mysql_base_dir        = '/usr';
 my $mysql_data_dir        = '/var/lib/mysql';
 my $mysql_service         = 'mysql';
 my $mysql_user            = 'mysql';
@@ -96,10 +97,11 @@ sub remove_data_files {
 #
 sub install_data_files {
     my $user_arg     = "--user=$mysql_user";
+    my $base_dir_arg = "--basedir=$mysql_base_dir";
     my $data_dir_arg = "--datadir=$mysql_data_dir";
 
     print "Installing new data files in $mysql_data_dir ...\n";
-    system('mysql_install_db', $user_arg, $data_dir_arg)
+    system('mysql_install_db', $user_arg, $base_dir_arg, $data_dir_arg)
       and    # 'system' returns the program's exit code
       exit_abnormally("Failed to install new data files in $mysql_data_dir");
     return;

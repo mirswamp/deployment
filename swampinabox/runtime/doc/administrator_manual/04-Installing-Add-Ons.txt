@@ -412,3 +412,8 @@ SWAMP-in-a-Box host.
 When prompted, provide the password for the database's `root` user, which is
 needed to add the Code Dx viewer to the database and make it available in
 the SWAMP.
+
+If you have previously installed an older version of Code Dx and wish to
+replace it with a newer version, follow the above procedure using the newer
+Code Dx `.war` file. The `install_codedx` script will replace the older
+version of Code Dx with the newer one.
