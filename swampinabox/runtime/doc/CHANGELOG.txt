@@ -1,3 +1,14 @@
+Noteworthy Changes in SWAMP-in-a-Box 1.34.2
+-------------------------------------------
+
+1. We have made improvements to SWAMP's Native Results Viewer. This
+includes the ability to filter weaknesses and view weaknesses flagged in 
+code.
+
+2. General enhancements and bug fixes, including improvements to 
+SWAMP-in-a-Box LDAP/AD integration.
+
+
 Noteworthy Changes in SWAMP-in-a-Box 1.34.1
 -------------------------------------------
 
