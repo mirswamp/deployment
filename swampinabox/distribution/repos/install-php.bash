@@ -38,8 +38,9 @@ yum_confirm yum-utils || exit_with_error
 yum_install "http://rpms.remirepo.net/enterprise/remi-release-${os_version}.rpm"
 yum_confirm remi-release || exit_with_error
 
-echo "Enabling Remi's PHP 7.0 RPM repository ..."
-yum-config-manager --enable remi-php70 || exit_with_error
+echo "Enabling Remi's PHP 7.1 RPM repository ..."
+yum-config-manager --disable remi-php70 || :
+yum-config-manager --enable  remi-php71 || exit_with_error
 
 php_packages=(
     php

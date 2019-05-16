@@ -1,3 +1,26 @@
+Noteworthy Changes in SWAMP-in-a-Box 1.34.3
+-------------------------------------------
+
+1. A new version of the PHPMD tool for scripting languages (PHP) is 
+available: version 2.6.0-swamp. This version includes a custom patch 
+for a bug in the tool that prevents assessment of some packages.
+
+2. A new version of the Flow tool for scripting languages (JavaScript) 
+is available: version 0.98.0.
+
+3. A new version of the SpotBugs tool for Java is available: version 
+3.1.12.
+
+4. A new version of the error-prone tool for Java is available: version 
+2.3.1. 
+
+5. A new version of the checkstyle tool for Java is available: version 
+8.20.
+
+6. We have improved the performance of the proxy used to connect to 
+Code Dx web servers in viewer VMs. 
+
+
 Noteworthy Changes in SWAMP-in-a-Box 1.34.2
 -------------------------------------------
 

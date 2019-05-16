@@ -17,5 +17,5 @@ us at:
 
   * Email: security@continuousassurance.org
 
-You may encrypt your email for privacy using GPG (key id#739202FA,
-fingerprint 2793 A0A7 4340 7587 FC2A 160F FE83 C695 7392 02FA).
+You may encrypt your email for privacy using GPG (key id#15499044,
+fingerprint D11A E15F 233A 3E59 AF9B EB52 F780 36E7 1549 9044).

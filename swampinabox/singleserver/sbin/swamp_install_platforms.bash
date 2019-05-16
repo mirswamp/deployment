@@ -32,6 +32,12 @@ function remove_deprecated_distribution_files() {
             condor-centos-5.11-32-master-2016080901.qcow2 \
             condor-centos-5.11-64-master-2016080901.qcow2 \
             condor-debian-7.0-64-master-2015012801.qcow2 \
+            condor-debian-7.11-64-master-2016100501.qcow2 \
+            condor-debian-7.11-64-master-2018091101.qcow2 \
+            condor-debian-7.11-64-master-2019010100.qcow2 \
+            condor-debian-8.6-64-master-2016100501.qcow2 \
+            condor-debian-8.11-64-master-2018091101.qcow2 \
+            condor-debian-8.11-64-master-2019010100.qcow2 \
             condor-dynamic-centos-6.8-64-viewer-master-2016080901.qcow2 \
             condor-dynamic-centos-6.8-64-viewer-master-2016102101.qcow2 \
             condor-fedora-19.0-64-master-2015012801.qcow2 \
@@ -41,6 +47,8 @@ function remove_deprecated_distribution_files() {
             condor-scientific-6.4-64-master-2015071401.qcow2 \
             condor-ubuntu-10.04-64-master-2016102702.qcow2 \
             condor-ubuntu-12.04-64-master-2015012801.qcow2 \
+            condor-ubuntu-12.04-64-master-2016102702.qcow2 \
+            condor-ubuntu-12.04-64-master-2019010100.qcow2 \
             condor-ubuntu-16.04-64-master-2016102702.qcow2 \
             condor-ubuntu-16.04-64-master-2017092701.qcow2 \
             condor-ubuntu-16.04-64-master-2018012401.qcow2 \
