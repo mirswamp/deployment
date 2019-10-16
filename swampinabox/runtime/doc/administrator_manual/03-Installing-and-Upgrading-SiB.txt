@@ -73,6 +73,14 @@ operating system since the host was initially set up. In this case, the
 steps below will likely cause a partial update to the new release, which
 might leave the host in an inconsistent and non-working state.
 
+[IMPORTANT]
+When upgrading a SWAMP-in-a-Box that was originally installed with
+SWAMP-in-a-Box version 1.33.4 or earlier, `yum update` may fail with an 
+error related to the package `condor-std-universe`. To resolve this issue, 
+first remove any version locks by running `yum versionlock clear` (as `root`
+or using `sudo`). Then uninstall the HTCondor packages by running 
+`yum remove 'condor*'` (as `root` or using `sudo`).
+
 
 Obtain the Installer
 ~~~~~~~~~~~~~~~~~~~~

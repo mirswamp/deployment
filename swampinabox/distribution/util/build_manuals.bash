@@ -54,6 +54,7 @@ for target in \
         then
             echo "Running $cmd"
             $cmd -a data-uri \
+                 -a doctype=book \
                  -a icons=font \
                  -a numbered \
                  -a pdf-page-size=Letter \

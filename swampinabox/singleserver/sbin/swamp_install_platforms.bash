@@ -53,6 +53,7 @@ function remove_deprecated_distribution_files() {
             condor-ubuntu-16.04-64-master-2017092701.qcow2 \
             condor-ubuntu-16.04-64-master-2018012401.qcow2 \
             condor-ubuntu-16.04-64-master-2018070301.qcow2 \
+            condor-ubuntu-16.04-64-master-2019010100.qcow2 \
             condor-universal-centos-6.8-64-viewer-master-2016110801.qcow2 \
             condor-universal-centos-6.9-64-viewer-master-2017101001.qcow2 \
             condor-universal-centos-6.9-64-viewer-master-2018032001.qcow2 \

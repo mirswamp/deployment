@@ -30,7 +30,7 @@ use Config;
 my $verbose = 0;
 
 
-my $version = '1.2.5 (Jul 19, 2018)';
+my $version = '1.2.7 (Aug 26, 2019)';
 
 my %toolProps = (
 	'coverity'	=> {
@@ -56,15 +56,16 @@ my %toolProps = (
 	    },
 	'ps-jtest'	=> {
 		bitIndependent		=> 0,
-		revision		=> 12,
+		revision		=> 13,
 		implemented		=> 1,
 		confFunc		=> \&MakePsJtestConf,
 		validateInstallers	=> \&ValidatePsJtestInstallers,
 		extraInFiles		=> {
 			'jtestcli.properties.template' => <<EOF,
 jtest.license.use_network=true
-jtest.license.network.type=ls
-jtest.license.network.edition=server_edition
+jtest.license.network.type=<tool-ps-jtest-license-network-type>
+jtest.license.network.edition=<tool-ps-jtest-license-network-edition>
+jtest.license.network.custom_edition_features=<tool-ps-jtest-license-custom-edition-features>
 dtp.server=<tool-ps-jtest-dtp-server>
 dtp.port=<tool-ps-jtest-dtp-port>
 dtp.user=<tool-ps-jtest-dtp-user>
@@ -101,20 +102,31 @@ my @linux64Plats = qw/
 	android-ubuntu-12.04-64
 	centos-5.11-64
 	centos-6.7-64 centos-6.8-64 centos-6.9-64 centos-6.10-64 centos-6.11-64
-	centos-7.2-64 centos-7.3-64 centos-7.4-64 centos-7.5-64 centos-7.6-64 centos-7.7-64
-	debian-7.0-64 debian-7.9-64 debian-7.10-64 debian-7.11-64 debian-7.12-64 debian-7.13-64 debian-7.14-64
-	debian-8.0-64 debian-8.3-64 debian-8.4-64 debian-8.5-64 debian-8.6-64 debian-8.7-64 debian-8.8-64
-	debian-8.9-64 debian-8.10-64 debian-8.11-64
-	debian-9.0-64 debian-9.1-64 debian-9.2-64 debian-9.3-64 debian-9.4-64 debian-9.5-64 debian-9.6-64
+	centos-7.2-64 centos-7.3-64 centos-7.4-64 centos-7.5-64 centos-7.6-64
+	centos-7.7-64 centos-7.8-64 centos-7.9-64 centos-7.10-64
+	centos-8.0-64 centos-8.1-64 centos-8.2-64 centos-8.3-64
+	debian-7.0-64 debian-7.9-64 debian-7.10-64 debian-7.11-64 debian-7.12-64
+	debian-7.13-64 debian-7.14-64
+	debian-8.0-64 debian-8.3-64 debian-8.4-64 debian-8.5-64 debian-8.6-64
+	debian-8.7-64 debian-8.8-64 debian-8.9-64 debian-8.10-64 debian-8.11-64
+	debian-8.12-64
+	debian-9.0-64 debian-9.1-64 debian-9.2-64 debian-9.3-64 debian-9.4-64
+	debian-9.5-64 debian-9.6-64 debian-9.7-64 debian-9.8-64 debian-9.9-64
+	debian-9.10-64 debian-9.11-64 debian-9.12-64 debian-9.13-64
 	fedora-18.0-64 fedora-19.0-64
 	fedora-18-64 fedora-19-64 fedora-20-64 fedora-21-64 fedora-22-64
-	fedora-23-64 fedora-24-64 fedora-25-64 fedora-26-64 fedora-27-64 fedora-28-64
+	fedora-23-64 fedora-24-64 fedora-25-64 fedora-26-64 fedora-27-64
+	fedora-28-64 fedora-29-64 fedora-30-64 fedora-31-64 fedora-32-64
 	rhel-6.4-64 rhel-6.7-64 rhel-6.8-64 rhel-6.9-64 rhel-6.10-64 rhel-6.11-64
 	rhel-7.2-64 rhel-7.3-64 rhel-7.4-64 rhel-7.5-64 rhel-7.6-64 rhel-7.7-64
 	scientific-5.9-64 scientific-5.11-64
-	scientific-6.4-64 scientific-6.7-64 scientific-6.8-64 scientific-6.9-64 scientific-6.10-64 scientific-6.11-64
-	scientific-7.2-64 scientific-7.3-64 scientific-7.4-64 scientific-7.5-64 scientific-7.6-64 scientific-7.7-64
-	ubuntu-10.04-64 ubuntu-12.04-64 ubuntu-14.04-64 ubuntu-16.04-64 ubuntu-18.04-64
+	scientific-6.4-64 scientific-6.7-64 scientific-6.8-64 scientific-6.9-64
+	scientific-6.10-64 scientific-6.11-64
+	scientific-7.2-64 scientific-7.3-64 scientific-7.4-64 scientific-7.5-64
+	scientific-7.6-64 scientific-7.7-64 scientific-7.8-64 scientific-7.9-64
+	scientific-7.10-64
+	ubuntu-10.04-64 ubuntu-12.04-64 ubuntu-14.04-64 ubuntu-16.04-64
+	ubuntu-18.04-64 ubuntu-20.04-64
 	/;
 my $linuxPlat = 'linux';
 my $linux32Plat = 'linux-32';
@@ -148,12 +160,13 @@ options:
     --installer-linux64             path to 64-bit installer
     --temp-dir                      temporary directory ($temp)
     --output-dir                 -o directory to place SWAMP packaged tool ($out)
+    --gzip                          gzip output archive
     --help                       -h print this message
     --version                    -v print version
     --verbose                    -V verbose output
     --no-clean-temp-files           do not clean up intermediate files
     --quiet                      -q no output
-    --conf-file=<FILE>           -c configure file to use ($conf)
+    --conf-file=<FILE>           -c configuration file to use ($conf)
 
 Valid Tool Names:
 EOF
@@ -168,7 +181,7 @@ sub PrintVersion
 {
     my $progname = $0;
 
-    $progname =~ s/.*(\\\/)//;
+    $progname =~ s/.*\///;
     print "$progname version $version\n";
 }
 
@@ -260,12 +273,13 @@ sub ValidateOptions
 	push @errors, "Directory not writable for --temp $tempDir";
     }  elsif (exists $options->{tool_dirname})  {
 	my $toolDirName = $options->{tool_dirname};
-	my $toolTarGz = "";
-	$toolTarGz .= "$outDir/" unless $outDir eq '.';
-	$toolTarGz .= "$toolDirName.tar.gz";
-	$options->{tool_tar_path} = $toolTarGz;
-	if (-e $toolTarGz)  {
-	    push @errors, "Tool Archive ($toolTarGz) must not exist";
+	my $toolTar = "";
+	$toolTar .= "$outDir/" unless $outDir eq '.';
+	$toolTar .= "$toolDirName.tar";
+	$toolTar .= ".gz" if $options->{gzip};
+	$options->{tool_tar_path} = $toolTar;
+	if (-e $toolTar)  {
+	    push @errors, "Tool Archive ($toolTar) must not exist";
 	}
     }
 
@@ -301,6 +315,7 @@ sub ProcessOptions
 		no_clean_temp_files	=> 0,
 		quiet			=> 0,
 		output_dir		=> '.',
+		gzip			=> 0,
 		temp_dir		=> '.',
 		tool_name		=> undef,
 		tool_version		=> undef,
@@ -323,6 +338,7 @@ sub ProcessOptions
 		"no_clean_temp_files|no-clean-temp-files!",
 		"quiet|q!",
 		"output_dir|output-dir|o=s",
+		"gzip!",
 		"temp_dir|temp-dir=s",
 		"tool_name|tool-name|t=s",
 		"tool_version|tool-version=s",
@@ -899,8 +915,8 @@ sub ValidatePsCtestInstallers
     my ($version, $installerLinux, $installerLinux32, $installerLinux64) = @_;
 
     my @errors;
-    my $re32 = "(^|\/)parasoft_cpptest_(?:engine|standard)_${version}_linux.tar.gz\$";
-    my $re64 = "(^|\/)parasoft_cpptest_(?:engine|standard)_${version}_linux_x86_64.tar.gz\$";
+    my $re32 = "(^|\/)parasoft_cpptest_(?:engine|standard)[_-]${version}(?:-linux\.x86|_linux)\.tar\.gz\$";
+    my $re64 = "(^|\/)parasoft_cpptest_(?:engine|standard)[_-]${version}(?:-linux.x86_64|_linux_x86_64)\.tar\.gz\$";
     my @reqFiles = ("cpptest/cpptestcli", "cpptest/bin/cpptestscan");
 
     if (defined $installerLinux32 && -f $installerLinux32)  {
@@ -989,14 +1005,59 @@ sub ValidatePsJtestInstallers
 }
 
 
+sub GetVersionComponents
+{
+    my ($v) = @_;
+
+    return $v if ref($v) eq 'ARRAY';
+
+    die "ERROR: Invalid version format, must be numbers separated by '.'"
+	    unless $v =~ /\d+(\.\d+)*/;
+
+    my @v = split /\./, $v;
+
+    return \@v;
+}
+
+
+sub CompareVersions
+{
+    my ($ver1, $ver2) = @_;
+
+    my $v1 = GetVersionComponents($ver1);
+    my $v2 = GetVersionComponents($ver2);
+    my $i = 0;
+
+    while (exists $v1->[$i] || exists $v2->[$i])  {
+	my $c1 = $v1->[$i] || 0;
+	my $c2 = $v2->[$i] || 0;
+
+	return ($c1 <=> $c2) unless $c1 == $c2;
+
+	++$i;
+    }
+
+    return 0;
+}
+
+
 sub MakePsJtestConf
 {
     my ($options, $toolArchive, $toolType, $version, $ts, $bits) = @_;
 
     my $creationData = GetCreationData($ts);
 
-    my $toolConfig = 'builtin://CWE-SANS Top 25 2011';
-    $toolConfig = $options->{tool_config} if defined $options->{tool_config};
+    my ($psJtestConfig, $psJtestLicenseEdition);
+    my $psJtestLicenseType = 'ls';
+    my $psJtestCustomFeatures = '';
+    if (CompareVersions($version, [10,4,1]) <= 0)  {
+	$psJtestLicenseEdition = 'server_edition';
+	$psJtestConfig = 'builtin://CWE-SANS Top 25 2011';
+    }  else  {
+	$psJtestLicenseEdition = 'server_compliance_edition';
+	$psJtestConfig = 'builtin://CWE SANS Top 25 2011 + On the Cusp';
+    }
+    $psJtestConfig = $options->{tool_config} if defined $options->{tool_config};
 
     my $s =<<EOF;
 tool-archive=$toolArchive
@@ -1006,7 +1067,10 @@ tool-invoke=tool-invoke.txt
 tool-defaults=tool-defaults.conf
 tool-type=$toolType
 tool-version=$version
-tool-ps-jtest-config='$toolConfig'
+tool-ps-jtest-license-network-type=$psJtestLicenseType
+tool-ps-jtest-license-network-edition=$psJtestLicenseEdition
+tool-ps-jtest-license-custom-edition-features=$psJtestCustomFeatures
+tool-ps-jtest-config=$psJtestConfig
 tool-report-exit-code=134
 tool-report-exit-code-msg=Error: Main license feature not found.
 tool-report-exit-code-task-name=assess-acquire-license
@@ -1036,7 +1100,7 @@ sub MakeSwampPackagedTool
 
     my $toolDirName = $options->{tool_dirname};
     my $toolDir = $options->{tool_temp_dir};
-    my $toolTarGz = $options->{tool_tar_path};
+    my $toolTar = $options->{tool_tar_path};
 
     my $md5sumName = 'md5sum';
     my $md5sum= "$toolDir/$md5sumName";
@@ -1154,12 +1218,19 @@ sub MakeSwampPackagedTool
     DoSystem($cmd);
     push @{$options->{files}}, $md5sum;
 
-    $cmd = "tar czf $toolTarGz -C $tempDir $toolDirName";
+    my $tarCompressOption = '';
+    if ($toolTar =~ /\.(tar\.gz|tgz)$/)  {
+	$tarCompressOption = 'z';
+    }  elsif ($toolTar !~ /\.tar$/)  {
+	die "unknown output extension for '$toolTar'";
+    }
+
+    $cmd = "tar c${tarCompressOption}f $toolTar -C $tempDir $toolDirName";
     DoSystem($cmd);
 
     DeleteCreatedFiles($options);
 
-    Print $options, "SWAMP tool archive: $toolTarGz\nPlatform support:   ", join(' ', @supports), "\n";
+    Print $options, "SWAMP tool archive: $toolTar\nPlatform support:   ", join(' ', @supports), "\n";
 }
 
 

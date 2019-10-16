@@ -47,19 +47,6 @@ my @temp_objects = ($sql_options_file);
 ############################################################################
 
 #
-# Get the value for a key in the given string of "key = value" pairs.
-#
-sub get_key_val {
-    my ($config, $key) = @_;
-    my $escaped_key = quotemeta $key;
-
-    my @vals = ($config =~ /^[ \t]*$escaped_key[ \t]*=(.*)$/m);
-    return $vals[0];
-}
-
-############################################################################
-
-#
 # Toggle the terminal's 'echo' property.
 #
 sub toggle_terminal_echo {
@@ -190,11 +177,10 @@ sub get_options {
     my $tool_scripts_dir      = $options{'tool-scripts-dir'} || q();
     my $tool_parameter_file   = "${tool_scripts_dir}/${tool_id}.sql";
     my $tool_meta_file        = "${tool_scripts_dir}/${tool_id}.meta.sql";
-    my $tool_archive_basename = "${tool_id}-${tool_version}.tar.gz";
+    my $tool_archive_basename = "${tool_id}-${tool_version}";
 
     $options{'tool-parameter-file'}         = $tool_parameter_file;
     $options{'tool-meta-file'}              = $tool_meta_file;
-    $options{'tool-archive-basename'}       = $tool_archive_basename;
     $options{'license-server-host-key'}     = $options{"${tool_id}-host-key"};
     $options{'license-server-port-key'}     = $options{"${tool_id}-port-key"};
     $options{'license-server-user-key'}     = $options{"${tool_id}-user-key"};
@@ -249,8 +235,8 @@ sub get_options {
         if (!-f $tool_archive_file) {
             push @errors, "Tool archive file not found: $tool_archive_file";
         }
-        elsif (!($tool_archive_file_basename =~ /^\Q$tool_archive_basename\E$/)) {
-            push @errors, "Tool archive file does not look like: $tool_archive_basename";
+        elsif (!($tool_archive_file_basename =~ /^\Q$tool_archive_basename\E[.]tar([.]gz)?$/)) {
+            push @errors, "Tool archive file does not look like: $tool_archive_basename.tar (or .tar.gz)";
         }
     }
 
@@ -334,6 +320,7 @@ sub check_system_requirements {
 
     my $tool_version      = $options->{'tool-version'};
     my $tool_version_uuid = get_tool_version_uuid($options);
+    my $tool_version_path = get_tool_version_path($options);
     my $tool_name         = get_tool_name($options);
 
     if (is_bundled_tool($options)) {
@@ -516,6 +503,30 @@ sub get_tool_version_uuid {
     return $tool_version_uuid;
 }
 
+#
+# Return the tool version path for the currently selected tool.
+#
+sub get_tool_version_path {
+    my ($options) = @_;
+
+    if (defined $options->{'tool-version-path'}) {
+        return $options->{'tool-version-path'};
+    }
+
+    my $version_string = $options->{'tool-version'} || q();
+    my $escaped_version_string = escape_squotes($version_string);
+
+    my $tool_params_file = $options->{'tool-parameter-file'} || q();
+    my $tool_params_sql = (-r $tool_params_file) ? read_file($tool_params_file) : q();
+
+    my $query = qq(${tool_params_sql}; select tool_path from tool_shed.tool_version where tool_uuid = \@tool_uuid and version_string = '$escaped_version_string');
+    my $results = get_sql_query_results($options, $query);
+
+    my ($tool_version_path) = split /^/, $results;
+    $options->{'tool-version-path'} = $tool_version_path;
+    return $tool_version_path;
+}
+
 ############################################################################
 
 sub update_license_server_config {
@@ -617,16 +628,13 @@ sub update_tool_archive {
     }
 
     if ($options->{'remove'}) {
-        my $tool_install_dir      = $options->{'tool-install-dir'};
-        my $tool_version          = $options->{'tool-version'};
-        my $tool_archive_basename = $options->{'tool-archive-basename'};
-        my $file_to_remove        = "$tool_install_dir/$tool_archive_basename";
+        my $file_to_remove = get_tool_version_path($options) || q();
 
         #
         # It's not an error if the tool archive file is already not present.
         #
         if (-f $file_to_remove) {
-            print "Removing '$tool_archive_basename' from '$tool_install_dir'\n";
+            print "Removing '$file_to_remove'\n";
 
             if (!unlink $file_to_remove) {
                 print "Warning: Failed to remove file: $file_to_remove\n";

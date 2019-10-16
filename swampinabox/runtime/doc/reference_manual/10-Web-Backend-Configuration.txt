@@ -98,8 +98,8 @@ installer sets this to "BCRYPT".
 +
 This should be set to "NONE" only if `LDAP_ENABLED` is "true",
 `LDAP_READ_ONLY` is "false", and the LDAP server does its own encryption
-when given a new or changed user password. This is not applicable when
-`LDAP_ENABLED` is "true" and `LDAP_READ_ONLY` is "true".
+when given a new or changed user password. This parameter is not applicable
+when `LDAP_ENABLED` is "true" and `LDAP_READ_ONLY` is "true".
 
 `APP_PASSWORD_MAX`::
 
@@ -157,6 +157,10 @@ page regardless of this setting.
 The result viewer selected by default on the Assessment Results page. Set 
 this to either "Native" or "Code DX". The SWAMP-in-a-Box installer sets this
 parameter to "Native".
+
+`APP_PYTHON`::
+The command used by the web server to run Python scripts. This should always
+be set to "python3.4". 
 
 
 HTCondor Settings
@@ -583,13 +587,20 @@ These parameters determine how session (logon) cookies behave.
 
 `SESSION_DRIVER`::
 
-The driver used to manage session data. Set this to "file" or "cookie".
-When this is set to "file", data for each user session is stored in the
-SWAMP-in-a-Box file system. When it is set to "cookie", data for each
-user session is stored as a cookie on the client. The SWAMP-in-a-Box
-installer sets this to "file". SWAMP-in-a-Box installations originally
-deployed using versions of SWAMP-in-a-Box prior to 1.33 will have this
-set to "cookie".
+The driver used to manage session data. Set this to "database", "file" or
+"cookie". When this is set to "database", data for each user session is
+stored in the `project.sessions` table in the SWAMP database. When this is
+set to "file", data for each user session is stored in the SWAMP-in-a-Box
+file system. When it is set to "cookie", data for each user session is
+stored as a cookie on the web client. The SWAMP-in-a-Box installer sets
+this to "database". SWAMP-in-a-Box installations originally deployed using
+versions of SWAMP-in-a-Box prior to 1.34.5 may have this set to either
+"cookie" or "file".
+
++
+When `SESSION_DRIVER` is set to "database", SWAMP administrators are able
+to restrict the list of users displayed on the Review Accounts page to
+users who are currently signed in.
 
 +
 When `SESSION_DRIVER` is set to "file", session data is stored in
@@ -661,6 +672,34 @@ to "web".
 The password for the database user above for accessing the database. The
 SWAMP-in-a-Box installer sets this to the password entered during the
 install process.
+
+
+Viewer Proxy Settings
+~~~~~~~~~~~~~~~~~~~~~
+
+These parameters control caching of data for integrated CodeDx results
+viewer web content served from a viewer VM through the proxy. Cached data
+includes the IP address and corresponding SWAMP project uid returned from
+the viewer job in HTCondor, the user object returned from the data server,
+the project object returned from the data server, and return data for
+static web content received from the CodeDx web server (such as 
+text/javascript files, image files, and font files).
+
+If Code Dx has not been added to a SWAMP-in-a-Box installation, these 
+parameters do not apply.
+
+`VIEWER_PROXY_CACHING`::
+
+Whether information is cached for viewer proxy content. When set to "false"
+no information is cached. When set to "true" the information described
+above is cached. The SWAMP-in-a-Box installer sets this to "false".
+
+`VIEWER_PROXY_CACHING_DURATION`::
+
+Determines the expiration time for viewer proxy cached data, in minutes, 
+from the time it is stored or updated. The SWAMP-in-a-Box installer sets
+this to "1". This setting has no effect if `VIEWER_PROXY_CACHING` is set to
+"false"
 
 
 Miscellaneous Settings

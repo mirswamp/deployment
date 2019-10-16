@@ -1,3 +1,66 @@
+Noteworthy Changes in SWAMP-in-a-Box 1.34.5
+-------------------------------------------
+
+Important: Support for SWAMP-in-a-Box on CentOS 6 will end with the 1.34.x
+releases. SWAMP-in-a-Box 1.35 and later will not support CentOS 6.
+
+1. A new version of the ESLint tool for assessing Web Scripting packages
+that contain JavaScript is available: version 6.4.0.
+
+2. A new version of the PMD tool for assessing Java packages is available: 
+version 6.14.0.
+
+3. The `make_swamp_tool` and `install_tool` utilities now support version
+10.4.2 of both Parasoft C/C++test and Parasoft Jtest.
+
+4. We have deprecated the RevealDroid tool for assessing Android .apk
+packages. This tool will be automatically removed when upgrading to 
+SWAMP-in-a-Box version 1.34.5.
+
+5. We have deprecated the tool ruby-lint for assessing Ruby packages. This
+tool will be automatically removed when upgrading to SWAMP-in-a-Box version
+1.34.5.
+
+6. We have deprecated the tool Findbugs for assessing Java packages. It is
+superseded by SpotBugs. This tool will be automatically removed when
+upgrading to SWAMP-in-a-Box version 1.34.5.
+
+7. We have deprecated older versions of all tools except error-prone
+(version 1.1.1 is still available for assessment of older Java packages).
+Most tools will now only have the latest version available. Older versions
+of tools installed with previous versions of SWAMP-in-a-Box will be removed
+as part of the upgrade to SWAMP-in-a-Box version 1.34.5. However, any custom
+add-on tools or tool versions added to a SWAMP-in-a-Box installation will
+not be changed by the upgrade.
+
+8. An updated version of the Ubuntu Linux version 16.04 platform is
+available and will be automatically installed with SWAMP-in-a-Box 1.34.5.
+
+9. An updated version of the CentOS 7.4 platform is available. This can be
+downloaded and installed as an add-on to SWAMP-in-a-Box. Download from:
+https://platform.swampinabox.org/platform-images/1.34_and_later/ .
+
+10. An updated version of the Scientific 7.4 platform is available. This can
+be downloaded and installed as an add-on to SWAMP-in-a-Box. Download from:
+https://platform.swampinabox.org/platform-images/1.34_and_later/ .
+
+11. SWAMP-in-a-Box can now be configured to store user session data in the
+SWAMP database. When thus configured, SWAMP provides administrators with a
+means of filtering the Review Accounts page to show only users who are
+currently signed in. For new SWAMP-in-a-Box 1.34.5 installations this is the
+default configuration. Existing SWAMP-in-a-Box installations that are
+upgraded to 1.34.5 will still be configured to store session data either in
+cookies or in the web server file system. To change this configuration, set
+the `SESSION_DRIVER` parameter equal to 'database' in
+`/var/www/swamp-web-server/.env`. Additional information is available in
+section 1.6 of the SWAMP-in-a-Box Reference Manual.
+
+12. We upgraded the version of the Marionette framework used by the SWAMP
+web front end to Marionette version 4.1.2.
+
+13. General enhancements and bug fixes.
+
+
 Noteworthy Changes in SWAMP-in-a-Box 1.34.3
 -------------------------------------------
 

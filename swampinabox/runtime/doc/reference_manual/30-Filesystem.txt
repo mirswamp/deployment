@@ -132,6 +132,17 @@ Directory containing files that SWAMP users view or download.
 
 Directory containing temporary files used by libvirt.
 
+`/var/www/swamp-web-server/storage/framework/sessions`::
+
+Directory containing data about SWAMP users' login sessions when the
+SWAMP web application's backend is configured to store session data on the
+file system.
+
+`/var/www/swamp-web-server/storage/framework/cache`::
+
+Directory containing cached data for add-on viewers (CodeDx) when the 
+SWAMP web application's backend is configured to cache viewer proxy data.
+
 
 Reclaiming Disk Space
 ~~~~~~~~~~~~~~~~~~~~~

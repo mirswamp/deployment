@@ -23,5 +23,8 @@ make clean rpm
 cd $WORKSPACE/deployment/swamp/swamp-web-server-installer
 make clean rpm
 
+cd $WORKSPACE/deployment/swamp/swamp-proxy-server-installer
+make clean rpm
+
 cd $WORKSPACE/deployment/swamp/runtime-installer
 make clean rpm

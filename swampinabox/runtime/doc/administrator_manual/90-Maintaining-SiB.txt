@@ -98,7 +98,12 @@ per day, when it is _not_ configured to make log entries in the system log.
 
 This directory contains data about SWAMP users' login sessions when the
 SWAMP web application's backend is configured to store session data on the
-file system (as opposed to in a cookie in the user's web browser).
+file system.
+
+`/var/www/swamp-web-server/storage/framework/cache`::
+
+This directory contains cached data for add-on viewers (CodeDx) when the 
+SWAMP web application's backend is configured to cache viewer proxy data.
 
 `/swamp/outgoing`::
 

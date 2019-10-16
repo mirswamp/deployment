@@ -1,2 +1,2 @@
-cloc-1.70.tar.gz
+cloc-1.82.tar.gz
 lizard-1.12.7.tar.gz

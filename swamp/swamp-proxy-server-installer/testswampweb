@@ -1,0 +1,65 @@
+#!/usr/bin/env bats
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2017 Software Assurance Marketplace
+
+CONFIG=/var/www/html/config/config.json
+PHP=/var/www/swamp-proxy-server/config/app.php
+FILES="$CONFIG $PHP"
+
+@test "Build swamp-proxy-server" {
+    RELEASE_NUMBER=0 BUILD_NUMBER=A run make clean rpm
+    [ $status -eq 0 ]
+}
+@test  "Install swamp-proxy-server" {
+    run sudo rpm -i --nodeps RPMS/noarch/swamp-proxy-server-0-A.noarch.rpm
+    [ $status -eq 0 ]
+}
+@test  "Checking for swamp-proxy-server files" {
+    run /bin/ls $FILES
+    echo $output > out
+    [ $status -eq 0 ]
+}
+@test  "Checking for build created version string" {
+    run grep "0.A" /var/www/html/scripts/version.js
+    [ $status -eq 0 ]
+}
+@test  "Uninstall swamp-proxy-server" {
+    run sudo rpm -e swamp-proxy-server
+    [ $status -eq 0 ]
+}
+@test  "Checking for missing for swamp-proxy-server" {
+    run /bin/ls $CONFIG $PHP
+    [ $status -ne 0 ]
+}
+@test  "Install swamp-proxy-server again" {
+    run sudo rpm -i --nodeps RPMS/noarch/swamp-proxy-server-0-A.noarch.rpm
+    [ $status -eq 0 ]
+}
+@test "Build upgrade swamp-proxy-server" {
+    RELEASE_NUMBER=0 BUILD_NUMBER=B run make clean rpm
+    [ $status -eq 0 ]
+}
+@test  "Upgrade swamp-proxy-server" {
+#    grep \'key /var/www/swamp-proxy-server/config/app.php > $BATS_TMPDIR/alpha
+    run sudo rpm -U --nodeps RPMS/noarch/swamp-proxy-server-0-B.noarch.rpm
+    [ $status -eq 0 ]
+}
+@test  "Checking for swamp-proxy-server files" {
+    run /bin/ls $CONFIG $PHP
+    [ $status -eq 0 ]
+}
+@test  "Checking for build created version string again" {
+    run grep "0.B" /var/www/html/scripts/version.js
+    [ $status -eq 0 ]
+}
+@test  "Uninstall swamp-proxy-server" {
+    run sudo rpm -e swamp-proxy-server
+    [ $status -eq 0 ]
+}
+@test  "Checking for missing config for swamp-proxy-server" {
+    run /bin/ls $CONFIG $PHP
+    [ $status -ne 0 ]
+}

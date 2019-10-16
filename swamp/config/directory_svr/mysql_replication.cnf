@@ -7,3 +7,5 @@ binlog-do-db=project
 log-bin=mysql-bin
 binlog_format=ROW
 innodb_flush_log_at_trx_commit=1
+max_binlog_size=99999744
+expire_logs_days=7

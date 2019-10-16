@@ -1,7 +1,5 @@
 dependency-check-2.1.1-2.tar.gz
 gt-csonar-4.4p0-2.tar
-ps-ctest-10.3.4-2.tar
-ps-ctest-10.4.0-2.tar
-ps-jtest-10.3.4-12.tar
-ps-jtest-10.4.0-12.tar
+ps-ctest-10.4.2-2.tar
+ps-jtest-10.4.2-13.tar
 sonatype-ahc-2.3.0.tar.gz
