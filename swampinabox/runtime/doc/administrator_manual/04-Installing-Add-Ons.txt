@@ -72,8 +72,8 @@ platform image.
 [NOTE]
 The Android Ubuntu platform includes the OS dependencies needed to build and
 assess Android Packages. As such it is quite large. The downloadable .qcow2.gz
-file needed to add the platform is over 28 GB. The decompressed, installed
-.qcow2 file takes up about 175 GB in the /swamp/platforms/images directory.
+file needed to add the platform is over 76 GB. The decompressed, installed
+.qcow2 file takes up about 150 GB in the /swamp/platforms/images directory.
 
 
 ==== Procedure ====
@@ -180,9 +180,10 @@ includes scripts and documentation for integrating the tool into the SWAMP.
 Retire.js::
 
 On the SWAMP-in-a-Box host, copy the
-`/swamp/store/SCATools/retire-js-<version>.tar.gz` file corresponding to the
-version of Retire.js that you would like to install to some directory that
-you have write access to (for example, your home directory).
+`/swamp/store/SCATools/bundled/retire-js-<version>.tar.gz` file 
+corresponding to the version of Retire.js that you would like to install 
+to some directory that you have write access to (for example, your home 
+directory).
 
 
 [[add-on-tool-create-archive]]

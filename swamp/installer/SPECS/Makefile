@@ -1,9 +1,9 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2019 Software Assurance Marketplace
+# Copyright 2012-2020 Software Assurance Marketplace
 
-rpms: submit exec dataserver dirserver
+rpms: submit exec dataserver
 
 swampinabox-files.txt: common-files-*.txt swampinabox-files-*.txt
 	cat $^ | grep -v "^\s*\#" | sort -u > $@
@@ -17,9 +17,6 @@ singleserver: clean swampinabox-files.txt swampinabox-install.txt
 
 swampinabox: clean swampinabox-files.txt swampinabox-install.txt
 	rpmbuild --verbose --define '_topdir $(TOPDIR)' -bb swampinabox-backend.spec
-
-dirserver:
-	rpmbuild --verbose --define '_topdir $(TOPDIR)' -bb swamp-directory.spec
 
 dataserver:
 	rpmbuild --verbose --define '_topdir $(TOPDIR)' -bb swamp-ds.spec

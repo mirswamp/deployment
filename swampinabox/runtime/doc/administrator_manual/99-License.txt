@@ -186,7 +186,7 @@ Additional notices for SWAMP can be found following the license.
 
    END OF TERMS AND CONDITIONS
 
-   Copyright 2012-2019 Software Assurance Marketplace
+   Copyright 2012-2020 Software Assurance Marketplace
 
 ............................................................................
 
@@ -203,7 +203,7 @@ Additional notices for SWAMP can be found following the license.
   (https://opensource.org/licenses/MIT). Copyright Taylor Otwell.
 
 * This product contains Code Dx, a commercial product created by Code Dx,
-  Inc. Copyright 2010-2019 Code Dx, Inc. All rights reserved. SWAMP has
+  Inc. Copyright 2010-2020 Code Dx, Inc. All rights reserved. SWAMP has
   a partnership with Code Dx, Inc. and offers a SWAMP-specific version of
   Code Dx software to be used solely with SWAMP software. Code Dx software
   shall not be redistributed with SWAMP software without written consent of

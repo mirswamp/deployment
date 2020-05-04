@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2019 Software Assurance Marketplace
+# Copyright 2012-2020 Software Assurance Marketplace
 
 #
 # Install the platform files for the current SWAMP-in-a-Box release.
@@ -41,6 +41,9 @@ function remove_deprecated_distribution_files() {
             condor-dynamic-centos-6.8-64-viewer-master-2016080901.qcow2 \
             condor-dynamic-centos-6.8-64-viewer-master-2016102101.qcow2 \
             condor-fedora-19.0-64-master-2015012801.qcow2 \
+            condor-fedora-18-64-master-2019010100.qcow2 \
+            condor-fedora-19-64-master-2019010100.qcow2 \
+            condor-fedora-20-64-master-2019010100.qcow2 \
             condor-scientific-5.9-64-master-2015012801.qcow2 \
             condor-scientific-5.11-32-master-2016080901.qcow2 \
             condor-scientific-5.11-64-master-2016080901.qcow2 \
@@ -54,6 +57,7 @@ function remove_deprecated_distribution_files() {
             condor-ubuntu-16.04-64-master-2018012401.qcow2 \
             condor-ubuntu-16.04-64-master-2018070301.qcow2 \
             condor-ubuntu-16.04-64-master-2019010100.qcow2 \
+            condor-ubuntu-16.04-64-master-2019082701.qcow2 \
             condor-universal-centos-6.8-64-viewer-master-2016110801.qcow2 \
             condor-universal-centos-6.9-64-viewer-master-2017101001.qcow2 \
             condor-universal-centos-6.9-64-viewer-master-2018032001.qcow2 \

@@ -1,7 +1,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2019 Software Assurance Marketplace
+# Copyright 2012-2020 Software Assurance Marketplace
 
 # This Makefile specifies how to create the following RPMs:
 #   - swamp-dataserver-setup
@@ -12,9 +12,6 @@ RELEASE_NUMBER ?= 0.10
 BUILD_NUMBER ?= dev
 
 SQLSCRIPTS=\
-	Directory_Server/user_setup.sql \
-	Directory_Server/project_tables.sql \
-	Directory_Server/populate_project.sql \
 	Data_Server/user_setup.sql \
 	Data_Server/sys_exec.sql \
 	Data_Server/Platform_Store/platform_store_tables.sql \
@@ -28,6 +25,9 @@ SQLSCRIPTS=\
 	Data_Server/Package_Store/populate_package_store.sql \
 	Data_Server/Viewer_Store/populate_viewer_store.sql \
 	Data_Server/Assessment/populate_assessment.sql
+	# Directory_Server/user_setup.sql \
+	# Directory_Server/project_tables.sql \
+	# Directory_Server/populate_project.sql \
 
 LIBS = \
 	lib_mysqludf_sys.so
@@ -37,15 +37,15 @@ CONFIG = \
 	permissions_svr/mysql_replication.cnf \
 	permissions_svr/mysql_global_settings.cnf \
 	permissions_svr/server.cnf \
-	directory_svr/mysql-clients.cnf \
-	directory_svr/mysql_replication.cnf \
-	directory_svr/server.cnf \
-	directory_svr/ldap_files/60eduperson.schema \
-	directory_svr/ldap_files/70cosalabswamp_enabled.schema \
-	directory_svr/ldap_files/71grouper.schema \
-	directory_svr/ldap_files/DB_CONFIG \
-	directory_svr/ldap_files/swa_admin.ldif \
-	directory_svr/ldap_files/slapd.conf
+	# directory_svr/mysql-clients.cnf \
+	# directory_svr/mysql_replication.cnf \
+	# directory_svr/server.cnf \
+	# directory_svr/ldap_files/60eduperson.schema \
+	# directory_svr/ldap_files/70cosalabswamp_enabled.schema \
+	# directory_svr/ldap_files/71grouper.schema \
+	# directory_svr/ldap_files/DB_CONFIG \
+	# directory_svr/ldap_files/swa_admin.ldif \
+	# directory_svr/ldap_files/slapd.conf
 
 SOURCES=$(SQLSCRIPTS) $(CONFIG) $(LIBS)
 CP=/bin/cp -p

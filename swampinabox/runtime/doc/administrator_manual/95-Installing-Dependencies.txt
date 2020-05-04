@@ -43,7 +43,7 @@ The following script will install MariaDB using the process described above:
 
 
 [[dependencies-php]]
-=== PHP 7.0 ===
+=== PHP 7.2 ===
 
 The set-up scripts for SWAMP-in-a-Box configure and download PHP from Remi's
 RPM Repository, using the instructions produced by the "configuration

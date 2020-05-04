@@ -1,8 +1,99 @@
-Noteworthy Changes in SWAMP-in-a-Box 1.34.5
+Noteworthy Changes in SWAMP-in-a-Box 1.34.6
 -------------------------------------------
 
 Important: Support for SWAMP-in-a-Box on CentOS 6 will end with the 1.34.x
-releases. SWAMP-in-a-Box 1.35 and later will not support CentOS 6.
+releases. SWAMP-in-a-Box 1.35 and later will not support installation of 
+SWAMP-in-a-Box on CentOS 6.
+
+1. A new version of the Flow tool for assessing Web Scripting packages that
+contain JavaScript is available: version 0.112.0. This version replaces all
+previous versions.
+
+2. A new version of the Retire.js tool for assessing Web Scripting packages
+that contain JavaScript is available: version 2.0.3. This version replaces
+all previous versions. Retire.js requires an internet connection to 
+download the latest information about potential weaknesses. If you have
+configured a SWAMP-in-a-Box to run without an internet connection you will
+need to create a new, custom version of Retire.js 2.0.3 to run without an
+internet connection. Please refer to the SWAMP-in-a-Box Administrator 
+Manual section 4.3.
+
+3. An updated version of the Ubuntu Linux version 16.04 platform is
+available and will be automatically installed with SWAMP-in-a-Box 1.34.6.
+
+4. Updated versions of the CentOS 7 64-bit, CentOS 6 32-bit, and CentOS 6
+64-bit platforms are available. These can be downloaded and installed as 
+add-ons to SWAMP-in-a-Box. Download from: https://platform.swampinabox.org/platform-images/1.34_and_later/ .
+
+5. Updated versions of the Scientific 7 64-bit, Scientific 6 32-bit, and
+Scientific 6 64-bit platforms are available. These can be downloaded and 
+installed as add-ons to SWAMP-in-a-Box. Download from:
+https://platform.swampinabox.org/platform-images/1.34_and_later/ .
+
+6. An updated version of the Ubuntu Linux 12.04 platform for Android 
+assessments is available, which includes the Fall 2019 Android SDK. 
+This can be downloaded (it is quite large) and installed as an add-on to 
+SWAMP-in-a-Box. Download from:
+https://platform.swampinabox.org/platform-images/1.34_and_later/ .
+
+7. We have discontinued support for the Fedora 18, 19, and 20 assessment 
+platforms. If you have installed any of these platforms as add-ons, they 
+will be removed when you upgrade to SWAMP-in-a-Box 1.34.6.
+
+8. We upgraded the version of the Laravel framework used by the SWAMP
+web front end to version 6. As a result of the upgrade to Laravel 6, 
+the SWAMP web API now returns more specific response codes for successful 
+responses (response codes in the 200-299 range). Previously these routes 
+always returned a successful response code of 200. If you are using the  
+java-cli, or one of the SWAMP plugins (swamp-eclipse-plugin, 
+swamp-jenkins-plugin, or swamp-scms-plugin), you may need to update to the
+latest version of those tools in order to supports successful return codes 
+other than 200. Otherwise, SWAMP-in-a-Box can be configured to always 
+return successful responses with response code 200. To do so edit 
+`/var/www/swamp-web-server/.env` to set APP_SIMPLE_STATUS_CODES to true 
+(you will need root access or sudo to edit the .env file). Refer to the 
+SWAMP-in-a-Box Reference Manual for more information about SWAMP Web 
+Application Backend Configuration.
+
+9. We rewrote the code for 3rd party sign-up and sign-in. As a result,
+sign-up or sign-in with Google, will resume working since it no longer 
+uses the Google+ API, which has been deprecated by Google. 
+* If you have configured your SWAMP-in-a-Box to allow users to sign-in 
+  via a GitHub account, you will need to edit the corresponding OAuth 
+  App under GitHub Developer settings to use an "Authorization callback 
+  URL" like the following, using your SWAMP-in-a-Box's hostname:
+  `https://<hostname>/providers/github/callback`
+* Similarly, if you have configured your SWAMP-in-a-Box to allow users to 
+  sign-in via a Google account, you will need to edit the OAuth2 Client ID 
+  settings for the Google API Project corresponding with your SWAMP-in-a-Box 
+  to add an "Authorized Redirect URI"  like the following, using your
+  SWAMP-in-a-Box's hostname:
+  `https://<hostname>/providers/google/callback`
+* If you have configured your SWAMP-in-a-Box to allow users to sign-in via
+  CI Logon, you do not have to make any changes. 
+Please refer to the SWAMP-in-a-Box Administrator Manual for more detail
+about Configuring Third-party Sign-in via OAuth2 Providers. 
+
+10. The SWAMP-in-a-Box upgrade and install scripts now check the 
+configuration settings in `/etc/php.ini` and update `max_execution_time` to 
+"120" if it is not already set to "120". Whenever the SWAMP upgrade or 
+install script makes a change to php.ini, a backup of the file is created 
+first.
+
+11. When installing or upgrading SWAMP-in-a-Box on a CentOS 7 system, the 
+the httpd.conf file is no longer replaced with a SWAMP version, overwriting 
+any site-specific customizations. Instead, specific httpd configurations 
+needed for SWAMP-in-a-Box are set in `/etc/httpd/conf.d/swampinabox.conf`. 
+There is one exception to this, which is that `/etc/httpd/conf/httpd.conf` 
+is still edited to disable port 80 when SWAMP-in-a-Box is initially 
+installed. The SWAMP-in-a-Box install and upgrade scripts still replace  
+`/etc/httpd/conf/httpd.conf` with a SWAMP version on CentOS 6 systems.
+
+12. General enhancements and bug fixes.
+
+
+Noteworthy Changes in SWAMP-in-a-Box 1.34.5
+-------------------------------------------
 
 1. A new version of the ESLint tool for assessing Web Scripting packages
 that contain JavaScript is available: version 6.4.0.

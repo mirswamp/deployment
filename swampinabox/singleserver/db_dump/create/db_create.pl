@@ -20,7 +20,7 @@ my @swampinabox_setup_files = (
 	File::Spec->catfile('Data Server', 'sys_exec.sql'),
 
 	# tables
-	File::Spec->catfile('Directory Server', 'project_tables.sql'),
+	File::Spec->catfile('Data Server', 'project_tables.sql'),
 	File::Spec->catfile('Swamp_on_a_Box', 'swamp_on_a_box_tables.sql'),
 	File::Spec->catfile('Data Server', 'Platform Store', 'platform_store_tables.sql'),
 	File::Spec->catfile('Data Server', 'Viewer Store', 'viewer_store_tables.sql'),
@@ -29,7 +29,7 @@ my @swampinabox_setup_files = (
 	File::Spec->catfile('Data Server', 'Assessment', 'assessment_tables.sql'),
 
 	# stored procedures
-	File::Spec->catfile('Directory Server', 'project_procs.sql'),
+	File::Spec->catfile('Data Server', 'project_procs.sql'),
 	File::Spec->catfile('Data Server', 'Platform Store', 'platform_store_procs.sql'),
 	File::Spec->catfile('Data Server', 'Tool Shed', 'tool_shed_procs.sql'),
 	File::Spec->catfile('Data Server', 'Package Store', 'package_store_procs.sql'),
@@ -40,7 +40,7 @@ my @swampinabox_setup_files = (
 	File::Spec->catfile('Data Server', 'Assessment', 'populate assessment.sql'),
 	File::Spec->catfile('Data Server', 'Package Store', 'populate package_store.sql'),
 	File::Spec->catfile('Data Server', 'Platform Store', 'populate platform_store.sql'),
-	File::Spec->catfile('Directory Server', 'populate project.sql'),
+	File::Spec->catfile('Data Server', 'populate_project.sql'),
 	File::Spec->catfile('Data Server', 'Tool Shed', 'populate tool_shed.sql'),
 	File::Spec->catfile('Data Server', 'Viewer Store', 'populate viewer_store.sql'),
 
@@ -54,7 +54,7 @@ my @swampinabox_upgrade_files = (
 	File::Spec->catfile('Data Server', 'Assessment', 'assessment_procs.sql'),
 	File::Spec->catfile('Data Server', 'Package Store', 'package_store_procs.sql'),
 	File::Spec->catfile('Data Server', 'Platform Store', 'platform_store_procs.sql'),
-	File::Spec->catfile('Directory Server', 'project_procs.sql'),
+	File::Spec->catfile('Data Server', 'project_procs.sql'),
 	File::Spec->catfile('Data Server', 'Tool Shed', 'tool_shed_procs.sql'),
 	File::Spec->catfile('Data Server', 'Viewer Store', 'viewer_store_procs.sql'),
 );

@@ -8,8 +8,9 @@ Obtaining Additional Tools and Viewers
 Code Dx
 ~~~~~~~
 
-Through SWAMP's partnership with Code Dx, Inc., a SWAMP-specific version
-of Code Dx software has been created to be solely used with SWAMP software.
+This product may run with Code Dx through SWAMP's partnership with 
+Code Dx, Inc., who offer a SWAMP-specific version of Code Dx software 
+that has been created to be solely used with SWAMP software.
 Code Dx software shall not be redistributed with SWAMP software without
 written consent of Code Dx, Inc.
 
@@ -24,7 +25,7 @@ License Agreement (EULA) with Code Dx, Inc. Once you have agreed to the
 EULA, you will receive a download kit from Code Dx, Inc.
 
 Code Dx is third-party software created and maintained by Code Dx, Inc.
-Copyright 2010-2019 Code Dx, Inc. All rights reserved.
+Copyright 2010-2020 Code Dx, Inc. All rights reserved.
 
 
 [[about-codesonar]]
@@ -46,7 +47,7 @@ CodeSonar can be found at:
   * https://www.grammatech.com/products/codesonar.
 
 CodeSonar is third-party software created and maintained by GrammaTech, Inc.
-Copyright 2019 GrammaTech, Inc. CodeSonar is a registered trademark of
+Copyright 2020 GrammaTech, Inc. CodeSonar is a registered trademark of
 GrammaTech, Inc. All rights reserved.
 
 

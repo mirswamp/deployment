@@ -14,7 +14,7 @@ error-prone-2.3.1.tar.gz
 eslint-6.4.0.tar.gz
 flake8-py2-3.2.1-5.tar.gz
 flake8-py3-3.2.1-5.tar.gz
-flow-0.98.0.tar.gz
+flow-0.112.0.tar.gz
 gcc-warn-0.9.tar.gz
 jshint-2.9.4.tar.gz
 php_codesniffer-3.0.0rc2.tar.gz
@@ -23,7 +23,7 @@ pmd-6.14.0.tar.gz
 pylint-py2-1.6.4.tar.gz
 pylint-py3-1.6.4.tar.gz
 reek-4.5.4.tar
-retire-js-1.2.10-2.tar.gz
+retire-js-2.0.3.tar.gz
 rubocop-0.47.1.tar
 security-code-scan-2.7.1.tar.gz
 spotbugs-3.1.12.tar.gz

@@ -35,13 +35,12 @@ Currently, the following identity providers are supported:
 
    * Application name: "SWAMP-in-a-Box" or the name of your SWAMP-in-a-Box
 
-   * Homepage URL: The URL to your SWAMP-in-a-Box's or organization's home
-     page
+   * Homepage URL: The URL to your SWAMP-in-a-Box's home page
 
    * Application description: Optional, you can leave this blank
 
-   * Authorized callback URL: "https://<hostname>/oauth2", using your
-     SWAMP-in-a-Box's hostname
+   * Authorized callback URL: "https://<hostname>/providers/github/callback",
+     using your SWAMP-in-a-Box's hostname
 
 6. Click the "Register application" button.
 
@@ -88,8 +87,7 @@ GITHUB_CLIENT_SECRET=<Your Client Secret>
 
 ===== Before You Begin =====
 
-* You will need a Google account for which to enable the Google+ API and
-  create OAuth credentials.
+* You will need a Google account for which to create OAuth credentials.
 
 
 ===== Procedure =====
@@ -100,50 +98,40 @@ GITHUB_CLIENT_SECRET=<Your Client Secret>
 
 3. Select or create a Project for your SWAMP-in-a-Box OAuth credentials.
 
-4. Enable the Google+ API for your project:
+4. Configure the OAuth consent screen:
 
-   * On the left, under API Manager, select "Library".
+   * On the left, under APIs & Services, select "OAuth consent screen".
 
-   * On the right, under Social APIs, select the link for "Google+ API".
-
-   * Click the "Enable" button.
-
-5. Configure the OAuth consent screen:
-
-   * On the left, under API Manager, select "Credentials".
-
-   * On the right, under Credentials, select "OAuth consent screen".
+   * Select "External" as the User Type and click "Create.
 
    * Enter the following information:
 
-      ** Email address: Your email
+      ** Application Name: "SWAMP-in-a-Box" or the name of your SWAMP-in-a-Box
 
-      ** Product name shown to users: "SWAMP-in-a-Box" or the name of your
+      ** Support email: An email address to provide support for your 
          SWAMP-in-a-Box
 
-      ** Homepage URL: The URL to your SWAMP-in-a-Box's or organization's
+      ** Authorized domains: Include the domains for your SWAMP-in-a-Box and
+         any other support links entered
+
+      ** Application Homepage link: The URL to your SWAMP-in-a-Box's
          home page
 
-      ** Product logo URL: The URL to a logo for your SWAMP-in-a-Box.
+      ** Application Privacy policy link: The URL to your privacy policy.
          For example, mir-swamp.org uses:
-         https://www.mir-swamp.org/images/logos/swamp-icon-small.png.
+         https://www.swampinabox.org/doc/SWAMP-Privacy-Policy.pdf
 
-      ** Privacy policy URL: The URL to your privacy policy.
-         For example, mir-swamp.org uses:
-         https://www.swampinabox.org/doc/SWAMP-Privacy-Policy.pdf.
-
-      ** Terms of service URL: The URL to your terms of service.
-         For example, mir-swamp.org uses:
-         https://www.mir-swamp.org/#policies/acceptable-use-policy.
+      ** Application Terms of service link (optional): The URL to your terms 
+         of service. For example, mir-swamp.org uses:
+         https://www.mir-swamp.org/#policies/acceptable-use-policy
 
    * Click "Save".
 
-6. Configure OAuth Client ID Credentials:
+5. Configure OAuth Client ID Credentials:
 
-   * On the left, under API Manager, select "Credentials".
+   * On the left, under APIs & Services, select "Credentials".
 
-   * On the right, under Credentials, select "OAuth client ID" from the
-     "Create credentials" menu.
+   * Select "OAuth client ID" from the "Create credentials" menu.
 
    * Under "Application type", select "Web application".
 
@@ -154,12 +142,12 @@ GITHUB_CLIENT_SECRET=<Your Client Secret>
       ** Authorized JavaScript origins: "https://<hostname>", using your
          SWAMP-in-a-Box's hostname
 
-      ** Authorized redirect URIs: "https://<hostname>/oauth2", using your
-         SWAMP-in-a-Box's hostname
+      ** Authorized redirect URIs: "https://<hostname>/providers/google/callback", 
+         using your SWAMP-in-a-Box's hostname
 
    * Click "Create".
 
-7. Copy down the "Client ID" and "Client Secret".
+6. Copy down the "Client ID" and "Client Secret".
 
 
 ==== Enabling Google as an OAuth2 Provider ====
@@ -207,12 +195,19 @@ GOOGLE_CLIENT_SECRET=<Your Client Secret>
 
    * Contact email: Your email address
 
-   * Home URL: The URL to your SWAMP-in-a-Box's or organization's home page
-
-   * Uncheck "Use Limited Proxy Certificates"
+   * Home URL: The URL to your SWAMP-in-a-Box's home page
 
    * Callback URLs: "https://<hostname>/oauth2", using your SWAMP-in-a-Box's
      hostname
+
+   * Is this a public client?: Leave unchecked
+
+   * Scopes: select the following: 
+
+      ** org.cilogon.userinfo
+      ** openid
+      ** profile
+      ** email
 
 3. Click the "Submit" button.
 

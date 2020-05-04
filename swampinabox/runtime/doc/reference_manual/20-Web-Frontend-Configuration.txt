@@ -82,7 +82,8 @@ Cookies
 These parameters affect the SWAMP layout cookie, which is used to persist
 the state of various layout elements: the position of the navigation bar,
 the state of the Show Numbering flag, the state of the Auto Refresh flag,
-and the state of the Show Grouping flag.
+the state of the Show Grouping flag, and the last Authorization Provider
+used to sign-in via CI Logon.
 
 `cookie.domain`::
 
@@ -90,6 +91,11 @@ The name of the domain for the SWAMP layout cookie. Set this to "null" to
 use the same domain name as in the `APP_URL` parameter in the
 <<backend-web-app,backend configuration file>>. The SWAMP-in-a-Box installer
 sets this to "null".
+
+`cookie.expires`::
+
+Determines the expiration date for the SWAMP layout cookie, in days, from 
+the time each is issued. The SWAMP-in-a-Box installer sets this to "7".
 
 `cookie.name`::
 

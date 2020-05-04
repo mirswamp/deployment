@@ -162,6 +162,16 @@ parameter to "Native".
 The command used by the web server to run Python scripts. This should always
 be set to "python3.4". 
 
+`APP_SIMPLE_STATUS_CODES`::
+Whether the HTTP response status codes for all successful (200 range) 
+responses should always be "200". Set this to "true" if you are interfacing 
+with your SWAMP-in-a-Box using a version of java_api, java_cli, or one of 
+the SWAMP plugins that does not support successful response codes other
+than "200".
+
++
+The SWAMP-in-a-Box installer sets this parameter to "false".  
+
 
 HTCondor Settings
 ~~~~~~~~~~~~~~~~~
@@ -696,10 +706,11 @@ above is cached. The SWAMP-in-a-Box installer sets this to "false".
 
 `VIEWER_PROXY_CACHING_DURATION`::
 
-Determines the expiration time for viewer proxy cached data, in minutes, 
+Determines the expiration time for viewer proxy cached data, in seconds, 
 from the time it is stored or updated. The SWAMP-in-a-Box installer sets
 this to "1". This setting has no effect if `VIEWER_PROXY_CACHING` is set to
-"false"
+"false". We recommend setting this to "10" when `VIEWER_PROXY_CACHING` is 
+set to "true".
 
 
 Miscellaneous Settings

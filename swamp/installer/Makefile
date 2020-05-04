@@ -1,7 +1,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2019 Software Assurance Marketplace
+# Copyright 2012-2020 Software Assurance Marketplace
 
 DIRS=SOURCES RPMS SPECS SRPMS BUILD TEMPSOURCES
 RELEASE_NUMBER ?= 0.10
@@ -128,10 +128,6 @@ scarfcparsing:
 	cp ../../../services/perl/agents/Scarf_Parsing_C/vmu_Scarf_CParsing TEMPSOURCES
 	strip TEMPSOURCES/vmu_Scarf_CParsing
 	cp ../config/Scarf_ToolList.json TEMPSOURCES
-
-dirserver: dirs $(SWAMPTARBALL)
-	/bin/rm -rf RPMS/noarch
-	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS dirserver
 
 dataserver: dirs $(SWAMPTARBALL)
 	/bin/rm -rf RPMS/noarch

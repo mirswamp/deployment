@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2019 Software Assurance Marketplace
+# Copyright 2012-2020 Software Assurance Marketplace
 
 echo
 echo "### Installing PHP"
@@ -38,9 +38,10 @@ yum_confirm yum-utils || exit_with_error
 yum_install "http://rpms.remirepo.net/enterprise/remi-release-${os_version}.rpm"
 yum_confirm remi-release || exit_with_error
 
-echo "Enabling Remi's PHP 7.1 RPM repository ..."
+echo "Enabling Remi's PHP 7.2 RPM repository ..."
 yum-config-manager --disable remi-php70 || :
-yum-config-manager --enable  remi-php71 || exit_with_error
+yum-config-manager --disable remi-php71 || :
+yum-config-manager --enable  remi-php72 || exit_with_error
 
 php_packages=(
     php

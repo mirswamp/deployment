@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2019 Software Assurance Marketplace
+# Copyright 2012-2020 Software Assurance Marketplace
 
 #
 # Display diagnostic information about the SWAMP current installation.
@@ -36,11 +36,11 @@ use SWAMP::SiB_Utilities qw(
   trim
 );
 use SWAMP::vmu_Support qw(
-  database_connect
-  database_disconnect
   getLoggingConfigString
   getSwampConfig
   getSwampDir
+  job_database_connect
+  job_database_disconnect
   rpccall
 );
 use SWAMP::vmu_AssessmentSupport qw(
@@ -317,7 +317,7 @@ sub check_database {
     }
 
     print 'Connecting to the SQL database ... ';
-    my $db_handle = database_connect();
+    my $db_handle = job_database_connect();
     if ($db_handle) {
         print "ok\n";
     }
@@ -344,7 +344,7 @@ sub check_database {
         print "$oops\n";
         add_error_line('Failed to query the SQL database for the SWAMP database version');
     }
-    database_disconnect($db_handle);
+    job_database_disconnect($db_handle);
 
     #
     # This query is as likely to fail as the previous one.
@@ -546,6 +546,15 @@ sub check_php {
     }
     else {
         add_error_line('Failed to determine PHP version');
+    }
+
+    print 'Looking for PHP modules ... ';
+    $output = do_basic_command(q(php -m));
+
+    for my $module (qw(ldap mbstring mcrypt mysqlnd xml zip)) {
+        if ($output !~ /^$module$/m) {
+            add_error_line("Failed to find the '$module' PHP module");
+        }
     }
     return;
 }

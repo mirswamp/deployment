@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2019 Software Assurance Marketplace
+# Copyright 2012-2020 Software Assurance Marketplace
 
 echo
 echo "### Initializing the SWAMP's SQL databases"
@@ -154,17 +154,12 @@ EOF
 ############################################################################
 
 do_upgrade() {
-    echo "Running 'directory' upgrade scripts"
-    (cd -- /opt/swamp/sql/upgrades_directory && do_mysql_command upgrade_script.sql)
-
-    echo "Upgrading 'directory' stored procedures"
-    do_mysql_command /opt/swamp/sql/project_procs.sql
-
-    echo "Running 'dataserver' upgrade scripts"
+    echo "Running upgrade scripts"
     (cd -- /opt/swamp/sql/upgrades_data && do_mysql_command upgrade_script.sql)
 
-    echo "Upgrading 'dataserver' stored procedures"
+    echo "Upgrading stored procedures"
     do_mysql_command \
+        /opt/swamp/sql/project_procs.sql \
         /opt/swamp/sql/platform_store_procs.sql \
         /opt/swamp/sql/tool_shed_procs.sql \
         /opt/swamp/sql/package_store_procs.sql \

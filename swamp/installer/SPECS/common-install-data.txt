@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2019 Software Assurance Marketplace
+# Copyright 2012-2020 Software Assurance Marketplace
 
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/bin
 mkdir -p $RPM_BUILD_ROOT/opt/swamp/etc
@@ -31,6 +31,7 @@ install -m 755 Data_Server/lib_mysqludf_sys.so ${RPM_BUILD_ROOT}/usr/lib64/mysql
 install -m 400 Data_Server/sys_exec.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 
 # install path specific table create files
+install -m 400 Data_Server/Project/project_tables.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Assessment/assessment_tables.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Package_Store/package_store_tables.sql  ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Platform_Store/platform_store_tables.sql  ${RPM_BUILD_ROOT}/opt/swamp/sql
@@ -38,6 +39,7 @@ install -m 400 Data_Server/Tool_Shed/tool_shed_tables.sql ${RPM_BUILD_ROOT}/opt/
 install -m 400 Data_Server/Viewer_Store/viewer_store_tables.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 
 # install and upgrade path stored procedure files
+install -m 400 Data_Server/Project/project_procs.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Assessment/assessment_procs.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Package_Store/package_store_procs.sql  ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Platform_Store/platform_store_procs.sql  ${RPM_BUILD_ROOT}/opt/swamp/sql
@@ -46,6 +48,7 @@ install -m 400 Data_Server/Viewer_Store/viewer_store_procs.sql ${RPM_BUILD_ROOT}
 install -m 400 Data_Server/upgrades/* ${RPM_BUILD_ROOT}/opt/swamp/sql/upgrades_data
 
 # install path specific table populate files
+install -m 400 Data_Server/Project/populate_project.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Assessment/populate_assessment.sql ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Package_Store/populate_package_store.sql  ${RPM_BUILD_ROOT}/opt/swamp/sql
 install -m 400 Data_Server/Tool_Shed/populate_tool_shed.sql ${RPM_BUILD_ROOT}/opt/swamp/sql

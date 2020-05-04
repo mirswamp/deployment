@@ -1,7 +1,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2019 Software Assurance Marketplace
+# Copyright 2012-2020 Software Assurance Marketplace
 
 #
 # spec file for SWAMP dataserver initialization RPM
@@ -76,7 +76,7 @@ install -m 444 Data_Server/Package_Store/populate_package_store.sql  $RPM_BUILD_
 install -m 444 Data_Server/Assessment/populate_assessment.sql $RPM_BUILD_ROOT/tmp/swamp/Data_Server
 install -m 444 permissions_svr/server.cnf $RPM_BUILD_ROOT/etc/my.cnf.d/server-swamp.cnf
 install -m 444 permissions_svr/mysql-clients.cnf $RPM_BUILD_ROOT/etc/my.cnf.d
-install -m 444 permissions_svr/mysql_replication.cnf $RPM_BUILD_ROOT/etc/my.cnf.d
+# install -m 444 permissions_svr/mysql_replication.cnf $RPM_BUILD_ROOT/etc/my.cnf.d
 install -m 444 permissions_svr/mysql_global_settings.cnf $RPM_BUILD_ROOT/etc/my.cnf.d
 install -m 755 lib_mysqludf_sys.so $RPM_BUILD_ROOT/usr/lib64/mysql/plugin/lib_mysqludf_sys.so
 
@@ -102,7 +102,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %config /etc/my.cnf.d/server-swamp.cnf
 %config /etc/my.cnf.d/mysql-clients.cnf
-%config /etc/my.cnf.d/mysql_replication.cnf
+# config /etc/my.cnf.d/mysql_replication.cnf
 %config /etc/my.cnf.d/mysql_global_settings.cnf
 %pre
 service mysql stop
@@ -149,7 +149,7 @@ echo Cleaning up...
 /bin/rm -rf /tmp/swamp
 echo Done
 echo Do not forget to secure the database per MariaDB instructions.
-echo Do not forget to configure the database replication.
+# echo Do not forget to configure the database replication.
 else 
 	echo This package has alreadly been installed, will not drop database.
 fi

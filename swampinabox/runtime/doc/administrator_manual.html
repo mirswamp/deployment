@@ -442,7 +442,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h1>SWAMP-in-a-Box Administrator Manual</h1>
 <div class="details">
 <span id="revnumber">version 1.34,</span>
-<span id="revdate">2019-10-15 14:35:28 -0500</span>
+<span id="revdate">2020-05-04 09:58:55 -0500</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -521,7 +521,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#installing-dependencies">Appendix A: Installing Dependencies</a>
 <ul class="sectlevel2">
 <li><a href="#dependencies-mariadb">A.1. MariaDB 5.5</a></li>
-<li><a href="#dependencies-php">A.2. PHP 7.0</a></li>
+<li><a href="#dependencies-php">A.2. PHP 7.2</a></li>
 <li><a href="#dependencies-other">A.3. Other Assorted Utilities</a></li>
 <li><a href="#troubleshooting-installing-dependencies">A.4. Troubleshooting Issues with Installing Dependencies</a></li>
 </ul>
@@ -687,6 +687,22 @@ hardware-assisted virtualization to the guest operating system" and
 <div class="paragraph">
 <p>CentOS 6 and 7 are both supported. Other similar Linux distributions, such
 as Red Hat Enterprise Linux, might work but are untested.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Support for SWAMP-in-a-Box on CentOS 6 will end with the 1.34.x
+releases. SWAMP-in-a-Box 1.35 and later will not support installation of
+SWAMP-in-a-Box on CentOS 6.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect2">
@@ -1310,8 +1326,8 @@ platform image.</p>
 <td class="content">
 The Android Ubuntu platform includes the OS dependencies needed to build and
 assess Android Packages. As such it is quite large. The downloadable .qcow2.gz
-file needed to add the platform is over 28 GB. The decompressed, installed
-.qcow2 file takes up about 175 GB in the /swamp/platforms/images directory.
+file needed to add the platform is over 76 GB. The decompressed, installed
+.qcow2 file takes up about 150 GB in the /swamp/platforms/images directory.
 </td>
 </tr>
 </table>
@@ -1460,9 +1476,10 @@ includes scripts and documentation for integrating the tool into the SWAMP.</p>
 <dt class="hdlist1">Retire.js</dt>
 <dd>
 <p>On the SWAMP-in-a-Box host, copy the
-<code>/swamp/store/SCATools/retire-js-&lt;version&gt;.tar.gz</code> file corresponding to the
-version of Retire.js that you would like to install to some directory that
-you have write access to (for example, your home directory).</p>
+<code>/swamp/store/SCATools/bundled/retire-js-&lt;version&gt;.tar.gz</code> file
+corresponding to the version of Retire.js that you would like to install
+to some directory that you have write access to (for example, your home
+directory).</p>
 </dd>
 </dl>
 </div>
@@ -2909,15 +2926,14 @@ OAuth application.</p>
 <p>Application name: "SWAMP-in-a-Box" or the name of your SWAMP-in-a-Box</p>
 </li>
 <li>
-<p>Homepage URL: The URL to your SWAMP-in-a-Box&#8217;s or organization&#8217;s home
-page</p>
+<p>Homepage URL: The URL to your SWAMP-in-a-Box&#8217;s home page</p>
 </li>
 <li>
 <p>Application description: Optional, you can leave this blank</p>
 </li>
 <li>
-<p>Authorized callback URL: "https://&lt;hostname&gt;/oauth2", using your
-SWAMP-in-a-Box&#8217;s hostname</p>
+<p>Authorized callback URL: "https://&lt;hostname&gt;/providers/github/callback",
+using your SWAMP-in-a-Box&#8217;s hostname</p>
 </li>
 </ul>
 </div>
@@ -2988,8 +3004,7 @@ GITHUB_CLIENT_SECRET=&lt;Your Client Secret&gt;</pre>
 <div class="ulist">
 <ul>
 <li>
-<p>You will need a Google account for which to enable the Google+ API and
-create OAuth credentials.</p>
+<p>You will need a Google account for which to create OAuth credentials.</p>
 </li>
 </ul>
 </div>
@@ -3008,60 +3023,43 @@ create OAuth credentials.</p>
 <p>Select or create a Project for your SWAMP-in-a-Box OAuth credentials.</p>
 </li>
 <li>
-<p>Enable the Google+ API for your project:</p>
-<div class="ulist">
-<ul>
-<li>
-<p>On the left, under API Manager, select "Library".</p>
-</li>
-<li>
-<p>On the right, under Social APIs, select the link for "Google+ API".</p>
-</li>
-<li>
-<p>Click the "Enable" button.</p>
-</li>
-</ul>
-</div>
-</li>
-<li>
 <p>Configure the OAuth consent screen:</p>
 <div class="ulist">
 <ul>
 <li>
-<p>On the left, under API Manager, select "Credentials".</p>
+<p>On the left, under APIs &amp; Services, select "OAuth consent screen".</p>
 </li>
 <li>
-<p>On the right, under Credentials, select "OAuth consent screen".</p>
+<p>Select "External" as the User Type and click "Create.</p>
 </li>
 <li>
 <p>Enter the following information:</p>
 <div class="ulist">
 <ul>
 <li>
-<p>Email address: Your email</p>
+<p>Application Name: "SWAMP-in-a-Box" or the name of your SWAMP-in-a-Box</p>
 </li>
 <li>
-<p>Product name shown to users: "SWAMP-in-a-Box" or the name of your
+<p>Support email: An email address to provide support for your
 SWAMP-in-a-Box</p>
 </li>
 <li>
-<p>Homepage URL: The URL to your SWAMP-in-a-Box&#8217;s or organization&#8217;s
+<p>Authorized domains: Include the domains for your SWAMP-in-a-Box and
+any other support links entered</p>
+</li>
+<li>
+<p>Application Homepage link: The URL to your SWAMP-in-a-Box&#8217;s
 home page</p>
 </li>
 <li>
-<p>Product logo URL: The URL to a logo for your SWAMP-in-a-Box.
+<p>Application Privacy policy link: The URL to your privacy policy.
 For example, mir-swamp.org uses:
-<a href="https://www.mir-swamp.org/images/logos/swamp-icon-small.png" class="bare">https://www.mir-swamp.org/images/logos/swamp-icon-small.png</a>.</p>
+<a href="https://www.swampinabox.org/doc/SWAMP-Privacy-Policy.pdf" class="bare">https://www.swampinabox.org/doc/SWAMP-Privacy-Policy.pdf</a></p>
 </li>
 <li>
-<p>Privacy policy URL: The URL to your privacy policy.
-For example, mir-swamp.org uses:
-<a href="https://www.swampinabox.org/doc/SWAMP-Privacy-Policy.pdf" class="bare">https://www.swampinabox.org/doc/SWAMP-Privacy-Policy.pdf</a>.</p>
-</li>
-<li>
-<p>Terms of service URL: The URL to your terms of service.
-For example, mir-swamp.org uses:
-<a href="https://www.mir-swamp.org/#policies/acceptable-use-policy" class="bare">https://www.mir-swamp.org/#policies/acceptable-use-policy</a>.</p>
+<p>Application Terms of service link (optional): The URL to your terms
+of service. For example, mir-swamp.org uses:
+<a href="https://www.mir-swamp.org/#policies/acceptable-use-policy" class="bare">https://www.mir-swamp.org/#policies/acceptable-use-policy</a></p>
 </li>
 </ul>
 </div>
@@ -3077,11 +3075,10 @@ For example, mir-swamp.org uses:
 <div class="ulist">
 <ul>
 <li>
-<p>On the left, under API Manager, select "Credentials".</p>
+<p>On the left, under APIs &amp; Services, select "Credentials".</p>
 </li>
 <li>
-<p>On the right, under Credentials, select "OAuth client ID" from the
-"Create credentials" menu.</p>
+<p>Select "OAuth client ID" from the "Create credentials" menu.</p>
 </li>
 <li>
 <p>Under "Application type", select "Web application".</p>
@@ -3098,8 +3095,8 @@ For example, mir-swamp.org uses:
 SWAMP-in-a-Box&#8217;s hostname</p>
 </li>
 <li>
-<p>Authorized redirect URIs: "https://&lt;hostname&gt;/oauth2", using your
-SWAMP-in-a-Box&#8217;s hostname</p>
+<p>Authorized redirect URIs: "https://&lt;hostname&gt;/providers/google/callback",
+using your SWAMP-in-a-Box&#8217;s hostname</p>
 </li>
 </ul>
 </div>
@@ -3182,14 +3179,33 @@ GOOGLE_CLIENT_SECRET=&lt;Your Client Secret&gt;</pre>
 <p>Contact email: Your email address</p>
 </li>
 <li>
-<p>Home URL: The URL to your SWAMP-in-a-Box&#8217;s or organization&#8217;s home page</p>
-</li>
-<li>
-<p>Uncheck "Use Limited Proxy Certificates"</p>
+<p>Home URL: The URL to your SWAMP-in-a-Box&#8217;s home page</p>
 </li>
 <li>
 <p>Callback URLs: "https://&lt;hostname&gt;/oauth2", using your SWAMP-in-a-Box&#8217;s
 hostname</p>
+</li>
+<li>
+<p>Is this a public client?: Leave unchecked</p>
+</li>
+<li>
+<p>Scopes: select the following:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>org.cilogon.userinfo</p>
+</li>
+<li>
+<p>openid</p>
+</li>
+<li>
+<p>profile</p>
+</li>
+<li>
+<p>email</p>
+</li>
+</ul>
+</div>
 </li>
 </ul>
 </div>
@@ -4185,7 +4201,7 @@ fingerprint 75A9 0FA7 3E64 BDE0 A663  602E B8FB 15A9 DB7E 1B51).</p>
 <p><a href="#dependencies-mariadb">MariaDB 5.5</a>,</p>
 </li>
 <li>
-<p><a href="#dependencies-php">PHP 7.0</a>, and</p>
+<p><a href="#dependencies-php">PHP 7.2</a>, and</p>
 </li>
 <li>
 <p><a href="#dependencies-other">other assorted utilities</a>.</p>
@@ -4238,7 +4254,7 @@ CentOS&#8217;s default repositories. The specific packages installed are
 </div>
 </div>
 <div class="sect2">
-<h3 id="dependencies-php">A.2. PHP 7.0</h3>
+<h3 id="dependencies-php">A.2. PHP 7.2</h3>
 <div class="paragraph">
 <p>The set-up scripts for SWAMP-in-a-Box configure and download PHP from Remi&#8217;s
 RPM Repository, using the instructions produced by the "configuration
@@ -4394,8 +4410,9 @@ contain <code>repo_gpgcheck=1</code>, run the following command:</p>
 <div class="sect2">
 <h3 id="about-code-dx">B.1. Code Dx</h3>
 <div class="paragraph">
-<p>Through SWAMP&#8217;s partnership with Code Dx, Inc., a SWAMP-specific version
-of Code Dx software has been created to be solely used with SWAMP software.
+<p>This product may run with Code Dx through SWAMP&#8217;s partnership with
+Code Dx, Inc., who offer a SWAMP-specific version of Code Dx software
+that has been created to be solely used with SWAMP software.
 Code Dx software shall not be redistributed with SWAMP software without
 written consent of Code Dx, Inc.</p>
 </div>
@@ -4422,7 +4439,7 @@ EULA, you will receive a download kit from Code Dx, Inc.</p>
 </div>
 <div class="paragraph">
 <p>Code Dx is third-party software created and maintained by Code Dx, Inc.
-Copyright 2010-2019 Code Dx, Inc. All rights reserved.</p>
+Copyright 2010-2020 Code Dx, Inc. All rights reserved.</p>
 </div>
 </div>
 <div class="sect2">
@@ -4454,7 +4471,7 @@ CodeSonar can be found at:</p>
 </div>
 <div class="paragraph">
 <p>CodeSonar is third-party software created and maintained by GrammaTech, Inc.
-Copyright 2019 GrammaTech, Inc. CodeSonar is a registered trademark of
+Copyright 2020 GrammaTech, Inc. CodeSonar is a registered trademark of
 GrammaTech, Inc. All rights reserved.</p>
 </div>
 </div>
@@ -4680,7 +4697,7 @@ Apache License, Version 2.0, reproduced below.</p>
 
    END OF TERMS AND CONDITIONS
 
-   Copyright 2012-2019 Software Assurance Marketplace</pre>
+   Copyright 2012-2020 Software Assurance Marketplace</pre>
 </div>
 </div>
 </div>
@@ -4702,7 +4719,7 @@ framework licensed under the MIT License
 </li>
 <li>
 <p>This product contains Code Dx, a commercial product created by Code Dx,
-Inc. Copyright 2010-2019 Code Dx, Inc. All rights reserved. SWAMP has
+Inc. Copyright 2010-2020 Code Dx, Inc. All rights reserved. SWAMP has
 a partnership with Code Dx, Inc. and offers a SWAMP-specific version of
 Code Dx software to be used solely with SWAMP software. Code Dx software
 shall not be redistributed with SWAMP software without written consent of
@@ -4727,7 +4744,7 @@ rights reserved.</p>
 <div id="footer">
 <div id="footer-text">
 Version 1.34<br>
-Last updated 2019-10-15 14:35:28 -0500
+Last updated 2020-05-04 09:58:55 -0500
 </div>
 </div>
 </body>

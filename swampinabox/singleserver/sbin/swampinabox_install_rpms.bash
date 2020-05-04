@@ -3,7 +3,7 @@
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
-# Copyright 2012-2019 Software Assurance Marketplace
+# Copyright 2012-2020 Software Assurance Marketplace
 
 echo
 echo "### Installing SWAMP RPMs"
@@ -169,6 +169,13 @@ if [ "$mode" = "-install" ]; then
     sed -i -E -e 's/^(\s*)APP_KEY(\s*)=(.*)$/APP_KEY=/' "$web_backend_config"
     (cd -- "$web_root"/swamp-web-server && php artisan key:generate --quiet)
 fi
+
+#
+# Clear and rebuild Laravel's caches (CSA-3670).
+#
+php /var/www/swamp-web-server/artisan cache:clear
+php /var/www/swamp-web-server/artisan route:cache
+php /var/www/swamp-web-server/artisan package:discover
 
 echo "Setting permissions on Laravel's working directories"
 for dir in \
