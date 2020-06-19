@@ -45,8 +45,9 @@ elif has_intel_vmx_flag ; then
 else
     echo "not found"
     echo "" 1>&2
-    echo "Error: CPU virtualization extensions not found" 1>&2
-    echo "Perhaps try enabling Intel Virtual Technology extensions in the BIOS." 1>&2
+    echo "Warning: CPU virtualization extensions not found" 1>&2
+    echo "Try enabling Intel Virtual Technology extensions in the BIOS." 1>&2
+    echo "Otherwise, virtual machine platforms will not be supported." 1>&2
     exit 1
 fi
 

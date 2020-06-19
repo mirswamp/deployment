@@ -11,6 +11,11 @@ The contents of `config.json` must be a valid JSON object; the collection of
 values for the parameters described below are stored as nested JSON objects.
 <<config-json-examples>> can be found at the end of this section.
 
+[NOTE]
+If you have upgraded your SWAMP-in-a-Box from a previous version it is 
+possible that `config.json` has a section of `cookie` parameters. These 
+are no longer used by SWAMP and can be safely deleted.
+
 The remainder of this section describes the parameters.
 
 
@@ -76,43 +81,6 @@ Additional text displayed for Report Security Incident messages.
 The phone number displayed for Report Security Incident messages.
 
 
-Cookies
-~~~~~~~
-
-These parameters affect the SWAMP layout cookie, which is used to persist
-the state of various layout elements: the position of the navigation bar,
-the state of the Show Numbering flag, the state of the Auto Refresh flag,
-the state of the Show Grouping flag, and the last Authorization Provider
-used to sign-in via CI Logon.
-
-`cookie.domain`::
-
-The name of the domain for the SWAMP layout cookie. Set this to "null" to
-use the same domain name as in the `APP_URL` parameter in the
-<<backend-web-app,backend configuration file>>. The SWAMP-in-a-Box installer
-sets this to "null".
-
-`cookie.expires`::
-
-Determines the expiration date for the SWAMP layout cookie, in days, from 
-the time each is issued. The SWAMP-in-a-Box installer sets this to "7".
-
-`cookie.name`::
-
-The name given to the SWAMP layout cookie. The SWAMP-in-a-Box installer sets
-this to "swamp".
-
-`cookie.path`::
-
-The path for SWAMP layout cookie. The SWAMP-in-a-Box installer sets this to
-"/".
-
-`cookie.secure`::
-
-Whether the SWAMP layout cookie is sent only for encrypted connections. The
-SWAMP-in-a-Box installer sets this to "true".
-
-
 Welcome Message
 ~~~~~~~~~~~~~~~
 
@@ -172,13 +140,6 @@ Examples
 ====
 ----
 {
-  "cookie": {
-    "domain": null,
-    "name": "swamp",
-    "path": "/",
-    "secure": true
-  },
-
   "options": {
     "assessments": {
       "allow_multiple_tool_selection": true,
@@ -217,13 +178,6 @@ omitted.
     }
   },
   
-  "cookie": {
-    "domain": null,
-    "name": "swamp",
-    "path": "/",
-    "secure": true
-  },
-
   "options": {
     "assessments": {
       "allow_multiple_tool_selection": true,

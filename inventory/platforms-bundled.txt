@@ -1,2 +1,0 @@
-condor-ubuntu-16.04-64-master-2020031801.qcow2
-condor-universal-centos-6.10-64-viewer-master-2019010100.qcow2

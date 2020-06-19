@@ -68,8 +68,7 @@ Bundle new version of perl for swamp distribution and update inventory
 4. Bundle /opt/perl5 into perlbin_exec_w-[perl-NEW-VERSION].tar.gz. Stay in /opt directory, run "sudo tar -czvf perlbin_exec_w-[perl-NEW-VERSION].tar.gz ./perl5/"
 5. Move perlbin_exec_w-[perl-NEW-VERSION].tar.gz result into SWAMP/deployment/perl by runnning
 "mv perlbin_exec_w-[perl-NEW-VERSION].tar.gz ~/SWAMP/deployment/perl/"
-6. cd into SWAMP/deployment/inventory/; change to perlbin_exec_w-[perl-CURRENT-VERSION].tar.gz to the
-"perlbin_exec_w-[perl-NEW-VERSION].tar.gz" in dependencies.txt
+6. cd into SWAMP/deployment/inventory/; update the 'perl:' line in dependencies.txt with [perl-NEW-VERSION]
 
 Ensure that all perl scripts compile with the new version of perl runtime
 7. cd into SWAMP/deployment/swamp/scripts; run Command "source swamp.sh"

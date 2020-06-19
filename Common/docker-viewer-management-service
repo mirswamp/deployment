@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Bootstrap the environment by testing location of run-params.sh
+# docker universe has _$_CONDOR_SCRATCH_DIR
+source $_CONDOR_SCRATCH_DIR/run-params.sh
+
+DOCKERIMAGE=$(cat $_CONDOR_SCRATCH_DIR/.job.ad | grep DockerImage | awk '{print $3; exit}')
+HOSTNAME=$(hostname)
+
+# Fix permissions on /tmp
+echo "`date +"%Y/%m/%d %H:%M:%S"`:  [$$] Correcting permissions of /tmp" >> $SWAMP_LOG_FILE 2>&1
+chmod 1777 /tmp -v >> $SWAMP_LOG_FILE 2>&1
+
+function call_shutdown {
+	echo "VRUNSERVICESTOP" > $SWAMP_EVENT_FILE
+	echo "`date +"%Y/%m/%d %H:%M:%S"`:  [$$] Stopping `basename $0` with dump of viewer persistent data" >> $SWAMP_LOG_FILE 2>&1
+	/usr/local/libexec/codedx_viewerdb.sh
+
+	echo "VIEWERDOWN" > $SWAMP_EVENT_FILE
+	echo "`date +"%Y/%m/%d %H:%M:%S"`: [$$] Shutting down Docker image $DOCKERIMAGE container instance $HOSTNAME" >> $SWAMP_LOG_FILE 2>&1
+
+	supervisorctl shutdown
+  	exit 0
+}
+
+echo "`date +"%Y/%m/%d %H:%M:%S"`: [$$] Trapping SIGTERM" >> $SWAMP_LOG_FILE 2>&1
+trap call_shutdown SIGTERM
+
+# hand off to run.sh
+echo "`date +"%Y/%m/%d %H:%M:%S"`: [$$] Starting run.sh" >> $SWAMP_LOG_FILE 2>&1
+cd /usr/local/libexec && nohup /usr/local/libexec/run.sh > $JOB_OUTPUT_DIR/runsh.out 2>&1
+
+echo "`date +"%Y/%m/%d %H:%M:%S"`: [$$] Waiting for SIGTERM" >> $SWAMP_LOG_FILE 2>&1
+while true; do
+	sleep 60
+done

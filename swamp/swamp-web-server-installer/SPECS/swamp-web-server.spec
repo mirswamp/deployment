@@ -21,7 +21,7 @@ Vendor:    The Morgridge Institute for Research
 Packager:  Support <support@continuousassurance.org>
 URL:       http://www.continuousassurance.org
 
-Requires:  httpd,mod_ssl,php
+Requires:  httpd,mod_ssl,php >= 7.2.0, php < 7.3.0,php-pecl-mcrypt
 Source:    swamp-1.tar
 BuildRoot: /tmp/%{name}-buildroot
 BuildArch: noarch

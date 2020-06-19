@@ -111,17 +111,6 @@ if [ "$mode" = "-install" ]; then
     cp "$web_root"/config/config.swampinabox.json "$web_frontend_config"
 fi
 
-echo "Setting viewer platform in $asmt_backend_config"
-
-viewer_platform=$(
-    head -n 1 "$swamp_root"/etc/platforms-viewers.txt \
-  | sed -E -e 's/^condor-//' -e 's/-master(.*)$//' \
-)
-
-"$RUNTIME"/sbin/swamp_patch_config -i "$asmt_backend_config" \
-    --key "master.viewer" \
-    --val "$viewer_platform"
-
 ############################################################################
 
 #

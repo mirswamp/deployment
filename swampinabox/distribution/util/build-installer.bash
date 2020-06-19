@@ -181,12 +181,10 @@ build_installer_tar_file() {
     #
     # Copy dependencies that are bundled with the installer.
     #
-    local version_re='([[:digit:]]+)([.][[:digit:]]+)*'
     local dependencies_conf=$DEPLOYMENT/inventory/dependencies.txt
 
     local htcondor_version
-    htcondor_version=$(grep -o -E "condor-${version_re}" "$dependencies_conf")
-    htcondor_version=$(printf '%s\n' "$htcondor_version" | sed -e 's/condor-//')
+    htcondor_version=$(grep '^htcondor:' "$dependencies_conf" | sed -e 's/htcondor://')
 
     cp /swampcs/htcondor/condor-"${htcondor_version}"-*.tar.gz "$BUILD_DIR"/dependencies/htcondor/.
 

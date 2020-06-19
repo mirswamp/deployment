@@ -8,40 +8,42 @@
 # chkconfig: 3 99 25
 # description: swamp bundling of viewer persistent data on shutdown
 
-RUNOUT=/mnt/out/run.out
-EVENTOUT="/dev/ttyS1"
+# Bootstrap the environment by testing location of run-params.sh
+# vm universe has /mnt/in
+source /mnt/in/run-params.sh
+
 NAME="$(basename $0)"
 if [ "${NAME:0:1}" = "S" -o "${NAME:0:1}" = "K" ]; then
     NAME="${NAME:3}"
 fi
 
 stop() {
-	echo "VRUNSERVICESTOP" > $EVENTOUT
+	echo "VRUNSERVICESTOP" > $SWAMP_EVENT_FILE
 	echo "`date +"%Y/%m/%d %H:%M:%S"`: Stopping $0 with dump of viewer persistent data"
-	echo "`date +"%Y/%m/%d %H:%M:%S"`: Stopping $0 with dump of viewer persistent data" >> $RUNOUT 2>&1
-	/mnt/in/backup_viewerdb.sh
-	echo "VIEWERDOWN" > $EVENTOUT
+	echo "`date +"%Y/%m/%d %H:%M:%S"`: Stopping $0 with dump of viewer persistent data" >> $SWAMP_LOG_FILE 2>&1
+	$($JOB_INPUT_DIR/backup_viewerdb.sh)
+	echo "VIEWERDOWN" > $SWAMP_EVENT_FILE
 	rm -f /var/lock/subsys/$NAME
 }
 
 start() {
-	echo "VRUNSERVICESTART" > $EVENTOUT
+	echo "VRUNSERVICESTART" > $SWAMP_EVENT_FILE
 	echo "`date +"%Y/%m/%d %H:%M:%S"`: Starting $0 for subsys lock"
-	echo "`date +"%Y/%m/%d %H:%M:%S"`: Starting $0 for subsys lock" >> $RUNOUT 2>&1
+	echo "`date +"%Y/%m/%d %H:%M:%S"`: Starting $0 for subsys lock" >> $SWAMP_LOG_FILE 2>&1
 	touch /var/lock/subsys/$NAME
 }
 
 status() {
-	echo "VRUNSERVICESTATUS" > $EVENTOUT
+	echo "VRUNSERVICESTATUS" > $SWAMP_EVENT_FILE
 	echo "No daemon runs as part of this service"
 	echo "The service establishes the lock file at start"
 	echo "The service executes bundling of viewer persistent data"
 	if [ -r /var/lock/subsys/$NAME ]; then
 		echo "`date +"%Y/%m/%d %H:%M:%S"`: /var/lock/subsys/$NAME lock found"
-		echo "`date +"%Y/%m/%d %H:%M:%S"`: /var/lock/subsys/$NAME lock found" >> $RUNOUT 2>&1
+		echo "`date +"%Y/%m/%d %H:%M:%S"`: /var/lock/subsys/$NAME lock found" >> $SWAMP_LOG_FILE 2>&1
 	else
 		echo "`date +"%Y/%m/%d %H:%M:%S"`: /var/lock/subsys/$NAME lock not found"
-		echo "`date +"%Y/%m/%d %H:%M:%S"`: /var/lock/subsys/$NAME lock not found" >> $RUNOUT 2>&1
+		echo "`date +"%Y/%m/%d %H:%M:%S"`: /var/lock/subsys/$NAME lock not found" >> $SWAMP_LOG_FILE 2>&1
 	fi
 }
 

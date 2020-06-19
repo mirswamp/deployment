@@ -1,0 +1,14 @@
+# Set the base image to CentOS
+FROM swamp/codedx-viewer-base
+ENV container docker
+MAINTAINER Riley Gardner
+ARG CODEDX_WAR_VERSION
+RUN echo "CODEDX_WAR_VERSION: $CODEDX_WAR_VERSION"
+
+# CodeDX WAR File
+ADD ./SecureDecisions/emptydb-codedx-${CODEDX_WAR_VERSION}.sql /root/emptydb-codedx.sql
+ADD ./codedx-${CODEDX_WAR_VERSION}.war /root/codedx-${CODEDX_WAR_VERSION}.war
+RUN mkdir -p /opt/codedx
+RUN unzip -q -d /opt/codedx /root/codedx-${CODEDX_WAR_VERSION}.war
+RUN cp /opt/codedx/WEB-INF/classes/version.properties /var/lib/codedx/PROJECT/config/version.properties
+RUN perl /root/mariadb_build.pl

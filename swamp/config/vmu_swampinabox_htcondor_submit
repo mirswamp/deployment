@@ -4,6 +4,7 @@
 universe = vm
 vm_type = kvm
 vm_networking = true
+vm_networking_type = swampinabox
 RequestMemory = 6144
 vm_memory = 6144
 RequestCpus = 2
@@ -20,14 +21,14 @@ RunAsOwner = True
 ## Enable Serial Console on ttyS0 (requires JobVMVNCConsole)
 +JobVMSerialConsole = true
 
-## Redirect Serial Port ttyS1-> VM_WORKING_DIR/events/JobVMEvents.log
+## Redirect Serial Port ttyS1-> VM_WORKING_DIR/JOB_EVENTS_PATH
 +JobVMEvents = true
 
 ## Using a customized libvirt xml script, defined networking types for
 ## SWAMP (which will use the ovs) and SWAMP-in-a-Box (which uses its own
 ## configured network)
-+JobVMNetworking = true
-+JobVMNetworkingType = swampinabox
+## +JobVMNetworking = true
+## +JobVMNetworkingType = "swampinabox"
 
 ### Define VM Disk Images
 vm_disk = delta.qcow2:vda:w:qcow2, inputdisk.qcow2:vdb:w:qcow2, outputdisk.qcow2:vdc:w:qcow2

@@ -1,0 +1,12 @@
+# Systemd unit file for run.sh
+[Unit]
+Description=Start the run.sh script
+After=syslog.target network.target
+
+[Service]
+ExecStart=/usr/local/libexec/run.sh
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

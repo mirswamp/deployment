@@ -6,6 +6,10 @@ htcondor_root = /opt/swamp/htcondor
 # HTCondor collector location. Set this on data server, submit, and execute node(s).
 htcondor_collector_host = HOSTNAME
 
+# HTCondor universe global preference - if image of this type exists then prefer it
+# (VM | DC)
+preferred_platform_type = VM
+
 # Perl database properties. Set these values on the data server, submit, and execute node(s).
 dbPerlDsnHost = <dataserver hostname>
 dbPerlDsnPort = 3306
@@ -41,8 +45,10 @@ vruntimeout_duration = 28800
 # Number of seconds of no Tomcat activity
 vruntimeout_lastlog = 3600
 
-# Default viewer master VM name. Set this on the submit node.
-master.viewer = universal-centos-6.9-64-viewer
+# Default viewer master platform identifier. Set this on the submit node.
+master.viewer = codedx-3.5.5-viewer
+# Default viewer master platform type (VM | DC). Set this on the submit node.
+master.viewer.type = VM
 
 # vmip attempt count, and sleep time. Set this on the execute node(s).
 # all times in seconds

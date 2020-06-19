@@ -1,260 +1,342 @@
 #!/bin/bash
-
+#
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
 # Copyright 2012-2020 Software Assurance Marketplace
 
-#
-# General-purpose utility functions for the SWAMP.
-#
 
-############################################################################
-
-#
-# Install RPMs using 'yum'.
-#
-yum_install() {
-    echo "Installing: $*"
-    yum -y install "$@"
+is_color_ok()
+{
+  [ -t 1 ] || [ -n "${SWAMP_USE_COLOR:-}" ]
 }
 
-#
-# Uninstall RPMs using 'yum'.
-#
-yum_erase() {
-    echo "Erasing: $*"
-    yum -y erase "$@"
+
+is_command()
+{
+  command -v "$1" >/dev/null 2>&1
 }
 
+
+is_readable_file()
+{
+  [ -r "$1" ] && [ -f "$1" ]
+}
+
+
+printctrl()
+{
+  if is_color_ok && is_command tput; then
+    tput "$@" 2>/dev/null ||:
+  fi
+}
+
+
+log()
+{
+  if [ -n "${SWAMP_LOG_FD:-}" ] \
+    && (printf "" >&"${SWAMP_LOG_FD}") 2>/dev/null
+  then
+    printf '%s\n' "[$(date +"%Y-%m-%d %H:%M:%S %z")] $*" >&"${SWAMP_LOG_FD}"
+  fi
+}
+
+
+debug()
+{
+  log "[DEBUG] $*"
+}
+
+
+info()
+{
+  log "[INFO] $*"
+  printf '%s\n' "$*"
+}
+
+
+warn()
+{
+  log "[WARN] $*"
+  { printctrl bold
+    printctrl setaf 1
+    printf '%s' "Warning:"
+    printctrl sgr0
+    printf '%s\n' " $*"
+  } >&2
+}
+
+
+error()
+{
+  log "[ERROR] $*"
+  { printctrl bold
+    printctrl setaf 1
+    printf '%s' "Error:"
+    printctrl sgr0
+    printf '%s\n' " $*"
+  } >&2
+}
+
+
+get_os_distribution()
+{
+  if [ -r /etc/centos-release ]; then
+    printf 'CentOS Linux'
+    return 0
+  fi
+  if [ -r /etc/redhat-release ]; then
+    printf 'Red Hat Linux'
+    return 0
+  fi
+  printf 'Unknown'
+  return 1
+}
+
+
+get_os_version()
+{
+  if [ -r /etc/centos-release ]; then
+    awk '{ print substr($0, match($0, /[[:digit:]]+/), RLENGTH) ; }' \
+        /etc/centos-release
+    return 0
+  fi
+  if [ -r /etc/redhat-release ]; then
+    awk '{ print substr($0, match($0, /[[:digit:]]+/), RLENGTH) ; }' \
+        /etc/redhat-release
+    return 0
+  fi
+  printf 'Unknown'
+  return 1
+}
+
+
+yum_install()
+{
+  info "Installing packages: $*"
+  yum -y install "$@"
+}
+
+
+yum_remove()
+{
+  info "Removing packages: $*"
+  yum -y remove "$@"
+}
+
+
+yum_confirm()
+{
+  local capability
+  for capability in "$@"; do
+    if ! rpm --query --whatprovides --quiet "${capability}"; then
+      error "No package provides: ${capability}"
+      return 1
+    fi
+  done
+}
+
+
+get_rpm_version()
+{
+  local capability=$1
+  if rpm --query --whatprovides --quiet "${capability}"; then
+    rpm --query --queryformat '%{VERSION}-%{RELEASE}' "${capability}"
+  fi
+}
+
+
+tell_service()
+{
+  local root_dir
+  root_dir="$(builtin cd -P -- "$(dirname -- "${BASH_SOURCE}")"/.. && pwd)"
+
+  "${root_dir}"/sbin/swamp_manage_service "$@"
+}
+
+
+disable_service()
+{
+  local svc=$1
+  info "Disabling the '${svc}' system service"
+  if command -v systemctl >/dev/null 2>&1; then
+    systemctl disable "${svc}"
+  else
+    chkconfig "${svc}" off
+  fi
+}
+
+
+enable_service()
+{
+  local svc=$1
+  info "Enabling the '${svc}' system service"
+  if command -v systemctl >/dev/null 2>&1; then
+    systemctl enable "${svc}"
+  else
+    chkconfig "${svc}" on
+  fi
+}
+
+
+create_user()
+{
+  local user=$1
+  if [ -z "$(getent passwd "${user}")" ]; then
+    info "Creating the '${user}' user"
+    useradd "${user}"
+  fi
+}
+
+
+create_group()
+{
+  local group=$1
+  shift  # keep only the users to add in "$@"
+
+  if ! groupmems -g "${group}" -l >/dev/null 2>&1; then
+    info "Creating the '${group}' group"
+    groupadd "${group}"
+  fi
+
+  local user
+  for user in "$@"; do
+    if ! groupmems -g "${group}" -l | grep -q "\\<${user}\\>"; then
+      info "Adding '${user}' to the '${group}' group"
+      groupmems -g "${group}" -a "${user}"
+    fi
+  done
+}
+
+
+is_command_available()
+{
+  local arg
+  for arg in "$@"; do
+    if ! command -v "${arg}" >/dev/null 2>&1; then
+      error "'${arg}' is not in ${USER}'s \$PATH"
+      return 1
+    fi
+  done
+}
+
+
+is_docker_available()
+{
+  command -v docker >/dev/null 2>&1
+}
+
+
+exit_if_not_root()
+{
+  if [ "$(whoami)" != "root" ]; then
+    error "This utility must be run as 'root' (perhaps use 'sudo'?)"
+    exit 1
+  fi
+}
+
+
 #
-# Check whether there are RPMs providing the given list of resources.
+# Use 'do_mysql_command' to run one or more SQL scripts.
 #
-yum_confirm() {
-    local not_installed=()
-    for pkg in "$@" ; do
-        printf 'Checking for %s ... ' "$pkg"
-        if ! rpm -q --whatprovides "$pkg" 2>&1 ; then
-            not_installed+=("$pkg")
-        fi
-    done
-    if [ ${#not_installed[@]} -gt 0 ]; then
-        echo
-        echo "Error: No packages provide: ${not_installed[*]}" 1>&2
+# Use 'prep_db_service' to ensure that the SQL database service is running
+# and that password files are present, which might require querying the user
+# for passwords. Use 'unprep_db_service' to undo any changes that were made
+# by 'prep_db_service'.
+#
+# The functions '{prep,unprep}_docker_service' are similar.
+#
+readonly mysql_command="mysql --defaults-file=/opt/swamp/sql/sql.cnf -B -N"
+readonly mysqldump_command="mysqldump --defaults-file=/opt/swamp/sql/sql.cnf"
+
+zz_rm_cnf=""
+zz_rm_password=""
+zz_stop_docker=""
+zz_stop_mysql=""
+
+
+run_sql_script()
+{
+  if [ $# -gt 0 ]; then
+    local arg
+    for arg in "$@"; do
+      if [ ! -f "${arg}" ] || [ ! -r "${arg}" ]; then
+        error "Not a readable file: ${arg}"
         return 1
-    fi
-    return 0
-}
-
-#
-# Write to standard out the installed version and release of the given RPM.
-#
-get_rpm_version() {
-    local pkg=$1
-    if yum_confirm "$pkg" 1>/dev/null 2>&1 ; then
-        rpm -q --qf "%{VERSION}-%{RELEASE}" "$pkg"
-    else
-        echo ""
-    fi
-}
-
-############################################################################
-
-#
-# Write to standard out this host's operating system.
-#
-get_os_distribution() {
-    if [ -r /etc/centos-release ]; then
-        echo "CentOS Linux"
-        return 0
-    fi
-    if [ -r /etc/redhat-release ]; then
-        echo "Red Hat Linux"
-        return 0
-    fi
-    echo "Unknown"
-    return 1
-}
-
-#
-# Write to standard out this host's operating system's major version.
-#
-get_os_version() {
-    if [ -r /etc/centos-release ]; then
-        awk '{ print substr($0, match($0, /[[:digit:]]+/), RLENGTH) ; }' \
-            /etc/centos-release
-        return 0
-    fi
-    if [ -r /etc/redhat-release ]; then
-        awk '{ print substr($0, match($0, /[[:digit:]]+/), RLENGTH) ; }' \
-            /etc/redhat-release
-        return 0
-    fi
-    echo "Unknown"
-    return 1
-}
-
-############################################################################
-
-#
-# Prevent a system service from automatically starting on system startup.
-#
-disable_service() {
-    local svc=$1
-    echo "Disabling the $svc system service"
-    if command -v systemctl 1>/dev/null 2>&1 ; then
-        systemctl disable "$svc"
-    else
-        chkconfig "$svc" off
-    fi
-}
-
-#
-# Allow a system service to automatically start on system startup.
-#
-enable_service() {
-    local svc=$1
-    echo "Enabling the $svc system service"
-    if command -v systemctl 1>/dev/null 2>&1 ; then
-        systemctl enable "$svc"
-    else
-        chkconfig "$svc" on
-    fi
-}
-
-#
-# Manage a system service.
-#
-tell_service() {
-    "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"/../sbin/swamp_manage_service "$@"
-}
-
-############################################################################
-
-#
-# Create a new group, and add existing user accounts to it.
-#
-create_group() {
-    local new_group=$1
-
-    echo "Creating the $new_group group"
-    groupadd -f "$new_group"
-
-    for user_account in "${@:2}" ; do
-        if ! groupmems -g "$new_group" -l | grep -q "\\<$user_account\\>"
-        then
-            echo "Adding $user_account to the $new_group group"
-            groupmems -g "$new_group" -a "$user_account"
-        else
-            echo "Found $user_account in the $new_group group"
-        fi
-    done
-}
-
-#
-# Create a new user account.
-#
-create_user() {
-    local new_user=$1
-
-    if [ -z "$(getent passwd "$new_user")" ]; then
-        echo "Creating the $new_user user"
-        useradd "$new_user"
-    else
-        echo "Found the $new_user user"
-    fi
-}
-
-#
-# Check whether the given commands are in the current user's $PATH.
-#
-check_for_commands() {
-    for cmd in "$@" ; do
-        printf 'Checking for %s ... ' "$cmd"
-        if ! command -v "$cmd" 2>&1 ; then
-            echo    # write a newline because 'command' printed nothing
-            echo
-            echo "Error: '$cmd' is not in $USER's \$PATH" 1>&2
-            return 1
-        fi
-    done
-    return 0
-}
-
-############################################################################
-
-#
-# Store the commands for undoing the changes made by 'setup_db_support'.
-#
-_db_cleanup_cmds=()
-_exit_db_setup() { reset_db_support ; exit 1 ; }
-
-#
-# Ensure that:
-#   - The 'mysql' system service is running
-#   - The SWAMP's default options file is available
-#
-setup_db_support() {
-    local SBIN
-    SBIN=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/../sbin
-
-    if [ "$(whoami)" != "root" ]; then
-        echo "Error: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
-        exit 1
-    fi
-    if [ "$(tell_service mysql status)" = "stopped" ]; then
-        _db_cleanup_cmds+=("tell_service mysql stop")
-        tell_service mysql start || _exit_db_setup
-    fi
-    if [ ! -e /etc/.mysql_root ] && [ ! -e /etc/.mysql ]; then
-        _db_cleanup_cmds+=("rm -f /etc/.mysql_root")
-        "$SBIN"/create_mysql_root /etc/.mysql_root --test || _exit_db_setup
-    fi
-    if [ ! -e /opt/swamp/sql/sql.cnf ]; then
-        _db_cleanup_cmds+=("rm -f /opt/swamp/sql/sql.cnf")
-        "$SBIN"/create_mysql_root_cnf /opt/swamp/sql/sql.cnf || _exit_db_setup
-    fi
-}
-
-#
-# Undo the changes made by 'setup_db_support'.
-#
-reset_db_support() {
-    for cleanup_command in "${_db_cleanup_cmds[@]}" ; do
-        $cleanup_command
+      fi
     done
 
-    #
-    # Ensure that the terminal's 'echo' property is reset.
-    #
-    stty echo 1>/dev/null 2>&1 || :
-
-    #
-    # Reset the list of cleanup commands.
-    #
-    _db_cleanup_cmds=()
+    debug "Running SQL scripts: $*"
+    cat "$@" | ${mysql_command}
+  fi
 }
 
-############################################################################
 
-#
-# Commands for running 'mysql' and 'mysqldump'.
-#
-mysql_command="mysql --defaults-file=/opt/swamp/sql/sql.cnf -B -N"
-mysqldump_command="mysqldump --defaults-file=/opt/swamp/sql/sql.cnf"
+prep_db_service()
+{
+  exit_if_not_root
 
-#
-# Run the SQL statements in the given files.
-#
-do_mysql_command() {
-    if [ -z "$*" ]; then
-        return 0
-    fi
-    for arg in "$@" ; do
-        if [ ! -f "$arg" ] || [ ! -r "$arg" ]; then
-            echo "Error: Not a readable file: $arg" 1>&2
-            return 1
-        fi
-    done
-    cat "$@" | $mysql_command
+  local root_dir
+  root_dir="$(builtin cd -P -- "$(dirname -- "${BASH_SOURCE}")"/.. && pwd)"
+
+  if [ "$(tell_service mysql status)" = "stopped" ]; then
+    zz_stop_mysql=yes
+    tell_service mysql start
+  fi
+  if [ ! -e /etc/.mysql_root ] && [ ! -e /etc/.mysql ]; then
+    zz_rm_password=yes
+    "${root_dir}"/sbin/create_mysql_root /etc/.mysql_root --test
+  fi
+  if [ ! -e /opt/swamp/sql/sql.cnf ]; then
+    zz_rm_cnf=yes
+    "${root_dir}"/sbin/create_mysql_root_cnf /opt/swamp/sql/sql.cnf
+  fi
 }
+
+
+unprep_db_service()
+{
+  if [ -n "${zz_stop_mysql}" ]; then
+    tell_service mysql stop && zz_stop_mysql=""
+  fi
+  if [ -n "${zz_rm_password}" ]; then
+    rm -f /etc/.mysql_root && zz_rm_password=""
+  fi
+  if [ -n "${zz_rm_cnf}" ]; then
+    rm -f /opt/swamp/sql/sql.cnf && zz_rm_cnf=""
+  fi
+}
+
+
+prep_docker_service()
+{
+  if ! is_docker_available; then
+    return
+  fi
+
+  exit_if_not_root
+
+  if [ "$(tell_service docker status)" = "stopped" ]; then
+    zz_stop_docker=yes
+    tell_service docker start
+  fi
+}
+
+
+unprep_docker_service()
+{
+  if [ -n "${zz_stop_docker}" ]; then
+    tell_service docker stop && zz_stop_docker=""
+  fi
+}
+
+
+#
+# Functions for backwards compatibility with older version of this library.
+#
+
+yum_erase() { yum_remove "$@" ; }
+check_for_commands() { is_command_available "$@" ; }
+setup_db_support() { prep_db_service "$@" ; }
+reset_db_support() { unprep_db_service "$@" ; }
+do_mysql_command() { run_sql_script "$@" ; }

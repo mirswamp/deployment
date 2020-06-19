@@ -186,6 +186,20 @@ files, which can be found in the directory from which you run the upgrade:
   * `bkup_information_schema.<YYYY_MM_DD>.sql`
 
 
+Add at least one Platform
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A new installation of SWAMP-in-a-Box does not initially include any 
+assessment platforms. A SWAMP-in-a-Box installation upgraded from a 
+previous version will retain any supported platform versions, but the
+upgrade process will delete any unsupported platform versions. Therefore
+it is also possible that an upgraded SWAMP-in-a-Box will have no Platforms
+available for assessments.
+
+Please refer to <<add-on-platforms,Installing Assessment Platforms>> for the
+procedure to add one or more platforms.
+
+
 Verify that the Install/Upgrade Was Successful
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

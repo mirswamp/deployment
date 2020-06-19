@@ -22,6 +22,7 @@ release_number=$2
 #
 old_install_dir="/swamp/store/SCATools"
 new_install_dir="/swamp/store/SCATools/bundled"
+add_on_install_dir="/swamp/store/SCATools/add_on"
 source_tarball="$BINDIR/../../swampinabox-${release_number}-tools.tar.gz"
 
 ############################################################################
@@ -165,7 +166,6 @@ function extract_distribution_bundle() {
     echo "Extracting bundled tool files into: $new_install_dir"
     echo "(this will take some time)"
     tar -C "$new_install_dir" --strip-components 1 -zxvf "$source_tarball"
-    echo "Finished extracting files"
 
     cat > "$new_install_dir"/00_DO_NOT_MODIFY_THIS_DIR.txt <<EOF
 The SWAMP-in-a-Box installer/upgrader script will not preserve any
@@ -173,10 +173,42 @@ changes made to the contents of this directory. Files may be deleted
 without warning.
 EOF
 
+    for path in "$new_install_dir"/*.tar; do
+        tar -C "$new_install_dir" -xvf "$path"
+        rm "$path"
+    done
+    for path in "$new_install_dir"/*.tar.gz; do
+        tar -C "$new_install_dir" -zxvf "$path"
+        rm "$path"
+    done
+    echo "Finished extracting files"
+
     echo "Setting file system permissions"
     chown -R mysql:mysql "$new_install_dir"
     find "$new_install_dir" -type d -exec chmod u=rwx,og=rx,ugo-s '{}' ';'
     find "$new_install_dir" -type f -exec chmod u=rw,og=r,ugo-s   '{}' ';'
+}
+
+function extract_add_on_tools() {
+    echo "Checking for and extracting add-on tools"
+
+    for sql_path in /opt/swamp/sql/tools_add_on/*.meta.sql; do
+      if [ ! -f "${sql_path}" ]; then
+        continue
+      fi
+
+      tool_id="$(basename -- "${sql_path}" .meta.sql)"
+
+      for path in "${add_on_install_dir}"/"${tool_id}"*.tar.gz; do
+        name="$(basename -- "${path}" .tar.gz)"
+        dest_dir="${add_on_install_dir}/${name}"
+        tool_version="${name#${tool_id}-}"
+
+        if [ -e "${path}" ] && [ ! -d "${dest_dir}" ]; then
+            /opt/swamp/bin/install_tool --tool "${tool_id}" --replace -f "${path}" -v "${tool_version}" && rm -rf -- "${path}"
+        fi
+      done
+    done
 }
 
 ############################################################################
@@ -184,6 +216,7 @@ EOF
 if [ "$swamp_context" = "-distribution" ]; then
     remove_deprecated_distribution_files
     extract_distribution_bundle
+    extract_add_on_tools
 
     if [ $encountered_error -eq 0 ]; then
         echo "Finished installing tool files"

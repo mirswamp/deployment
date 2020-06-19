@@ -12,8 +12,8 @@ use POSIX qw(strftime);
 
 my $viewer;
 my $tomcatlogdir;
-my $swampstartlogfile = '/mnt/out/run.epoch';
-my $swamplog = '/mnt/out/run.out';
+my $swampstartlogfile = $ENV{'VIEWER_STARTEPOCH_FILE'};
+my $swamplog = $ENV{'SWAMP_LOG_FILE'};
 
 sub parse_date_to_epoch { my ($date, $format) = @_ ;
 	# swamp 2016/06/03 11:19:08

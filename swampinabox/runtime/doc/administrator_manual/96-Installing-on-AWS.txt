@@ -1,0 +1,109 @@
+[[appendix-amazon-ec2]]
+[appendix]
+Installing on an Amazon Elastic Compute Cloud Instance
+------------------------------------------------------
+
+The <<system-requirements,system requirements>> and
+<<installing-sib,installation instructions>> for SWAMP-in-a-Box are
+generally applicable to using an Amazon Elastic Compute Cloud (Amazon EC2)
+instance as the SWAMP-in-a-Box host. This appendix calls out several
+considerations specific to Amazon EC2.
+
+
+Documentation for Amazon EC2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This Administrator Manual assumes that you have an Amazon Web Services (AWS)
+account and some experience working with Amazon Elastic Compute Cloud
+(Amazon EC2). If you are just getting started, the following resources might
+be helpful:
+
+  * https://aws.amazon.com/ec2/getting-started/
+  * https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html
+  * https://aws.amazon.com/getting-started/tutorials/
+
+
+[[configure-ec2-instance]]
+Configuring an EC2 Instance that Supports SWAMP-in-a-Box
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Any instance that meets SWAMP-in-a-Box's <<system-requirements,system
+requirements>> should work.
+
+* Access the AWS Management Console.
+
+* Select the option to "Launch a virtual machine."
+
+* For "Choose an Amazon Machine Image (AMI)", search for "CentOS" in the
+  AWS Marketplace and select "CentOS 7 (x86_64) - with Updates HVM".
+
+* For "Choose an Instance Type", pick an option based on the Hardware
+  Requirements section of the SWAMP-in-a-Box Administrator Manual.
+  In general SWAMP-in-a-Box requires 2 cores and 6 GiB of Memory for
+  each simultaneous assessment run. The SWAMP team has successfully
+  run SWAMP-in-a-Box on the following instance types:
+
+** t3a.xlarge (4 core, 16 GiB memory)
+** m5a.2xlarge (8 core, 32 GiB memory)
+
+* For "Configure Instance", ensure that the instance is configured to be
+  assigned a public IP address. Specifically, under Configure Instance
+  Details, set "Auto-assign Public IP" to "Enable".
+
+* For "Add Storage", the "Root" Volume Type should have a size of at least
+  64 GiB. There is no need to add any other volume. Note that for
+  experimental purposes, you can configure the instance with as little as
+  48 GiB of storage space. For anything less than that there will not be
+  sufficient space to complete the install and run assessments.
+
+* For "Configure Security Group", SWAMP-in-a-Box requires inbound rules
+  allowing SSH, HTTP, and HTTPS. By default, SWAMP-in-a-Box does not allow
+  access over HTTP, but for instances where you might be unable or unwilling
+  to obtain SSL certifications signed by a trusted authority,
+  <<configure-http,enabling HTTP access>> might be necessary and acceptable.
+
+
+Known Issues
+~~~~~~~~~~~~
+
+.Hostname Does Not Remain Fixed
+
+Unless you have a static IP address (Elastic IP) for your AWS Instance, you
+will get a new IP address, and therefore a new DNS name every time you stop
+and start your instance. In this case you will need to reconfigure
+SWAMP-in-a-Box with the new hostname every time you re-start your Instance.
+You will also, then have a different URL to access the SWAMP-in-a-Box
+website. See the section on <<updating-the-hostname>> for instructions on
+how to update the hostname through SWAMP-in-a-Box's configuration files.
+
+.Default Self-Signed SSL Certificate is Rejected by Browsers
+
+The default AWS Instance configuration includes an automatically generated
+SSL certificate which will appear to web browsers to be suspicious. When
+you first access your SWAMP-in-a-Box on an AWS instance via your web browser,
+the browser will display a warning page. In most cases you can override the
+warning and proceed, but if one browser does not work for you, please try
+another.
+
+- In Firefox: Click "Advanced..." and then click the link "Accept the Risk
+  and Continue" to access the site.
+
+- In Google Chrome: Click "Advanced". There may be a link,
+  "Proceed to <site url> (unsafe)", if so, click it to access the site.
+  If there is no link to access the site you may still be able to access the
+  site by typing "thisisunsafe" while the browser window has focus.
+
+- In Safari: Click "Show Details" and then click "Visit this website". You
+  will then need to confirm and enter your Mac OS username and password
+  to make changes to your Certificate Trust Settings. You will then be
+  redirected to the site. This may only work if your Mac OS account is also
+  an Administrator account.
+
+- In Microsoft Edge: Click "Details" and then click "Go on to the webpage"
+  to access the site.
+
+.Code Dx Cannot Be Installed
+
+Currently, SWAMP-in-a-Box is limited to running <<add-on-viewers,optional
+Code Dx results viewer>> only in a virtual machine. Unfortunately, EC2
+instances do not support running virtual machines.

@@ -1,5 +1,5 @@
-c-assess-1.2.3.tar.gz
-java-assess-2.7.4.tar
-resultparser-3.3.3.tar
-ruby-assess-1.2.4.tar.gz
-script-assess-1.4.4.tar
+c-assess-1.2.6.tar.gz
+java-assess-2.7.6.tar
+resultparser-3.3.4.tar
+ruby-assess-1.2.5.tar.gz
+script-assess-1.4.5.tar

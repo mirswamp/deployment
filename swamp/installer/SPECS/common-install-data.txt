@@ -89,6 +89,7 @@ install -m 755 swamp.sh $RPM_BUILD_ROOT/etc/profile.d
 
 install -m 400 Data_Server/Platform_Store/platforms/*          $RPM_BUILD_ROOT/opt/swamp/sql/platforms
 install -m 400 Data_Server/Platform_Store/delete_platforms.sql $RPM_BUILD_ROOT/opt/swamp/sql/util
+install -m 400 Data_Server/Platform_Store/configure_package_types_after_platform_install.sql $RPM_BUILD_ROOT/opt/swamp/sql/util
 
 install -m 400 Data_Server/Metric/metric_tools/*               $RPM_BUILD_ROOT/opt/swamp/sql/tools
 install -m 400 Data_Server/Tool_Shed/tools_MIR_and_SiaB/*      $RPM_BUILD_ROOT/opt/swamp/sql/tools

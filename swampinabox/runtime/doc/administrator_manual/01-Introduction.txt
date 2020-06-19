@@ -5,17 +5,17 @@ Introduction
 What Is SWAMP
 ~~~~~~~~~~~~~
 
-The Software Assurance Marketplace (SWAMP) is a platform for running
-software assurance tools on your code. It is a joint effort of four research
-institutions -- the Morgridge Institute for Research, Indiana University,
-the University of Illinois at Urbana-Champaign, and the University of
-Wisconsin-Madison -- to advance the capabilities and increase the adoption
-of software assurance technologies through an open continuous assurance
-facility. The SWAMP originally went live in February 2014 as a web
-application at https://www.mir-swamp.org, where it provides continuous
+The Software Assurance Marketplace (SWAMP) is a continuous software
+assurance platform for running software assurance tools on your code. It was
+a joint effort of four research institutions -- the Morgridge Institute for
+Research, Indiana University, the University of Illinois at
+Urbana-Champaign, and the University of Wisconsin-Madison -- to advance the
+capabilities and increase the adoption of software assurance technologies
+through an open continuous assurance facility. The SWAMP originally went
+live in February 2014 as a web application, where it provided continuous
 software assurance capabilities to developers and researchers.
 
-The SWAMP project is funded by the Department of Homeland Security (DHS)
+The SWAMP project was funded by the Department of Homeland Security (DHS)
 Science and Technology Directorate, Homeland Security Advanced Research
 Projects Agency, Cyber Security Division (DHS S&T/HSARPA/CSD); BAA 11-02;
 and the Air Force Research Laboratory, Information Directorate under
@@ -26,9 +26,10 @@ What Is SWAMP-in-a-Box
 ~~~~~~~~~~~~~~~~~~~~~~
 
 For users that need or prefer to run software assurance tools on their own
-computing infrastructure, the SWAMP project offers a standalone software
-application called SWAMP-in-a-Box (SiB). It is, in essence, a local instance
-of the SWAMP that can be deployed on your own servers if you have higher
+computing infrastructure, SWAMP-in-a-Box (SiB) is a standalone software
+application for continuous software assurance. It is, in essence, a local
+instance of a continuous assurance platform, originally created by the SWAMP
+project, that can be deployed on your own servers if you have higher
 security or compliance requirements for your software, or, being
 open-source, when you want to customize the software.
 
@@ -45,9 +46,11 @@ Documentation for SWAMP-in-a-Box
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Copies of this SWAMP-in-a-Box Administrator Manual and the SWAMP-in-a-Box
-Reference Manual can be found in `/opt/swamp/doc` on the SWAMP-in-a-Box host
-after SWAMP-in-a-Box has been installed. Each manual is available as
-a single page HTML document and as a PDF.
+Reference Manual can be found at
+https://platform.swampinabox.org/siab-latest-release/. They are additionally
+available in `/opt/swamp/doc` on the SWAMP-in-a-Box host after
+SWAMP-in-a-Box has been installed. Each manual is available as a single page
+HTML document and as a PDF.
 
 Documentation for users of the SWAMP is available on the Help page of the
 SWAMP web application after SWAMP-in-a-Box has been installed.

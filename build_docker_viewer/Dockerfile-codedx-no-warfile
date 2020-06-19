@@ -1,0 +1,114 @@
+# Set the base image to CentOS
+FROM centos:7
+ENV container docker
+MAINTAINER Riley Gardner
+ARG CODEDX_WAR_VERSION
+RUN echo "CODEDX_WAR_VERSION: $CODEDX_WAR_VERSION"
+ARG TOMCAT_VERSION
+RUN echo "TOMCAT_VERSION: $TOMCAT_VERSION"
+ARG TOMCAT_URL="https://archive.apache.org/dist/tomcat/tomcat-8/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
+RUN echo "TOMCAT_URL: $TOMCAT_URL"
+
+# Add MariaDB YUM repo
+ADD ./services/mariadb/MariaDB.repo /etc/yum.repos.d/MariaDB.repo
+
+# Replace systemctl - required by build/scripts/mariadb_build.pl
+# Only used during building of container
+ADD ./services/systemctl/systemctl.py /usr/bin/systemctl
+
+# Install Dependencies
+RUN yum -y install \
+    curl \
+    sudo \
+    tar \
+    unzip \
+    java-1.8.0-openjdk \
+    MariaDB-client MariaDB-common MariaDB-compat MariaDB-server \
+    jemalloc \
+    galera \
+    libzstd \
+    perl-Digest-MD5 \
+    epel-release 
+RUN yum -y install supervisor
+
+# Install Supercronic CROND replacement
+# # https://github.com/aptible/supercronic
+ENV SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.1.9/supercronic-linux-amd64 \
+    SUPERCRONIC=supercronic-linux-amd64 \
+    SUPERCRONIC_SHA1SUM=5ddf8ea26b56d4a7ff6faecdd8966610d5cb9d85
+RUN curl -fsSLO "$SUPERCRONIC_URL" \
+    && echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - \
+    && chmod +x "$SUPERCRONIC" \
+    && mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" \
+    && ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
+ADD ./services/supercronic/crontab /usr/local/etc/crontab
+RUN chown root:root /usr/local/etc/crontab
+
+# Install checktimeout to supercronic
+ADD ./Common/checktimeout /usr/local/libexec/checktimeout
+ADD ./Common/checktimeout.pl /usr/local/libexec/checktimeout.pl
+RUN chmod +x /usr/local/libexec/checktimeout*
+
+# Configure MariaDB Service
+ADD ./services/mariadb/mariadb_build.pl /root/mariadb_build.pl
+ADD ./services/mariadb/dot.mariadb.pw /root/.mariadb.pw
+ADD ./Common/flushprivs.sql /root/flushprivs.sql
+ADD ./SecureDecisions/resetdb-codedx.sql /root/resetdb-codedx.sql
+ADD ./SecureDecisions/emptydb-mysql-codedx.sql /root/emptydb-mysql-codedx.sql
+
+RUN chown root:root /root/.mariadb.pw
+RUN chown -R mysql:mysql /var/lib/mysql
+RUN chown -R root:mysql /etc/my.cnf.d
+RUN chmod -R g+w /etc/my.cnf.d
+
+# Create Apache Tomcat Service user
+RUN useradd tomcat
+RUN chsh -s /sbin/nologin tomcat
+
+# Extract Tomcat (Docker didn't properly extract from URL)
+RUN curl -s -S -o /opt/apache-tomcat-${TOMCAT_VERSION}.tar.gz ${TOMCAT_URL}
+RUN tar -x --exclude="apache-tomcat-${TOMCAT_VERSION}/webapps/*" -f /opt/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C /opt
+
+# Configure Tomcat
+ADD ./services/tomcat/catalina.properties.8.5 /opt/apache-tomcat-${TOMCAT_VERSION}/conf/catalina.properties
+ADD ./services/tomcat/catalina.sh.8.5 /opt/apache-tomcat-${TOMCAT_VERSION}/bin/catalina.sh
+ADD ./services/tomcat/server.xml.8.5 /opt/apache-tomcat-${TOMCAT_VERSION}/conf/server.xml
+ADD ./services/tomcat/context.xml.8.5 /opt/apache-tomcat-${TOMCAT_VERSION}/conf/context.xml
+ADD ./services/tomcat/setenv.sh /opt/apache-tomcat-${TOMCAT_VERSION}/bin/setenv.sh
+RUN chown -R root:root /opt/apache-tomcat*
+RUN ln -s /opt/apache-tomcat-${TOMCAT_VERSION} /opt/tomcat
+
+# Install SSL Cert Keystore
+ADD ./services/ssl/viewer.p12 /opt/keystore/viewer.p12
+RUN chown root:root /opt/keystore/viewer.p12
+RUN chmod 600 /opt/keystore/viewer.p12
+
+# CodeDX Config
+RUN mkdir -p /var/lib/codedx
+RUN mkdir -p /var/lib/codedx/PROJECT/config
+ADD ./SecureDecisions/codedx.props /var/lib/codedx/PROJECT/config/codedx.props
+ADD ./SecureDecisions/logback.xml /var/lib/codedx/PROJECT/config/logback.xml
+ADD ./SecureDecisions/codedx_viewerdb.sh /usr/local/libexec/codedx_viewerdb.sh
+RUN touch /var/lib/codedx/PROJECT/config/.installation
+RUN chown -R root:root /var/lib/codedx
+RUN chmod +x /usr/local/libexec/codedx_viewerdb.sh
+
+# Supervisor Configuration
+ADD ./services/supervisor/supervisord.conf /etc/supervisord.conf
+ADD ./services/supervisor/supervisor.d/supercronic.conf /etc/supervisor.d/supercronic.conf
+ADD ./services/supervisor/supervisor.d/mariadb.conf /etc/supervisor.d/mariadb.conf
+ADD ./services/supervisor/supervisor.d/tomcat.conf /etc/supervisor.d/tomcat.conf
+ADD ./services/supervisor/supervisor.d/viewer-management-service.conf /etc/supervisor.d/viewer-management-service.conf
+RUN chmod o+w /etc/supervisor.d/*.conf
+ADD ./Common/docker-viewer-management-service /usr/local/libexec/viewer-management-service
+
+# Execution Script
+ADD ./SecureDecisions/docker_vrun.sh /usr/local/libexec/run.sh
+RUN chown root:root /usr/local/libexec/run.sh
+RUN chmod u+x /usr/local/libexec/run.sh
+
+# Expose https
+EXPOSE 8443
+
+# Lauch supervisord as init
+CMD /usr/bin/supervisord -c /etc/supervisord.conf

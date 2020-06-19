@@ -14,7 +14,9 @@ install -m 400 Data_Server/Project/project_procs.sql     "$RPM_BUILD_ROOT"/opt/s
 
 install -m 644 swampinabox/perl5/SWAMP/SiB_Utilities.pm  "$RPM_BUILD_ROOT"/opt/swamp/perl5/SWAMP
 
+install -m 755 swampinabox/bin/install_platform "$RPM_BUILD_ROOT"/opt/swamp/bin
 install -m 755 swampinabox/bin/swamp_check_db_file_paths "$RPM_BUILD_ROOT"/opt/swamp/bin
+install -m 755 swampinabox/bin/swamp_utility.functions "$RPM_BUILD_ROOT"/opt/swamp/bin
 install -m 700 swampinabox/sbin/create_mysql_root        "$RPM_BUILD_ROOT"/opt/swamp/sbin
 install -m 700 swampinabox/sbin/create_mysql_root_cnf    "$RPM_BUILD_ROOT"/opt/swamp/sbin
 install -m 700 swampinabox/sbin/db_support.functions     "$RPM_BUILD_ROOT"/opt/swamp/sbin

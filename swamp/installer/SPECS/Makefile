@@ -9,8 +9,7 @@ swampinabox-files.txt: common-files-*.txt swampinabox-files-*.txt
 	cat $^ | grep -v "^\s*\#" | sort -u > $@
 
 swampinabox-install.txt: common-install-*.txt swampinabox-install-*.txt
-	cat $^ | sort -u | grep "^mkdir" > $@
-	cat $^ | grep -v "^\s*\#" | sort -u | grep -v "^mkdir" >> $@
+	cat $^ > $@
 
 singleserver: clean swampinabox-files.txt swampinabox-install.txt
 	rpmbuild --verbose --define '_topdir $(TOPDIR)' -bb swampinabox-backend.spec

@@ -31,7 +31,6 @@ fi
 # extracted in the expected manner.
 #
 for archive_file in \
-        "$BINDIR/../../swampinabox-${version}-platforms.tar.gz" \
         "$BINDIR/../../swampinabox-${version}-tools.tar.gz" \
         ; do
     if [ ! -f "$archive_file" ]; then
@@ -46,7 +45,7 @@ done
 # Check whether this host's hardware meets our requirements.
 #
 "$BINDIR/runtime/bin/swamp_check_vm_support" \
-    || exit 1
+    ||:
 "$BINDIR/swampinabox_check_hardware.pl" \
         "$mode" \
         "$swamp_context"  \
@@ -70,7 +69,7 @@ if ! check_for_commands \
         chgrp chmod chown chsh groupadd groupmems \
         awk diff install sed patch \
         chkconfig service \
-        compress gunzip jar rpm sha512sum tar unzip yum zip \
+        compress gunzip jar rpm sha512sum tar unzip xz yum zip \
         guestfish qemu-img virsh virt-copy-out virt-make-fs \
         curl mysql openssl perl php
 then

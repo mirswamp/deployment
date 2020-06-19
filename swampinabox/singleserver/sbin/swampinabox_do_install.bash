@@ -96,6 +96,12 @@ echo
 
 if [ "$mode" = "-install" ] && [ "$swamp_context" != "-singleserver" ]; then
 
+aws_dns=$(curl -s -m 1 http://169.254.169.254/latest/meta-data/public-hostname ||:)
+
+if [ -n "${aws_dns}" ]; then
+  export HOSTNAME="${aws_dns}"
+fi
+
 cat <<EOF
 We are currently using the following for this host's DNS name:
 
@@ -187,6 +193,11 @@ echo
 echo "### Stopping Services"
 echo
 
+#
+# NOTE: Do not tell the 'docker' service to stop, because we want to respect
+# the fact that the SWAMP might not "own" the installation.
+#
+
 tell_service                httpd        stop
 tell_service --skip-missing swamp        stop    # might not be installed
 tell_service --skip-missing swamp-condor stop    # might not be installed
@@ -244,27 +255,34 @@ echo
 /opt/swamp/bin/swamp_set_web_host       --hostname="$HOSTNAME"
 
 echo
+echo "### Installing Tools"
+echo
+
+tell_service mysql restart
+/opt/swamp/sbin/create_mysql_root_cnf /opt/swamp/sql/sql.cnf
+"$BINDIR"/swamp_install_tools.bash "$swamp_context" "$version"
+rm -f /opt/swamp/sql/sql.cnf
+tell_service mysql stop
+
+/opt/swamp/sbin/rebuild_tools_db "$swamp_context"
+
+echo
 echo "### Installing Platforms"
 echo
 "$BINDIR"/swamp_install_platforms.bash "$swamp_context" "$version"
-"$RUNTIME"/sbin/rebuild_platforms_db "$swamp_context"
-
-echo
-echo "### Installing Tools"
-echo
-"$BINDIR"/swamp_install_tools.bash "$swamp_context" "$version"
-"$RUNTIME"/sbin/rebuild_tools_db "$swamp_context"
-
-if [ -f /opt/swamp/thirdparty/codedx/vendor/codedx.war ]; then
-    echo
-    echo "### Installing Code Dx"
-    echo
-    "$RUNTIME"/bin/install_codedx
-fi
+/opt/swamp/sbin/rebuild_platforms_db
 
 echo
 echo "### Restarting Services"
 echo
+
+if [ -e /usr/lib/systemd/system/docker.service ]; then
+    #
+    # NOTE: We never told the 'docker' service to 'stop',
+    # so we need only to ensure that the service is running.
+    #
+    tell_service docker start
+fi
 
 tell_service libvirtd     restart
 tell_service mysql        restart

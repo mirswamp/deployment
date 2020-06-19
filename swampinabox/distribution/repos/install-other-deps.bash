@@ -28,6 +28,9 @@ common_packages=(
     libguestfs-tools
     libguestfs-tools-c
     libvirt
+    mariadb
+    mariadb-server
+    mariadb-libs
     mod_ssl
     ncompress
     patch
@@ -36,6 +39,7 @@ common_packages=(
     python34
     rubygems
     unzip
+    xz
     zip
 )
 

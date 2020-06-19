@@ -1,0 +1,6 @@
+## SWAMP-START
+## all swamp changes in this block
+/dev/vdb           /mnt/in                 auto    defaults        0 0
+/dev/vdc           /mnt/out                auto    defaults        0 0
+## SWAMP-END
+

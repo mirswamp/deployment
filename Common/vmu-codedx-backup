@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# This file is subject to the terms and conditions defined in
+# 'LICENSE.txt', which is part of this source code distribution.
+#
+# Copyright 2012-2019 Software Assurance Marketplace
+
+# Bootstrap the environment by testing location of run-params.sh
+# vm universe has /mnt/in
+source /mnt/in/run-params.sh
+
+stop() {
+	echo "VRUNSERVICESTOP" > $SWAMP_EVENT_FILE
+	echo "`date +"%Y/%m/%d %H:%M:%S"`: Stopping $0 with dump of viewer persistent data" >> $SWAMP_LOG_FILE 2>&1
+	/usr/local/libexec/codedx_viewerdb.sh
+	echo "VIEWERDOWN" > $SWAMP_EVENT_FILE
+}
+
+start() {
+	echo "VRUNSERVICESTART" > $SWAMP_EVENT_FILE
+}
+
+case "$1" in
+	start)
+		start
+	;;
+	stop)
+		stop
+	;;
+	*)
+		echo $"Usage: $0 {start|stop}"
+		exit 1
+	;;
+esac
+exit 0

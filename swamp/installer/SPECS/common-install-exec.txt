@@ -35,7 +35,6 @@ install -m 644 lib/SWAMP/FloodlightAccess.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/
 install -m 644 lib/SWAMP/ScarfXmlReader.pm  ${RPM_BUILD_ROOT}/opt/swamp/perl5/SWAMP/ScarfXmlReader.pm
 
 install -m 755 swamp_config ${RPM_BUILD_ROOT}/opt/swamp/bin
-install -m 755 arun.sh ${RPM_BUILD_ROOT}/opt/swamp/bin
 
 install -m 755 vmu_perl_launcher $RPM_BUILD_ROOT/opt/swamp/bin
 
@@ -54,14 +53,25 @@ install -m 400 swamp.conf $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 644 versions.txt $RPM_BUILD_ROOT/opt/swamp/etc
 install -m 644 dependencies.txt $RPM_BUILD_ROOT/opt/swamp/etc
 
-install -m 444 java-assess.tar* $RPM_BUILD_ROOT/opt/swamp/thirdparty
-install -m 444 c-assess.tar* $RPM_BUILD_ROOT/opt/swamp/thirdparty
-install -m 444 ruby-assess.tar* $RPM_BUILD_ROOT/opt/swamp/thirdparty
-install -m 444 script-assess.tar* $RPM_BUILD_ROOT/opt/swamp/thirdparty
-install -m 444 resultparser.tar $RPM_BUILD_ROOT/opt/swamp/thirdparty
+install -m 644 java-assess.tar* $RPM_BUILD_ROOT/opt/swamp/thirdparty
+install -m 644 c-assess.tar* $RPM_BUILD_ROOT/opt/swamp/thirdparty
+install -m 644 ruby-assess.tar* $RPM_BUILD_ROOT/opt/swamp/thirdparty
+install -m 644 script-assess.tar* $RPM_BUILD_ROOT/opt/swamp/thirdparty
+install -m 644 resultparser.tar $RPM_BUILD_ROOT/opt/swamp/thirdparty
 install -m 755 cloc $RPM_BUILD_ROOT/opt/swamp/thirdparty
 
-install -m 755 common/vrunchecktimeout $RPM_BUILD_ROOT/opt/swamp/thirdparty/common
+for path in $RPM_BUILD_ROOT/opt/swamp/thirdparty/*.tar; do tar -C $RPM_BUILD_ROOT/opt/swamp/thirdparty -xvf $path; rm $path; done
+for path in $RPM_BUILD_ROOT/opt/swamp/thirdparty/*.tar.gz; do tar -C $RPM_BUILD_ROOT/opt/swamp/thirdparty -zxvf $path; rm $path; done
+
+(cd $RPM_BUILD_ROOT/opt/swamp/thirdparty && ln -s java-assess-* java-assess)
+(cd $RPM_BUILD_ROOT/opt/swamp/thirdparty && ln -s c-assess-* c-assess)
+(cd $RPM_BUILD_ROOT/opt/swamp/thirdparty && ln -s ruby-assess-* ruby-assess)
+(cd $RPM_BUILD_ROOT/opt/swamp/thirdparty && ln -s script-assess-* script-assess)
+(cd $RPM_BUILD_ROOT/opt/swamp/thirdparty && ln -s resultparser-* resultparser)
+
+find $RPM_BUILD_ROOT/opt/swamp/thirdparty/*-assess-* $RPM_BUILD_ROOT/opt/swamp/thirdparty/resultparser-* -exec chmod u=rwX,og=rX {} \;
+
+install -m 755 common/checktimeout $RPM_BUILD_ROOT/opt/swamp/thirdparty/common
 install -m 755 common/checktimeout.pl $RPM_BUILD_ROOT/opt/swamp/thirdparty/common
 install -m 755 common/swamp-shutdown-service $RPM_BUILD_ROOT/opt/swamp/thirdparty/common
 install -m 444 common/flushprivs.sql $RPM_BUILD_ROOT/opt/swamp/thirdparty/common
@@ -73,7 +83,7 @@ install -m 444 codedx/codedx.props $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/s
 install -m 444 codedx/logback.xml $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/swamp
 install -m 444 codedx/emptydb-mysql-codedx.sql $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/swamp
 install -m 444 codedx/emptydb-codedx-*.sql $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/swamp
-install -m 755 codedx/vrun.sh $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/swamp
+install -m 755 codedx/vmu_vrun.sh $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/swamp
 install -m 755 codedx/codedx_viewerdb.sh $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/swamp
 install -m 444 codedx/resetdb-codedx.sql $RPM_BUILD_ROOT/opt/swamp/thirdparty/codedx/swamp
 

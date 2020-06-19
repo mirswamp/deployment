@@ -1,108 +1,381 @@
 #!/bin/bash
-
+#
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
 # Copyright 2012-2020 Software Assurance Marketplace
 
+set -eu
+
+usage_statement="Usage: $(basename -- "$0") [option]... [file]...
+
+Add assessment platforms to the SWAMP. Each file must be named as it is on
+the SWAMP-in-a-Box download site. Docker images can be added only if Docker
+is already installed.
+
+Options:
+  -s, --sync    Sync the SWAMP with previously installed platform files
+  -r, --remove  Remove out-of-date platforms from the SWAMP and file system
+  -h, --help    Display this message"
+
+############################################################################
+
+# Implementation notes:
 #
-# Install a VM disk image as a new platform for assessments.
-#
+# Each platform to be processed is passed between the functions below as
+# a "path", which should name either a file on the file system or a Docker
+# image (or "repository", as Docker sometimes calls them).
 
-encountered_error=0
-trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
-set -o errtrace
+unset CDPATH
+root_dir="$(builtin cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")"/.. && pwd)"
+source "${root_dir}/bin/swamp_utility.functions"
 
-##########################################################################
+opt_sync="no"
+opt_remove="no"
 
-platforms_image_store="/swamp/platforms/images"
-platforms_script_store="/opt/swamp/sql/platforms"
+docker_prefix="swamp/condor-"
+viewer_marker="-viewer-"
 
-BINDIR=$(dirname "$0")
-vm_image_src=$1
-vm_image_dest="$platforms_image_store/$(basename "$vm_image_src")"
-vm_image_dest="${vm_image_dest%%.gz}"
+sql_dir="${root_dir}/sql/platforms"
+vm_dir="/swamp/platforms/images"
 
-##########################################################################
+docker_list="${root_dir}/etc/platforms-assessments-docker.txt"
+vm_list="${root_dir}/etc/platforms-assessments.txt"
+cache_list="${root_dir}/etc/swamp_docker_images.txt"
 
-if [ -z "$vm_image_src" ]; then
-    echo "Usage: $0 <VM platform .qcow2 or .qcow2.gz file>" 1>&2
-    exit 1
-fi
-if [ ! -r "$vm_image_src" ]; then
-    echo "Error: File is not readable: $vm_image_src" 1>&2
-    exit 1
-fi
-if [[ ! ( "$vm_image_src" =~ \.qcow2$ ) && ! ( "$vm_image_src" =~ \.qcow2\.gz$ ) ]]; then
-    echo "Error: Not a '.qcow2' or 'qcow2.gz' file: $vm_image_src" 1>&2
-    exit 1
-fi
+reset_db="${root_dir}/sql/util/delete_platforms.sql"
+configure_db="${root_dir}/sql/util/configure_package_types_after_platform_install.sql"
 
-platform_install_sql=""
-for platform_sql in "$platforms_script_store"/*.sql ; do
-    platform=$(basename "$platform_sql" .sql)
-    platform=${platform/\.minorversion/}
 
-    if [[ $platform =~ (.*)(-32|-64) ]]; then
-        distribution=${BASH_REMATCH[1]}
-        bits=${BASH_REMATCH[2]}
+print_name()
+{
+  local path="$1"
 
-        if [[ $(basename "$vm_image_src") =~ ^"condor-$distribution".*"$bits-master".*".qcow2" ]]; then
-            platform_install_sql="$platform_sql"
-            break
+  # Platform names take the form:
+  #
+  #   [distribution]-[version]-[32|64]-master-[date stamp]
+  #
+  # Compared to the files that are made available for download, we need to
+  # strip off the leading 'condor-' and everything following the date stamp.
+
+  basename -- "${path}" \
+    | sed -E -e 's/^condor-//' -e 's/(-master-([0-9]+))(.*)$/\1/'
+}
+
+
+print_id()
+{
+  local path="$1"
+
+  # Platform identifiers take the form:
+  #
+  #   [distribution]-[version]-[32|64]
+  #
+  # Compared to the platforms' names, we need to strip off the date stamp
+  # and potentially abstract out the distribution's minor version.
+
+  print_name "${path}" \
+    | sed -E -e 's/^(centos|debian|scientific)-([0-9]+).([0-9]+)-/\1-\2.minorversion-/' -e 's/-master-.*$//'
+}
+
+
+print_qcow_path()
+{
+  local path="$1"
+  local answer
+
+  case "${path}" in
+    *.qcow2) answer="${vm_dir}/$(basename -- "${path}")" ;;
+    *.qcow2.gz) answer="${vm_dir}/$(basename -- "${path}" .gz)" ;;
+    *.qcow2.xz) answer="${vm_dir}/$(basename -- "${path}" .xz)" ;;
+  esac
+  printf '%s\n' "${answer}"
+}
+
+
+print_sql_path()
+{
+  local path="$1"
+  printf '%s\n' "${sql_dir}/$(print_id "${path}").sql"
+}
+
+
+is_vm()
+{
+  local path="$1"
+  [ -f "${path}" ] && [[ "${path}" =~ [.](qcow2|qcow2[.]gz|qcow2[.]xz)$ ]]
+}
+
+
+is_docker()
+{
+  local path="$1"
+
+  # A Docker image is either a file with a '.tar' extension or similar,
+  # or path that begins with the appropriate prefix. Note that we do not
+  # want to be tricked by files whose paths begin that prefix.
+
+  if [ -f "${path}" ]; then
+    [[ "${path}" =~ [.](tar|tar[.]gz|tar[.]xz)$ ]]
+  else
+    [[ "${path}" =~ ^${docker_prefix} ]]
+  fi
+}
+
+
+is_viewer()
+{
+  local path="$1"
+  print_name "${path}" | grep -q -- "${viewer_marker}"
+}
+
+
+is_not_usable()
+{
+  local path="$1"
+  ! is_readable_file "$(print_sql_path "${path}")"
+}
+
+
+is_out_of_date()
+{
+  local path="$1"
+  local platform_list
+
+  if is_docker "${path}"; then
+    platform_list="${docker_list}"
+  elif is_vm "${path}"; then
+    platform_list="${vm_list}"
+  fi
+  ! grep -q -- "$(print_name "${path}")" "${platform_list}"
+}
+
+
+############################################################################
+
+
+install_image()
+{
+  local path="$1"
+
+  if is_docker "${path}"; then
+    if ! is_docker_available; then
+      error "'${path}' is a Docker image, but Docker is not installed"
+      exit 1
+    fi
+
+    info "Loading Docker image: ${path}"
+    docker image load -i "${path}"
+
+  elif is_vm "${path}"; then
+    local vm_image_dest
+    vm_image_dest="$(print_qcow_path "${path}")"
+
+    case "${path}" in
+      *.qcow2)
+        info "Copying VM image: ${path}"
+        if [ ! "${path}" -ef "${vm_image_dest}" ]; then
+          cp -- "${path}" "${vm_image_dest}"
         fi
+        ;;
+      *.qcow2.gz)
+        info "Decompressing VM image: ${path}"
+        gzip -c -d -- "${path}" >"${vm_image_dest}"
+        ;;
+      *.qcow2.xz)
+        info "Decompressing VM image: ${path}"
+        xz -c -d -- "${path}" >"${vm_image_dest}"
+        ;;
+    esac
+
+    chown root:root -- "${vm_image_dest}"
+    chmod 644       -- "${vm_image_dest}"
+  fi
+}
+
+
+install_images()
+{
+  local path
+  for path in "$@"; do
+    if ! is_readable_file "${path}"; then
+      error "Not a readable file: ${path}"
+      exit 1
+
+    elif is_not_usable "${path}"; then
+      error "Not a supported platform image: ${path}"
+      exit 1
+
+    elif is_out_of_date "${path}"; then
+      if [ "${opt_remove}" = "yes" ]; then
+        warn "Platform image is out of date, skipping: ${path}"
+        continue
+      else
+        warn "Platform image is out of date, installing anyway: ${path}"
+      fi
     fi
-done
 
-if [ -z "$platform_install_sql" ]; then
-    echo "Error: Not a recognized installable platform: $vm_image_src" 1>&2
-    exit 1
-fi
-if [ "$(whoami)" != "root" ]; then
-    echo "Error: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
-    exit 1
-fi
+    install_image "${path}"
+    install_db_record "${path}"
+  done
+}
 
-source "$BINDIR/../sbin/db_support.functions"
-trap 'stty echo ; reset_db_support' EXIT
-trap 'stty echo ; reset_db_support ; exit 1' INT TERM
 
-##########################################################################
+remove_image()
+{
+  local path="$1"
 
-#
-# Prompt early for the database root password, so that the user can
-# wander off while the .qcow2 file is installed on the file system.
-#
-setup_db_support
+  if [ "${opt_remove}" != "yes" ]; then
+    return
 
-#
-# Install the .qcow2 file.
-#
-if [ "$vm_image_src" != "$vm_image_dest" ]; then
-    if [[ "$vm_image_src" =~ .qcow2$ ]]; then
-        echo "Copying '$(basename "$vm_image_src")' to '$(dirname "$vm_image_dest")'"
-        cp "$vm_image_src" "$vm_image_dest"
-    elif [[ "$vm_image_src" =~ .gz$ ]]; then
-        echo "Unzipping '$(basename "$vm_image_src")' into '$(dirname "$vm_image_dest")'"
-        gunzip -c "$vm_image_src" > "$vm_image_dest"
+  elif is_docker "${path}"; then
+    warn "Removing Docker platform image: ${path}"
+    docker image rm -- "${path}"
+
+  elif is_vm "${path}"; then
+    warn "Removing VM platform image: ${path}"
+    rm -f -- "${path}"
+  fi
+}
+
+
+sync_image()
+{
+  local path="$1"
+  local descriptor
+
+  if is_docker "${path}"; then
+    descriptor="Docker platform image"
+  elif is_vm "${path}"; then
+    descriptor="VM platform image"
+  fi
+
+  if [ "${opt_sync}" != "yes" ]; then
+    return
+
+  elif is_viewer "${path}"; then
+    return
+
+  elif is_not_usable "${path}"; then
+    warn "${descriptor} is no longer supported: ${path}"
+    remove_image "${path}"
+
+  elif is_out_of_date "${path}"; then
+    warn "${descriptor} is out of date: ${path}"
+
+    if [ "${opt_remove}" = "yes" ]; then
+      remove_image "${path}"
+    else
+      install_db_record "${path}"
     fi
-fi
-chown root:root "$vm_image_dest"
-chmod 644       "$vm_image_dest"
 
-#
-# Update the database.
-#
-echo "Updating database records"
-do_mysql_command "$platform_install_sql"
+  else
+    install_db_record "${path}"
+  fi
+}
 
-##########################################################################
 
-reset_db_support
+sync_images()
+{
+  local path
 
-if [ $encountered_error -eq 0 ]; then
-    echo "Finished installing platform"
-else
-    echo "Error: Finished installing platform, but with errors"
-fi
-exit $encountered_error
+  if [ "${opt_sync}" != "yes" ]; then
+    return
+  fi
+
+  info "Resetting database"
+  run_sql_script "${reset_db}"
+
+  for path in "${vm_dir}"/*.qcow2; do
+    if is_readable_file "${path}"; then
+      sync_image "${path}"
+    fi
+  done
+
+  if is_docker_available; then
+    docker image ls --format '{{.Repository}}' \
+      | grep "^${docker_prefix}" \
+      | sort \
+      | while IFS="" read -r path
+    do
+      sync_image "${path}"
+    done
+  fi
+}
+
+
+install_db_record()
+{
+  local path="$1"
+
+  info "Adding to database: $(print_id "${path}")"
+  run_sql_script "$(print_sql_path "${path}")"
+}
+
+
+update_dependents()
+{
+  debug "Updating metadata"
+  run_sql_script "${configure_db}"
+
+  if is_docker_available; then
+    debug "Updating cached list of Docker images"
+    docker images >"${cache_list}"
+  fi
+}
+
+
+main()
+{
+  if [ $# -lt 1 ]; then
+    printf '%s\n' "${usage_statement}"
+    exit 1
+  fi
+
+  local arg
+  for arg in "$@"; do
+    shift
+    case "${arg}" in
+      -s|--sync)
+        opt_sync=yes
+        ;;
+      -r|--remove)
+        opt_remove=yes
+        ;;
+      -h|-help|--help)
+        printf '%s\n' "${usage_statement}"
+        exit 0
+        ;;
+      *)
+        set -- "$@" "${arg}"
+        ;;
+    esac
+  done
+
+  if [ $# -lt 1 ] && [ "${opt_sync}" != "yes" ]; then
+    error "Specify a platform file to install or the '-s' option"
+    exit 1
+  fi
+
+  if [ "${opt_remove}" = "yes" ] && [ "${opt_sync}" != "yes" ]; then
+    error "The '-r' option also requires the '-s' option"
+    exit 1
+  fi
+
+  trap 'unprep_db_service ; unprep_docker_service' EXIT
+  trap 'unprep_db_service ; unprep_docker_service ; exit 1' INT TERM
+
+  exit_if_not_root
+  prep_db_service
+  prep_docker_service
+
+  install_images "$@"
+  sync_images
+  update_dependents
+
+  unprep_docker_service
+  unprep_db_service
+}
+
+
+main "$@"

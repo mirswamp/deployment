@@ -74,6 +74,11 @@ system after the initial SWAMP-in-a-Box install.
 
 Directory containing MariaDB's storage files for the SWAMP's SQL databases.
 
+`/var/lib/docker`::
+
+Directory containing Docker’s storage files for the containers used to perform assessments.
+
+
 
 [[log-files]]
 Log Files

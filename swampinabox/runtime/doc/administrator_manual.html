@@ -441,8 +441,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="header">
 <h1>SWAMP-in-a-Box Administrator Manual</h1>
 <div class="details">
-<span id="revnumber">version 1.34,</span>
-<span id="revdate">2020-05-04 09:58:55 -0500</span>
+<span id="revnumber">version 1.35,</span>
+<span id="revdate">2020-06-19 12:51:15 -0500</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -474,16 +474,16 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_extract_the_installer">3.4. Extract the Installer</a></li>
 <li><a href="#_installupgrade_dependencies">3.5. Install/Upgrade Dependencies</a></li>
 <li><a href="#_run_the_main_installupgrade_script">3.6. Run the Main Install/Upgrade Script</a></li>
-<li><a href="#_verify_that_the_installupgrade_was_successful">3.7. Verify that the Install/Upgrade Was Successful</a></li>
-<li><a href="#_check_for_updates">3.8. Check for Updates</a></li>
+<li><a href="#_add_at_least_one_platform">3.7. Add at least one Platform</a></li>
+<li><a href="#_verify_that_the_installupgrade_was_successful">3.8. Verify that the Install/Upgrade Was Successful</a></li>
+<li><a href="#_check_for_updates">3.9. Check for Updates</a></li>
 </ul>
 </li>
 <li><a href="#_installing_additional_components">4. Installing Additional Components</a>
 <ul class="sectlevel2">
-<li><a href="#add-on-platforms">4.1. Installing Additional Platforms</a></li>
-<li><a href="#_enabling_android_assessments">4.2. Enabling Android Assessments</a></li>
-<li><a href="#_installing_additional_tools">4.3. Installing Additional Tools</a></li>
-<li><a href="#add-on-viewers">4.4. Installing Additional Viewers</a></li>
+<li><a href="#add-on-platforms">4.1. Installing Assessment Platforms</a></li>
+<li><a href="#_installing_additional_tools">4.2. Installing Additional Tools</a></li>
+<li><a href="#add-on-viewers">4.3. Installing Additional Viewers</a></li>
 </ul>
 </li>
 <li><a href="#_configuring_swamp_in_a_box">5. Configuring SWAMP-in-a-Box</a>
@@ -494,6 +494,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_configuring_ldap_for_user_authentication_and_attributes">5.4. Configuring LDAP for User Authentication and Attributes</a></li>
 <li><a href="#_configuring_third_party_sign_in_via_oauth2_providers">5.5. Configuring Third-party Sign-in via OAuth2 Providers</a></li>
 <li><a href="#_configuring_a_welcome_message_for_swamp_in_a_box">5.6. Configuring a Welcome Message for SWAMP-in-a-Box</a></li>
+<li><a href="#configure-http">5.7. Configuring HTTP Access to SWAMP-in-a-Box</a></li>
 </ul>
 </li>
 <li><a href="#_maintaining_swamp_in_a_box">6. Maintaining SWAMP-in-a-Box</a>
@@ -513,30 +514,38 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#checking-sib-health">7.1. Checking the Host&#8217;s Health</a></li>
 <li><a href="#collecting-log-files">7.2. Collecting Log Files</a></li>
 <li><a href="#_debugging_failed_assessments">7.3. Debugging Failed Assessments</a></li>
-<li><a href="#_debugging_stuck_assessments">7.4. Debugging Stuck Assessments</a></li>
-<li><a href="#_using_java_cli_and_related_plugins_with_swamp_in_a_box">7.5. Using Java CLI and Related Plugins with SWAMP-in-a-Box</a></li>
+<li><a href="#_debugging_assessment_warnings">7.4. Debugging Assessment Warnings</a></li>
+<li><a href="#_debugging_stuck_assessments">7.5. Debugging Stuck Assessments</a></li>
+<li><a href="#_using_java_cli_and_related_plugins_with_swamp_in_a_box">7.6. Using Java CLI and Related Plugins with SWAMP-in-a-Box</a></li>
 </ul>
 </li>
 <li><a href="#support-and-contact-info">8. Support and Contact Information</a></li>
 <li><a href="#installing-dependencies">Appendix A: Installing Dependencies</a>
 <ul class="sectlevel2">
-<li><a href="#dependencies-mariadb">A.1. MariaDB 5.5</a></li>
+<li><a href="#dependencies-docker">A.1. Docker</a></li>
 <li><a href="#dependencies-php">A.2. PHP 7.2</a></li>
 <li><a href="#dependencies-other">A.3. Other Assorted Utilities</a></li>
 <li><a href="#troubleshooting-installing-dependencies">A.4. Troubleshooting Issues with Installing Dependencies</a></li>
 </ul>
 </li>
-<li><a href="#obtaining-add-ons">Appendix B: Obtaining Additional Tools and Viewers</a>
+<li><a href="#appendix-amazon-ec2">Appendix B: Installing on an Amazon Elastic Compute Cloud Instance</a>
 <ul class="sectlevel2">
-<li><a href="#about-code-dx">B.1. Code Dx</a></li>
-<li><a href="#about-codesonar">B.2. CodeSonar</a></li>
-<li><a href="#about-parasoft">B.3. Parasoft C/C++test and Parasoft Jtest</a></li>
+<li><a href="#_documentation_for_amazon_ec2">B.1. Documentation for Amazon EC2</a></li>
+<li><a href="#configure-ec2-instance">B.2. Configuring an EC2 Instance that Supports SWAMP-in-a-Box</a></li>
+<li><a href="#_known_issues">B.3. Known Issues</a></li>
 </ul>
 </li>
-<li><a href="#_license_and_notices">Appendix C: License and Notices</a>
+<li><a href="#obtaining-add-ons">Appendix C: Obtaining Additional Tools and Viewers</a>
 <ul class="sectlevel2">
-<li><a href="#_apache_license_version_2_0">C.1. Apache License, Version 2.0</a></li>
-<li><a href="#_notices">C.2. Notices</a></li>
+<li><a href="#about-code-dx">C.1. Code Dx</a></li>
+<li><a href="#about-codesonar">C.2. CodeSonar</a></li>
+<li><a href="#about-parasoft">C.3. Parasoft C/C++test and Parasoft Jtest</a></li>
+</ul>
+</li>
+<li><a href="#_license_and_notices">Appendix D: License and Notices</a>
+<ul class="sectlevel2">
+<li><a href="#_apache_license_version_2_0">D.1. Apache License, Version 2.0</a></li>
+<li><a href="#_notices">D.2. Notices</a></li>
 </ul>
 </li>
 </ul>
@@ -549,18 +558,18 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect2">
 <h3 id="_what_is_swamp">1.1. What Is SWAMP</h3>
 <div class="paragraph">
-<p>The Software Assurance Marketplace (SWAMP) is a platform for running
-software assurance tools on your code. It is a joint effort of four research
-institutions&#8201;&#8212;&#8201;the Morgridge Institute for Research, Indiana University,
-the University of Illinois at Urbana-Champaign, and the University of
-Wisconsin-Madison&#8201;&#8212;&#8201;to advance the capabilities and increase the adoption
-of software assurance technologies through an open continuous assurance
-facility. The SWAMP originally went live in February 2014 as a web
-application at <a href="https://www.mir-swamp.org" class="bare">https://www.mir-swamp.org</a>, where it provides continuous
+<p>The Software Assurance Marketplace (SWAMP) is a continuous software
+assurance platform for running software assurance tools on your code. It was
+a joint effort of four research institutions&#8201;&#8212;&#8201;the Morgridge Institute for
+Research, Indiana University, the University of Illinois at
+Urbana-Champaign, and the University of Wisconsin-Madison&#8201;&#8212;&#8201;to advance the
+capabilities and increase the adoption of software assurance technologies
+through an open continuous assurance facility. The SWAMP originally went
+live in February 2014 as a web application, where it provided continuous
 software assurance capabilities to developers and researchers.</p>
 </div>
 <div class="paragraph">
-<p>The SWAMP project is funded by the Department of Homeland Security (DHS)
+<p>The SWAMP project was funded by the Department of Homeland Security (DHS)
 Science and Technology Directorate, Homeland Security Advanced Research
 Projects Agency, Cyber Security Division (DHS S&amp;T/HSARPA/CSD); BAA 11-02;
 and the Air Force Research Laboratory, Information Directorate under
@@ -571,9 +580,10 @@ agreement number FA8750-12-2-0289.</p>
 <h3 id="_what_is_swamp_in_a_box">1.2. What Is SWAMP-in-a-Box</h3>
 <div class="paragraph">
 <p>For users that need or prefer to run software assurance tools on their own
-computing infrastructure, the SWAMP project offers a standalone software
-application called SWAMP-in-a-Box (SiB). It is, in essence, a local instance
-of the SWAMP that can be deployed on your own servers if you have higher
+computing infrastructure, SWAMP-in-a-Box (SiB) is a standalone software
+application for continuous software assurance. It is, in essence, a local
+instance of a continuous assurance platform, originally created by the SWAMP
+project, that can be deployed on your own servers if you have higher
 security or compliance requirements for your software, or, being
 open-source, when you want to customize the software.</p>
 </div>
@@ -590,9 +600,11 @@ SWAMP-in-a-Box as a pre-packaged installer or as source code.</p>
 <h3 id="_documentation_for_swamp_in_a_box">1.4. Documentation for SWAMP-in-a-Box</h3>
 <div class="paragraph">
 <p>Copies of this SWAMP-in-a-Box Administrator Manual and the SWAMP-in-a-Box
-Reference Manual can be found in <code>/opt/swamp/doc</code> on the SWAMP-in-a-Box host
-after SWAMP-in-a-Box has been installed. Each manual is available as
-a single page HTML document and as a PDF.</p>
+Reference Manual can be found at
+<a href="https://platform.swampinabox.org/siab-latest-release/" class="bare">https://platform.swampinabox.org/siab-latest-release/</a>. They are additionally
+available in <code>/opt/swamp/doc</code> on the SWAMP-in-a-Box host after
+SWAMP-in-a-Box has been installed. Each manual is available as a single page
+HTML document and as a PDF.</p>
 </div>
 <div class="paragraph">
 <p>Documentation for users of the SWAMP is available on the Help page of the
@@ -609,10 +621,89 @@ SWAMP web application after SWAMP-in-a-Box has been installed.</p>
 not providing other services&#8201;&#8212;&#8201;including Apache HTTP Server, MySQL/MariaDB,
 and HTCondor.</p>
 </div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you are installing SWAMP-in-a-Box on an Amazon Elastic Compute Cloud
+(Amazon EC2) instance, consult the appendix on <a href="#appendix-amazon-ec2">Installing on an Amazon Elastic Compute Cloud Instance</a> for
+special considerations and examples.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
 <div class="sect2">
 <h3 id="hardware-requirements">2.1. Hardware Requirements</h3>
+<div class="paragraph">
+<p>The hardware requirements for SWAMP-in-a-Box are driven primarily by the
+following considerations.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Whether you wish to run assessments using virtual machines (VMs) or
+Docker containers.</p>
+<div class="paragraph">
+<p>The main advantage of virtual machines is that they provide stronger
+isolation guarantees compared to Docker containers. The SWAMP runs Docker
+containers as <code>root</code> via a custom build of
+<a href="https://research.cs.wisc.edu/htcondor/">HTCondor</a>. Thus, packages containing
+malicious code (the SWAMP builds packages according to the arbitrary
+instructions that they provide) might be able to take advantages of any
+vulnerabilities and weaknesses in Docker in order to directly compromise the
+SWAMP-in-a-Box host. The same package being assessed inside a virtual
+machine would have direct access to only that one virtual host, whose
+lifetime is only for that specific assessment.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>To emphasize, the SWAMP runs Docker containers as <code>root</code>, which has security
+implications for the SWAMP-in-a-Box host.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The main advantage of Docker containers is that they do not require special
+hardware features to run and can thus run on more kinds of hosts, including
+virtual machines and Amazon Elastic Compute Cloud (Amazon EC2) instances.
+They also run assessments slightly more quickly, due to shorter start up
+times.</p>
+</div>
+</li>
+<li>
+<p>Whether you wish to use the <a href="#add-on-viewers">optional Code Dx results
+viewer</a>. Currently, this requires the host to support virtual machines
+(VMs).</p>
+</li>
+<li>
+<p>The number of simultaneous assessments and instances of the
+<a href="#add-on-viewers">optional Code Dx results viewer</a> you wish to be able to
+run at any given time. Each assessment and viewer instance requires
+2 cores and 6G of memory.</p>
+</li>
+<li>
+<p>The number of assessment platforms that need to be installed to support
+the package types you wish to assess. See the section on
+<a href="#add-on-platforms">installing platforms</a> for details about the disk
+space required.</p>
+</li>
+</ol>
+</div>
 <div class="ulist">
-<div class="title">Minimum:</div>
+<div class="title">Minimum hardware requirements:</div>
 <ul>
 <li>
 <p>Cores:  4</p>
@@ -621,15 +712,12 @@ and HTCondor.</p>
 <p>Memory: 16G</p>
 </li>
 <li>
-<p>Disk:   256G</p>
-</li>
-<li>
-<p>Support for <a href="https://www.linux-kvm.org/page/Main_Page">KVM</a> virtualization</p>
+<p>Disk:   64G</p>
 </li>
 </ul>
 </div>
 <div class="ulist">
-<div class="title">Recommended:</div>
+<div class="title">Recommended hardware:</div>
 <ul>
 <li>
 <p>Cores:  8</p>
@@ -640,69 +728,36 @@ and HTCondor.</p>
 <li>
 <p>Disk:   1T</p>
 </li>
-<li>
-<p>Support for <a href="https://www.linux-kvm.org/page/Main_Page">KVM</a> virtualization</p>
-</li>
 </ul>
 </div>
 <div class="paragraph">
-<p>The hardware requirements for SWAMP-in-a-Box are driven primarily by the
-number of simultaneous assessments and instances of the
-<a href="#add-on-viewers">optional Code Dx results viewer</a> you wish to be able to
-run at any given time. Each assessment and viewer instance is run in
-a virtual machine that requires:</p>
+<div class="title">Required support for virtual machines:</div>
+<p>In order to run virtual machines, the SWAMP-in-a-Box host must support
+<a href="https://www.linux-kvm.org/page/Main_Page">KVM</a> virtualization:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>2 cores</p>
+<p>Modern x86-family processors provide support for KVM virtualization via
+Intel&#8217;s VT-x or AMD&#8217;s AMD-V extensions. On some systems, it might be
+necessary to enable Intel Virtual Technology extensions in the BIOS.</p>
 </li>
 <li>
-<p>6G of memory.</p>
+<p>If you are installing SWAMP-in-a-Box in a virtual machine, it might be
+possible to configure the hypervisor to support nested virtualization. For
+example, when using a VMware product as the hypervisor, enable settings
+such as "Expose hardware-assisted virtualization to the guest operating
+system" and "Virtualize Intel VT-x/EPT or AMD-V/RVI."</p>
 </li>
 </ul>
-</div>
-<div class="paragraph">
-<p>The minimum requirements allow the host to run two virtual machines
-simultaneously while leaving resources available to run the web server and
-database that together provide the SWAMP web application to users.</p>
-</div>
-<div class="paragraph">
-<p>Because SWAMP-in-a-Box uses virtual machines to run assessments, the host
-must support <a href="https://www.linux-kvm.org/page/Main_Page">KVM</a> virtualization.
-Modern x86-family processors provide support for KVM via Intel&#8217;s VT-x or
-AMD&#8217;s AMD-V extensions. On some systems, it might be necessary to enable
-Intel Virtual Technology extensions in the BIOS.</p>
-</div>
-<div class="paragraph">
-<p>If you are installing SWAMP-in-a-Box in a virtual machine, the hypervisor
-must support and be configured for nested virtualization. For example, when
-using a VMware product as the hypervisor, enable settings such as "Expose
-hardware-assisted virtualization to the guest operating system" and
-"Virtualize Intel VT-x/EPT or AMD-V/RVI."</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_supported_operating_systems">2.2. Supported Operating Systems</h3>
 <div class="paragraph">
-<p>CentOS 6 and 7 are both supported. Other similar Linux distributions, such
-as Red Hat Enterprise Linux, might work but are untested.</p>
-</div>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-important" title="Important"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>Support for SWAMP-in-a-Box on CentOS 6 will end with the 1.34.x
-releases. SWAMP-in-a-Box 1.35 and later will not support installation of
-SWAMP-in-a-Box on CentOS 6.</p>
-</div>
-</td>
-</tr>
-</table>
+<p>CentOS 7 is the only supported operating system. Other similar Linux
+distributions, such as Red Hat Enterprise Linux, might work but are
+untested.</p>
 </div>
 </div>
 <div class="sect2">
@@ -861,27 +916,7 @@ permanent.</p>
 </table>
 </div>
 <div class="exampleblock">
-<div class="title">Example 1. Allowing Incoming HTTPS and SSH Traffic with <code>iptables</code></div>
-<div class="content">
-<div class="paragraph">
-<p>For systems that use <code>iptables</code>, such as CentOS 6 by default, a sample
-configuration file can be found in the <code>config_templates</code> sub-directory of
-the SWAMP-in-a-Box installer (referred to below as <code>&lt;installer-dir&gt;</code>). Copy
-the <code>iptables</code> file from that directory to <code>/etc/sysconfig</code>. Then restart
-the <code>iptables</code> and <code>libvirtd</code> services. For example, as <code>root</code> (or using
-<code>sudo</code>), run the following commands:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>cp &lt;installer-dir&gt;/config_templates/iptables /etc/sysconfig
-service iptables restart
-service libvirtd restart</pre>
-</div>
-</div>
-</div>
-</div>
-<div class="exampleblock">
-<div class="title">Example 2. Allowing Incoming HTTPS and SSH Traffic with <code>firewalld</code></div>
+<div class="title">Example 1. Allowing Incoming HTTPS and SSH Traffic with <code>firewalld</code></div>
 <div class="content">
 <div class="paragraph">
 <p>For systems that use <code>firewalld</code>, such as CentOS 7 by default, use
@@ -1196,7 +1231,22 @@ files, which can be found in the directory from which you run the upgrade:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_verify_that_the_installupgrade_was_successful">3.7. Verify that the Install/Upgrade Was Successful</h3>
+<h3 id="_add_at_least_one_platform">3.7. Add at least one Platform</h3>
+<div class="paragraph">
+<p>A new installation of SWAMP-in-a-Box does not initially include any
+assessment platforms. A SWAMP-in-a-Box installation upgraded from a
+previous version will retain any supported platform versions, but the
+upgrade process will delete any unsupported platform versions. Therefore
+it is also possible that an upgraded SWAMP-in-a-Box will have no Platforms
+available for assessments.</p>
+</div>
+<div class="paragraph">
+<p>Please refer to <a href="#add-on-platforms">Installing Assessment Platforms</a> for the
+procedure to add one or more platforms.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_verify_that_the_installupgrade_was_successful">3.8. Verify that the Install/Upgrade Was Successful</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -1215,7 +1265,7 @@ directory provides basic information about the samples.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_check_for_updates">3.8. Check for Updates</h3>
+<h3 id="_check_for_updates">3.9. Check for Updates</h3>
 <div class="paragraph">
 <p>After upgrading an existing SWAMP-in-a-Box, refer to the section on
 <a href="#checking-for-updates">checking for updates</a> to determine whether there are
@@ -1230,13 +1280,60 @@ a newer version might be available.</p>
 <h2 id="_installing_additional_components">4. Installing Additional Components</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="add-on-platforms">4.1. Installing Additional Platforms</h3>
+<h3 id="add-on-platforms">4.1. Installing Assessment Platforms</h3>
 <div class="paragraph">
-<p>The SWAMP-in-a-Box installer includes and installs only the Ubuntu 16.04
-platform for performing assessments. For most package types, this is the
-only supported platform. For C/C++ packages, additional platforms are
-available, including releases of CentOS, Debian, Fedora, Scientific Linux,
-and older releases of Ubuntu.</p>
+<p>In order to upload a package to your SWAMP and assess it, the SWAMP must
+have a compatible assessment platform installed. For each package type that
+the SWAMP supports, one or more platforms are available to be downloaded and
+installed as part of your SWAMP-in-a-Box:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Java, Python, Ruby, Web Scripting, and .NET: Ubuntu 16.04.</p>
+</li>
+<li>
+<p>C/C++: Recent releases of CentOS, Debian, Fedora, Scientific Linux,
+and Ubuntu.</p>
+</li>
+<li>
+<p>Android Java source: A version of the Ubuntu
+platform that includes the necessary dependencies for building packages.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Most of the platforms will consume no more than approximately 20 GB of disk
+space each when installed. The exceptions are the Android Ubuntu platforms.
+The Docker-based Android Ubuntu platform will consume approximately 310 GB
+of disk space; the virtual machine-based version will consume approximately
+150 GB of disk space.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If you add both the Docker and Virtual Machine platforms corresponding to
+the same platform version, SWAMP-in-a-Box will use the Virtual Machine
+platform for assessments. If you wish to configure SWAMP-in-a-Box to instead
+give preference to Docker platforms, edit <code>/opt/swamp/etc/swamp.conf</code> (you
+will need <code>root</code> access or <code>sudo</code> to edit this file) and change the value
+for <code>preferred_platform_type</code> from <code>VM</code> to <code>DC</code>.
+</td>
+</tr>
+</table>
 </div>
 <div class="sect3">
 <h4 id="_before_you_begin_2">4.1.1. Before You Begin</h4>
@@ -1247,6 +1344,10 @@ and older releases of Ubuntu.</p>
 </li>
 <li>
 <p>You will need <code>root</code> access to the SWAMP-in-a-Box database.</p>
+</li>
+<li>
+<p>You will need to know whether the SWAMP-in-a-Box will run assessments
+using Docker or virtual machines (VMs).</p>
 </li>
 </ul>
 </div>
@@ -1259,12 +1360,20 @@ and older releases of Ubuntu.</p>
 <p>Visit <a href="https://platform.swampinabox.org/platform-images/" class="bare">https://platform.swampinabox.org/platform-images/</a>.</p>
 </li>
 <li>
-<p>Download and copy to the SWAMP-in-a-Box host the <code>.qcow2.gz</code> files
-corresponding to the additional platforms you wish to perform assessments
-on. The naming scheme for these files is as follows:</p>
+<p>Download and copy to the SWAMP-in-a-Box host the files corresponding to
+the platforms you wish to perform assessments on. Docker-based platforms
+are named as follows:</p>
 <div class="listingblock">
 <div class="content">
-<pre>condor-&lt;Linux distribution&gt;-&lt;version&gt;-&lt;32 or 64 bit&gt;-master-&lt;YYYYMMDD&gt;.qcow2.gz</pre>
+<pre>condor-[Linux distribution]-[version]-[64 bit]-master-[date]_docker.tar.xz</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Virtual machine-based platforms are named as follows:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>condor-[Linux distribution]-[version]-[32 or 64 bit]-master-[date].qcow2.gz</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1275,88 +1384,31 @@ step.</p>
 </div>
 </li>
 <li>
-<p>On the SWAMP-in-a-Box host, for each file, as <code>root</code> (or using <code>sudo</code>),
-run the <code>install_platform</code> script, providing the path to the <code>.qcow2.gz</code>
-file:</p>
+<p>On the SWAMP-in-a-Box host, as <code>root</code> (or using <code>sudo</code>),
+run the <code>install_platform</code> script, providing the paths to the platform files:</p>
 <div class="listingblock">
 <div class="content">
-<pre>/opt/swamp/bin/install_platform &lt;path to .qcow2.gz file&gt;</pre>
+<pre>/opt/swamp/bin/install_platform &lt;platform 1&gt; &lt;platform 2&gt;...</pre>
 </div>
 </div>
 <div class="paragraph">
 <p>When prompted, provide the password for the database&#8217;s <code>root</code> user, which is
 needed to add the platform to the database and make it available in the
 SWAMP. Note that <code>install_platform</code> will likely take several minutes to
-complete due to the size of the file.</p>
+complete due to the sizes of the files (possibly several hours, in the case of
+the Android Ubuntu platform).</p>
 </div>
+</li>
+<li>
+<p>(Optional) In order to conserve disk space, delete the platform files
+that you downloaded and copied to the SWAMP-in-a-Box host.</p>
 </li>
 </ol>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_enabling_android_assessments">4.2. Enabling Android Assessments</h3>
-<div class="paragraph">
-<p>You can enable SWAMP-in-a-Box to assess Android Java Source and Android .APK
-packages.</p>
-</div>
-<div class="sect3">
-<h4 id="_before_you_begin_3">4.2.1. Before You Begin</h4>
-<div class="ulist">
-<ul>
-<li>
-<p>You will need <code>root</code> access to the SWAMP-in-a-Box host.</p>
-</li>
-<li>
-<p>You will need <code>root</code> access to the SWAMP-in-a-Box database.</p>
-</li>
-<li>
-<p>You will need to make sure you have enough available hard drive space on
-your SWAMP-in-a-Box host to download and decompress the Android Ubuntu
-platform image.</p>
-</li>
-</ul>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-The Android Ubuntu platform includes the OS dependencies needed to build and
-assess Android Packages. As such it is quite large. The downloadable .qcow2.gz
-file needed to add the platform is over 76 GB. The decompressed, installed
-.qcow2 file takes up about 150 GB in the /swamp/platforms/images directory.
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_procedure_2">4.2.2. Procedure</h4>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Download and install the Android Ubuntu 12.04 64-bit platform following
-the procedure for <a href="#add-on-platforms">Installing Additional Platforms</a>.</p>
-</li>
-<li>
-<p>Optionally delete the Android Ubuntu platform .qcow2.gz file if you wish to
-conserve disk space.</p>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>When the Android Ubuntu platform is added, the Android Java Source and
-Android .APK package types are enabled. Android-specific tools are installed
-with SWAMP-in-a-Box, but they cannot be used for assessments until the
-Android Ubuntu platform is added.</p>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_installing_additional_tools">4.3. Installing Additional Tools</h3>
+<h3 id="_installing_additional_tools">4.2. Installing Additional Tools</h3>
 <div class="paragraph">
 <p>The SWAMP-in-a-Box installer includes and installs a variety of tools for
 assessing packages.</p>
@@ -1375,13 +1427,10 @@ assessing packages.</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>For Java packages, two additional tools can be installed:</p>
+<p>For Java packages, one additional tool can be installed:</p>
 </div>
 <div class="ulist">
 <ul>
-<li>
-<p><a href="https://www.owasp.org/index.php/OWASP_Dependency_Check">OWASP Dependency Check</a> and</p>
-</li>
 <li>
 <p><a href="#about-parasoft">Parasoft Jtest</a>.</p>
 </li>
@@ -1395,7 +1444,7 @@ assessing packages.</p>
 <li>
 <p>A version of <a href="https://retirejs.github.io/">Retire.js</a> that does not
 require internet access (the version included with SWAMP-in-a-Box will
-not function correctly without internet access)</p>
+not function correctly without internet access).</p>
 </li>
 </ul>
 </div>
@@ -1407,7 +1456,7 @@ for installing and configuring the tools for use in the SWAMP is largely
 similar.</p>
 </div>
 <div class="sect3">
-<h4 id="_before_you_begin_4">4.3.1. Before You Begin</h4>
+<h4 id="_before_you_begin_3">4.2.1. Before You Begin</h4>
 <div class="ulist">
 <ul>
 <li>
@@ -1420,7 +1469,7 @@ similar.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_obtain_the_tool_installerarchive_from_its_vendor">4.3.2. Obtain the Tool Installer/Archive from Its Vendor</h4>
+<h4 id="_obtain_the_tool_installerarchive_from_its_vendor">4.2.2. Obtain the Tool Installer/Archive from Its Vendor</h4>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">CodeSonar</dt>
@@ -1465,14 +1514,6 @@ parasoft_jtest_&lt;version&gt;_linux_x86_64.tar.gz  (64-bit)</pre>
 </div>
 </div>
 </dd>
-<dt class="hdlist1">OWASP Dependency Check</dt>
-<dd>
-<p>Visit <a href="https://platform.swampinabox.org/tool-archives/" class="bare">https://platform.swampinabox.org/tool-archives/</a> and download the
-<code>dependency-check-&lt;version&gt;.tar.gz</code> file corresponding to the version of
-OWASP Dependency Check that you would like to install. The archive from
-<a href="https://platform.swampinabox.org/tool-archives/">platform.swampinabox.org</a>
-includes scripts and documentation for integrating the tool into the SWAMP.</p>
-</dd>
 <dt class="hdlist1">Retire.js</dt>
 <dd>
 <p>On the SWAMP-in-a-Box host, copy the
@@ -1485,7 +1526,7 @@ directory).</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="add-on-tool-create-archive">4.3.3. Create the SWAMP Tool Archive</h4>
+<h4 id="add-on-tool-create-archive">4.2.3. Create the SWAMP Tool Archive</h4>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">CodeSonar</dt>
@@ -1515,7 +1556,6 @@ SWAMP tool archive file that was created. Note that <code>make_swamp_tool</code>
 likely take several minutes to complete due to the size of the installers.</p>
 </div>
 </dd>
-<dt class="hdlist1">OWASP Dependency Check</dt>
 <dt class="hdlist1">Retire.js</dt>
 <dd>
 <p>Expand the archive file that you downloaded or copied:</p>
@@ -1537,7 +1577,7 @@ without internet access</a> (i.e., "internet-inaccessible" assessments).</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_install_the_tool">4.3.4. Install the Tool</h4>
+<h4 id="_install_the_tool">4.2.4. Install the Tool</h4>
 <div class="paragraph">
 <p>The <code>install_tool</code> script is used to install and manage any tools that are
 added onto a SWAMP-in-a-Box installation. The script must always be invoked
@@ -1550,9 +1590,6 @@ with the following command line arguments:</p>
 for <code>&lt;id&gt;</code> include:</p>
 <div class="ulist">
 <ul>
-<li>
-<p><code>dependency-check</code>: OWASP Dependency Check</p>
-</li>
 <li>
 <p><code>gt-csonar</code>: GrammaTech CodeSonar</p>
 </li>
@@ -1603,7 +1640,7 @@ the size of the tool archive.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="add-on-tool-configure">4.3.5. Configure the Tool</h4>
+<h4 id="add-on-tool-configure">4.2.5. Configure the Tool</h4>
 <div class="paragraph">
 <p>As <code>root</code> (or using <code>sudo</code>), run the <code>install_tool</code> script with the
 <code>--configure</code> option, providing additional options as needed.</p>
@@ -1643,24 +1680,11 @@ instances of the tool the SWAMP may run:</p>
 </div>
 </div>
 </dd>
-<dt class="hdlist1">OWASP Dependency Check</dt>
-<dd>
-<p>Use the <code>--tool-conf</code> option to specify the path to a file containing
-additional entries that should be added to <code>services.conf</code>:</p>
-<div class="listingblock">
-<div class="content">
-<pre>/opt/swamp/bin/install_tool \
-    --tool &lt;id&gt; \
-    --configure \
-    --tool-conf &lt;path to file containing entries for services.conf&gt;</pre>
-</div>
-</div>
-</dd>
 </dl>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_manage_the_installed_versions_of_the_tool">4.3.6. Manage the Installed Versions of the Tool</h4>
+<h4 id="_manage_the_installed_versions_of_the_tool">4.2.6. Manage the Installed Versions of the Tool</h4>
 <div class="ulist">
 <ul>
 <li>
@@ -1705,7 +1729,7 @@ package the 32-bit and 64-bit archives together for the SWAMP. Then as
 </div>
 </div>
 <div class="sect2">
-<h3 id="add-on-viewers">4.4. Installing Additional Viewers</h3>
+<h3 id="add-on-viewers">4.3. Installing Additional Viewers</h3>
 <div class="paragraph">
 <p>The SWAMP-in-a-Box installer includes and installs only a "native" viewer
 for viewing the results of an assessment. The SWAMP web application also
@@ -1721,9 +1745,12 @@ obtaining this SWAMP-specific version of Code Dx from Code Dx, Inc.
 standalone Code Dx installation.)</p>
 </div>
 <div class="sect3">
-<h4 id="_before_you_begin_5">4.4.1. Before You Begin</h4>
+<h4 id="_before_you_begin_4">4.3.1. Before You Begin</h4>
 <div class="ulist">
 <ul>
+<li>
+<p>You will need a SWAMP-in-a-Box capable of running virtual machines.</p>
+</li>
 <li>
 <p>You will need <code>root</code> access to the SWAMP-in-a-Box host.</p>
 </li>
@@ -1740,19 +1767,32 @@ within the expanded contents.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_procedure_3">4.4.2. Procedure</h4>
+<h4 id="_procedure_2">4.3.2. Procedure</h4>
 <div class="olist arabic">
 <ol class="arabic">
+<li>
+<p>Visit <a href="https://platform.swampinabox.org/platform-images/" class="bare">https://platform.swampinabox.org/platform-images/</a>.</p>
+</li>
+<li>
+<p>Download and copy to the SWAMP-in-a-Box the viewer platform corresponding
+to the version of Code Dx that you wish to install. The platforms are
+named as follows:</p>
+<div class="listingblock">
+<div class="content">
+<pre>condor-codedx-[version]-viewer-master-[date].qcow2.gz</pre>
+</div>
+</div>
+</li>
 <li>
 <p>Copy the Code Dx <code>.war</code> file obtained from Code Dx, Inc. to the
 SWAMP-in-a-Box host.</p>
 </li>
 <li>
 <p>On the SWAMP-in-a-Box host, as <code>root</code> (or using <code>sudo</code>), run the
-<code>install_codedx</code> script, providing the path to the <code>.war</code> file:</p>
+<code>install_codedx</code> script, providing the path to the <code>.war</code> and platform files:</p>
 <div class="listingblock">
 <div class="content">
-<pre>/opt/swamp/bin/install_codedx &lt;path to Code Dx .war file&gt;</pre>
+<pre>/opt/swamp/bin/install_codedx &lt;.war file&gt; &lt;.qcow2.gz file&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1761,13 +1801,19 @@ needed to add the Code Dx viewer to the database and make it available in
 the SWAMP.</p>
 </div>
 </li>
+<li>
+<p>(Optional) In order to conserve disk space, delete the Code Dx <code>.war</code>
+file and platform files that you downloaded and copied to the
+SWAMP-in-a-Box host.</p>
+</li>
 </ol>
 </div>
 <div class="paragraph">
 <p>If you have previously installed an older version of Code Dx and wish to
 replace it with a newer version, follow the above procedure using the newer
-Code Dx <code>.war</code> file. The <code>install_codedx</code> script will replace the older
-version of Code Dx with the newer one.</p>
+Code Dx <code>.war</code> file and the viewer platform corresponding to the newer version
+of Code Dx. The <code>install_codedx</code> script will replace the older version of
+Code Dx with the newer one.</p>
 </div>
 </div>
 </div>
@@ -1807,7 +1853,7 @@ assessment will still fail.
 </table>
 </div>
 <div class="sect3">
-<h4 id="_before_you_begin_6">5.1.1. Before You Begin</h4>
+<h4 id="_before_you_begin_5">5.1.1. Before You Begin</h4>
 <div class="ulist">
 <ul>
 <li>
@@ -1817,7 +1863,7 @@ assessment will still fail.
 </div>
 </div>
 <div class="sect3">
-<h4 id="_procedure_4">5.1.2. Procedure</h4>
+<h4 id="_procedure_3">5.1.2. Procedure</h4>
 <div class="paragraph">
 <p>Modify <code>/opt/swamp/etc/swamp.conf</code> such that the line</p>
 </div>
@@ -2037,7 +2083,7 @@ membership and disabling and re-enabling of projects and user accounts.</p>
 </ul>
 </div>
 <div class="sect3">
-<h4 id="_before_you_begin_7">5.3.1. Before You Begin</h4>
+<h4 id="_before_you_begin_6">5.3.1. Before You Begin</h4>
 <div class="ulist">
 <ul>
 <li>
@@ -2342,7 +2388,7 @@ instead of in the <code>user</code> table in the SWAMP&#8217;s local database.</
 <div class="sect3">
 <h4 id="_configuring_ldap_options_in_the_web_backend_configuration_file">5.4.1. Configuring LDAP Options in the Web Backend Configuration File</h4>
 <div class="sect4">
-<h5 id="_before_you_begin_8">Before You Begin</h5>
+<h5 id="_before_you_begin_7">Before You Begin</h5>
 <div class="ulist">
 <ul>
 <li>
@@ -2356,7 +2402,7 @@ the parameters discussed below.</p>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_procedure_5">Procedure</h5>
+<h5 id="_procedure_4">Procedure</h5>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -2464,7 +2510,7 @@ have no administrator users.</p>
 <p>You can use the following procedure to promote a user to a SWAMP administrator.</p>
 </div>
 <div class="sect4">
-<h5 id="_before_you_begin_9">Before You Begin</h5>
+<h5 id="_before_you_begin_8">Before You Begin</h5>
 <div class="ulist">
 <ul>
 <li>
@@ -2492,7 +2538,7 @@ file.</p>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_procedure_6">Procedure</h5>
+<h5 id="_procedure_5">Procedure</h5>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -2528,7 +2574,7 @@ SWAMP administrator access.</p>
 query and the corresponding <code>.env</code> configuration.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 3. Secure LDAP Server with Anonymous Read Access</div>
+<div class="title">Example 2. Secure LDAP Server with Anonymous Read Access</div>
 <div class="content">
 <div class="listingblock">
 <div class="title">ldapsearch command</div>
@@ -2629,7 +2675,7 @@ connecting with <code>ldaps://</code>.</p>
 </div>
 </div>
 <div class="exampleblock">
-<div class="title">Example 4. Insecure Active Directory Server with Credentialed User</div>
+<div class="title">Example 3. Insecure Active Directory Server with Credentialed User</div>
 <div class="content">
 <div class="listingblock">
 <div class="title">ldapsearch command</div>
@@ -2882,7 +2928,7 @@ Currently, the following identity providers are supported:</p>
 <div class="sect3">
 <h4 id="_creating_a_github_oauth_application_for_your_swamp_in_a_box">5.5.1. Creating a GitHub OAuth Application for Your SWAMP-in-a-Box</h4>
 <div class="sect4">
-<h5 id="_before_you_begin_10">Before You Begin</h5>
+<h5 id="_before_you_begin_9">Before You Begin</h5>
 <div class="ulist">
 <ul>
 <li>
@@ -2893,7 +2939,7 @@ OAuth application.</p>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_procedure_7">Procedure</h5>
+<h5 id="_procedure_6">Procedure</h5>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -2955,7 +3001,7 @@ using your SWAMP-in-a-Box&#8217;s hostname</p>
 <div class="sect3">
 <h4 id="_enabling_github_as_an_oauth2_provider">5.5.2. Enabling GitHub as an OAuth2 Provider</h4>
 <div class="sect4">
-<h5 id="_before_you_begin_11">Before You Begin</h5>
+<h5 id="_before_you_begin_10">Before You Begin</h5>
 <div class="ulist">
 <ul>
 <li>
@@ -2969,7 +3015,7 @@ SWAMP-in-a-Box&#8217;s GitHub OAuth application.</p>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_procedure_8">Procedure</h5>
+<h5 id="_procedure_7">Procedure</h5>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -3000,7 +3046,7 @@ GITHUB_CLIENT_SECRET=&lt;Your Client Secret&gt;</pre>
 <div class="sect3">
 <h4 id="_creating_google_oauth_credentials_for_your_swamp_in_a_box">5.5.3. Creating Google OAuth Credentials for Your SWAMP-in-a-Box</h4>
 <div class="sect4">
-<h5 id="_before_you_begin_12">Before You Begin</h5>
+<h5 id="_before_you_begin_11">Before You Begin</h5>
 <div class="ulist">
 <ul>
 <li>
@@ -3010,7 +3056,7 @@ GITHUB_CLIENT_SECRET=&lt;Your Client Secret&gt;</pre>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_procedure_9">Procedure</h5>
+<h5 id="_procedure_8">Procedure</h5>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -3117,7 +3163,7 @@ using your SWAMP-in-a-Box&#8217;s hostname</p>
 <div class="sect3">
 <h4 id="_enabling_google_as_an_oauth2_provider">5.5.4. Enabling Google as an OAuth2 Provider</h4>
 <div class="sect4">
-<h5 id="_before_you_begin_13">Before You Begin</h5>
+<h5 id="_before_you_begin_12">Before You Begin</h5>
 <div class="ulist">
 <ul>
 <li>
@@ -3131,7 +3177,7 @@ SWAMP-in-a-Box&#8217;s Google OAuth credentials.</p>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_procedure_10">Procedure</h5>
+<h5 id="_procedure_9">Procedure</h5>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -3162,7 +3208,7 @@ GOOGLE_CLIENT_SECRET=&lt;Your Client Secret&gt;</pre>
 <div class="sect3">
 <h4 id="_registering_for_cilogon_oauth2_credentials">5.5.5. Registering for CILogon OAuth2 Credentials</h4>
 <div class="sect4">
-<h5 id="_procedure_11">Procedure</h5>
+<h5 id="_procedure_10">Procedure</h5>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -3226,7 +3272,7 @@ hostname</p>
 <div class="sect3">
 <h4 id="_enabling_cilogon_as_an_oauth2_provider">5.5.6. Enabling CILogon as an OAuth2 Provider</h4>
 <div class="sect4">
-<h5 id="_before_you_begin_14">Before You Begin</h5>
+<h5 id="_before_you_begin_13">Before You Begin</h5>
 <div class="ulist">
 <ul>
 <li>
@@ -3240,7 +3286,7 @@ SWAMP-in-a-Box&#8217;s CILogon OAuth2 credentials.</p>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_procedure_12">Procedure</h5>
+<h5 id="_procedure_11">Procedure</h5>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -3280,7 +3326,7 @@ whenever a user accesses the SWAMP-in-a-Box home page (not signed in).</p>
 your SWAMP-in-a-Box, or provide status information.</p>
 </div>
 <div class="sect3">
-<h4 id="_before_you_begin_15">5.6.1. Before You Begin</h4>
+<h4 id="_before_you_begin_14">5.6.1. Before You Begin</h4>
 <div class="ulist">
 <ul>
 <li>
@@ -3328,6 +3374,74 @@ removing parameters in this file.</p>
 </div>
 </div>
 </div>
+<div class="sect2">
+<h3 id="configure-http">5.7. Configuring HTTP Access to SWAMP-in-a-Box</h3>
+<div class="paragraph">
+<p>For situations where it is not possible to <a href="#configure-ssl-certs">configure
+SWAMP-in-a-Box with an SSL certificate signed by a trusted authority</a>, you
+can configure SWAMP-in-a-Box to allow access over HTTP.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>This is <strong>not</strong> a recommended configuration for SWAMP-in-a-Box. All network
+traffic to and from the SWAMP-in-a-Box, <strong>including passwords</strong> used to log
+into the SWAMP, will <strong>not</strong> be encrypted.</p>
+</div>
+<div class="paragraph">
+<p>This configuration is appropriate only for situations where network traffic
+to and from SWAMP-in-a-Box is restricted to a trusted network, or situations
+where every user is using a username and password unique to the SWAMP and
+does not care whether unknown third parties snoop on their packages and
+assessments.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_before_you_begin_15">5.7.1. Before You Begin</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>You need <code>root</code> access to the SWAMP-in-a-Box host.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_procedure_12">5.7.2. Procedure</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>As <code>root</code>, or using <code>sudo</code>, edit <code>/etc/httpd/conf/httpd.conf</code>.</p>
+</li>
+<li>
+<p>Enable HTTP access to SWAMP-in-a-Box&#8217;s web server by finding the line
+<code>#Listen 80</code> and changing it so that it reads <code>Listen 80</code> (i.e., remove
+the <code>#</code> at the beginning of the line).</p>
+</li>
+<li>
+<p>As <code>root</code>, or using <code>sudo</code>, edit <code>/var/www/swamp-web-server/.env</code>.</p>
+</li>
+<li>
+<p>Configure the SWAMP to allow insecure session cookies by finding the line
+<code>SESSION_SECURE_COOKIE=true</code> and changing it so that it reads
+<code>SESSION_SECURE_COOKIE=false</code> (i.e., change <code>true</code> to <code>false</code>).</p>
+</li>
+<li>
+<p>As <code>root</code>, or using <code>sudo</code>, restart the web server by running <code>service
+httpd restart</code>.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -3345,19 +3459,25 @@ instructions on how to upgrade them.</p>
 <dl>
 <dt class="hdlist1">Assessment Platforms</dt>
 <dd>
-<p>If you have previously installed additional assessment platforms, run the
-following command to determine whether there are updated versions available
-(the command does not require <code>root</code> access):</p>
+<p>If you have previously installed additional assessment platforms, as <code>root</code>
+(or using <code>sudo</code>), run the following command to determine whether there are
+updated versions available:</p>
 <div class="listingblock">
 <div class="content">
-<pre>/opt/swamp/bin/swamp_check_platform_images</pre>
+<pre>/opt/swamp/bin/install_platform -s</pre>
 </div>
 </div>
 <div class="paragraph">
 <p>For any out-of-date platform images, follow the instructions on
-<a href="#add-on-platforms">installing additional assessment platforms</a> for
-downloading and installing the updated images. Once that is done, the
-out-of-date images may be deleted.</p>
+<a href="#add-on-platforms">installing assessment platforms</a> for
+downloading and installing the updated images. Once that is done, you can
+use the following command to delete any out-of-date images (or you can
+delete them by hand):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>/opt/swamp/bin/install_platform -s -r</pre>
+</div>
 </div>
 </dd>
 </dl>
@@ -4013,14 +4133,38 @@ systems).</p>
 <div class="paragraph">
 <p>If an assessment reaches a status of "Finished with Errors," the SWAMP is
 functioning normally, but the assessment failed to yield any results. Click
-the "Error" button to view a detailed report about the failure. The
-following sections in the report summarize the major steps in performing the
-assessment and the output they produced:</p>
+the "Error" button to view a detailed report about the failure.</p>
+</div>
+<div class="paragraph">
+<p>The primary error is listed at the top of the Error Information section of
+the report followed by the full content of status.out.</p>
+</div>
+<div class="paragraph">
+<p>Details about the primary error can be found in the document: "SWAMP Output
+Files and Debugging Failures" (formerly called, "Status.out and Debugging
+SWAMP Failures"). You can access a PDF or HTML version of this document
+following links provided in the Error Report. Links are also provided on the
+SWAMP-in-a-Box Help page.</p>
+</div>
+<div class="paragraph">
+<p>Depending on the primary error, you can also jump to the relevant section of
+"SWAMP Output Files and Debugging Failures" by clicking the link for the
+primary error.</p>
+</div>
+<div class="paragraph">
+<p>Additional content may be displayed in the Error Information section of the
+Error Report depending on the primary error.</p>
+</div>
+<div class="paragraph">
+<p>This may include the following:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Contents of status.out</p>
+<p>Contents of build_stderr.out</p>
+</li>
+<li>
+<p>Contents of build_assess.out</p>
 </li>
 <li>
 <p>Contents of stderr</p>
@@ -4031,13 +4175,8 @@ assessment and the output they produced:</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>Details about the messages in <code>status.out</code> can be found in the document
-<a href="https://www.swampinabox.org/doc/statusout.pdf">Status.out and Debugging SWAMP Failures</a>,
-a link to which can be found near the beginning of the error report.</p>
-</div>
-<div class="paragraph">
-<p>If an assessment reaches some other error state, the assessment&#8217;s log file
-might indicate why:</p>
+<p>If an assessment reaches some other error state (other than "Finished with
+Errors"), the assessment&#8217;s log file might indicate why:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -4053,13 +4192,110 @@ assessment&#8217;s status. Locate the execution record UUID.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_debugging_stuck_assessments">7.4. Debugging Stuck Assessments</h3>
+<h3 id="_debugging_assessment_warnings">7.4. Debugging Assessment Warnings</h3>
+<div class="paragraph">
+<p>If an assessment reaches a status of "Finished with Warnings," the SWAMP is
+functioning normally and results are available for the assessment, but it
+is possible that the results are incomplete. Click the "Warning" button to
+view a detailed report.</p>
+</div>
+<div class="paragraph">
+<p>The primary warning is listed at the top of the Warning Information section
+of the report followed by the full content of status.out.</p>
+</div>
+<div class="paragraph">
+<p>For Java and C/C++ No Build packages, a warning status may indicate that not
+all code files in the build directory could be compiled. In this case the
+primary warning will indicate that the number of expected source file was
+greater than the number compilable. Additional content in the Warning
+Information section of the report then lists the Source Files, including
+those that compiled successfully and those that failed.</p>
+</div>
+<div class="paragraph">
+<p>For assessments of other package types, representing non-compilable languages,
+a warning may indicate that there were no files found to assess.</p>
+</div>
+<div class="paragraph">
+<p>As in the Error report, the Warning report includes links to the document:
+"SWAMP Output Files and Debugging Failures" (formerly called, "Status.out
+and Debugging SWAMP Failures").</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_debugging_stuck_assessments">7.5. Debugging Stuck Assessments</h3>
 <div class="paragraph">
 <p>If an assessment appears stuck at a status of "Waiting in HTCondor Queue" or
 is unable to be submitted to HTCondor, refer back to the section on
-<a href="#checking-sib-health">checking the host&#8217;s health</a>.</p>
+<a href="#checking-sib-health">checking the host&#8217;s health</a>. Otherwise, it is
+possible to log into the Docker container or virtual machine that is running
+the assessment in order to examine its running processes and file system.</p>
+</div>
+<div class="olist arabic">
+<div class="title">Logging into a Docker-Based Assessment</div>
+<ol class="arabic">
+<li>
+<p>On the Assessment Results page of the SWAMP web application, click on the
+assessment&#8217;s status. Locate the execution record UUID.</p>
+</li>
+<li>
+<p>On the SWAMP-in-a-Box host, login as <code>root</code>, or run <code>sudo -i</code>.</p>
+</li>
+<li>
+<p>Run the following command:</p>
+<div class="listingblock">
+<div class="content">
+<pre>condor_q -constraint 'SWAMP_arun_execrunuid == "UUID"'</pre>
+</div>
 </div>
 <div class="paragraph">
+<p>where <code>UUID</code> is replaced with execution record UUID from step 1. Exactly one
+job should be listed. Note the Job ID.</p>
+</div>
+</li>
+<li>
+<p>Run the following command:</p>
+<div class="listingblock">
+<div class="content">
+<pre>condor_q -long &lt;Job ID&gt; | grep slot</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>where <code>&lt;Job ID&gt;</code> is replaced with the Job ID you noted in the previous step.
+The output should indicate that the <code>RemoteHost</code> for the job is
+<code>slotNNN@&#8230;&#8203;</code>. Note the <code>slotNNN</code> part.</p>
+</div>
+</li>
+<li>
+<p>Run the following command:</p>
+<div class="listingblock">
+<div class="content">
+<pre>docker ps --filter name=slotNNN</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>where <code>slotNNN</code> comes from the <code>RemoteHost</code> identified in the previous step.
+The output should list exactly one container. Note its ID.</p>
+</div>
+</li>
+<li>
+<p>Run the following command:</p>
+<div class="listingblock">
+<div class="content">
+<pre>docker exec -i &lt;Container ID&gt; /bin/bash -i</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>where <code>&lt;Container ID&gt;</code> is replaced with the one you identified in the
+previous step.</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>At this point, you should have a shell running inside the container.</p>
+</div>
+<div class="paragraph">
+<div class="title">Logging into a Virtual Machine-Based Assessment</div>
 <p>If an assessment appears stuck at a status of "Shutting down the VM," it is
 likely that the assessment&#8217;s virtual machine has encountered an issue. At
 this point, the assessment has completed its work; all that remains is to
@@ -4124,7 +4360,7 @@ results available in the SWAMP web application.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_using_java_cli_and_related_plugins_with_swamp_in_a_box">7.5. Using Java CLI and Related Plugins with SWAMP-in-a-Box</h3>
+<h3 id="_using_java_cli_and_related_plugins_with_swamp_in_a_box">7.6. Using Java CLI and Related Plugins with SWAMP-in-a-Box</h3>
 <div class="paragraph">
 <p>SWAMP-in-a-Box supports the following minimum versions of Java CLI and
 related plug-ins. If you are using an earlier version, please upgrade.</p>
@@ -4132,13 +4368,16 @@ related plug-ins. If you are using an earlier version, please upgrade.</p>
 <div class="ulist">
 <ul>
 <li>
-<p>Java CLI version 1.5.2</p>
+<p>Java CLI version 1.5.9</p>
 </li>
 <li>
-<p>SWAMP Eclipse Plugin version 1.1.2</p>
+<p>SWAMP Eclipse Plugin version 1.1.7</p>
 </li>
 <li>
-<p>SWAMP Jenkins Plugin version 1.2.1</p>
+<p>SWAMP Jenkins Plugin version 1.2.6</p>
+</li>
+<li>
+<p>SWAMP SCMS Plugin version 1.3.7</p>
 </li>
 </ul>
 </div>
@@ -4198,7 +4437,7 @@ fingerprint 75A9 0FA7 3E64 BDE0 A663  602E B8FB 15A9 DB7E 1B51).</p>
 <div class="ulist">
 <ul>
 <li>
-<p><a href="#dependencies-mariadb">MariaDB 5.5</a>,</p>
+<p><a href="#dependencies-docker">Docker</a> (optional),</p>
 </li>
 <li>
 <p><a href="#dependencies-php">PHP 7.2</a>, and</p>
@@ -4209,10 +4448,11 @@ fingerprint 75A9 0FA7 3E64 BDE0 A663  602E B8FB 15A9 DB7E 1B51).</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>All of these dependencies must be installed in order for SWAMP-in-a-Box to
-function correctly. If you run into issues installing these dependencies,
-refer to the <a href="#troubleshooting-installing-dependencies">troubleshooting
-section</a> at the end of this appendix for possible solutions.</p>
+<p>With the exception of Docker, all of these dependencies must be installed in
+order for SWAMP-in-a-Box to function correctly. If you run into issues
+installing these dependencies, refer to the
+<a href="#troubleshooting-installing-dependencies">troubleshooting section</a> at the
+end of this appendix for possible solutions.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -4230,26 +4470,44 @@ on obtaining and extracting the installer.
 </table>
 </div>
 <div class="sect2">
-<h3 id="dependencies-mariadb">A.1. MariaDB 5.5</h3>
+<h3 id="dependencies-docker">A.1. Docker</h3>
 <div class="paragraph">
-<p>For CentOS 6, the set-up scripts for SWAMP-in-a-Box configure and download
-MariaDB from the repository hosted by the MariaDB Foundation, using the
-configuration file produced by the "repository configuration" tool at
-<a href="https://downloads.mariadb.org/mariadb/repositories/" class="bare">https://downloads.mariadb.org/mariadb/repositories/</a>. The specific packages
-installed are <code>MariaDB-client</code>, <code>MariaDB-server</code>, <code>MariaDB-shared</code>, and
-their dependencies.</p>
+<p>The set-up scripts for SWAMP-in-a-Box configure and download Docker Engine
+from Docker&#8217;s official repositories, generally following the instructions at
+<a href="https://docs.docker.com/engine/install/centos/" class="bare">https://docs.docker.com/engine/install/centos/</a>. The specific packages
+installed are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>yum-utils</code>,</p>
+</li>
+<li>
+<p><code>device-mapper-persistent-data</code>,</p>
+</li>
+<li>
+<p><code>lvm2</code>,</p>
+</li>
+<li>
+<p><code>docker-ce</code>,</p>
+</li>
+<li>
+<p><code>docker-ce-cli</code>,</p>
+</li>
+<li>
+<p><code>containerd.io</code>,</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
-<p>For CentOS 7, the set-up scripts for SWAMP-in-a-Box download MariaDB from
-CentOS&#8217;s default repositories. The specific packages installed are
-<code>mariadb</code>, <code>mariadb-server</code>, <code>mariadb-libs</code>, and their dependencies.</p>
+<p>and their dependencies.</p>
 </div>
 <div class="paragraph">
-<p>The following script will install MariaDB using the process described above:</p>
+<p>The following script will install Docker using the process described above:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>&lt;installer-dir&gt;/repos/install-mariadb.bash</pre>
+<pre>&lt;installer-dir&gt;/repos/install-docker-ce.bash</pre>
 </div>
 </div>
 </div>
@@ -4335,6 +4593,15 @@ specific packages installed are:</p>
 <p><code>libvirt</code>,</p>
 </li>
 <li>
+<p><code>mariadb</code>,</p>
+</li>
+<li>
+<p><code>mariadb-server</code>,</p>
+</li>
+<li>
+<p><code>mariadb-libs</code>,</p>
+</li>
+<li>
 <p><code>mod_ssl</code>,</p>
 </li>
 <li>
@@ -4357,6 +4624,9 @@ specific packages installed are:</p>
 </li>
 <li>
 <p><code>unzip</code>,</p>
+</li>
+<li>
+<p><code>xz</code>,</p>
 </li>
 <li>
 <p><code>zip</code>,</p>
@@ -4405,10 +4675,154 @@ contain <code>repo_gpgcheck=1</code>, run the following command:</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="obtaining-add-ons">Appendix B: Obtaining Additional Tools and Viewers</h2>
+<h2 id="appendix-amazon-ec2">Appendix B: Installing on an Amazon Elastic Compute Cloud Instance</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <a href="#system-requirements">system requirements</a> and
+<a href="#installing-sib">installation instructions</a> for SWAMP-in-a-Box are
+generally applicable to using an Amazon Elastic Compute Cloud (Amazon EC2)
+instance as the SWAMP-in-a-Box host. This appendix calls out several
+considerations specific to Amazon EC2.</p>
+</div>
+<div class="sect2">
+<h3 id="_documentation_for_amazon_ec2">B.1. Documentation for Amazon EC2</h3>
+<div class="paragraph">
+<p>This Administrator Manual assumes that you have an Amazon Web Services (AWS)
+account and some experience working with Amazon Elastic Compute Cloud
+(Amazon EC2). If you are just getting started, the following resources might
+be helpful:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://aws.amazon.com/ec2/getting-started/" class="bare">https://aws.amazon.com/ec2/getting-started/</a></p>
+</li>
+<li>
+<p><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html" class="bare">https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html</a></p>
+</li>
+<li>
+<p><a href="https://aws.amazon.com/getting-started/tutorials/" class="bare">https://aws.amazon.com/getting-started/tutorials/</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="configure-ec2-instance">B.2. Configuring an EC2 Instance that Supports SWAMP-in-a-Box</h3>
+<div class="paragraph">
+<p>Any instance that meets SWAMP-in-a-Box&#8217;s <a href="#system-requirements">system
+requirements</a> should work.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Access the AWS Management Console.</p>
+</li>
+<li>
+<p>Select the option to "Launch a virtual machine."</p>
+</li>
+<li>
+<p>For "Choose an Amazon Machine Image (AMI)", search for "CentOS" in the
+AWS Marketplace and select "CentOS 7 (x86_64) - with Updates HVM".</p>
+</li>
+<li>
+<p>For "Choose an Instance Type", pick an option based on the Hardware
+Requirements section of the SWAMP-in-a-Box Administrator Manual.
+In general SWAMP-in-a-Box requires 2 cores and 6 GiB of Memory for
+each simultaneous assessment run. The SWAMP team has successfully
+run SWAMP-in-a-Box on the following instance types:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>t3a.xlarge (4 core, 16 GiB memory)</p>
+</li>
+<li>
+<p>m5a.2xlarge (8 core, 32 GiB memory)</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>For "Configure Instance", ensure that the instance is configured to be
+assigned a public IP address. Specifically, under Configure Instance
+Details, set "Auto-assign Public IP" to "Enable".</p>
+</li>
+<li>
+<p>For "Add Storage", the "Root" Volume Type should have a size of at least
+64 GiB. There is no need to add any other volume. Note that for
+experimental purposes, you can configure the instance with as little as
+48 GiB of storage space. For anything less than that there will not be
+sufficient space to complete the install and run assessments.</p>
+</li>
+<li>
+<p>For "Configure Security Group", SWAMP-in-a-Box requires inbound rules
+allowing SSH, HTTP, and HTTPS. By default, SWAMP-in-a-Box does not allow
+access over HTTP, but for instances where you might be unable or unwilling
+to obtain SSL certifications signed by a trusted authority,
+<a href="#configure-http">enabling HTTP access</a> might be necessary and acceptable.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_known_issues">B.3. Known Issues</h3>
+<div class="paragraph">
+<div class="title">Hostname Does Not Remain Fixed</div>
+<p>Unless you have a static IP address (Elastic IP) for your AWS Instance, you
+will get a new IP address, and therefore a new DNS name every time you stop
+and start your instance. In this case you will need to reconfigure
+SWAMP-in-a-Box with the new hostname every time you re-start your Instance.
+You will also, then have a different URL to access the SWAMP-in-a-Box
+website. See the section on <a href="#updating-the-hostname">Updating the Host&#8217;s Hostname</a> for instructions on
+how to update the hostname through SWAMP-in-a-Box&#8217;s configuration files.</p>
+</div>
+<div class="paragraph">
+<div class="title">Default Self-Signed SSL Certificate is Rejected by Browsers</div>
+<p>The default AWS Instance configuration includes an automatically generated
+SSL certificate which will appear to web browsers to be suspicious. When
+you first access your SWAMP-in-a-Box on an AWS instance via your web browser,
+the browser will display a warning page. In most cases you can override the
+warning and proceed, but if one browser does not work for you, please try
+another.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>In Firefox: Click "Advanced&#8230;&#8203;" and then click the link "Accept the Risk
+and Continue" to access the site.</p>
+</li>
+<li>
+<p>In Google Chrome: Click "Advanced". There may be a link,
+"Proceed to &lt;site url&gt; (unsafe)", if so, click it to access the site.
+If there is no link to access the site you may still be able to access the
+site by typing "thisisunsafe" while the browser window has focus.</p>
+</li>
+<li>
+<p>In Safari: Click "Show Details" and then click "Visit this website". You
+will then need to confirm and enter your Mac OS username and password
+to make changes to your Certificate Trust Settings. You will then be
+redirected to the site. This may only work if your Mac OS account is also
+an Administrator account.</p>
+</li>
+<li>
+<p>In Microsoft Edge: Click "Details" and then click "Go on to the webpage"
+to access the site.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<div class="title">Code Dx Cannot Be Installed</div>
+<p>Currently, SWAMP-in-a-Box is limited to running <a href="#add-on-viewers">optional
+Code Dx results viewer</a> only in a virtual machine. Unfortunately, EC2
+instances do not support running virtual machines.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="obtaining-add-ons">Appendix C: Obtaining Additional Tools and Viewers</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="about-code-dx">B.1. Code Dx</h3>
+<h3 id="about-code-dx">C.1. Code Dx</h3>
 <div class="paragraph">
 <p>This product may run with Code Dx through SWAMP&#8217;s partnership with
 Code Dx, Inc., who offer a SWAMP-specific version of Code Dx software
@@ -4443,7 +4857,7 @@ Copyright 2010-2020 Code Dx, Inc. All rights reserved.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="about-codesonar">B.2. CodeSonar</h3>
+<h3 id="about-codesonar">C.2. CodeSonar</h3>
 <div class="paragraph">
 <p>SWAMP-in-a-Box can be used with CodeSonar, a deep-path static analysis tool
 provided by GrammaTech, Inc. CodeSonar finds cases of undefined behavior
@@ -4476,7 +4890,7 @@ GrammaTech, Inc. All rights reserved.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="about-parasoft">B.3. Parasoft C/C++test and Parasoft Jtest</h3>
+<h3 id="about-parasoft">C.3. Parasoft C/C++test and Parasoft Jtest</h3>
 <div class="paragraph">
 <p>SWAMP-in-a-Box can be used with C/C++test and Jtest, static analysis and
 unit testing tools for C/C++ and Java development, provided by Parasoft.
@@ -4507,7 +4921,7 @@ information for C/C++test or Jtest can be found at:</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_license_and_notices">Appendix C: License and Notices</h2>
+<h2 id="_license_and_notices">Appendix D: License and Notices</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The Software Assurance Marketplace (SWAMP) is released under the open source
@@ -4517,7 +4931,7 @@ Apache License, Version 2.0, reproduced below.</p>
 <p>Additional notices for SWAMP can be found following the license.</p>
 </div>
 <div class="sect2">
-<h3 id="_apache_license_version_2_0">C.1. Apache License, Version 2.0</h3>
+<h3 id="_apache_license_version_2_0">D.1. Apache License, Version 2.0</h3>
 <div class="literalblock">
 <div class="content">
 <pre>                                 Apache License
@@ -4702,7 +5116,7 @@ Apache License, Version 2.0, reproduced below.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_notices">C.2. Notices</h3>
+<h3 id="_notices">D.2. Notices</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -4743,8 +5157,8 @@ rights reserved.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 1.34<br>
-Last updated 2020-05-04 09:58:55 -0500
+Version 1.35<br>
+Last updated 2020-06-19 12:51:15 -0500
 </div>
 </div>
 </body>

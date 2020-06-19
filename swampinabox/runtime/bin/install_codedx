@@ -1,110 +1,184 @@
 #!/bin/bash
-
+#
 # This file is subject to the terms and conditions defined in
 # 'LICENSE.txt', which is part of this source code distribution.
 #
 # Copyright 2012-2020 Software Assurance Marketplace
 
-#
-# Install Code Dx.
-#
+set -eu
 
-encountered_error=0
-trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR
-set -o errtrace
+usage_message="Usage: $(basename -- "$0") [option]... [.war file] [.qcow2 file]
 
-codedx_root="/opt/swamp/thirdparty/codedx"
-codedx_swamp="$codedx_root/swamp"
-codedx_vendor="$codedx_root/vendor"
+Add Code Dx to the SWAMP. Provide two files:
 
-BINDIR="$(dirname "$0")"
-codedx_src="$1"
-codedx_dest="$codedx_vendor/codedx.war"
-codedx_install_sql="/opt/swamp/sql/install_codedx.sql"
-codedx_emptydb=""
-codedx_version=""
-codedx_properties="WEB-INF/classes/version.properties"
+  1. The '.war' file for Code Dx, which can be obtained from Secure
+     Decisions, Inc. Refer to the SWAMP-in-a-Box Adminstrator Manual
+     for information on how to contact Secure Decisions, Inc.
 
-source "$BINDIR/../sbin/db_support.functions"
-trap 'stty echo ; reset_db_support' EXIT
-trap 'stty echo ; reset_db_support ; exit 1' INT TERM
+  2. The '.qcow2' file for the VM used to run Code Dx, which can be
+     obtained from the SWAMP-in-a-Box download site.
+
+Options:
+  -h, --help  Display this message"
 
 ############################################################################
 
-function set_codedx_version() {
-    war_file="$1"
+unset CDPATH
+root_dir="$(builtin cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")"/.. && pwd)"
+source "${root_dir}/bin/swamp_utility.functions"
 
-    if [ ! -r "$war_file" ]; then
-        echo "Error: Unable to read: $war_file" 1>&2
-        exit 1
-    fi
-    if ! unzip -l "$war_file" "$codedx_properties" 1>/dev/null 2>/dev/null ; then
-        echo "Error: Not a recognized Code Dx .war file: $war_file" 1>&2
-        exit 1
-    fi
+vm_dir="/swamp/platforms/images"
+code_dx_props="WEB-INF/classes/version.properties"
+install_db="/opt/swamp/sql/install_codedx.sql"
+swamp_conf="/opt/swamp/etc/swamp.conf"
 
-    codedx_version=$(unzip -p "$war_file" "$codedx_properties" | \
-                     grep -E '^\s*version\s*=' | \
-                     head -n 1 | \
-                     sed -E -e 's/^\s*version\s*=\s*//')
-    codedx_emptydb="emptydb-codedx-${codedx_version}.sql"
+############################################################################
 
-    if [ ! -f "$codedx_swamp/$codedx_emptydb" ]; then
-        echo "Error: Not a supported version of Code Dx: $codedx_version" 1>&2
-        exit 1
-    fi
+
+print_version()
+{
+  local war_file="$1"
+
+  if ! unzip -l "${war_file}" "${code_dx_props}" 1>/dev/null 2>&1; then
+    error "Not a recognized Code Dx .war file: ${war_file}"
+    exit 1
+  fi
+
+  unzip -p "${war_file}" "${code_dx_props}" \
+    | grep '^[[:space:]]*version[[:space:]]*=' \
+    | head -n 1 \
+    | sed -e 's/^[[:space:]]*version[[:space:]]*=//'
 }
 
-############################################################################
 
-#
-# The source file is optional if the destination already exists.
-# However, when provided, the source file takes priority.
-#
-if [ -e "$codedx_dest" ] && [ ! -f "$codedx_dest" ]; then
-    echo "Error: Already exists, but is not a regular file: $codedx_dest" 1>&2
+print_datestamp()
+{
+  local platform_file="$1"
+  basename -- "${platform_file}" | sed -E -e 's/^.*-master-([0-9]*).*$/\1/'
+}
+
+
+install_image()
+{
+  local war_file="$1"
+  local platform_file="$2"
+
+  local version datestamp prefix suffix vm_image_dest
+  version=$(print_version "${war_file}")
+  datestamp=$(print_datestamp "${platform_file}")
+  prefix="condor-codedx"
+  suffix="viewer-master-${datestamp}"
+  vm_image_dest="${vm_dir}/${prefix}-${version}-${suffix}.qcow2"
+
+  case "$(basename -- "${platform_file}")" in
+    "condor-codedx-${version}-viewer-master-${datestamp}.qcow2")
+      info "Copying VM image: ${platform_file}"
+      if [ ! "${platform_file}" -ef "${vm_image_dest}" ]; then
+        cp -- "${platform_file}" "${vm_image_dest}"
+      fi
+      ;;
+    "condor-codedx-${version}-viewer-master-${datestamp}.qcow2.gz")
+      info "Decompressing VM image: ${platform_file}"
+      gzip -c -d -- "${platform_file}" >"${vm_image_dest}"
+      ;;
+    "condor-codedx-${version}-viewer-master-${datestamp}.qcow2.xz")
+      info "Decompressing VM image: ${platform_file}"
+      xz -c -d -- "${platform_file}" >"${vm_image_dest}"
+      ;;
+    *)
+      error "Not a recognized image for running Code Dx ${version}: ${platform_file}"
+      exit 1
+  esac
+
+  chown root:root -- "${vm_image_dest}"
+  chmod 644 -- "${vm_image_dest}"
+
+  local mnt_point
+  mnt_point=$(mktemp -d "/tmp/$(basename -- "$0").XXXXXXXX")
+
+  info "Mounting image"
+  LIBGUESTFS_BACKEND=direct guestmount -a "${vm_image_dest}" -m /dev/sda1 -w "${mnt_point}"
+
+  echo "Adding ${war_file}"
+  mkdir -p -- "${mnt_point}/opt/codedx"
+  unzip -q -d "${mnt_point}/opt/codedx" "${war_file}"
+
+  echo "Updating CodeDX version."
+  cp \
+    "${mnt_point}/opt/codedx/WEB-INF/classes/version.properties" \
+    "${mnt_point}/var/lib/codedx/PROJECT/config/version.properties"
+
+  info "Unmounting image"
+  umount "${mnt_point}"
+  rm -rf -- "${mnt_point}"
+
+  info "Renaming image"
+  mv \
+    "${vm_image_dest}" \
+    "${vm_dir}/${prefix}-${version}-embedded-${suffix}.qcow2"
+
+  sed -i \
+    -e 's/^[[:space:]]*master.viewer[[:space:]]*=.*$/master.viewer = codedx-'"${version}"'-embedded-viewer/' "${swamp_conf}" \
+    -e 's/^[[:space:]]*master.viewer.type[[:space:]]*=.*$/master.viewer.type = VM/' \
+    "${swamp_conf}"
+
+  info "Restarting the 'swamp' service"
+  "${root_dir}/sbin/swamp_manage_service" swamp restart
+}
+
+
+main()
+{
+  local arg
+  local platform_file
+  local war_file
+
+  if [ $# -lt 1 ]; then
+    info "${usage_message}"
     exit 1
-fi
-if [ ! -f "$codedx_dest" ] && [ -z "$codedx_src" ]; then
-    echo "Usage: $0 <Code Dx .war file>" 1>&2
+  fi
+
+  for arg in "$@"; do
+    shift
+    case "${arg}" in
+      -h|--help)
+        info "${usage_message}"
+        exit 0
+        ;;
+      *.war)
+        war_file="${arg}"
+        ;;
+      *.qcow2|*.qcow2.gz|*.qcow2.xz)
+        platform_file="${arg}"
+        ;;
+      *)
+        error "Not a recognized argument or option: ${arg}"
+        exit 1
+        ;;
+    esac
+  done
+
+  if [ -z "${war_file:-}" ]; then
+    error "A '.war' file for Code Dx is required"
     exit 1
-fi
-if [ ! -z "$codedx_src" ] && [ ! -f "$codedx_src" ]; then
-    echo "Error: No such file: $codedx_src" 1>&2
+  fi
+  if [ -z "${platform_file:-}" ]; then
+    error "A '.qcow2' file for the VM to run Code Dx is required"
     exit 1
-fi
+  fi
 
-if [ -f "$codedx_src" ]; then
-    set_codedx_version "$codedx_src"
-elif [ -f "$codedx_dest" ]; then
-    set_codedx_version "$codedx_dest"
-fi
+  trap 'unprep_db_service' EXIT
+  trap 'unprep_db_service ; exit 1' INT TERM
 
-if [ "$(whoami)" != "root" ]; then
-    echo "Error: This utility must be run as 'root'. Perhaps use 'sudo'." 1>&2
-    exit 1
-fi
+  exit_if_not_root
+  prep_db_service
 
-############################################################################
+  install_image "${war_file}" "${platform_file}"
+  info "Adding Code Dx to the SWAMP"
+  run_sql_script "${install_db}"
 
-if [ -f "$codedx_src" ] && [ ! \( "$codedx_src" -ef "$codedx_dest" \) ]; then
-    echo "Copying '$codedx_src' to '$(dirname "$codedx_dest")'"
-    install -m 0444 "$codedx_src" "$codedx_dest"
-fi
+  unprep_db_service
+}
 
-echo "Setting up empty Code Dx database for version $codedx_version"
-ln -sf "$codedx_emptydb" "$codedx_swamp/emptydb-codedx.sql"
 
-echo "Adding SWAMP database entries for Code Dx"
-setup_db_support
-do_mysql_command "$codedx_install_sql"
-reset_db_support
-
-############################################################################
-
-if [ $encountered_error -eq 0 ]; then
-    echo "Finished installing Code Dx"
-else
-    echo "Error: Finished installing Code Dx, but with errors" 1>&2
-fi
-exit $encountered_error
+main "$@"

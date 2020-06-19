@@ -35,9 +35,11 @@ function remove_deprecated_distribution_files() {
             condor-debian-7.11-64-master-2016100501.qcow2 \
             condor-debian-7.11-64-master-2018091101.qcow2 \
             condor-debian-7.11-64-master-2019010100.qcow2 \
+            condor-debian-7.11-64-master-2019040200.qcow2 \
             condor-debian-8.6-64-master-2016100501.qcow2 \
             condor-debian-8.11-64-master-2018091101.qcow2 \
             condor-debian-8.11-64-master-2019010100.qcow2 \
+            condor-debian-8.11-64-master-2019040200.qcow2 \
             condor-dynamic-centos-6.8-64-viewer-master-2016080901.qcow2 \
             condor-dynamic-centos-6.8-64-viewer-master-2016102101.qcow2 \
             condor-fedora-19.0-64-master-2015012801.qcow2 \
@@ -61,6 +63,8 @@ function remove_deprecated_distribution_files() {
             condor-universal-centos-6.8-64-viewer-master-2016110801.qcow2 \
             condor-universal-centos-6.9-64-viewer-master-2017101001.qcow2 \
             condor-universal-centos-6.9-64-viewer-master-2018032001.qcow2 \
+            condor-universal-centos-6.10-64-viewer-master-2019010100.qcow2 \
+            version.txt \
             ; do
         file_to_remove="${old_install_dir}/${old_file}"
         if [ -f "$file_to_remove" ]; then
@@ -89,7 +93,6 @@ function extract_distribution_bundle() {
 
 if [ "$swamp_context" = "-distribution" ]; then
     remove_deprecated_distribution_files
-    extract_distribution_bundle
 
     if [ $encountered_error -eq 0 ]; then
         echo "Finished installing platform files"

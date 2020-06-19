@@ -6,7 +6,7 @@
 # Copyright 2012-2020 Software Assurance Marketplace
 
 echo
-echo "### Installing MariaDB, PHP, and Other Dependencies"
+echo "### Installing Docker, PHP, and Other Dependencies"
 echo
 
 unset CDPATH
@@ -19,9 +19,9 @@ check_os_dist_upgrade || exit 1
 
 ############################################################################
 
-"$BINDIR"/install-mariadb.bash    || exit 1
+"$BINDIR"/install-docker-ce.bash  || exit 1
 "$BINDIR"/install-php.bash        || exit 1
 "$BINDIR"/install-other-deps.bash || exit 1
 
 echo
-echo "Finished installing MariaDB, PHP, and other dependencies"
+echo "Finished installing Docker, PHP, and other dependencies"

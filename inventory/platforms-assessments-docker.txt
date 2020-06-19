@@ -1,0 +1,14 @@
+android-ubuntu-12.04-64-master-2019100102
+centos-6.10-64-master-2019090501
+condor-centos-7.7-64-master-2020040602
+debian-7.11-64-master-2019040201
+debian-8.11-64-master-2019040201
+fedora-21-64-master-2019010100
+fedora-22-64-master-2019010100
+fedora-23-64-master-2019010100
+fedora-24-64-master-2019010100
+scientific-6.10-64-master-2019090501
+scientific-7.7-64-master-2020040602
+ubuntu-12.04-64-master-2019040200
+ubuntu-14.04-64-master-2019010100
+ubuntu-16.04-64-master-2020031801

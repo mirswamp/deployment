@@ -193,14 +193,16 @@ END {
     if(attrs["JobVMEvents"] == "true")
     {
     	print "<serial type='file'>" ;
-		print "<source path='" attrs["VM_WORKING_DIR"] "/JobVMEvents.log'/>" ;
+		# from vmu_Support.pm HTCONDOR_JOB_EVENTS_FILE
+		print "<source path='" attrs["VM_WORKING_DIR"] "/" attrs["JOB_EVENTS_PATH"] "'/>" ;
 		print "<target port='1'/>" ;
 		print "</serial>" ;
     }
 
     # Enable VMIP TTY
 	print "<serial type='file'>" ;
-	print "<source path='" attrs["VM_WORKING_DIR"] "/vmip.txt'/>" ;
+	# from vmu_Support.pm HTCONDOR_JOB_IP_ADDRESS_FILE
+	print "<source path='" attrs["VM_WORKING_DIR"] "/" attrs["JOB_IP_ADDRESS_PATH"] "'/>" ;
 	print "<target port='2'/>" ;
 	print "</serial>" ;
 

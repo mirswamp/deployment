@@ -5,14 +5,15 @@ Installing Dependencies
 
 The software packages that SWAMP-in-a-Box depends on include:
 
-  * <<dependencies-mariadb>>,
+  * <<dependencies-docker>> (optional),
   * <<dependencies-php>>, and
   * <<dependencies-other,other assorted utilities>>.
 
-All of these dependencies must be installed in order for SWAMP-in-a-Box to
-function correctly. If you run into issues installing these dependencies,
-refer to the <<troubleshooting-installing-dependencies,troubleshooting
-section>> at the end of this appendix for possible solutions.
+With the exception of Docker, all of these dependencies must be installed in
+order for SWAMP-in-a-Box to function correctly. If you run into issues
+installing these dependencies, refer to the
+<<troubleshooting-installing-dependencies,troubleshooting section>> at the
+end of this appendix for possible solutions.
 
 [NOTE]
 In the sections below, `<installer-dir>` refers to the directory containing
@@ -21,24 +22,27 @@ the SWAMP-in-a-Box installer. Refer back to the section on
 on obtaining and extracting the installer.
 
 
-[[dependencies-mariadb]]
-=== MariaDB 5.5 ===
+[[dependencies-docker]]
+=== Docker ===
 
-For CentOS 6, the set-up scripts for SWAMP-in-a-Box configure and download
-MariaDB from the repository hosted by the MariaDB Foundation, using the
-configuration file produced by the "repository configuration" tool at
-https://downloads.mariadb.org/mariadb/repositories/. The specific packages
-installed are `MariaDB-client`, `MariaDB-server`, `MariaDB-shared`, and
-their dependencies.
+The set-up scripts for SWAMP-in-a-Box configure and download Docker Engine
+from Docker's official repositories, generally following the instructions at
+https://docs.docker.com/engine/install/centos/. The specific packages
+installed are:
 
-For CentOS 7, the set-up scripts for SWAMP-in-a-Box download MariaDB from
-CentOS's default repositories. The specific packages installed are
-`mariadb`, `mariadb-server`, `mariadb-libs`, and their dependencies.
+  * `yum-utils`,
+  * `device-mapper-persistent-data`,
+  * `lvm2`,
+  * `docker-ce`,
+  * `docker-ce-cli`,
+  * `containerd.io`,
 
-The following script will install MariaDB using the process described above:
+and their dependencies.
+
+The following script will install Docker using the process described above:
 
 ----
-<installer-dir>/repos/install-mariadb.bash
+<installer-dir>/repos/install-docker-ce.bash
 ----
 
 
@@ -70,8 +74,8 @@ The following script will install PHP using the process described above:
 [[dependencies-other]]
 === Other Assorted Utilities ===
 
-In addition to MariaDB and PHP, the set-up scripts for SWAMP-in-a-Box 
-download assorted software packages from CentOS's default repositories. The 
+In addition to MariaDB and PHP, the set-up scripts for SWAMP-in-a-Box
+download assorted software packages from CentOS's default repositories. The
 specific packages installed are:
 
   * `ant`,
@@ -83,6 +87,9 @@ specific packages installed are:
   * `libguestfs-tools`,
   * `libguestfs-tools-c`,
   * `libvirt`,
+  * `mariadb`,
+  * `mariadb-server`,
+  * `mariadb-libs`,
   * `mod_ssl`,
   * `ncompress`,
   * `patch`,
@@ -91,6 +98,7 @@ specific packages installed are:
   * `python34`,
   * `rubygems`,
   * `unzip`,
+  * `xz`,
   * `zip`,
 
 and their dependencies.

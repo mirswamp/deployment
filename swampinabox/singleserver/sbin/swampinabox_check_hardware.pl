@@ -238,7 +238,10 @@ sub determine_required_disk_space {
     # For the moment, assume that the installation needs to fit on disk
     # alongside whatever is currently installed.
     #
-    $required_space{get_mount_point($PLATFORMS_DIR)}     += $platforms_size;
+
+    # CSA-3648: For the dev preview, ignore platforms.
+    # $required_space{get_mount_point($PLATFORMS_DIR)}     += $platforms_size;
+
     $required_space{get_mount_point($TOOLS_DIR)}         += $tools_size;
     $required_space{get_mount_point($PERL_RT_DIR)}       += get_rpm_size($PERL_RT_RPM, 0);
     $required_space{get_mount_point($SWAMP_BACKEND_DIR)} += get_rpm_size($SWAMP_BACKEND_RPM, 0);

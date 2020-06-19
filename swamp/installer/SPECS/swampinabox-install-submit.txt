@@ -9,3 +9,4 @@ mkdir -p "$RPM_BUILD_ROOT"/opt/swamp/etc
 
 install -m 444 swampinaboxmonitor.conf "$RPM_BUILD_ROOT"/opt/swamp/etc/swampmonitor.conf
 install -m 444 vmu_swampinabox_htcondor_submit "$RPM_BUILD_ROOT"/opt/swamp/etc/vmu_htcondor_submit
+install -m 444 docker_swampinabox_htcondor_submit "$RPM_BUILD_ROOT"/opt/swamp/etc/docker_htcondor_submit

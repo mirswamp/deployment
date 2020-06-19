@@ -333,20 +333,36 @@ Debugging Failed Assessments
 
 If an assessment reaches a status of "Finished with Errors," the SWAMP is
 functioning normally, but the assessment failed to yield any results. Click
-the "Error" button to view a detailed report about the failure. The
-following sections in the report summarize the major steps in performing the
-assessment and the output they produced:
+the "Error" button to view a detailed report about the failure.
 
-* Contents of status.out
+The primary error is listed at the top of the Error Information section of
+the report followed by the full content of status.out.
+
+Details about the primary error can be found in the document: "SWAMP Output
+Files and Debugging Failures" (formerly called, "Status.out and Debugging
+SWAMP Failures"). You can access a PDF or HTML version of this document
+following links provided in the Error Report. Links are also provided on the
+SWAMP-in-a-Box Help page.
+
+Depending on the primary error, you can also jump to the relevant section of
+"SWAMP Output Files and Debugging Failures" by clicking the link for the
+primary error.
+
+Additional content may be displayed in the Error Information section of the
+Error Report depending on the primary error.
+
+This may include the following:
+
+* Contents of build_stderr.out
+
+* Contents of build_assess.out
+
 * Contents of stderr
+
 * Contents of stdout
 
-Details about the messages in `status.out` can be found in the document
-https://www.swampinabox.org/doc/statusout.pdf[Status.out and Debugging SWAMP Failures],
-a link to which can be found near the beginning of the error report.
-
-If an assessment reaches some other error state, the assessment's log file
-might indicate why:
+If an assessment reaches some other error state (other than "Finished with
+Errors"), the assessment's log file might indicate why:
 
 1. On the Assessment Results page of the SWAMP web application, click on the
 assessment's status. Locate the execution record UUID.
@@ -355,12 +371,96 @@ assessment's status. Locate the execution record UUID.
 `/opt/swamp/log/<execution-record-UUID>.log` on the SWAMP-in-a-Box host.
 
 
+Debugging Assessment Warnings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If an assessment reaches a status of "Finished with Warnings," the SWAMP is
+functioning normally and results are available for the assessment, but it
+is possible that the results are incomplete. Click the "Warning" button to
+view a detailed report.
+
+The primary warning is listed at the top of the Warning Information section
+of the report followed by the full content of status.out.
+
+For Java and C/C++ No Build packages, a warning status may indicate that not
+all code files in the build directory could be compiled. In this case the
+primary warning will indicate that the number of expected source file was
+greater than the number compilable. Additional content in the Warning
+Information section of the report then lists the Source Files, including
+those that compiled successfully and those that failed.
+
+For assessments of other package types, representing non-compilable languages,
+a warning may indicate that there were no files found to assess.
+
+As in the Error report, the Warning report includes links to the document:
+"SWAMP Output Files and Debugging Failures" (formerly called, "Status.out
+and Debugging SWAMP Failures").
+
+
 Debugging Stuck Assessments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If an assessment appears stuck at a status of "Waiting in HTCondor Queue" or
 is unable to be submitted to HTCondor, refer back to the section on
-<<checking-sib-health,checking the host's health>>.
+<<checking-sib-health,checking the host's health>>. Otherwise, it is
+possible to log into the Docker container or virtual machine that is running
+the assessment in order to examine its running processes and file system.
+
+.Logging into a Docker-Based Assessment
+
+1. On the Assessment Results page of the SWAMP web application, click on the
+   assessment's status. Locate the execution record UUID.
+
+2. On the SWAMP-in-a-Box host, login as `root`, or run `sudo -i`.
+
+3. Run the following command:
+
++
+----
+condor_q -constraint 'SWAMP_arun_execrunuid == "UUID"'
+----
+
++
+where `UUID` is replaced with execution record UUID from step 1. Exactly one
+job should be listed. Note the Job ID.
+
+4. Run the following command:
+
++
+----
+condor_q -long <Job ID> | grep slot
+----
+
++
+where `<Job ID>` is replaced with the Job ID you noted in the previous step.
+The output should indicate that the `RemoteHost` for the job is
+`slotNNN@...`. Note the `slotNNN` part.
+
+5. Run the following command:
+
++
+----
+docker ps --filter name=slotNNN
+----
+
++
+where `slotNNN` comes from the `RemoteHost` identified in the previous step.
+The output should list exactly one container. Note its ID.
+
+6. Run the following command:
+
++
+----
+docker exec -i <Container ID> /bin/bash -i
+----
+
++
+where `<Container ID>` is replaced with the one you identified in the
+previous step.
+
+At this point, you should have a shell running inside the container.
+
+.Logging into a Virtual Machine-Based Assessment
 
 If an assessment appears stuck at a status of "Shutting down the VM," it is
 likely that the assessment's virtual machine has encountered an issue. At
@@ -416,7 +516,8 @@ Using Java CLI and Related Plugins with SWAMP-in-a-Box
 SWAMP-in-a-Box supports the following minimum versions of Java CLI and
 related plug-ins. If you are using an earlier version, please upgrade.
 
-* Java CLI version 1.5.2
-* SWAMP Eclipse Plugin version 1.1.2
-* SWAMP Jenkins Plugin version 1.2.1
+* Java CLI version 1.5.9
+* SWAMP Eclipse Plugin version 1.1.7
+* SWAMP Jenkins Plugin version 1.2.6
+* SWAMP SCMS Plugin version 1.3.7
 

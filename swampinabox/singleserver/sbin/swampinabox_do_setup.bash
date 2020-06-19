@@ -41,6 +41,9 @@ fi
 #
 # Ensure that system services start up automatically after a system restart.
 #
+if [ -e /usr/lib/systemd/system/docker.service ]; then
+    enable_service docker
+fi
 if [ -e /usr/lib/systemd/system/mariadb.service ]; then
     enable_service mariadb
 fi
@@ -81,6 +84,25 @@ if [[ "$current_version" =~ ^1[.](27|28|29|30|31|32|33)[.-] ]]; then
     disable_service condor              || :
     yum versionlock delete "*:condor-*" || :
     groupdel slotusers                  || :
+fi
+
+#
+# In 1.35, we switched to "baking in" the Code Dx '.war' file into the
+# viewer platform image. When upgrading, we need to uninstall Code Dx,
+# because without user intervention, there will be no way to run Code Dx
+# following the upgrade.
+#
+
+if [[ "$current_version" =~ ^1[.](27|28|29|30|31|32|33|34)[.-] ]]; then
+    echo "Uninstalling Code Dx"
+    #
+    # None of these steps are required to succeed.
+    #
+    if [ -f /opt/swamp/sql/uninstall_codedx.sql ]; then
+        prep_db_service ||:
+        run_sql_script /opt/swamp/sql/uninstall_codedx.sql ||:
+        unprep_db_service ||:
+    fi
 fi
 
 ############################################################################

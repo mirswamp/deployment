@@ -3,3 +3,6 @@
 # Global Variables
 #
 event_scheduler=ON
+sql-mode='NO_AUTO_CREATE_USER'
+local_infile = 'OFF'
+secure_auth = 'ON'

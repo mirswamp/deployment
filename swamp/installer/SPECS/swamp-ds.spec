@@ -28,8 +28,8 @@ Vendor: The Morgridge Institute for Research
 Packager: Support <support@continuousassurance.org>
 BuildRoot: /tmp/%{name}-buildroot
 BuildArch: noarch
-Requires: swamp-rt-perl,swamp-dataserver-setup
-Conflicts: swamp-exec,swamp-submit, swamp-directory-server
+Requires: swamp-rt-perl
+Conflicts: swamp-exec,swamp-submit
 AutoReqProv: no
 
 %description

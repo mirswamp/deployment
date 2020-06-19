@@ -11,7 +11,6 @@ use Getopt::Long;
 use JSON;
 use URI::Escape;
 use Term::ReadLine;
-use IO::Prompt;
 
 my $debug				= 0;
 my $verbose				= 0;
@@ -90,7 +89,7 @@ sub set_api_route_prefix { my ($swampserver) = @_ ;
 		if ($@) {
 			return;
 		}
-		$api_route_prefix = $config->{'servers'}->{'web'};
+		$api_route_prefix .= $config->{'servers'}->{'web'};
 	}
 	print "api_route_prefix: $api_route_prefix\n" if ($debug);
 	return ($api_route_prefix, $swampserver);
@@ -171,7 +170,7 @@ sub fetch_packages { my ($user_uuid) = @_ ;
 		print "package count: ", scalar(@$packages), " package type count: ", scalar(keys %$package_type_ids), "\n";
 	}
 	if ($debug) {
-		foreach my $package_type_id (sort {$a <=> $b} keys $package_type_ids) {
+		foreach my $package_type_id (sort {$a <=> $b} keys %$package_type_ids) {
 			my $package_type_name = $global_package_type_id_to_name->{$package_type_id};
 			my $count = $package_type_ids->{$package_type_id};
 			print "  package type id: $package_type_id package type name: $package_type_name count: $count\n";
@@ -404,7 +403,7 @@ sub show_all_platforms {
 sub show_each_package_by_type { my ($packages) = @_ ;
 	my $ptcount = 0;
 	my $pcount = 0;
-	foreach my $package_type_id (sort {$a <=> $b} keys $packages) {
+	foreach my $package_type_id (sort {$a <=> $b} keys %$packages) {
 		$ptcount += 1;
 		print $package_type_id, ') ', $global_package_type_id_to_name->{$package_type_id}, ' [', scalar(@{$packages->{$package_type_id}}), "]\n";
 		foreach my $package (@{$packages->{$package_type_id}}) {
@@ -419,7 +418,7 @@ sub show_each_package_by_type { my ($packages) = @_ ;
 sub show_all_tools { my ($bypackage) = @_ ;
 	if ($bypackage) {
 		my $total = 0;
-		foreach my $package_type_id (sort {$a <=> $b} keys $global_tools_by_package_type_id) {
+		foreach my $package_type_id (sort {$a <=> $b} keys %$global_tools_by_package_type_id) {
 			print $package_type_id, ') ', $global_package_type_id_to_name->{$package_type_id}, ' [', scalar(@{$global_tools_by_package_type_id->{$package_type_id}}), "]\n";
 			foreach my $tool (@{$global_tools_by_package_type_id->{$package_type_id}}) {
 				$total += 1;
@@ -459,7 +458,7 @@ sub show_current_project {
 sub show_current_packages { my ($packages, $package_type_id_filter) = @_ ;
 	my $answer = "Current packages [$global_package_set] (%d): ";
 	my $total = 0;
-	foreach my $package_type_id (sort {$a <=> $b} keys $packages) {
+	foreach my $package_type_id (sort {$a <=> $b} keys %$packages) {
 		next if (! exists($package_type_id_filter->{$package_type_id}));
 		my $package_type = $global_package_type_id_to_name->{$package_type_id};
 		my $count = scalar(@{$packages->{$package_type_id}});
@@ -493,7 +492,7 @@ sub _select_package_type_id_filter { my ($all, $packages, $package_type_id_list)
 		}
 	}
 	if ($all || ! %$filter) {
-		foreach my $package_type_id (sort {$a <=> $b} keys $packages) {
+		foreach my $package_type_id (sort {$a <=> $b} keys %$packages) {
 			$filter->{$package_type_id} = 1;
 		}
 	}
@@ -512,7 +511,7 @@ sub _package_type_names_to_package_type_ids { my ($package_type_names) = @_ ;
 sub select_package_type_id_filter { my ($all, $packages) = @_ ;
 	my @package_type_id_list = ();
 	if (! $all) {
-		foreach my $package_type_id (sort {$a <=> $b} keys $packages) {
+		foreach my $package_type_id (sort {$a <=> $b} keys %$packages) {
 			print $package_type_id, ') ', $global_package_type_id_to_name->{$package_type_id}, "\n";
 			push @package_type_id_list, $package_type_id;
 		}
@@ -568,7 +567,7 @@ sub _select_tool_uuid_filter { my ($all, $tool_uuid_list) = @_ ;
 		}
 	}
 	if ($all || ! %$filter) {
-		foreach my $package_type_id (sort {$a <=> $b} keys $global_tools_by_package_type_id) {
+		foreach my $package_type_id (sort {$a <=> $b} keys %$global_tools_by_package_type_id) {
 			foreach my $tool (@{$global_tools_by_package_type_id->{$package_type_id}}) {
 				$filter->{$tool->{'tool_uuid'}} = 1;
 			}
@@ -722,7 +721,7 @@ sub all_cross_product { my ($project_uuid, $package_type_id_filter, $tool_uuid_f
 	my $scount = 0;
 	my $fcount = 0;
 	my $pcount = 0;
-	foreach my $package_type_id (sort {$a <=> $b} keys $packages) {
+	foreach my $package_type_id (sort {$a <=> $b} keys %$packages) {
 		next if (! exists($package_type_id_filter->{$package_type_id}));
 		my $local_packagecount = 0;
 		foreach my $package (@{$packages->{$package_type_id}}) {
@@ -1144,7 +1143,11 @@ if (! $username) {
 	}
 }
 if (! $password) {
-	$password = prompt('Enter password: ', -e => '*');
+	system("stty -echo");
+	print "Enter password: ";
+	chomp($password = <STDIN>);
+	print "\n";
+	system("stty echo");
 }
 my ($error, $user_uuid) = login($username, $password);
 if ($error) {

@@ -21,6 +21,7 @@ use warnings;
 use English qw( -no_match_vars );
 use File::Basename;
 use File::Spec::Functions qw(catfile);
+use File::Path qw(rmtree);
 use Getopt::Long;
 use POSIX qw(strftime);
 use Socket;
@@ -42,7 +43,7 @@ my $mysql_command    = qq(mysql --defaults-file="$sql_options_file" -B -N);
 #
 # Track temporary files that need to be deleted before exiting.
 #
-my @temp_objects = ($sql_options_file);
+my @temp_objects = ();
 
 ############################################################################
 
@@ -83,7 +84,6 @@ Usage: $PROGRAM_NAME --tool <id> <--add|--remove|--replace|--configure> [options
 Manage the SWAMP's add-on tools on this host.
 
 Values for the --tool option, to select the tool to update (choose one):
-  dependency-check    OWASP Dependency Check
   gt-csonar           GrammaTech CodeSonar
   ps-ctest            Parasoft C/C++test
   ps-jtest            Parasoft Jtest
@@ -405,6 +405,7 @@ EOF
     #
     # Make sure the created file is not publicly readable.
     #
+    push(@temp_objects, $sql_options_file);
     write_file($sql_options_file, q());
     chmod 0600, $sql_options_file
       || exit_abnormally("Failed to set permissions on: $sql_options_file");
@@ -612,33 +613,32 @@ sub update_user_password_config {
 sub update_tool_archive {
     my ($options) = @_;
 
+    #
+    # Remove the tool's current directory, if it exists.
+    #
+    my $dir_to_remove = get_tool_version_path($options) || q();
+
+    if (-d $dir_to_remove) {
+        print "Removing '$dir_to_remove'\n";
+        rmtree($dir_to_remove, {safe => 1, error => \my $err});
+
+        if (scalar @{$err} > 0) {
+            print "Warning: Failed to remove file: $dir_to_remove\n";
+        }
+    }
+
     if ($options->{'add'} || $options->{'replace'}) {
         my $tool_archive_file = $options->{'tool-archive-file'};
         my $tool_install_dir  = $options->{'tool-install-dir'};
 
-        print "Installing '$tool_archive_file' in '$tool_install_dir'\n";
+        print "Extracting '$tool_archive_file' into '$tool_install_dir'\n";
 
         my $escaped_tool_archive_file = escape_dquotes($tool_archive_file);
         my $escaped_tool_install_dir  = escape_dquotes($tool_install_dir);
 
-        my ($output, $status) = do_command(qq(install -m 644 -o root -g root "$escaped_tool_archive_file" "$escaped_tool_install_dir"));
+        my ($output, $status) = do_command(qq(tar -xz -C "$escaped_tool_install_dir" -f "$escaped_tool_archive_file" && chown -R root:root "$escaped_tool_install_dir" && chmod -R u=rwX,og=rX "$escaped_tool_install_dir"));
         if ($status) {
-            exit_abnormally("Failed to install '$tool_archive_file' in '$tool_install_dir'", $output);
-        }
-    }
-
-    if ($options->{'remove'}) {
-        my $file_to_remove = get_tool_version_path($options) || q();
-
-        #
-        # It's not an error if the tool archive file is already not present.
-        #
-        if (-f $file_to_remove) {
-            print "Removing '$file_to_remove'\n";
-
-            if (!unlink $file_to_remove) {
-                print "Warning: Failed to remove file: $file_to_remove\n";
-            }
+            exit_abnormally("Failed to extract '$tool_archive_file' into '$tool_install_dir'", $output);
         }
     }
     return;
@@ -724,6 +724,7 @@ sub update_database {
     my $tool_install_dir  = $options->{'tool-install-dir'};
     my $tool_archive      = $options->{'tool-archive-file'};
     my $tool_archive_file = $tool_archive ? basename($tool_archive) : q();
+    my $tool_id           = $options->{'tool-id'};
     my $tool_version      = $options->{'tool-version'};
     my $tool_params_file  = $options->{'tool-parameter-file'};
     my $tool_meta_file    = $options->{'tool-meta-file'};
@@ -752,7 +753,7 @@ sub update_database {
     my $tool_params = <<"EOF";
 set \@tool_version_uuid  = '${escaped_tool_version_uuid}';
 set \@version_string     = '${escaped_tool_version}';
-set \@tool_path          = '${escaped_tool_install_dir}/${escaped_tool_archive_file}';
+set \@tool_path          = '${escaped_tool_install_dir}/${tool_id}-${tool_version}';
 set \@checksum           = '${escaped_checksum}';
 EOF
 

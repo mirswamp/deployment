@@ -70,7 +70,7 @@ cp -p "$source_file" "$tmp_file"    # capture the file's permission bits
     echo "# This file is subject to the terms and conditions defined in"
     echo "# 'LICENSE.txt', which is part of this source code distribution."
     echo "#"
-    echo "# Copyright 2012-2019 Software Assurance Marketplace"
+    echo "# Copyright 2012-2020 Software Assurance Marketplace"
     echo
 
     tail -n +"$((skip_lines + 1))" "$source_file"

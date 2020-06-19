@@ -10,7 +10,7 @@ BUILD_NUMBER ?= dev
 CP=/bin/cp -p
 TAR=tar
 
-PERL_RPM_VERSION=$(shell grep perlbin ../../inventory/dependencies.txt)
+PERL_RPM_VERSION=$(shell grep perl ../../inventory/dependencies.txt | sed -e 's/perl://')
 
 .PHONY: dirs rpm perl
 
@@ -20,7 +20,7 @@ perl: dirs SOURCES/perlbin.tgz
 	RELEASE_NUMBER=$(RELEASE_NUMBER) BUILD_NUMBER=$(BUILD_NUMBER) TOPDIR="$(PWD)" make -C SPECS perl
 
 SOURCES/perlbin.tgz: SOURCES
-	$(CP) -r ../../perl/$(PERL_RPM_VERSION) SOURCES/perlbin.tgz
+	$(CP) -r ../../perl/perlbin_exec_w-$(PERL_RPM_VERSION).tar.gz SOURCES/perlbin.tgz
 
 dirs: $(DIRS)
 $(DIRS):

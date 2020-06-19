@@ -16,11 +16,8 @@ SCRIPT_ASSESS_VERSION=$(shell grep script-assess ../../inventory/frameworks.txt 
 RESULTPARSER_VERSION=$(shell grep resultparser ../../inventory/frameworks.txt | sed 's/resultparser-//' | sed 's/.tar//')
 CLOC_VERSION=$(shell grep cloc ../../inventory/tools-metric.txt | sed 's/cloc-//' | sed 's/.tar.gz//')
 CODEDX_WAR_VERSION=$(shell grep codedx ../../inventory/viewers.txt | sed 's/codedx-//' | sed 's/.war//')
-PERL_RPM_DEPENDENCY_VERSION=$(shell grep perlbin ../../inventory/dependencies.txt | sed 's/perlbin_exec_w-//' | sed 's/.tar.gz//')
-HTCONDOR_DEPENDENCY_VERSION=$(shell grep -oE 'condor-[[:digit:]]+(\.[[:digit:]]+)*' ../../inventory/dependencies.txt | sed -E -e 's/condor-//')
 
 AGENTFILES= \
-	arun.sh \
 	vmu_PreAssessment.pl \
 	vmu_PostAssessment.pl \
 	vmu_MonitorAssessment.pl \
@@ -52,6 +49,7 @@ AGENTPKGS= \
 CONFIG= \
 	libvirt_swamp_script.awk \
 	vmu_swampinabox_htcondor_submit \
+	docker_swampinabox_htcondor_submit \
 	vmu_swamp_htcondor_submit \
 	log4perl.conf \
 	services.conf.map \
@@ -196,8 +194,7 @@ versioninfo:
 	echo cloc:$(CLOC_VERSION) >> TEMPSOURCES/versions.txt
 	
 dependencies:
-	echo htcondor:$(HTCONDOR_DEPENDENCY_VERSION) >> TEMPSOURCES/dependencies.txt
-	echo perl-rpm:$(PERL_RPM_DEPENDENCY_VERSION) >> TEMPSOURCES/dependencies.txt
+	cp ../../inventory/dependencies.txt TEMPSOURCES/dependencies.txt
 
 resultparser:
 	cp /swampcs/releases/resultparser-$(RESULTPARSER_VERSION).tar TEMPSOURCES/resultparser.tar
@@ -207,7 +204,7 @@ common:
 	cp ../../Common/checktimeout.pl TEMPSOURCES/common/checktimeout.pl
 	cp ../../Common/flushprivs.sql TEMPSOURCES/common/flushprivs.sql
 	cp ../../Common/swamp-shutdown-service TEMPSOURCES/common/swamp-shutdown-service
-	cp ../../Common/vrunchecktimeout TEMPSOURCES/common/vrunchecktimeout
+	cp ../../Common/checktimeout TEMPSOURCES/common/checktimeout
 
 codedx:
 	cp ../../SecureDecisions/codedx.props TEMPSOURCES/codedx/codedx.props
@@ -216,7 +213,7 @@ codedx:
 	cp ../../SecureDecisions/emptydb-mysql-codedx.sql TEMPSOURCES/codedx/emptydb-mysql-codedx.sql
 	cp ../../SecureDecisions/logback.xml TEMPSOURCES/codedx/logback.xml
 	cp ../../SecureDecisions/resetdb-codedx.sql TEMPSOURCES/codedx/resetdb-codedx.sql
-	cp ../../SecureDecisions/vrun.sh TEMPSOURCES/codedx/vrun.sh
+	cp ../../SecureDecisions/vmu_vrun.sh TEMPSOURCES/codedx/vmu_vrun.sh
 
 codedx.war:
 	cp ../../../proprietary/SecureDecisions/codedx-*.war TEMPSOURCES/codedx/.

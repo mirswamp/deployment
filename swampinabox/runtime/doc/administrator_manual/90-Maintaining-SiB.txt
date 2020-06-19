@@ -13,20 +13,26 @@ instructions on how to upgrade them.
 
 Assessment Platforms::
 
-If you have previously installed additional assessment platforms, run the
-following command to determine whether there are updated versions available
-(the command does not require `root` access):
+If you have previously installed additional assessment platforms, as `root`
+(or using `sudo`), run the following command to determine whether there are
+updated versions available:
 
 +
 ----
-/opt/swamp/bin/swamp_check_platform_images
+/opt/swamp/bin/install_platform -s
 ----
 
 +
 For any out-of-date platform images, follow the instructions on
-<<add-on-platforms,installing additional assessment platforms>> for
-downloading and installing the updated images. Once that is done, the
-out-of-date images may be deleted.
+<<add-on-platforms,installing assessment platforms>> for
+downloading and installing the updated images. Once that is done, you can
+use the following command to delete any out-of-date images (or you can
+delete them by hand):
+
++
+----
+/opt/swamp/bin/install_platform -s -r
+----
 
 
 [[updating-the-hostname]]

@@ -3,33 +3,67 @@ Installing Additional Components
 
 
 [[add-on-platforms]]
-Installing Additional Platforms
+Installing Assessment Platforms
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The SWAMP-in-a-Box installer includes and installs only the Ubuntu 16.04
-platform for performing assessments. For most package types, this is the
-only supported platform. For C/C++ packages, additional platforms are
-available, including releases of CentOS, Debian, Fedora, Scientific Linux,
-and older releases of Ubuntu.
+In order to upload a package to your SWAMP and assess it, the SWAMP must
+have a compatible assessment platform installed. For each package type that
+the SWAMP supports, one or more platforms are available to be downloaded and
+installed as part of your SWAMP-in-a-Box:
+
+* Java, Python, Ruby, Web Scripting, and .NET: Ubuntu 16.04.
+
+* C/C++: Recent releases of CentOS, Debian, Fedora, Scientific Linux,
+  and Ubuntu.
+
+* Android Java source: A version of the Ubuntu
+  platform that includes the necessary dependencies for building packages.
+
+[NOTE]
+Most of the platforms will consume no more than approximately 20 GB of disk
+space each when installed. The exceptions are the Android Ubuntu platforms.
+The Docker-based Android Ubuntu platform will consume approximately 310 GB
+of disk space; the virtual machine-based version will consume approximately
+150 GB of disk space.
+
+[NOTE]
+If you add both the Docker and Virtual Machine platforms corresponding to
+the same platform version, SWAMP-in-a-Box will use the Virtual Machine
+platform for assessments. If you wish to configure SWAMP-in-a-Box to instead
+give preference to Docker platforms, edit `/opt/swamp/etc/swamp.conf` (you
+will need `root` access or `sudo` to edit this file) and change the value
+for `preferred_platform_type` from `VM` to `DC`.
 
 
 ==== Before You Begin ====
 
 * You will need `root` access to the SWAMP-in-a-Box host.
+
 * You will need `root` access to the SWAMP-in-a-Box database.
+
+* You will need to know whether the SWAMP-in-a-Box will run assessments
+  using Docker or virtual machines (VMs).
 
 
 ==== Procedure ====
 
 1. Visit https://platform.swampinabox.org/platform-images/.
 
-2. Download and copy to the SWAMP-in-a-Box host the `.qcow2.gz` files
-corresponding to the additional platforms you wish to perform assessments
-on. The naming scheme for these files is as follows:
+2. Download and copy to the SWAMP-in-a-Box host the files corresponding to
+   the platforms you wish to perform assessments on. Docker-based platforms
+   are named as follows:
 
 +
 ----
-condor-<Linux distribution>-<version>-<32 or 64 bit>-master-<YYYYMMDD>.qcow2.gz
+condor-[Linux distribution]-[version]-[64 bit]-master-[date]_docker.tar.xz
+----
+
++
+Virtual machine-based platforms are named as follows:
+
++
+----
+condor-[Linux distribution]-[version]-[32 or 64 bit]-master-[date].qcow2.gz
 ----
 
 +
@@ -38,56 +72,23 @@ https://platform.swampinabox.org/platform-images/[platform.swampinabox.org].
 Otherwise, they will not be recognized as supported platforms in the next
 step.
 
-3. On the SWAMP-in-a-Box host, for each file, as `root` (or using `sudo`),
-run the `install_platform` script, providing the path to the `.qcow2.gz`
-file:
+3. On the SWAMP-in-a-Box host, as `root` (or using `sudo`),
+run the `install_platform` script, providing the paths to the platform files:
 
 +
 ----
-/opt/swamp/bin/install_platform <path to .qcow2.gz file>
+/opt/swamp/bin/install_platform <platform 1> <platform 2>...
 ----
 
 +
 When prompted, provide the password for the database's `root` user, which is
 needed to add the platform to the database and make it available in the
 SWAMP. Note that `install_platform` will likely take several minutes to
-complete due to the size of the file.
+complete due to the sizes of the files (possibly several hours, in the case of
+the Android Ubuntu platform).
 
-
-Enabling Android Assessments
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You can enable SWAMP-in-a-Box to assess Android Java Source and Android .APK
-packages.
-
-
-==== Before You Begin ====
-
-* You will need `root` access to the SWAMP-in-a-Box host.
-* You will need `root` access to the SWAMP-in-a-Box database.
-* You will need to make sure you have enough available hard drive space on
-your SWAMP-in-a-Box host to download and decompress the Android Ubuntu
-platform image.
-
-[NOTE]
-The Android Ubuntu platform includes the OS dependencies needed to build and
-assess Android Packages. As such it is quite large. The downloadable .qcow2.gz
-file needed to add the platform is over 76 GB. The decompressed, installed
-.qcow2 file takes up about 150 GB in the /swamp/platforms/images directory.
-
-
-==== Procedure ====
-
-1. Download and install the Android Ubuntu 12.04 64-bit platform following
-the procedure for <<add-on-platforms>>.
-
-2. Optionally delete the Android Ubuntu platform .qcow2.gz file if you wish to
-conserve disk space.
-
-When the Android Ubuntu platform is added, the Android Java Source and
-Android .APK package types are enabled. Android-specific tools are installed
-with SWAMP-in-a-Box, but they cannot be used for assessments until the
-Android Ubuntu platform is added.
+4. (Optional) In order to conserve disk space, delete the platform files
+that you downloaded and copied to the SWAMP-in-a-Box host.
 
 
 Installing Additional Tools
@@ -101,16 +102,15 @@ For C/C++ packages, three additional tools can be installed:
   * <<about-codesonar,CodeSonar>>, and
   * <<about-parasoft,Parasoft C/C++test>>.
 
-For Java packages, two additional tools can be installed:
+For Java packages, one additional tool can be installed:
 
-  * https://www.owasp.org/index.php/OWASP_Dependency_Check[OWASP Dependency Check] and
   * <<about-parasoft,Parasoft Jtest>>.
 
 For Web Scripting packages, one additional tool can be installed:
 
   * A version of https://retirejs.github.io/[Retire.js] that does not
     require internet access (the version included with SWAMP-in-a-Box will
-    not function correctly without internet access)
+    not function correctly without internet access).
 
 The process for obtaining tool installers/archives from their vendors and
 packaging them into the format that the SWAMP requires differs
@@ -169,20 +169,12 @@ parasoft_jtest_<version>_linux_x86.tar.gz     (32-bit)
 parasoft_jtest_<version>_linux_x86_64.tar.gz  (64-bit)
 ----
 
-OWASP Dependency Check::
-
-Visit https://platform.swampinabox.org/tool-archives/ and download the
-`dependency-check-<version>.tar.gz` file corresponding to the version of
-OWASP Dependency Check that you would like to install. The archive from
-https://platform.swampinabox.org/tool-archives/[platform.swampinabox.org]
-includes scripts and documentation for integrating the tool into the SWAMP.
-
 Retire.js::
 
 On the SWAMP-in-a-Box host, copy the
-`/swamp/store/SCATools/bundled/retire-js-<version>.tar.gz` file 
-corresponding to the version of Retire.js that you would like to install 
-to some directory that you have write access to (for example, your home 
+`/swamp/store/SCATools/bundled/retire-js-<version>.tar.gz` file
+corresponding to the version of Retire.js that you would like to install
+to some directory that you have write access to (for example, your home
 directory).
 
 
@@ -216,7 +208,6 @@ When `make_swamp_tool` completes, the output should include the path to the
 SWAMP tool archive file that was created. Note that `make_swamp_tool` will
 likely take several minutes to complete due to the size of the installers.
 
-OWASP Dependency Check::
 Retire.js::
 
 Expand the archive file that you downloaded or copied:
@@ -244,7 +235,6 @@ with the following command line arguments:
 * `--tool <id>`: This specifies the tool being managed. Recognized values
   for `<id>` include:
 
-  ** `dependency-check`: OWASP Dependency Check
   ** `gt-csonar`: GrammaTech CodeSonar
   ** `ps-ctest`: Parasoft C/C++test
   ** `ps-jtest`: Parasoft Jtest
@@ -316,19 +306,6 @@ instances of the tool the SWAMP may run:
     --limit <max number of simultaneous instances>
 ----
 
-OWASP Dependency Check::
-
-Use the `--tool-conf` option to specify the path to a file containing
-additional entries that should be added to `services.conf`:
-
-+
-----
-/opt/swamp/bin/install_tool \
-    --tool <id> \
-    --configure \
-    --tool-conf <path to file containing entries for services.conf>
-----
-
 
 ==== Manage the Installed Versions of the Tool ====
 
@@ -386,6 +363,8 @@ standalone Code Dx installation.)
 
 ==== Before You Begin ====
 
+* You will need a SWAMP-in-a-Box capable of running virtual machines.
+
 * You will need `root` access to the SWAMP-in-a-Box host.
 
 * You will need `root` access to the SWAMP-in-a-Box database.
@@ -398,15 +377,26 @@ standalone Code Dx installation.)
 
 ==== Procedure ====
 
-1. Copy the Code Dx `.war` file obtained from Code Dx, Inc. to the
-SWAMP-in-a-Box host.
+1. Visit https://platform.swampinabox.org/platform-images/.
 
-2. On the SWAMP-in-a-Box host, as `root` (or using `sudo`), run the
-`install_codedx` script, providing the path to the `.war` file:
+2. Download and copy to the SWAMP-in-a-Box the viewer platform corresponding
+   to the version of Code Dx that you wish to install. The platforms are
+   named as follows:
 
 +
 ----
-/opt/swamp/bin/install_codedx <path to Code Dx .war file>
+condor-codedx-[version]-viewer-master-[date].qcow2.gz
+----
+
+3. Copy the Code Dx `.war` file obtained from Code Dx, Inc. to the
+SWAMP-in-a-Box host.
+
+4. On the SWAMP-in-a-Box host, as `root` (or using `sudo`), run the
+`install_codedx` script, providing the path to the `.war` and platform files:
+
++
+----
+/opt/swamp/bin/install_codedx <.war file> <.qcow2.gz file>
 ----
 
 +
@@ -414,7 +404,12 @@ When prompted, provide the password for the database's `root` user, which is
 needed to add the Code Dx viewer to the database and make it available in
 the SWAMP.
 
+5. (Optional) In order to conserve disk space, delete the Code Dx `.war`
+   file and platform files that you downloaded and copied to the
+   SWAMP-in-a-Box host.
+
 If you have previously installed an older version of Code Dx and wish to
 replace it with a newer version, follow the above procedure using the newer
-Code Dx `.war` file. The `install_codedx` script will replace the older
-version of Code Dx with the newer one.
+Code Dx `.war` file and the viewer platform corresponding to the newer version
+of Code Dx. The `install_codedx` script will replace the older version of 
+Code Dx with the newer one.

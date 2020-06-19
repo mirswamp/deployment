@@ -1,0 +1,14 @@
+[Unit]
+Description=CodeDX Backup Service
+After=mariadb.service tomcat.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=root
+Group=root
+ExecStart=/usr/local/libexec/codedx-backup start
+ExecStop=/usr/local/libexec/codedx-backup stop
+
+[Install]
+WantedBy=multi-user.target

@@ -3,75 +3,81 @@
 #
 # Copyright 2012-2020 Software Assurance Marketplace
 
-RUNOUT=/mnt/out/run.out
-SKIPPEDBUNDLE=/mnt/out/skippedbundle
-EVENTOUT="/dev/ttyS1"
-
-if ! grep 'viewer is UP' $RUNOUT
+# Bootstrap the environment by testing location of run-params.sh
+# vm universe has /mnt/in
+# docker universe has _$_CONDOR_SCRATCH_DIR
+if [ -r "/mnt/in/run-params.sh" ]
 then
-	echo "VIEWERDBBUNDLESKIP" > $EVENTOUT
-	touch $SKIPPEDBUNDLE
+    source /mnt/in/run-params.sh
+else
+    source $_CONDOR_SCRATCH_DIR/run-params.sh
+fi
+
+if ! grep 'viewer is UP' $SWAMP_LOG_FILE
+then
+	echo "VIEWERDBBUNDLESKIP" > $SWAMP_EVENT_FILE
+	touch $SKIPPED_BUNDLE
 	exit
 fi
 
-echo "VIEWERDBBACKUP" > $EVENTOUT
-echo "`date +"%Y/%m/%d %H:%M:%S"`: mysqldump to /mnt/out/codedx.sql"
-echo "`date +"%Y/%m/%d %H:%M:%S"`: mysqldump to /mnt/out/codedx.sql" >> $RUNOUT 2>&1
-mysqldump --user='codedx' --password='PA$$w0rd123' --databases codedx > /mnt/out/codedx.sql 2>> $RUNOUT
+echo "VIEWERDBBACKUP" > $SWAMP_EVENT_FILE
+echo "`date +"%Y/%m/%d %H:%M:%S"`: mysqldump to $JOB_OUTPUT_DIR/codedx.sql"
+echo "`date +"%Y/%m/%d %H:%M:%S"`: mysqldump to $JOB_OUTPUT_DIR/codedx.sql" >> $SWAMP_LOG_FILE 2>&1
+mysqldump --user='codedx' --password='PA$$w0rd123' --databases codedx > $JOB_OUTPUT_DIR/codedx.sql 2>> $SWAMP_LOG_FILE
 dresult=$?
 dresultfile=''
 if [ "$dresult" != 0 ]; then
-	echo "VIEWERDBDUMPFAIL" > $EVENTOUT
+	echo "VIEWERDBDUMPFAIL" > $SWAMP_EVENT_FILE
 	echo "`date +"%Y/%m/%d %H:%M:%S"`: mysqldump failed: $dresult"
-	echo "`date +"%Y/%m/%d %H:%M:%S"`: mysqldump failed: $dresult" >> $RUNOUT 2>&1
-	if [ -r /mnt/out/codedx.sql ]; then
-		echo "`date +"%Y/%m/%d %H:%M:%S"`: moving /mnt/out/codedx.sql to /mnt/out/codedx.sql.error"
-		echo "`date +"%Y/%m/%d %H:%M:%S"`: moving /mnt/out/codedx.sql to /mnt/out/codedx.sql.error" >> $RUNOUT 2>&1
-		mv /mnt/out/codedx.sql /mnt/out/codedx.sql.error
+	echo "`date +"%Y/%m/%d %H:%M:%S"`: mysqldump failed: $dresult" >> $SWAMP_LOG_FILE 2>&1
+	if [ -r $JOB_OUTPUT_DIR/codedx.sql ]; then
+		echo "`date +"%Y/%m/%d %H:%M:%S"`: moving $JOB_OUTPUT_DIR/codedx.sql to $JOB_OUTPUT_DIR/codedx.sql.error"
+		echo "`date +"%Y/%m/%d %H:%M:%S"`: moving $JOB_OUTPUT_DIR/codedx.sql to $JOB_OUTPUT_DIR/codedx.sql.error" >> $SWAMP_LOG_FILE 2>&1
+		mv $JOB_OUTPUT_DIR/codedx.sql $JOB_OUTPUT_DIR/codedx.sql.error
 		dresultfile="codedx.sql.error"
 	fi
 else
-	echo "VIEWERDBDUMPSUCCESS" > $EVENTOUT
-	echo "`date +"%Y/%m/%d %H:%M:%S"`: mysqldump completed to /mnt/out/codedx.sql"
-	echo "`date +"%Y/%m/%d %H:%M:%S"`: mysqldump completed to /mnt/out/codedx.sql" >> $RUNOUT 2>&1
+	echo "VIEWERDBDUMPSUCCESS" > $SWAMP_EVENT_FILE
+	echo "`date +"%Y/%m/%d %H:%M:%S"`: mysqldump completed to $JOB_OUTPUT_DIR/codedx.sql"
+	echo "`date +"%Y/%m/%d %H:%M:%S"`: mysqldump completed to $JOB_OUTPUT_DIR/codedx.sql" >> $SWAMP_LOG_FILE 2>&1
 	dresultfile="codedx.sql"
 fi
 
-echo "`date +"%Y/%m/%d %H:%M:%S"`: bundling codedx.sql and codedx_config.tar from /var/lib/codedx/$PROJECT/config into /mnt/out/codedx_viewerdb.tar.gz"
-echo "`date +"%Y/%m/%d %H:%M:%S"`: bundling codedx.sql and codedx_config.tar from /var/lib/codedx/$PROJECT/config into /mnt/out/codedx_viewerdb.tar.gz" >> $RUNOUT 2>&1
-tar --directory=/var/lib/codedx/$PROJECT -cf /mnt/out/codedx_config.tar config
-tar tf /mnt/out/codedx_config.tar > /dev/null 2>> $RUNOUT
+echo "`date +"%Y/%m/%d %H:%M:%S"`: bundling codedx.sql and codedx_config.tar from /var/lib/codedx/$PROJECT/config into $JOB_OUTPUT_DIR/codedx_viewerdb.tar.gz"
+echo "`date +"%Y/%m/%d %H:%M:%S"`: bundling codedx.sql and codedx_config.tar from /var/lib/codedx/$PROJECT/config into $JOB_OUTPUT_DIR/codedx_viewerdb.tar.gz" >> $SWAMP_LOG_FILE 2>&1
+tar --directory=/var/lib/codedx/$PROJECT -cf $JOB_OUTPUT_DIR/codedx_config.tar config
+tar tf $JOB_OUTPUT_DIR/codedx_config.tar > /dev/null 2>> $SWAMP_LOG_FILE
 cresult=$?
 cresultfile=''
 if [ "$cresult" != 0 ]; then
-	echo "VIEWERDBCONFIGFAIL" > $EVENTOUT
+	echo "VIEWERDBCONFIGFAIL" > $SWAMP_EVENT_FILE
 	echo "`date +"%Y/%m/%d %H:%M:%S"`: tar /var/lib/codedx/$PROJECT/config failed: $cresult"
-	echo "`date +"%Y/%m/%d %H:%M:%S"`: tar /var/lib/codedx/$PROJECT/config failed: $cresult" >> $RUNOUT 2>&1
-	if [ -r /mnt/out/codedx_config.tar ]; then
-		echo "`date +"%Y/%m/%d %H:%M:%S"`: moving /mnt/out/codedx_config.tar to /mnt/out/codedx_config.tar.error"
-		echo "`date +"%Y/%m/%d %H:%M:%S"`: moving /mnt/out/codedx_config.tar to /mnt/out/codedx_config.tar.error" >> $RUNOUT 2>&1
-		mv /mnt/out/codedx_config.tar /mnt/out/codedx_config.tar.error
+	echo "`date +"%Y/%m/%d %H:%M:%S"`: tar /var/lib/codedx/$PROJECT/config failed: $cresult" >> $SWAMP_LOG_FILE 2>&1
+	if [ -r $JOB_OUTPUT_DIR/codedx_config.tar ]; then
+		echo "`date +"%Y/%m/%d %H:%M:%S"`: moving $JOB_OUTPUT_DIR/codedx_config.tar to $JOB_OUTPUT_DIR/codedx_config.tar.error"
+		echo "`date +"%Y/%m/%d %H:%M:%S"`: moving $JOB_OUTPUT_DIR/codedx_config.tar to $JOB_OUTPUT_DIR/codedx_config.tar.error" >> $SWAMP_LOG_FILE 2>&1
+		mv $JOB_OUTPUT_DIR/codedx_config.tar $JOB_OUTPUT_DIR/codedx_config.tar.error
 		cresultfile="codedx_config.tar.error"
 	fi
 else
-	echo "VIEWERDBCONFIGSUCCESS" > $EVENTOUT
+	echo "VIEWERDBCONFIGSUCCESS" > $SWAMP_EVENT_FILE
 	echo "`date +"%Y/%m/%d %H:%M:%S"`: tar /var/lib/codedx/$PROJECT/config completed"
-	echo "`date +"%Y/%m/%d %H:%M:%S"`: tar /var/lib/codedx/$PROJECT/config completed" >> $RUNOUT 2>&1
+	echo "`date +"%Y/%m/%d %H:%M:%S"`: tar /var/lib/codedx/$PROJECT/config completed" >> $SWAMP_LOG_FILE 2>&1
 	cresultfile="codedx_config.tar"
 fi
 
 if [[ "$dresultfile" == "" && "$cresultfile" == "" ]]; then
-	echo "VIEWERDBNOBUNDLE" > $EVENTOUT
+	echo "VIEWERDBNOBUNDLE" > $SWAMP_EVENT_FILE
 	echo "`date +"%Y/%m/%d %H:%M:%S"`: no results to bundle results: d[$dresult] c[$cresult]"
-	echo "`date +"%Y/%m/%d %H:%M:%S"`: no results to bundle results: d[$dresult] c[$cresult]" >> $RUNOUT 2>&1
+	echo "`date +"%Y/%m/%d %H:%M:%S"`: no results to bundle results: d[$dresult] c[$cresult]" >> $SWAMP_LOG_FILE 2>&1
 else
-	tar --directory=/mnt/out -czf /mnt/out/codedx_viewerdb.tar.gz $dresultfile $cresultfile
+	tar --directory=$JOB_OUTPUT_DIR -czf $JOB_OUTPUT_DIR/codedx_viewerdb.tar.gz $dresultfile $cresultfile
 	tresult=$?
 	if [ "$tresult" != 0 ]; then
-		echo "VIEWERDBBUNDLEFAIL" > $EVENTOUT
+		echo "VIEWERDBBUNDLEFAIL" > $SWAMP_EVENT_FILE
 	else
-		echo "VIEWERDBBUNDLESUCCESS" > $EVENTOUT
+		echo "VIEWERDBBUNDLESUCCESS" > $SWAMP_EVENT_FILE
 	fi
-	echo "`date +"%Y/%m/%d %H:%M:%S"`: bundling completed into /mnt/out/codedx_viewerdb.tar.gz with results: d[$dresult] c[$cresult] t[$tresult]"
-	echo "`date +"%Y/%m/%d %H:%M:%S"`: bundling completed into /mnt/out/codedx_viewerdb.tar.gz with results: d[$dresult] c[$cresult] t[$tresult]" >> $RUNOUT 2>&1
+	echo "`date +"%Y/%m/%d %H:%M:%S"`: bundling completed into $JOB_OUTPUT_DIR/codedx_viewerdb.tar.gz with results: d[$dresult] c[$cresult] t[$tresult]"
+	echo "`date +"%Y/%m/%d %H:%M:%S"`: bundling completed into $JOB_OUTPUT_DIR/codedx_viewerdb.tar.gz with results: d[$dresult] c[$cresult] t[$tresult]" >> $SWAMP_LOG_FILE 2>&1
 fi

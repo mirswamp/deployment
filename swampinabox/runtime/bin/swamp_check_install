@@ -406,13 +406,21 @@ sub check_htcondor {
     my $condor_q            = qq($htcondor_config_arg $condor_q_arg);
     my $condor_status       = qq($htcondor_config_arg $condor_status_arg);
 
+    my $vm_flag = q();
+    my ($ignored, $vm_missing) = do_command(qq($FindBin::Bin/swamp_check_vm_support), {'no-warn' => 1});
+
+    if (!$vm_missing) {
+        $vm_flag = "-vm";
+    }
+
     if ($options->{'wait-for-condor'}) {
+
         print 'Waiting for HTCondor daemons to start ...';
 
         my $limit              = 15;
         my $poll_time          = 2;
         my $poll_condor_q      = qq($condor_q);
-        my $poll_condor_status = qq($condor_status -vm -af:, Name);
+        my $poll_condor_status = qq($condor_status $vm_flag -af:, Name);
         my $poll_opts          = {'no-warn' => 1};
         my $tries;
 
@@ -455,15 +463,17 @@ sub check_htcondor {
         add_error_line('The HTCondor pool has no resources for running jobs');
     }
 
-    print 'Checking for HTCondor execute slots with VM support ... ';
-    $output = do_line_count_command(qq($condor_status -vm -af:, $status_fields));
-    print "$output slots\n" if defined $output;
+    if (!$vm_missing) {
+        print 'Checking for HTCondor execute slots with VM support ... ';
+        $output = do_line_count_command(qq($condor_status -vm -af:, $status_fields));
+        print "$output slots\n" if defined $output;
 
-    if (!defined $output || $output == 0) {
-        add_error_line('The HTCondor pool has no resources for running VM jobs');
-    }
-    else {
-        add_info_line("The HTCondor pool has $output slots for running VM jobs");
+        if (!defined $output || $output == 0) {
+            add_error_line('The HTCondor pool has no resources for running VM jobs');
+        }
+        else {
+            add_info_line("The HTCondor pool has $output slots for running VM jobs");
+        }
     }
 
     print 'Looking for jobs in the HTCondor queue ... ';

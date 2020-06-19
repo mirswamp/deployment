@@ -1,0 +1,24 @@
+# HTCondor submit file for SWAMP Docker Universe.
+
+### General Docker Universe Settings
+universe = docker
+RequestMemory = 6144
+RequestCpus = 2
+RequestDisk = 2
+
+transfer_executable = False
+
+### Transfer Output Files
+# REMOVE
+should_transfer_files = YES
+# transfer_output_files = ""
+
+# REMOVE
+transfer_output_files = in,out
+# REMOVE
+when_to_transfer_output = ON_EXIT_OR_EVICT
+output = condor_out
+stream_error = True
+error = condor_err
+log = condor_log
+want_graceful_removal = true

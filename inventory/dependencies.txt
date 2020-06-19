@@ -1,2 +1,2 @@
-condor-8.8.8-x86_64_<OS_VER>-stripped.tar.gz
-perlbin_exec_w-5.26.1.tar.gz
+perl:5.26.1
+htcondor:8.9.8-sib

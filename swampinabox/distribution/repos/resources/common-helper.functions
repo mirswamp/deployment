@@ -89,9 +89,7 @@ check_os_dist_and_ver() {
     echo "Checking OS support ... $distribution $version"
 
     case "$distribution $version" in
-        "CentOS Linux 6") ;;
         "CentOS Linux 7") ;;
-        "Red Hat Linux 6") ;;
         "Red Hat Linux 7") ;;
         *)
             echo

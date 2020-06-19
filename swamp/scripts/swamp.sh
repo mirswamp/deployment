@@ -16,7 +16,7 @@ fi
 perl_version='5.26.1'
 if [ -r /opt/swamp/etc/dependencies.txt ]
 then
-	perl_version=$(grep perl /opt/swamp/etc/dependencies.txt | sed 's/perl-rpm://')
+	perl_version=$(grep perl /opt/swamp/etc/dependencies.txt | sed 's/perl://')
 fi
 perl_path="/opt/perl5/perls/perl-$perl_version/bin/"
 # echo "perl_version: $perl_version"

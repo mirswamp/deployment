@@ -1,1 +1,1 @@
-condor-universal-centos-6.10-64-viewer-master-2019010100.qcow2
+condor-codedx-3.5.5-embedded-viewer-master-2020060400.qcow2

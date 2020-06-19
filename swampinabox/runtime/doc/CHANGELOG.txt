@@ -1,9 +1,123 @@
+Noteworthy Changes in SWAMP-in-a-Box 1.35
+-----------------------------------------
+
+1. SWAMP-in-a-Box is no longer supported on CentOS 6 systems. SWAMP-in-a-Box 
+1.35 cannot be installed on CentOS 6 nor can an earlier version of 
+SWAMP-in-a-Box installed on CentOS 6 be upgraded to SWAMP-in-a-Box 1.35. 
+Specifically, the script to update SWAMP dependencies, `install-all.bash`, 
+will not run under CentOS 6.
+
+2. Docker Containers can be used instead of (or in addition to) Virtual 
+Machine images for running assessments. As a result, SWAMP-in-a-Box can 
+itself run in a Virtual Machine environment (such as AWS) without the need 
+to have nested virtualization enabled. Please refer to the SWAMP-in-a-Box 
+Administrator Manual for information about choosing between VM images and 
+Docker Containers. Note that use of the Code Dx result viewer with 
+SWAMP-in-a-Box still requires a Virtual Machine and therefore nested 
+virtualization.
+
+3. SWAMP-in-a-Box is no longer initially deployed with any assessment 
+platforms. Adding at least one platform is now an additional required step. 
+Package types (languages) are enabled based on platform selected. Not all 
+platforms support assessments of all package types. Supported VM platforms 
+previously installed with or added to SWAMP-in-a-Box installations will 
+still be available after an upgrade to SWAMP-in-a-Box 1.35. However, 
+depending on what version of SWAMP-in-a-Box you are upgrading from, it is 
+possible that your current version of SWAMP-in-a-Box does not have any 
+platforms supported by SWAMP-in-a-Box 1.35. In that case there will be no 
+platforms available after the upgrade. Please refer to the SWAMP-in-a-Box 
+Administrator Manual for information about adding platforms. The following 
+platforms can be downloaded and added to a SWAMP-in-a-Box deployment. Each 
+platform is available as either a VM image or a Docker container, except 
+where noted :
+-- android-ubuntu-12.04-64
+-- centos-6.10-32 (VM only)
+-- centos-6.10-64
+-- centos-7.7-64
+-- debian-7.11-64
+-- debian-8.11-64
+-- fedora-21-64
+-- fedora-22-64
+-- fedora-23-64
+-- fedora-24-64
+-- scientific-6.10-32 (VM only)
+-- scientific-6.10-64
+-- scientific-7.7-64
+-- ubuntu-12.04-64
+-- ubuntu-14.04-64
+-- ubuntu-16.04-64
+
+4. New VM master images are available for the Debian (7.11 and 8.11) 
+platforms. These images include a fix that allows packages with specified OS 
+dependencies to download those dependencies prior to build and assessment. 
+If you have added a Debian platform to a SWAMP-in-a-Box, you will need to 
+download and re-add the corresponding platform master after upgrading to 
+SWAMP-in-a-Box version 1.35.
+
+5. New VM master images are available for the CentOS 7 and Scientific 7 
+platforms. These images include only minor configuration changes. 
+
+6. SWAMP-in-a-Box now requires that the .war file for Code Dx be embedded in 
+the VM master images used for Code Dx viewers. This improves the time it 
+takes to initially run a viewer VM and start Code Dx for a given SWAMP 
+project. If you have added Code Dx as a viewer for a SWAMP-in-a-Box 
+installation, you will need to download a new viewer VM master image that 
+corresponds with your version of Code Dx and then re-add Code Dx as a 
+SWAMP-in-a-Box add-on. VM master images for use with Code Dx can be 
+downloaded from https://platform.swampinabox.org Please refer to the 
+SWAMP-in-a-Box Administrator guide for information on adding Code Dx to a 
+SWAMP-in-a-Box.
+
+7. SWAMP-in-a-Box now stores tools in the file system in expanded format 
+(instead of in archive files). This streamlines the way SWAMP adds them to 
+the input disk for assessment VMs or Docker containers. For SWAMP-in-a-Box 
+installations, the expansion of tools, including add-on tools, is done 
+automatically as part of an installation of or upgrade to SWAMP-in-a-Box 
+1.35.
+
+8. SWAMP-in-a-Box now stores its assessment frameworks and result parser on 
+the file system in expanded format (instead of in archive files). This 
+streamlines the way SWAMP adds them to the input disk for assessment VMs or 
+Docker containers. For SWAMP-in-a-Box installations, the expansion of the 
+frameworks and result parser are handled automatically with installation of 
+or upgrade to SWAMP-in-a-Box 1.35. 
+
+9. We have improved the Error Report available for assessments that finish 
+with errors. Specifically, we've reorganized the information displayed so 
+that the content of logs and files that contain information helpful in 
+troubleshooting the error is available and prominent. Additionally, the 
+Error Report now includes a link to the section of the updated help 
+document, "SWAMP Output Files and Debugging Failures" (formerly called 
+"Status.out and Debugging SWAMP Failures"), that describes the first error 
+or failure to occur. This document is also available from the Help page in 
+both PDF and HTML formats.
+
+10. SWAMP now indicates when an assessment is successful, but one or more of 
+the code files for a C/C++ or Java No Build package are not able to be 
+compiled and assessed. Similarly, SWAMP now warns when an assessment appears 
+successful, but there were no applicable code files to assess. In each of 
+these cases, assessments have a final status of "Finshed with Warnings", and 
+SWAMP provides access to a "Warning Report" (similar to the "Error Repot") 
+that provides details about the specific warning.
+
+12. The version of OWASP Dependency Check previously compatible with 
+SWAMP-in-a-Box (available as an add-on tool) is no longer supported and is 
+unable to obtain up-to-date data about dependencies and known weaknesses or 
+vulnerabilities. As a result we have deprecated OWASP Dependency Check 
+version 2.2.1. If you had OWASP Dependency Check installed as an add-on tool 
+in a SWAMP-in-a-Box installation, it will be removed upon upgrading to 
+SWAMP-in-a-Box 1.35. Note that because OWASP Dependency Check was the only 
+SWAMP tool available to assess Android .apk packages,  the Android .apk 
+package type will be disabled in SWAMP 1.35. You will not be able to upload 
+new Android .apk packages in SWAMP 1.35. Any existing Android .apk packages 
+you have added will remain, however there will be no tools available to 
+assess them.
+
+13. General enhancements and bug fixes.
+
+
 Noteworthy Changes in SWAMP-in-a-Box 1.34.6
 -------------------------------------------
-
-Important: Support for SWAMP-in-a-Box on CentOS 6 will end with the 1.34.x
-releases. SWAMP-in-a-Box 1.35 and later will not support installation of 
-SWAMP-in-a-Box on CentOS 6.
 
 1. A new version of the Flow tool for assessing Web Scripting packages that
 contain JavaScript is available: version 0.112.0. This version replaces all
@@ -13,7 +127,7 @@ previous versions.
 that contain JavaScript is available: version 2.0.3. This version replaces
 all previous versions. Retire.js requires an internet connection to 
 download the latest information about potential weaknesses. If you have
-configured a SWAMP-in-a-Box to run without an internet connection you will
+configured a SWAMP-in-a-Box to run without an internet connection, you will
 need to create a new, custom version of Retire.js 2.0.3 to run without an
 internet connection. Please refer to the SWAMP-in-a-Box Administrator 
 Manual section 4.3.

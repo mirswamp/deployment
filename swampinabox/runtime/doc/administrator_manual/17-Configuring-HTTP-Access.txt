@@ -1,0 +1,43 @@
+[[configure-http]]
+Configuring HTTP Access to SWAMP-in-a-Box
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For situations where it is not possible to <<configure-ssl-certs,configure
+SWAMP-in-a-Box with an SSL certificate signed by a trusted authority>>, you
+can configure SWAMP-in-a-Box to allow access over HTTP.
+
+[WARNING]
+====
+This is *not* a recommended configuration for SWAMP-in-a-Box. All network
+traffic to and from the SWAMP-in-a-Box, *including passwords* used to log
+into the SWAMP, will *not* be encrypted.
+
+This configuration is appropriate only for situations where network traffic
+to and from SWAMP-in-a-Box is restricted to a trusted network, or situations
+where every user is using a username and password unique to the SWAMP and
+does not care whether unknown third parties snoop on their packages and
+assessments.
+====
+
+
+==== Before You Begin ====
+
+* You need `root` access to the SWAMP-in-a-Box host.
+
+
+==== Procedure ====
+
+1. As `root`, or using `sudo`, edit `/etc/httpd/conf/httpd.conf`.
+
+2. Enable HTTP access to SWAMP-in-a-Box's web server by finding the line
+   `\#Listen 80` and changing it so that it reads `Listen 80` (i.e., remove
+   the `#` at the beginning of the line).
+
+3. As `root`, or using `sudo`, edit `/var/www/swamp-web-server/.env`.
+
+4. Configure the SWAMP to allow insecure session cookies by finding the line
+   `SESSION_SECURE_COOKIE=true` and changing it so that it reads
+   `SESSION_SECURE_COOKIE=false` (i.e., change `true` to `false`).
+
+5. As `root`, or using `sudo`, restart the web server by running `service
+   httpd restart`.

@@ -62,7 +62,15 @@ if [ -z "$htcondor_tar_file" ]; then
     htcondor_version=$(grep '^htcondor:' /opt/swamp/etc/dependencies.txt \
                          | head -n 1 \
                          | sed -e 's/^htcondor://')
-    htcondor_tar_file=$BINDIR/../dependencies/htcondor/condor-${htcondor_version}-x86_64_${os_tag}-stripped.tar.gz
+
+    for path in "$BINDIR"/../dependencies/htcondor/condor-"${htcondor_version}"*"${os_tag}"*
+    do
+        if [ -f "$path" ]
+        then
+            htcondor_tar_file=$path
+            break
+        fi
+    done
 fi
 
 if [ -f "$htcondor_tar_file" ]; then
@@ -77,6 +85,11 @@ fi
 
 create_user "$htcondor_user"
 tell_service --skip-missing "$htcondor_service" stop
+
+if groupmems -g docker -l 1>/dev/null 2>&1
+then
+    create_group docker "$htcondor_user"
+fi
 
 trap 'rm -rf "$htcondor_installer_dir"' EXIT
 htcondor_installer_dir=$(mktemp -d /tmp/htcondor_installer.XXXXXXXX)

@@ -68,11 +68,18 @@ sub wait_for_htcondor {
     my $condor_q            = qq($htcondor_config_arg $condor_q_arg);
     my $condor_status       = qq($htcondor_config_arg $condor_status_arg);
 
+    my $vm_flag = q();
+    my ($ignored, $vm_missing) = do_command(qq($FindBin::Bin/../bin/swamp_check_vm_support));
+
+    if (!$vm_missing) {
+        $vm_flag = "-vm";
+    }
+
     #
     # Poll 'condor_q' and 'condor_status'.
     #
     my $poll_condor_q      = qq($condor_q);
-    my $poll_condor_status = qq($condor_status -vm -af:, Name);
+    my $poll_condor_status = qq($condor_status $vm_flag -af:, Name);
     my $poll_interval      = 2;
     my $poll_limit         = 15;    ## no critic (MagicNumbers)
 
