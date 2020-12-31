@@ -1,0 +1,30 @@
+
+== Before You Begin ==
+
+Building SIB includes components that are not built with the build process described in this document.  These compoents are included with the SIB installer to be installed in an SIB instance.
+
+=== Frameworks and HTCondor ===
+
+==== Frameworks ====
+
+These are found as directories within the `/opt/swamp/thirdparty` directory on an already installed SIB instance.  Recreate the `.tar` files from the directories.  Make sure you are extracting these frameworks from the same SIB release version that you are attempting to build.  SIB releases depend on specific versions of these frameworks.
+
+[IMPORTANT]
+The GitHub repositories listed above are incomplete. Do NOT attempt to create the required `.tar` files from the GitHub repositories.
+
+.Obtaining Frameworks and Result Parser Example
+----
+cd /opt/swamp/thirdparty
+for framework in c-assess-1.2.6 \
+java-assess-2.7.6 \
+ruby-assess-1.2.5 \
+script-assess-1.4.5 ;
+do tar cf /tmp/${framework}.tar ${framework} ; done
+tar cf /tmp/resultparser-3.3.4.tar resultparser-3.3.4
+----
+
+Copy the `.tar` files to `/swampcs/releases` on the machine you are building SIB.
+
+==== HTCondor ====
+
+SIB includes a custom release of HTCondor.  To successfully build the SIB installer, copy the HTCondor `.tar` files from `<sib installer>/dependencies/htcondor` directory to `/swampcs/htcondor` on the machine you are building SIB.

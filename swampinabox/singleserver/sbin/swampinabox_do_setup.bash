@@ -10,6 +10,8 @@
 # that can be done without internet access or input from the user.
 #
 
+swamp_context=$1
+
 echo ""
 echo "### Setting Up This Host for SWAMP-in-a-Box"
 echo ""
@@ -39,19 +41,23 @@ if [ -e /usr/lib/systemd/system/mariadb.service ]; then
 fi
 
 #
-# Ensure that system services start up automatically after a system restart.
+# Ensure that system services start up automatically after a system restart,
+# except for in a docker build: Docker containers use supervisord to start services
 #
-if [ -e /usr/lib/systemd/system/docker.service ]; then
-    enable_service docker
+if [ "$swamp_context" != "-docker" ]
+then
+    if [ -e /usr/lib/systemd/system/docker.service ]; then
+        enable_service docker
+    fi
+    if [ -e /usr/lib/systemd/system/mariadb.service ]; then
+        enable_service mariadb
+    fi
+    if [ -e /etc/rc.d/init.d/mysql ]; then
+        enable_service mysql
+    fi
+    enable_service httpd
+    enable_service libvirtd
 fi
-if [ -e /usr/lib/systemd/system/mariadb.service ]; then
-    enable_service mariadb
-fi
-if [ -e /etc/rc.d/init.d/mysql ]; then
-    enable_service mysql
-fi
-enable_service httpd
-enable_service libvirtd
 
 #
 # Ensure that the 'mysql' user's shell is set appropriately.

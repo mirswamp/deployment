@@ -589,6 +589,13 @@ only when `[SITE]_ENABLED` is set to "true".
 The Client Secret set in the OAuth Application for the site. This is
 applicable only when `[SITE]_ENABLED` is set to "true".
 
+One additional parameter is available for configuring CILogon.
+
+`CILOGON_SKIN`::
+
+Determines the appearance of CILogon's interstitial page. The SWAMP-in-a-Box
+installer sets this to "default".
+
 
 Session Related Settings
 ~~~~~~~~~~~~~~~~~~~~~~~~

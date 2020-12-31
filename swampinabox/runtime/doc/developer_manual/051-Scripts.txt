@@ -1,0 +1,32 @@
+
+=== Database `bash` Scripts Called by `sys_exec` and `sys_eval` ===
+
+There are three entry points into the Perl backend from the database. They are simple bash scripts that call
+their corresponding Perl scripts, passing all arguments and returning all results.
+
+* `/usr/local/bin/launch_viewer` - launch a viewer job in HTCondor
+* `/usr/local/bin/kill_run` - remove an assessment or viewer job from the HTCondor queue
+* `/usr/local/bin/execute_execution_record` - launch an assessment job in HTCondor
+
+==== Perl Entry Scripts Called by Database `bash` Scripts ====
+
+These three Perl scripts correspond directly with their bash counterparts described above. Each of these
+scripts perform setup computations and then use `RPC::XML` to communicate requests to the child daemons
+described below. These scripts take an execrunuid as argument from the database invocation as the SWAMP
+job identifier. When needed, these scripts execute database queries to obtain the requisite data to
+submit the job or perform the task.
+
+===== `vmu_launchviewer.pl` =====
+
+This script is the backend entry point for submitting an HTCondor viewer job, monitoring its progress, and collecting the output when the job finishes. Collected output consists of the CodeDX viewer database, the CodeDX configuration files, and the CodeDX log files. This script is also responsible for preparing native viewer json data and error/warning report json data. In these later cases, no HTCondor job is submitted.
+
+This script prepares the input directory for the viewer machine, prepares the HTCondor submit file, and submits the HTCondor job. In the case of CodeDX viewer jobs, this script uploads the package archive and the viewer SCARF results to the viewer machine using the `curl` command via the Perl `system` call. It is capable of uploading to a personal CodeDX viewer machine or an enterprise wide CodeDX installation.
+
+===== `vmu_calldorun.pl` =====
+
+This is the analagous backend entry point for submitting an HTCondor assessment job. It has similar charactersitics as the viewer launch script. Collected output consists of the archive of the output disk of the assessment machine which contains either the assessment results if successful, or the error report data in the case of failure.
+
+===== `vmu_killrun.pl` =====
+
+This script is the backend entry point for removal of the HTCondor job that corresponds to a SWAMP job. Translation is made between the SWAMP execrunuid and the HTCondor job id and `condor_rm` is used to shutdown the job. For viewer jobs, and attempt is made to ensure a graceful shutdown so that the viewer output can be collected. For assessment jobs, a hard kill is performed and any job results are ignored.
+

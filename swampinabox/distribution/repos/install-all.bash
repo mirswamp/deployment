@@ -5,6 +5,15 @@
 #
 # Copyright 2012-2020 Software Assurance Marketplace
 
+swamp_context=$1
+
+if [ "${swamp_context}" = "-docker" ]
+then 
+    echo
+    echo "Installing dependencies in a docker image."
+    echo "VM-related dependencies will not be installed."
+fi
+
 echo
 echo "### Installing Docker, PHP, and Other Dependencies"
 echo
@@ -19,9 +28,9 @@ check_os_dist_upgrade || exit 1
 
 ############################################################################
 
-"$BINDIR"/install-docker-ce.bash  || exit 1
-"$BINDIR"/install-php.bash        || exit 1
-"$BINDIR"/install-other-deps.bash || exit 1
+"$BINDIR"/install-docker-ce.bash                   || exit 1
+"$BINDIR"/install-php.bash                         || exit 1
+"$BINDIR"/install-other-deps.bash "${swamp_context}" || exit 1
 
 echo
 echo "Finished installing Docker, PHP, and other dependencies"

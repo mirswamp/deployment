@@ -5,9 +5,9 @@
 #
 # Copyright 2012-2020 Software Assurance Marketplace
 
-#
-# Configure Apache (httpd) for SWAMP-in-a-Box.
-#
+echo
+echo "### Configuring Web Server components for SWAMP-in-a-Box."
+echo
 
 encountered_error=0
 trap 'encountered_error=1; echo "Error (unexpected): In $(basename "$0"): $BASH_COMMAND" 1>&2' ERR

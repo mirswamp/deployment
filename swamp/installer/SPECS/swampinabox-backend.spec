@@ -17,7 +17,7 @@ Vendor:    The Morgridge Institute for Research
 Packager:  Support <support@continuousassurance.org>
 URL:       http://www.continuousassurance.org
 
-Requires:  libguestfs-tools,swamp-rt-perl
+Requires:  swamp-rt-perl
 Obsoletes: swamponabox-backend
 Source:    swampinabox-1.tar.gz
 BuildRoot: /tmp/%{name}-buildroot

@@ -1,0 +1,44 @@
+
+=== Documentation ===
+
+The SIB documentation is built separately from SIB itself.  However, the built documentation files are included within a build of a SIB release. The documentation resides in the https://github.com/mirswamp/deployment[`deployment`] repository in the `swampinabox/runtime/doc` directory.
+
+[NOTE]
+Modifications to the documentation occur in the *_GitHub Clone_*.
+
+==== Before You Begin ====
+
+The documentation is built using `asciidoctor` and `asciidoctor-pdf`.  Perform these steps to install these tools.  
+
+.Install asciidoctor
+----
+yum install asciidoctor
+----
+
+.Install asciidoctor-pdf
+----
+yum install centos-release-scl-rh
+yum --enablerepo=centos-sclo-rh -y install rh-ruby23
+scl enable rh-ruby23 'gem install asciidoctor-pdf --pre'
+----
+
+==== Building The Documentation ====
+
+There are two types of files envolved.  The AsciiDoc source files and the generated HTML and PDF files.  Refer to https://asciidoctor.org/docs/[`Asciidoctor Documentation`] for the proper syntax for modifying the documentation.
+
+The AsciiDoc source files are contained within subdirctories of the `swampinabox/runtime/doc` directory.  The current manuals are these:
+
+* _SIB Administrator Manual_ in the `administrator_manual` directory
+* _SIB Reference Manual_ in the `reference_manual` directory
+* _SIB Developer Manual_ in the `developer_manual` directory
+
+There is a script that is ran to generate the PDF and HTML files from the AsciiDoc sources.  This script is in the `swampinabox/distribution/util` directory.
+
+In this example, the current directory is `swampinabox/runtime/doc`:
+
+.build_manuals.bash Example
+----
+scl enable rh-ruby23 ../../distribution/util/build_manuals.bash
+----
+
+Once the `build_manuals.bash` script completes, commit the changes to the AsciiDoc sources, the HTML files, and the PDF files.  The HTML and PDF files will be included in the SIB installer.

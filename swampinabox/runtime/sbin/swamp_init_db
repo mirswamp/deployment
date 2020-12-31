@@ -33,6 +33,7 @@ Options:
   -upgrade       Upgrade tables and records to the current release
   -distribution  Set up everything for a typical SWAMP-in-a-Box
   -singleserver  Set up everything for a developer of SWAMP-in-a-Box
+  -docker        Set up everything for a Docker image build
   -help, -?      Display this message
 EOF
     exit 1
@@ -43,7 +44,7 @@ for option in "$@" ; do
         -install|-upgrade)
             mode=$option
             ;;
-        -distribution|-singleserver)
+        -distribution|-singleserver|-docker)
             swamp_context=$option
             ;;
         -\?|-h|-help|--help)
@@ -62,7 +63,7 @@ if [ -z "$mode" ]; then
     show_usage_and_exit
 fi
 if [ -z "$swamp_context" ]; then
-    echo "Error: Must specify either '-distribution' or '-singleserver'" 1>&2
+    echo "Error: Must specify either '-distribution', '-singleserver', or '-docker'" 1>&2
     echo
     show_usage_and_exit
 fi

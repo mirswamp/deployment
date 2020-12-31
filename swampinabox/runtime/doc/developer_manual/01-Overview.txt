@@ -1,0 +1,33 @@
+
+== Overview ==
+
+This guide has been split into a few key sections.  The following sections will provide details for each step of the process.  The build process for SIB contains many parts that need to be performed in a specific order.  It is recommended to use a build system such as Jenkins to automate this process. The layout of the process has been taken directly from the steps performed by Jenkins.  Additionally, examples of how to make some common modifications will be given.   Knowledge of how to use GIT is required to properly maintain local customizations to SIB.
+
+The SIB source code is made available at https://github.com/mirswamp/deployment[GitHub] in the following repositories:
+
+https://github.com/mirswamp/deployment[`deployment`]::
+Contains the SIB installer.
+
+https://github.com/mirswamp/db[`db`]::
+Database and database upgrade paths.
+
+https://github.com/mirswamp/services[`services`]::
+Java and Perl code for assessments.
+
+https://github.com/mirswamp/swamp-web-server[`swamp-web-server`]::
+SIB web server that includes customized https://laravel.com[Laravel] framework code.
+
+https://github.com/mirswamp/www-front-end[`www-front-end`]::
+Web front end code.
+
+Additional supporting code is contained in the following repositories:
+
+* https://github.com/mirswamp/c-assess[`c-assess`]
+* https://github.com/mirswamp/java-assess[`java-assess`]
+* https://github.com/mirswamp/ruby-assess[`ruby-assess`]
+* https://github.com/mirswamp/script-assess[`script-assess`]
+* https://github.com/mirswamp/resultparser[`resultparser`]
+ 
+[%hardbreaks]
+[NOTE]
+This document does not cover building the frameworks or result parser.

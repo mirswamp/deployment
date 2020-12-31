@@ -1,3 +1,9 @@
+Noteworthy Changes in SWAMP-in-a-Box 1.37
+-----------------------------------------
+
+1. Updated the branding on the web application.
+
+
 Noteworthy Changes in SWAMP-in-a-Box 1.35
 -----------------------------------------
 

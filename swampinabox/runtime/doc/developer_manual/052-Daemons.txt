@@ -1,0 +1,35 @@
+
+=== Daemons Managed by The `swamp` Init Script ===
+
+The SWAMP daemon(s) are architected for the original multi-host SWAMP facility. They are used in the singleserver
+and SIB versions of SWAMP to keep the code base uniform across implementation flavors. A strongly recommended
+future direction is to eliminate the multi-host implementation, move all job control functionality to the web
+service code, and thereby eliminate the Perl backend altogether.
+
+The daemon(s) are implemented as an operating system service. The entry point for the service is the
+vmu_swamp_monitor. It is controlled by `systemctl` `start`/`stop`/`status`. It in turn controls the remaining
+Perl script child daemons that are written to run indefinitely, detached from a tty. There is keep-alive
+functionality built in to the service that restarts child daemons when their crash is detected.
+
+==== `vmu_swamp_monitor` ====
+
+This is the operating system service daemon. It serves only to manage the child daemons.
+
+==== `vmu_LaunchPad.pl` ====
+
+This child daemon serves to kill HTCondor jobs via condor_rm, and to launch assessment jobs after the BOG (Bill of Goods) is prepared.
+
+==== `vmu_AgentMonitor.pl` ====
+
+This child daemon serves to launch viewer jobs after the BOG is prepared. This is written as a separate daemon to simplify giving viewer jobs higher priority than other tasks.
+
+==== `vmu_csa_agent.pl` ====
+
+This child daemon manages preparation of HTCondor job submit files from BOGs. Assessment jobs have their BOG written to the filesystem and this daemon monitors the filesystem for such BOGs to be executed in queue fashion. There is a single instance of this daemon that runs continuously, monitoring for assessment job BOGs.
+
+This child daemon is also started on demand to submit HTCondor jobs for viewers. This provides for immediate response to a viewer request.
+
+==== `vmu_perl_launcher` ====
+
+This is not a daemon. It is a script referenced by the vmu_csa_agent.pl daemon described above. It is the preamble setup script handed off to HTCondor via the submit file, that is used to manage the execution of the HTCondor jobs scripts described below.
+

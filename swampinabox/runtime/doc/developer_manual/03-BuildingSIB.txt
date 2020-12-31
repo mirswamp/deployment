@@ -1,0 +1,204 @@
+
+== Building SIB ==
+
+=== Obtaining the SIB Source ===
+
+Obtain the SIB source by cloning the following GIT repositories from GitHub. Next, create branches based on the release <tag> for the current release.
+
+https://github.com/mirswamp/deployment[`deployment`]::
+----
+git clone https://github.com/mirswamp/deployment.git
+cd deployment; git checkout tags/v1.37 -b 1.37-release
+----
+https://github.com/mirswamp/db[`db`]::
+----
+git clone https://github.com/mirswamp/db.git
+cd db; git checkout tags/v1.37 -b 1.37-release
+----
+https://github.com/mirswamp/services[`services`]::
+----
+git clone https://github.com/mirswamp/services.git
+cd services; git checkout tags/v1.37 -b 1.37-release
+----
+https://github.com/mirswamp/swamp-web-server[`swamp-web-server`]::
+----
+git clone https://github.com/mirswamp/swamp-web-server.git
+cd swamp-web-server; git checkout tags/v1.37 -b 1.37-release
+----
+https://github.com/mirswamp/www-front-end[`www-front-end`]::
+----
+git clone https://github.com/mirswamp/www-front-end.git
+cd www-front-end; git checkout tags/v1.37 -b 1.37-release
+----
+
+=== GitHub vs Workspace Repository Clones ===
+
+The repository clones (GitHub Clones) created in the previous section are where you will commit your local customizations.  During the building of SIB, you will be building from clones of the *_GitHub Clones_*, these clones will be called *_Workspace Clones_*.
+
+In this example, the current directory is `~/sib`.
+
+.GitHub Clone
+----
+mkdir sibsource
+cd sibsource
+git clone https://github.com/mirswamp/deployment.git
+cd deployment; git checkout tags/v1.37 -b 1.37-release
+----
+
+.Workspace Clone
+----
+mkdir sibbuild
+cd sibbuild
+git clone ../sibsource/deployment deployment
+cd deployment; git checkout tags/v1.37 -b 1.37-release
+----
+
+=== Build Parameters ===
+
+The following  parameters are used for building SIB. `BRANCH`, `RELEASE_NUMBER`, and `BUILD_TAG` are typically set up as Build Parameters in Jenkins and `WORKSPACE` and `BUILD_NUMBER` are auto populated by Jenkins.
+
+* `BRANCH`
+* `RELEASE_NUMBER`
+* `BUILD_TAG`
+* `BUILD_NUMBER`
+* `WORKSPACE`
+
+=== Building the Tools Bundle ===
+
+The following GIT repositories are used for building the tools bundle.
+
+* https://github.com/mirswamp/deployment[`deployment`]
+
+If there are no changes to the tools bundle, you can skip building it and download https://platform.swampinabox.org/siab-1.37-release/swampinabox-1.37-tools.tar.gz[`swampinabox-1.37-tools.tar.gz`].  To rebuild the tools bundle, download the version corresponding to your SIB release and extract it and move the files to `/swampcs/releases`.  Otherwise, copy it to your `BUILD_ROOT` directory.  It is also included with initial installer download.  Simply copy this file into your `BUILD_ROOT` to save a step of downloading the file again.
+
+Save the following script as `build_tools_bundle.bash` in the directory where your *_Workspace Clones_* are located. This location is your workspace. Edit the parameters at the top of the script as necessary.
+
+.build_tools_bundle.bash
+[source,bash]
+----
+#!/usr/bin/env bash
+
+# Set these to a location with significant space
+BUILD_ROOT_LOCATION=/sib/buildroot // <1>
+WORKSPACE=/sib // <2>
+ 
+# Build versioning parameters
+RELEASE_NUMBER=1.37 // <3>
+BRANCH=1.37-release // <4>
+BUILD_TAG=sib // <5>
+BUILD_NUMBER=1 // <6>
+ 
+TYPE=tools
+ARCHIVE_ROOT_DIR=swampinabox-${RELEASE_NUMBER}-${TYPE}
+SIB_ROOT=$WORKSPACE/deployment/swampinabox
+BUILD_ROOT=${BUILD_ROOT_LOCATION}/swampinabox/bundles/$ARCHIVE_ROOT_DIR
+ 
+rm -rf "${ARCHIVE_ROOT_DIR}" "${BUILD_ROOT}"
+ 
+mkdir -p "${BUILD_ROOT}"
+ 
+"$SIB_ROOT"/distribution/util/build-archive.pl \
+    --inventory    "$WORKSPACE/deployment/inventory/tools-bundled.txt" \
+    --inventory    "$WORKSPACE/deployment/inventory/tools-metric.txt" \
+    --output-file  "${BUILD_ROOT}/${ARCHIVE_ROOT_DIR}.tar.gz" \
+    --root-dir     "${ARCHIVE_ROOT_DIR}" \
+    --version      "${RELEASE_NUMBER}" \
+    --build        "${BUILD_NUMBER}" \
+  || exit 1
+ 
+for path in "$BUILD_ROOT"/* ; do
+    if [ -f "$path" ]; then
+        { cd -- "$(dirname -- "$path")" && md5sum "$(basename -- "$path")"
+        } > "$path".md5
+    fi
+done
+ 
+chmod -R u=rwX,og=rX "$BUILD_ROOT"
+----
+<1> Set this to the path of where the build artifacts will be saved.
+<2> Set this to the path of your WORKSPACE location. If you are attmpting to use this script inside Jenkins, comment this out.
+<3> Set this to the release number. If you are attempting to use this script inside Jenkins, make this a build parameter and comment this out.
+<4> Set this to the branch you are building. If you are attempting to use this script inside Jenkins, make this a build parameter and comment this out.
+<5> Set this to the tag of the build.  It can be any string with the purpose of labeling if a build is a development build or not. If you are attempting to use this script inside Jenkins, make this a build parameter and comment this out.
+<6> Set this to the build number.  Increment this between builds of the same release so that they will be treated as upgrades. If you are attempting to use this script in Jenkins, comment this out.
+
+=== Building the SIB Release ===
+
+[IMPORTANT]
+The tools bundle must be in place prior to building SIB itself.
+
+This step assumes that all local customizations have been committed to the *_GitHub Clones_*.  Instructions for where to apply local customizations within the source code will be shown later in this document.  So, commit your local customizations and then generate your *_Workspace Clones_* into a clean workspace prior to initiating a new build.  The build scripts utilized were written with the behavior of Jenkins in mind.  So, don't perform the build using *_GitHub Clones_* directly. 
+
+Install the following RPM packages on the machine you are building SIB.
+
+.Install Build Dependencies
+----
+yum install rpm-build cmake ruby gcc doxygen libxml2-devel
+----
+
+Save the following script as `build_sib_installer.bash` in the workspace directory where you created the *_WorkSpace Clones_*.  Edit the parameters at the top of the script as necessary.
+
+.build_sib_installer.bash
+[source,bash]
+----
+#!/usr/bin/env bash
+ 
+# Set these to a location with significant space
+BUILD_ROOT_LOCATION=/sib/buildroot // <1>
+WORKSPACE=/sib // <2>
+ 
+# Build versioning parameters
+RELEASE_NUMBER=1.37 // <3>
+BRANCH=1.37-release // <4>
+BUILD_TAG=sib // <5>
+BUILD_NUMBER=1 // <6>
+ 
+SIB_ROOT=$WORKSPACE/deployment/swampinabox
+BUILD_ROOT=$WORKSPACE/export/swampinabox/distribution
+ 
+mkdir -p "${BUILD_ROOT}"
+ 
+"$SIB_ROOT"/distribution/util/build-installer.bash \
+    "${RELEASE_NUMBER}" \
+    "${BUILD_NUMBER}.${BUILD_TAG}" \
+  || exit 1
+ 
+"$SIB_ROOT"/distribution/util/build-release.bash \
+    "${RELEASE_NUMBER}" \
+    "${BUILD_ROOT_LOCATION}/swampinabox/builds/${RELEASE_NUMBER}-${BUILD_NUMBER}.${BUILD_TAG}" \
+    "${BUILD_ROOT}/swampinabox-${RELEASE_NUMBER}-installer" \
+    "${BUILD_ROOT_LOCATION}/swampinabox/bundles/swampinabox-${RELEASE_NUMBER}-tools" \
+  || exit 1
+----
+<1> Set this to the path of where the build artifacts will be saved.
+<2> Set this to the path of your WORKSPACE location. If you are attmpting to use this script inside Jenkins, comment this out.
+<3> Set this to the release number. If you are attempting to use this script inside Jenkins, make this a build parameter and comment this out.
+<4> Set this to the branch you are building. If you are attempting to use this script inside Jenkins, make this a build parameter and comment this out.
+<5> Set this to the tag of the build.  It can be any string with the purpose of labeling if a build is a development build or not. If you are attempting to use this script inside Jenkins, make this a build parameter and comment this out.
+<6> Set this to the build number.  Increment this between builds of the same release so that they will be treated as upgrades. If you are attempting to use this script in Jenkins, comment this out.
+
+This build environment needs to be ran as a normal user.  To initiate a build, run `build_sib_installer.bash`.  When the script finishes, you will see the following message:
+
+.Successful Build Message
+----
+Finished building the installer
+
+### Assembling SWAMP-in-a-Box Release
+
+Version:            1.37
+Release directory:  /sib/buildroot/swampinabox/builds/1.37-1.sib
+Working directory:  /sib
+
+Finished assembling the release
+----
+
+The new build artifacts have been saved to the release directory.  This build can then be used to upgrade an existing SIB instance to this build that now includes the local customizations.
+
+If there were errors detected in the build process, the following message will be displayed instead.
+
+.Build Failure Message
+----
+Finished building the installer, but with errors
+----
+
+If your build does not display either of these messages, something went wrong beyond the error dection of the build scripts.  Examine the build output generated for failures.  This typically happens when a build time dependency has not been met.

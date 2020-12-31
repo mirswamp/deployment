@@ -91,7 +91,7 @@ function extract_distribution_bundle() {
 
 ############################################################################
 
-if [ "$swamp_context" = "-distribution" ]; then
+if [ "$swamp_context" != "-singleserver" ]; then
     remove_deprecated_distribution_files
 
     if [ $encountered_error -eq 0 ]; then

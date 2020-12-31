@@ -213,7 +213,7 @@ function extract_add_on_tools() {
 
 ############################################################################
 
-if [ "$swamp_context" = "-distribution" ]; then
+if [ "$swamp_context" != "-singleserver" ]; then
     remove_deprecated_distribution_files
     extract_distribution_bundle
     extract_add_on_tools

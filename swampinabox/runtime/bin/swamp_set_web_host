@@ -132,8 +132,8 @@ update_config "reporturl" "$default_web_server/results" "$swamp_conf"
 TMP_FILE=$(mktemp /tmp/swamp_set_web_host.XXXXXX.sql)
 
 source "$BINDIR/../sbin/db_support.functions"
-trap 'rm -f "$TMP_FILE" ; stty echo ; reset_db_support' EXIT
-trap 'rm -f "$TMP_FILE" ; stty echo ; reset_db_support ; exit 1' INT TERM
+trap 'rm -f "$TMP_FILE" ; reset_db_support' EXIT
+trap 'rm -f "$TMP_FILE" ; reset_db_support ; exit 1' INT TERM
 
 setup_db_support
 

@@ -1,0 +1,18 @@
+=== SCARF Stream Parsing to JSON
+
+This subsystem is used to provide stream parsing of assessment job output SCARF xml files. This is a performance requirement since the Perl code and modules available to perform the task of parsing xml files is not able to handle extremely large files without exceeding memory requirements and causing an execution crash. This code is written in the C language and utilizes framework support for stream parsing of SCARF xml files. The Makefile to
+build the executable stream parsing program is provided with the subsystem. It is invoked as part of the installation.
+
+[source]
+Makefile
+AttributeJsonReader.c
+AttributeJsonReader.h
+ScarfCommon.h
+ScarfJson.h
+ScarfJsonWriter.c
+ScarfXml.h
+ScarfXmlReader.c
+vmu_Scarf_Cparsing.c
+
+This source code can be found in the https://github.com/mirswamp/deployment[`services`] repository in the `services/perl/agents/Scarf_Parsing_C` directory.
+

@@ -1,0 +1,31 @@
+=== HTCondor Job Scripts ===
+
+These scripts are essentially controlled by HTCondor after the job's submission, and in the case of the multi-host facility, run on the execute node along side the job machine (vm or dc). The `Pre*` scripts are HTCondor hooks invoked after the HTCondor job is submitted and before its machine is started. Each `Monitor*` script is started by the corresponding `Pre*` script so it is not technically started by HTCondor, but HTCondor does control
+removing this script upon cleanup of abnormal termination of the HTCondor job.
+
+In the case of assessment jobs, the framework that runs the assessment includes the controlling script that is started by the init system of the assessment machine (vm or dc). Communication with this controlling script is obtained by a configuration file. In the case of viewer jobs, the controlling script that is started by the init system of the viewer machine (vm or dc) is configured and passed in to the machine in the input directory.
+
+==== `vmu_PreAssessment.pl` ====
+
+This script creates the input and output directories of the machine. In the case of vm, they are implemented as mountable filesystems where mounting is done in the machine. In the case of dc, they are implemented as folders that are accessed in the filesystem of the machine's execution environment. The script populates the input directory with the framework needed to run the assessment, and patches the machine's init system to run a prescribed script on startup. This allows for the unattended execution of assessments. This script sets up the monitoring connection between the machine and its execution environment.
+
+==== `vmu_MonitorAssessment.pl` ====
+
+This script opens a connection to the machine via the filesystem. It reads single word status lines from the event file until it detects the final status of a successfully executed machine task. These statuses are communicated to the rest of the SWAMP system (in particular the web service) via the HTCondor collector. In the case of abnormal termination of a job, this script is expected to have transmitted its most recently detected status to the collector and it is cleaned up by the HTCondor supervisor.
+
+==== `vmu_PostAssessment.pl` ====
+
+This script archives the input and output of the machine and stores it in a temporary location for analysis. Upon completion of the job, the output archive is also stored permanently in the filesystem with its location recorded and managed by the database.
+
+==== `vmu_PreViewer.pl` ====
+
+This script is analagous to the assessment job version. A major difference is that it prepares the controlling script and puts it in the input directory instead of preparing a configuration file to drive an embedded script.
+
+==== `vmu_MonitorViewer.pl` ====
+
+This script works analagously to the assessment job version.
+
+==== `vmu_PostViewer.pl` ====
+
+This script collects job output which consists of the codedx user database, configuration, package archive files and some log files that are useful for debugging.
+

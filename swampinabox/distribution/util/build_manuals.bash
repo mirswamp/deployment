@@ -21,6 +21,7 @@ BINDIR=$(cd -- "$(dirname -- "$0")" && pwd)
 for target in \
         "$(cd -- "$BINDIR"/../../runtime/doc/administrator_manual && pwd)" \
         "$(cd -- "$BINDIR"/../../runtime/doc/reference_manual && pwd)" \
+	"$(cd -- "$BINDIR"/../../runtime/doc/developer_manual && pwd)" \
         ; do
 
     revdate=$(date +"%Y-%m-%d %H:%M:%S %z")

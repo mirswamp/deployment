@@ -1,0 +1,57 @@
+
+== Perl Architecture  ==
+
+There are currently three deployment flavors of SWAMP - the original multi-host facility deployment, the
+singleserver facility deployment _(primarily used for development purposes but should be extended as a
+replacement for the multi-host version in the future)_, and the swampinabox deployment intended for 
+distribution and installation at user sites.
+
+For the multi-host design, the relevant host nodes consist of:
+
+* Web Server
+** The HTML service routes are executed on this server.
+* Data Server
+** The MariaDB database server is executed here.
+* Submit Server
+** The SWAMP daemon(s) execute here.
+* Execute Servers (one or more)
+** The viewer and assessment machines _(virtual machines 'vm'  and docker containers 'dc')_ execute here.
+
+There are additional host(s) used for the installation and deployment of HTCondor which is used as a job
+management tool. In particular, there is a HTCondor host where the collector runs. This collector is 
+briefly described below.
+
+The Perl backend is the component that manages jobs in the SWAMP system.  
+
+There are two kinds of jobs: 
+
+* assessments
+* viewers 
+
+All jobs are submitted to HTCondor to be executed in either a virtual machine (vm universe) or a 
+docker container (docker universe). One fundamental difference between assessment jobs and viewer jobs 
+is that assessment jobs are expected to run to completion; typically on the order of minutes for 
+processing, while viewer jobs are run under end user control and therefore are expected to run 
+indefinitely as long as the user's client web application interface maintains a connection
+to the viewer machine.
+
+The Perl backend is responsible for responding to requests from the database to launch assessment and viewer jobs
+and to kill jobs by removing them from the HTCondor queue. All job management is performed by executing operating
+system shell level commands using the perl `system` procedure call. All requests initiated by the database are
+performed using the `sys_exec` and `sys_eval` user extensions to the MariaDB server.  The two database user commands
+only differ in that `sys_exec` executes shell commands without gathering the command output, while `sys_eval` provides
+the extra step of gathering the output of the commands and returns it to the caller.
+
+Each job has an execution record uuid (execrunuid) that uniquely identifies the job.
+There is also an HTCondor job id
+that is used to identify the job once it is submitted to and managed by HTCondor. The mechanism for making
+the correspondence between the SWAMP execrunuid and the HTCondor job is a Perl subroutine `getHTCondorJobId`
+that invokes the `condor_q` command with the execrunuid as a constraint.
+
+Assessment and viewer job progress is monitored by Perl monitoring scripts that are launched with each job and
+communicate with the job's machine (vm or dc) via a tty to file connection. Inside the machine, the connection
+looks like a tty, outside the machine, the monitoring script sees a file. Communication between the Perl
+monitoring scripts and the rest of the SWAMP system is obtained by use of HTCondor's collector functionality.
+A separate HTCondor collector is started when the SWAMP system is installed, that is used to facilitate this
+communication. In this way, the web service code can check the HTCondor collector for status information
+regarding jobs that are initiated by the web service.

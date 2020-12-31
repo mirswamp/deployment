@@ -15,11 +15,13 @@ You need to have the KVM hypervisor installed, along with a few other packages:
 - libguestfs-tools-c
 - qemu-img
 - libvirt-client
+- nmap
+- wget
 
 To install the dependencies, run:
 
 ```
-sudo dnf -y install genisoimage virt-install libguestfs-tools-c qemu-img libvirt-client wget
+sudo dnf -y install genisoimage virt-install libguestfs-tools-c qemu-img libvirt-client nmap wget
 ```
 
 If you want to resolve guests by their hostnames, install the `libvirt-nss` package:

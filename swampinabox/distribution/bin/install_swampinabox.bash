@@ -9,6 +9,20 @@
 # Install or upgrade SWAMP-in-a-Box on this host.
 #
 
+if [ "$1" = "-docker" ]
+then
+    swamp_context=$1
+else
+    swamp_context="-distribution"
+fi
+
+if [ "${swamp_context}" = "-docker" ]
+then 
+    echo
+    echo "Installing in a docker image build."
+    echo
+fi
+
 unset CDPATH
 BINDIR=$(cd -- "$(dirname -- "$0")" && pwd)
 
@@ -40,7 +54,7 @@ read -r VERSION_NUMBER BUILD_NUMBER < "$BINDIR"/version.txt
 set -o pipefail
 "$BINDIR"/../sbin/swampinabox_do_install.bash \
         "$MODE" \
-        "-distribution" \
+        "$swamp_context" \
         "$VERSION_NUMBER" \
         "$BUILD_NUMBER" \
         "$WORKSPACE/RPMS" \

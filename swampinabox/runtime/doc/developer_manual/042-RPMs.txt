@@ -1,0 +1,40 @@
+
+=== RPMs ===
+
+SIB uses RPM as its package management format.  The following RPMs are built and included in the SIB installer. The additional separate `.txt` files are shared with the SWAMP facility packages.
+
+Package `swamp-rt-perl`
+
+* RPM `swamp-rt-perl-1.37-1.sib.noarch.rpm`
+* SPEC `swamp-rt-perl.spec`
+* Location
+** `deployment/swamp/runtime-installer/SPECS`
+
+Package `swampinabox-backend`
+
+* RPM `swampinabox-backend-1.37-1.sib.norarch.rpm`
+* SPEC `swampinabox-backend.spec`
+* Location
+** `deployment/swmap/installer/SPECS`
+* Additional Files
+** `common-files-data.txt`
+** `common-files-exec.txt`
+** `common-files-submit.txt`
+** `common-install-data.txt`
+** `common-install-exec.txt`
+** `common-install-submit.txt`
+** `swampinabox-files-data.txt`
+** `swampinabox-files-exec.txt`
+** `swampinabox-files-general.txt`
+** `swampinabox-files-submit.txt`
+** `swampinabox-install-data.txt`
+** `swampinabox-install-exec.txt`
+** `swampinabox-install-general.txt`
+** `swampinabox-install-submit.txt`
+
+Package `swamp-web-server`
+
+* RPM `swamp-web-server-1.37-1.sib.noarch.rpm`
+* SPEC `swamp-web-server.spec`
+* Location
+** `deployment/swmap/swamp-web-server-installer/SPECS`

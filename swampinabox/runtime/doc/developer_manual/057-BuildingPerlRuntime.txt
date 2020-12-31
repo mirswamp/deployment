@@ -1,0 +1,72 @@
+=== Building the Perl Runtime Distribution Archive ===
+
+These instructions assume that the SWAMP deployment project from git has been cloned into SWAMP/deployment. The literal string `<major.minor.patch>` in these instructions are to be substituted with the literal string representing the `major.minor.patch` version string of the new Perl core installation.
+
+The Perl runtime must be installed to `/opt/perl5`. 
+
+.Install perlbrew to obtain the core Perl distribution
+[source]
+----
+curl -L https://install.perlbrew.pl | bash
+export PERLBREW_ROOT=/opt/perl5
+perlbrew init
+perlbrew install perl-<major.minor.patch> // <1>
+export PATH=/opt/perl5/perls/perl-<major.minor.patch>/bin:$PATH // <1>
+----
+<1> E.g. `<major.minor.patch>` = `5.26.1`
+
+.Install additional Perl modules using cpanm
+[source]
+----
+Log::Log4perl
+File::Remove
+XML::Parser // <1>
+RPC::XML::Server
+Readonly
+ConfigReader::Simple
+Data::UUID
+DBI
+JSON
+Date::Parse
+XML::LibXML
+XML::LibXSLT // <2>
+XML::XPath
+DBD::mysql // <3>
+File::Slurp
+MongoDB
+XML::Simple
+----
+<1> XML-Parser requires expat-devel (`yum install expat-devel`)
+<2> XML::LibXSLT requires libxslt and libxml2 and their *-devel packages (`yum install libxml2-devel libxslt-devel`)
+<3> DBD::mysql requires mysql-devel (`yum install mysql-devel`)
+
+Additional Perl modules for SWAMP Perl Runtime are installed using `cpanm <module-name>`. Repeat this command while replacing `<module-name>` with a module from the list above.
+
+[NOTE]
+The Perl runtime must be built on CentOS 6 to be compatible with both CentOS 6 and CentOS 7.
+
+.Building the Perl Runtime Archive
+[source]
+----
+cd /opt/perl5
+
+# Remove all folders except the one named 'perls'. 
+# /opt/perl5/perls should have one folder 
+# named `perl-<major.minor.patch>'. // <1>
+
+cd /opt
+sudo tar -czvf perlbin_exec_w-<major.minor.patch>.tar.gz ./perl5
+mv perlbin_exec_w-<major.minor.patch>.tar.gz SWAMP/deployment/perl/.
+
+# edit SWAMP/deployment/inventory/dependencies.txt
+#  change the perl: to read perl:<major.minor.patch> // <1>
+
+# To perform Perl syntax checking on the SWAMP Perl code 
+# after the Perl Runtime upgrade:
+
+cd SWAMP/services/perl/agents
+for f in *.pl; do perl -cw $f; done
+cd SWAMP/services/perl/vmtools
+for f in masterify_vm start_vm vm_cleanup vm_masterinfo vm_output; do perl -cw $f; done
+----
+<1> e.g. `<major.minor.patch>` = `5.26.1`

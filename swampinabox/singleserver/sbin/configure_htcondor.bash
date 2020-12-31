@@ -5,6 +5,8 @@
 #
 # Copyright 2012-2020 Software Assurance Marketplace
 
+swamp_context=$1
+
 echo
 echo "### Configuring HTCondor for the SWAMP"
 echo
@@ -19,7 +21,7 @@ BINDIR=$(cd -- "$(dirname -- "$0")" && pwd)
 
 ############################################################################
 
-htcondor_tar_file=$1
+htcondor_tar_file=$2
 htcondor_installer_dir=""
 
 htcondor_root=/opt/swamp/htcondor
@@ -228,7 +230,15 @@ case "$os_tag" in
         encountered_error=1
         ;;
 esac
-enable_service "$htcondor_service"
+
+# Enable the htcondor service, except for in a docker build. 
+# supervisord is used to start htcondor in a docker container
+if [ "$swamp_context" = "-docker" ]
+then
+    echo "Not enabling the condor service for a docker build"
+else
+    enable_service "$htcondor_service"
+fi
 
 ############################################################################
 

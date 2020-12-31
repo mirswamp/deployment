@@ -5,6 +5,8 @@
 #
 # Copyright 2012-2020 Software Assurance Marketplace
 
+swamp_context=$1
+
 echo
 echo "### Installing Other Dependencies"
 echo
@@ -24,10 +26,6 @@ common_packages=(
     curl
     git
     httpd
-    libguestfs
-    libguestfs-tools
-    libguestfs-tools-c
-    libvirt
     mariadb
     mariadb-server
     mariadb-libs
@@ -42,6 +40,25 @@ common_packages=(
     xz
     zip
 )
+
+vm_packages=(
+    libguestfs
+    libguestfs-tools
+    libguestfs-tools-c
+    libvirt
+)
+
+if [ "${swamp_context}" = "-docker" ]
+then 
+    echo
+    echo "Will not install libguestfs or libvirt in a docker image."
+    echo
+else
+    common_packages=(
+        "${common_packages[@]}"
+        "${vm_packages[@]}"
+    )
+fi
 
 yum_install "${common_packages[@]}"
 yum_confirm "${common_packages[@]}" || exit_with_error

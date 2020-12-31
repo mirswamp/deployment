@@ -37,5 +37,5 @@ echo $SWAMPADMINPASSWORD | sudo openssl enc -aes-256-cbc -salt -out /etc/.mysql_
 chmod 400 /etc/.mysql_admin
 
 $BINDIR/../sbin/swampinabox_install_database.bash -install -singleserver
-$BINDIR/../sbin/swamp_install_tools.bash
+$BINDIR/../sbin/swamp_install_tools.bash -singleserver
 $BINDIR/../sbin/manage_services.bash start mysql

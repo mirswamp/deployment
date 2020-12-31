@@ -1,0 +1,44 @@
+=== Perl Backend Support Modules ===
+
+These Perl modules are written uniformly to expose their set of subroutines to caller scripts.
+
+==== `vmu_Support.pm` ====
+
+This provides general suppport subroutines that are used by both assessment jobs and viewer jobs. There are logging support routines, configuration support routines, HTCondor support routines, libvirt support routines (for virtual machines) and operating system interface routines.
+
+==== `vmu_AssessmentSupport.pm` ====
+
+This provides the assessment job specific routines. There are database routines, routines to program the job control state machine, and some configuration routines.
+
+==== `vmu_ViewerSupport.pm` ====
+
+This provides the viewer job specific routines. There are database routines, viewer state routines to support managing the viewer state in the collector, and logging support routines.
+
+==== `CodeDX.pm` ====
+
+This provides the interface to the codedx tomcat based web application. Communication and data transmission is obtained by curl command calls, using the Perl `system` command.
+
+==== `FloodlightAccess.pm` ====
+
+This provides the interface to the `floodlight` flow control software that is used in the multi-host facility in order to constrain access to the assessment machine public ip space. This machine ip space is typically accessed from the general public ip space to allow end user access to assessment machines for inspection while jobs are executing. It also controls internal access to license servers for those commercial tools that require license for operation and use.
+
+==== `FrameworkUtils.pm` ====
+
+This provides the error analysis functionality that is driven the the assessment `status.out` file produced by the framework. There is an extensive document that describes the results produced by the assessment framework, with instructions for its interpretation and presentation.
+
+==== `Locking.pm` ====
+
+This provides locking and mutual exclusion for the daemons to ensure that only one daemon or background process can run at any time.
+
+==== `mongoDBUtils.pm` ====
+
+This provides the interface to MongoDB which is utilized for storing large data blobs. Future work includes searching and filtering of result data.
+
+==== `PackageTypes.pm` ====
+
+This provides the enumeration of the package type constants that match the constants in the database. This data should ideally be queried from the database as the authoritative source for this data so as to avoid synchronization issues.
+
+==== `ScarfXmlReader.pm` ====
+
+This provides the Perl support for stream parsing of SCARF xml files.
+
